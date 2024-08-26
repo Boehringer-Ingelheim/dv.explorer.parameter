@@ -407,11 +407,10 @@ As per the selections made in the screenshot:
 The last plot is the parameter heatmap that plots a heatmap where the
 rows represent different parameters.
 
-The menus in this plot follow similar rules to those presented in the
-[Plotting Parameter](../articles/dv-wfphm.html#plotting-parameters)
-section in the Waterfall plot with the difference that the *Category*
-and *Parameter* menus now accept selecting multiple values. The
-*Transformation* menu will be covered in a separate section below.
+The menus in this plot follow similar rules to those presented in the 
+Plotting Parameter section in the Waterfall plot with the difference
+that the *Category* and *Parameter* menus now accept selecting multiple values.
+The *Transformation* menu will be covered in a separate section below.
 
 ![](images/hmpar_app.png){width="100%"}
 
