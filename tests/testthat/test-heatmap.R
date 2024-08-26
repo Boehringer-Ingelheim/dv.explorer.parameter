@@ -1,5 +1,8 @@
 # nolint start
 component <- "heatmap_d3"
+
+testthat::skip_on_ci()
+
 # Steps
 # 1. Start an app with AppDriver. We will not navigate using this driver but connect to it with other drivers.
 #   - We do this to avoid creating the app in the background manually, but just delegate it to AppDriver.

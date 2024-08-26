@@ -147,6 +147,7 @@ test_that("tables are included" |>
   app$wait_for_idle()
 
   app$set_inputs(!!ID$OUTPUT$TABPANEL := attr(ID$OUTPUT$TABLES$REGRESSION, "tab"))
+  app$wait_for_idle()
 
   reg <- app$get_html(paste0("#", ID$OUTPUT$TABLES$REGRESSION))
   expect_snapshot(reg, cran = TRUE)

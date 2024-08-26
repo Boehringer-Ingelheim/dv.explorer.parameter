@@ -1,4 +1,4 @@
-use_load_all <- TRUE #(isTRUE(as.logical(Sys.getenv("LOCAL_SHINY_TESTS"))) || isTRUE(as.logical(Sys.getenv("CI")))) #nolint
+use_load_all <- TRUE # (isTRUE(as.logical(Sys.getenv("LOCAL_SHINY_TESTS"))) || isTRUE(as.logical(Sys.getenv("CI")))) #nolint
 if (use_load_all) {
   pkg_path <- "."
   prev_path <- ""

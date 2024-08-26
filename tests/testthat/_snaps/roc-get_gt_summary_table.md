@@ -3,11 +3,6 @@
     Code
       ds_list %>% get_summary_data() %>% get_gt_summary_table(sort_alph = FALSE) %>%
         gt::as_raw_html()
-    Condition
-      Warning in `dir.create()`:
-      cannot create dir '//.cache', reason 'Permission denied'
-      Warning in `value[[3L]]()`:
-      Error using cache directory at '//.cache/R/sass'. Using temp dir instead.
     Output
       <div id="ydgabwknrs" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
         
@@ -130,11 +125,6 @@
     Code
       ds_list %>% get_summary_data() %>% get_gt_summary_table(sort_alph = FALSE) %>%
         gt::as_raw_html()
-    Condition
-      Warning in `dir.create()`:
-      cannot create dir '//.cache', reason 'Permission denied'
-      Warning in `value[[3L]]()`:
-      Error using cache directory at '//.cache/R/sass'. Using temp dir instead.
     Output
       <div id="ydgabwknrs" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
         
@@ -201,11 +191,6 @@
     Code
       ds_list %>% get_summary_data() %>% get_gt_summary_table(sort_alph = TRUE) %>%
         gt::as_raw_html()
-    Condition
-      Warning in `dir.create()`:
-      cannot create dir '//.cache', reason 'Permission denied'
-      Warning in `value[[3L]]()`:
-      Error using cache directory at '//.cache/R/sass'. Using temp dir instead.
     Output
       <div id="ydgabwknrs" style="padding-left:0px;padding-right:0px;padding-top:10px;padding-bottom:10px;overflow-x:auto;overflow-y:auto;width:auto;height:auto;">
         
