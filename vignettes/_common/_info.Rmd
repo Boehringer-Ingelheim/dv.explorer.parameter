@@ -1,0 +1,21 @@
+
+### Pre-requisite:
+
+<br>
+
+::: {style="padding: 1em 1em 1em 1em;  margin-bottom: 5px;  border: 1px solid #64a1ce;  border-radius: 5px;  background:#f5f5f5 5px center/3em no-repeat;"}
+![](images/info.png){width="4%"} **"Parameter" Term Disambiguation**
+
+The guide uses the term **"parameter"** at several places. This term in
+the guide represents clinical analysis parameters and values such as
+laboratory values, safety values, etc as used in the clinical dataset
+context. This can be confused with the word parameter as used in a
+programming context - "parameters of a function". Therefore, to fully
+disambiguate the usage in this guide:
+
+-   **Parameter** is used exclusively in the clinical dataset context
+-   **Argument** is used to represent parameter of a function in the
+    programming context
+:::
+
+<br>

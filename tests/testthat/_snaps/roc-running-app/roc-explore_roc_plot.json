@@ -1,0 +1,74 @@
+{
+  "output": {
+    "roc-explore_roc_plot": {
+      "html": "<div class=\"vegawidget-vl5 html-widget html-widget-output shiny-report-size html-fill-item\" id=\"roc-explore_roc_plot-chart\" style=\"width:auto;height:auto;\"><\/div>",
+      "deps": [
+        {
+          "name": "htmlwidgets",
+          "version": "1.6.4",
+          "src": {
+            "href": "htmlwidgets-1.6.4"
+          },
+          "meta": null,
+          "script": "htmlwidgets.js",
+          "stylesheet": null,
+          "head": null,
+          "attachment": null,
+          "all_files": true
+        },
+        {
+          "name": "vega",
+          "version": "5.24.0",
+          "src": {
+            "href": "vega-5.24.0"
+          },
+          "meta": null,
+          "script": "vega@5.24.0.min.js",
+          "stylesheet": null,
+          "head": null,
+          "attachment": null,
+          "all_files": true
+        },
+        {
+          "name": "vega-lite",
+          "version": "5.16.3",
+          "src": {
+            "href": "vega-lite-5.16.3"
+          },
+          "meta": null,
+          "script": "vega-lite@5.16.3.min.js",
+          "stylesheet": null,
+          "head": null,
+          "attachment": null,
+          "all_files": true
+        },
+        {
+          "name": "vega-embed",
+          "version": "6.22.2",
+          "src": {
+            "href": "vega-embed-6.22.2"
+          },
+          "meta": null,
+          "script": "vega-embed@6.22.2.min.js",
+          "stylesheet": "vega-embed.css",
+          "head": null,
+          "attachment": null,
+          "all_files": true
+        },
+        {
+          "name": "vegawidget-vl5-binding",
+          "version": "0.5.0",
+          "src": {
+            "href": "vegawidget-vl5-binding-0.5.0"
+          },
+          "meta": null,
+          "script": "vegawidget-vl5.js",
+          "stylesheet": null,
+          "head": null,
+          "attachment": null,
+          "all_files": false
+        }
+      ]
+    }
+  }
+}

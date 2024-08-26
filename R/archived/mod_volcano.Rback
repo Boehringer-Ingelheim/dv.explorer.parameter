@@ -1,0 +1,911 @@
+stop("mod_volcano must remove dv.selector dependency before being reincluded")
+
+# UI and server functions ----
+
+#' Volcano plot module
+#'
+#' @param id Shiny ID `[character(1)]`
+#'
+#' @name mod_volcano
+#'
+#' @keywords main
+#'
+NULL
+
+#' @describeIn mod_volcano UI
+#' @export
+volcano_UI <- function(id) { # nolint
+  # id assert ---- It goes on its own as id is used to provide context to the other assertions
+  checkmate::assert_string(id, min.chars = 1)
+
+  # argument asserts ----
+
+  # UI ----
+  ns <- shiny::NS(id)
+
+  parameter_menu <- drop_menu_helper(
+    ns(VP$ID$PAR_BUTTON), VP$MSG$LABEL$PAR_BUTTON,
+    dv.selector::step_selector_UI(
+      id = ns(VP$ID$PAR),
+      ids = c("cat", "par"),
+      label = c(VP$MSG$LABEL$PAR, VP$MSG$LABEL$CAT),
+      multiple = c(TRUE, TRUE)
+    ),
+    dv.selector::col_selector_UI(ns(VP$ID$PAR_VALUE), label = VP$MSG$LABEL$PAR_VALUE),
+    dv.selector::val_selector_UI(id = ns(VP$ID$PAR_VISIT), label = VP$MSG$LABEL$PAR_VISIT, multiple = FALSE)
+  )
+
+  group_menu <- drop_menu_helper(
+    ns(VP$ID$GRP_BUTTON), VP$MSG$LABEL$GRP_BUTTON,
+    shiny::radioButtons(
+      ns(VP$ID$CONT_CAT_RADIO),
+      label = VP$MSG$LABEL$CONT_CAT_RADIO,
+      inline = TRUE,
+      choiceNames = c("Continuous", "Categorical"),
+      choiceValues = c("cont", "cat")
+    ),
+    shiny::conditionalPanel(
+      paste0("input['", ns(VP$ID$CONT_CAT_RADIO), "']==='cont'"),
+      dv.selector::col_selector_UI(
+        id = ns(VP$ID$CONT_VAR),
+        label = VP$MSG$LABEL$CONT_VAR,
+        multiple = FALSE
+      ),
+      shiny::radioButtons(
+        ns(VP$ID$STAT_METHOD_CONT),
+        label = VP$MSG$LABEL$STAT_METHOD_CONT,
+        choices = VP$VAL$STAT_METHOD_CONT, inline = TRUE
+      )
+    ),
+    shiny::conditionalPanel(
+      paste0("input['", ns(VP$ID$CONT_CAT_RADIO), "']==='cat'"),
+      dv.selector::col_val_selector_UI(
+        id = ns(VP$ID$CAT_VAR),
+        col_UI_p = list(
+          label = VP$MSG$LABEL$CAT_VAR
+        ),
+        val_UI_p = list(
+          label = "Values",
+          multiple = TRUE
+        )
+      ),
+      shiny::radioButtons(
+        ns(VP$ID$STAT_METHOD_CAT),
+        label = VP$MSG$LABEL$STAT_METHOD_CAT,
+        choices = VP$VAL$STAT_METHOD_CAT, inline = TRUE
+      )
+    ),
+    shiny::numericInput(
+      inputId = ns(VP$ID$STAT_THRESHOLD),
+      label = VP$MSG$LABEL$STAT_THRESHOLD,
+      value = VP$VAL$STAT_DEFAULT,
+      max = Inf,
+      min = -Inf
+    ),
+    shiny::radioButtons(
+      inputId = ns(VP$ID$MULTIPLE_CORR_METHOD),
+      label = VP$MSG$LABEL$MULTIPLE_CORR_METHOD,
+      choices = VP$VAL$MULTIPLE_CORR_METHOD,
+      inline = TRUE
+    ),
+    shiny::numericInput(
+      inputId = ns(VP$ID$P_THRESHOLD),
+      label = VP$MSG$LABEL$P_THRESHOLD,
+      value = VP$VAL$P_DEFAULT,
+      max = 1,
+      step = .1,
+      min = 0
+    )
+  )
+
+  other_menu <- drop_menu_helper(
+    ns(VP$ID$OTHER_BUTTON), VP$MSG$LABEL$OTHER_BUTTON
+  )
+
+
+  vp_menu <- shiny::tagList(
+    parameter_menu,
+    group_menu,
+    other_menu
+  )
+
+
+
+  # Charts and tables ----
+
+  chart <- shiny::div(align = "center", style = "position: relative", shiny::div(
+    shiny::plotOutput(outputId = ns(VP$ID$CHART), height = "100%", width = "auto", brush = ns(VP$ID$CHART_BRUSH)),
+    style = "height:70vh;width:70vh"
+  ))
+
+  tables <- shiny::tabsetPanel(
+    id = ns(VP$ID$TAB_TABLES),
+    shiny::tabPanel(
+      VP$MSG$LABEL$TABLE_LISTING,
+      DT::DTOutput(ns(VP$ID$TABLE_LISTING))
+    ),
+    shiny::tabPanel(
+      VP$MSG$LABEL$TABLE_SIGNIFICANCE,
+      DT::DTOutput(ns(VP$ID$TABLE_SIGNIFICANCE))
+    )
+  )
+
+  #   # main_ui ----
+
+  main_ui <- shiny::tagList(
+    shiny::div(vp_menu, class = "vp_menu_bar"),
+    chart,
+    tables
+  )
+
+  if (..__is_db()) {
+    ..__db_UI(ns("debug"), main_ui, stacked = TRUE) # Debugging
+  } else {
+    main_ui
+  }
+}
+
+#' @describeIn mod_volcano Server
+#'
+#' @description
+#'
+#' ## Input dataframes:
+#'
+#' ### pred_dataset
+#'
+#' It expects a dataset similar to
+#' https://www.cdisc.org/kb/examples/adam-basic-data-structure-bds-using-paramcd-80288192 ,
+#' 1 record per subject per parameter per analysis visit
+#'
+#' It expects, at least, the columns passed in the parameters, `subjid_var`, `pred_cat_var`, `pred_par_var`,
+#' `pred_visit_var` and `pred_value_var`. The values of these variables are as described
+#' in the CDISC standard for the variables USUBJID, PARCAT, PARAM, AVISIT and AVAL.
+#'
+#' ### resp_dataset
+#'
+#' It expects a dataset similar to
+#' https://www.cdisc.org/kb/examples/adam-basic-data-structure-bds-using-paramcd-80288192
+#'
+#' It expects, at least, the columns passed in the parameters, `subjid_var`, `resp_cat_var`,
+#' `resp_par_var`, `resp_visit_var` and `resp_value_var`.
+#' The values of these variables are as described
+#' in the CDISC standard for the variables USUBJID, PARCAT, PARAM, AVISIT and AVAL.
+#'
+#' ### group_dataset
+#'
+#' It expects a dataset with an structure similar to
+#' https://www.cdisc.org/kb/examples/adam-subject-level-analysis-adsl-dataset-80283806 ,
+#' one record per subject
+#'
+#' It expects to contain, at least, `subjid_var`
+#'
+#' @param pred_dataset,resp_dataset,group_dataset `[data.frame()]`
+#'
+#' Dataframes as described in the `Input dataframes` section
+#'
+#' @param dataset_name `[shiny::reactive(*)]`
+#'
+#' a reactive indicating when the dataset has possibly changed its columns
+#'
+#' @param pred_cat_var,pred_par_var,pred_visit_var,resp_cat_var,resp_par_var,resp_visit_var `[character(1)]`
+#'
+#' Columns from `pred_dataset`/`resp_dataset` that correspond to the parameter category, parameter and visit
+#'
+#' @param pred_value_var,resp_value_var `[character(n)]`
+#'
+#' Columns from `pred_dataset`,`resp_dataset` that correspond to values of the parameters
+#'
+#' @param subjid_var `[character(1)]`
+#'
+#' Column corresponding to subject ID
+#'
+#' @param compute_roc_fn,compute_metric_fn `[function()]`
+#'
+#' Functions used to compute the ROC and metric analysis, please view the corresponding vignette for more details.
+#'
+#' @export
+#'
+volcano_server <- function(id,
+                           bm_dataset,
+                           group_dataset,
+                           dataset_name = shiny::reactive(character(0)),
+                           cat_var = "PARCAT",
+                           par_var = "PARAM",
+                           value_var = c("AVAL", "PCHG"),
+                           visit_var = "AVISIT",
+                           subjid_var = "SUBJID",
+                           stat_method = list(
+                             cont = list(
+                               "A" = function(x) {
+                                 1
+                               }
+                             ),
+                             cat = list(
+                               "B" = function(x) {
+                                 2
+                               }
+                             ),
+                             mc = list(
+                               "C" = function(x) {
+                                 3
+                               }
+                             )
+                           )) {
+  ac <- checkmate::makeAssertCollection()
+  # id assert ---- It goes on its own as id is used to provide context to the other assertions
+  checkmate::assert_string(id, min.chars = 1, add = ac)
+  # non reactive asserts
+  ###### Check types of reactive variables, pred_dataset, ...
+  checkmate::assert_string(cat_var, min.chars = 1, add = ac)
+  checkmate::assert_string(par_var, min.chars = 1, add = ac)
+  checkmate::assert_character(
+    value_var,
+    min.chars = 1, any.missing = FALSE,
+    all.missing = FALSE, unique = TRUE, min.len = 1, add = ac
+  )
+  checkmate::assert_string(visit_var, min.chars = 1, add = ac)
+  checkmate::assert_string(subjid_var, min.chars = 1, add = ac)
+
+  checkmate::reportAssertions(ac)
+
+  # module constants ----
+  VAR <- poc( # nolint Parameters from the function that will be considered constant across the function
+    CAT = cat_var,
+    PAR = par_var,
+    VAL = value_var,
+    VIS = visit_var,
+    SBJ = subjid_var
+  )
+
+  #   # Internally stored IDs
+
+  INPUT_ID <- # nolint
+    poc( # List of inputs
+      PAR = "parameter",
+      CAT = "category",
+      VISIT = "visit",
+      VALUE = "value",
+      CONT_VAR = "cont_var",
+      CAT_VAR = "cat_var",
+      STAT_CONT = "stat_method_cont",
+      STAT_CAT = "stat_method_cat",
+      S_TH = "stat_threshold",
+      P_TH = "p_threshold",
+      MC = "multiple_correction_method"
+    )
+
+  module <- function(input, output, session) {
+    # sessions ----
+    ns <- session[["ns"]]
+
+    # argument asserts ----
+
+    # dataset validation ----
+
+    v_group_dataset <- shiny::reactive(
+      {
+        ac <- checkmate::makeAssertCollection()
+        checkmate::assert_data_frame(group_dataset(), min.rows = 1, .var.name = ns("group_dataset"))
+        checkmate::assert_names(
+          names(group_dataset()),
+          type = "unique",
+          must.include = c(VAR$SBJ), .var.name = ns("group_dataset")
+        )
+        checkmate::assert_factor(group_dataset()[[VAR$SBJ]], add = ac, .var.name = ns("group_dataset"))
+        checkmate::reportAssertions(ac)
+        group_dataset()
+      },
+      label = ns(" v_group_dataset")
+    )
+
+    v_bm_dataset <- shiny::reactive(
+      {
+        ac <- checkmate::makeAssertCollection()
+        checkmate::assert_data_frame(bm_dataset(), min.rows = 1, .var.name = ns("bm_dataset"))
+        checkmate::assert_names(
+          names(bm_dataset()),
+          type = "unique",
+          must.include = c(
+            VAR$CAT, VAR$PAR, VAR$SBJ, VAR$VIS, VAR$VAL
+          ),
+          .var.name = ns("bm_dataset")
+        )
+        unique_par_names <- bm_dataset() |>
+          dplyr::distinct(dplyr::across(c(VAR$CAT, VAR$PAR))) |>
+          dplyr::group_by(dplyr::across(c(VAR$PAR))) |>
+          dplyr::tally() |>
+          dplyr::pull(.data[["n"]]) |>
+          max() |>
+          `==`(1)
+        checkmate::assert_true(unique_par_names, .var.name = ns("bm_dataset"))
+        checkmate::assert_factor(bm_dataset()[[VAR$SBJ]], .var.name = ns("bm_dataset"))
+        checkmate::reportAssertions(ac)
+        bm_dataset()
+      },
+      label = ns("v_bm_dataset")
+    )
+
+    # input ----
+    # TODO: Change this list2 for a regular list? It is only executed at
+    # application startup and a regular list may be a better option
+    input_mod <- rlang::list2(
+      !!INPUT_ID$CONT_VAR := dv.selector::col_selector_server( # nolint
+        id = VP$ID$CONT_VAR,
+        dataset = v_group_dataset,
+        update_signal = dataset_name,
+        include_name = TRUE,
+        multiple = FALSE,
+        include_none = FALSE,
+        selected = FALSE,
+        include_function = "numeric"
+      ),
+      !!INPUT_ID$CAT_VAR := dv.selector::col_val_selector_server( # nolint
+        id = VP$ID$CAT_VAR,
+        dataset = v_group_dataset,
+        col_server_p = list(
+          update_signal = dataset_name,
+          include_name = TRUE,
+          include_none = FALSE,
+          selected = FALSE,
+          include_function = "factor"
+        ),
+        val_server_p = list(
+          multiple = TRUE,
+          selected = TRUE,
+          include_none = FALSE
+        )
+      ),
+      !!INPUT_ID$PAR := dv.selector::step_selector_server( # nolint
+        id = VP$ID$PAR,
+        dataset = v_bm_dataset,
+        ids = c("cat", "par"),
+        col = c(VAR$CAT, VAR$PAR),
+        multiple = c(TRUE, TRUE),
+        selected = list(FALSE, FALSE)
+      ),
+      !!INPUT_ID$VISIT := dv.selector::val_selector_server( # nolint
+        id = VP$ID$PAR_VISIT,
+        dataset = v_bm_dataset,
+        col = VAR$VIS,
+        selected = FALSE,
+        multiple = FALSE,
+        include_none = FALSE
+      ),
+      !!INPUT_ID$VALUE := dv.selector::col_selector_server( # nolint
+        id = VP$ID$PAR_VALUE,
+        dataset = v_bm_dataset,
+        update_signal = dataset_name,
+        include_cols = VAR$VAL,
+        include_function = "none",
+        include_name = TRUE,
+        multiple = FALSE,
+        include_none = FALSE,
+        selected = TRUE
+      ),
+      # TODO: This should happen on their own reactive
+      !!INPUT_ID$STAT_CONT := shiny::reactive(input[[VP$ID$STAT_METHOD_CONT]]), # nolint
+      !!INPUT_ID$STAT_CAT := shiny::reactive(input[[VP$ID$STAT_METHOD_CAT]]), # nolint
+      !!INPUT_ID$MC := shiny::reactive(input[[VP$ID$MULTIPLE_CORR_METHOD]]), # nolint
+      !!INPUT_ID$S_TH := shiny::reactive(input[[VP$ID$STAT_THRESHOLD]]), # nolint
+      !!INPUT_ID$P_TH := shiny::reactive(input[[VP$ID$P_THRESHOLD]]) # nolint
+    )
+
+    # input validation ----
+
+    v_input_subset <- shiny::reactive(
+      {
+        shiny::validate(
+          shiny::need(
+            checkmate::test_string(input_mod[[INPUT_ID$VALUE]](), min.chars = 1),
+            VP$MSG$VALIDATE$NO_VALUE_SEL
+          ),
+          shiny::need(
+            isTRUE(input_mod[[INPUT_ID$VALUE]]() %in% names(v_bm_dataset())),
+            paste(input_mod[[INPUT_ID$VALUE]](), VP$MSG$VALIDATE$UKNOWN_VALUE_SEL)
+          ),
+          shiny::need(
+            checkmate::test_character(
+              input_mod[[INPUT_ID$PAR]][[VAR$PAR]](),
+              min.len = 1, any.missing = FALSE, unique = TRUE, min.chars = 1
+            ),
+            VP$MSG$VALIDATE$NO_PAR_SEL
+          ),
+          shiny::need(
+            checkmate::test_character(
+              input_mod[[INPUT_ID$PAR]][[VAR$CAT]](),
+              min.len = 1, any.missing = FALSE, unique = TRUE, min.chars = 1
+            ),
+            VP$MSG$VALIDATE$NO_CAT_SEL
+          ),
+          shiny::need(
+            checkmate::test_string(input_mod[[INPUT_ID$VISIT]](), min.chars = 1),
+            VP$MSG$VALIDATE$NO_VISIT_SEL
+          ),
+          # The || are in specific order so they shortcircuit based on the radio selector, otherwise they will try
+          # to access hidden selectors and may produce a silent error due to dv.selector, expected based on dv.selector
+          # documentation but unexpected from the user perspective sometimes.
+          shiny::need(
+            input[[VP$ID$CONT_CAT_RADIO]] == "cat" ||
+              checkmate::test_string(input_mod[[INPUT_ID$CONT_VAR]](), min.chars = 1),
+            VP$MSG$VALIDATE$NO_CONT_VAR_SEL
+          ),
+          shiny::need(
+            input[[VP$ID$CONT_CAT_RADIO]] == "cont" ||
+              checkmate::test_string(input_mod[[INPUT_ID$CAT_VAR]]$col(), min.chars = 1),
+            VP$MSG$VALIDATE$NO_CAT_VAR_SEL
+          ),
+          shiny::need(
+            # Purr possibly is a hack to avoid the req in dv.selector
+            input[[VP$ID$CONT_CAT_RADIO]] == "cont" ||
+              purrr::possibly(checkmate::test_character, otherwise = FALSE)(
+                input_mod[[INPUT_ID$CAT_VAR]]$val(), min.len = 1, any.missing = FALSE
+              ),
+            VP$MSG$VALIDATE$NO_CAT_VAL_SEL
+          ),
+          shiny::need(
+            checkmate::test_string(input_mod[[INPUT_ID$STAT_CONT]](), min.chars = 1),
+            VP$MSG$VALIDATE$NO_STAT_METHOD_CONT_SEL
+          ),
+          shiny::need(
+            checkmate::test_string(input_mod[[INPUT_ID$STAT_CAT]](), min.chars = 1),
+            VP$MSG$VALIDATE$NO_STAT_METHOD_CAT_SEL
+          ),
+          shiny::need(
+            checkmate::test_string(input_mod[[INPUT_ID$MC]](), min.chars = 1),
+            VP$MSG$VALIDATE$NO_MULTIPLE_CORR_SEL
+          ),
+          # TODO: Move this things outside in their own reactive
+          shiny::need(
+            checkmate::test_numeric(input_mod[[INPUT_ID$S_TH]](), len = 1, any.missing = FALSE),
+            VP$MSG$VALIDATE$NO_STAT_THRESHOLD_VAL
+          ),
+          shiny::need(
+            checkmate::test_numeric(input_mod[[INPUT_ID$P_TH]](), len = 1, any.missing = FALSE),
+            VP$MSG$VALIDATE$NO_P_THRESHOLD_VAL
+          )
+        )
+        input_mod
+      },
+      label = ns("input_roc")
+    )
+
+    v_stat_method <- shiny::reactive({
+      if (input[[VP$ID$CONT_CAT_RADIO]] == "cont") {
+        shiny::validate(
+          shiny::need(
+            checkmate::test_string(input[[VP$ID$STAT_METHOD_CONT]], min.chars = 1),
+            "NO CONT METHOD TO CONSTANT"
+          )
+        )
+        method <- input[[VP$ID$STAT_METHOD_CONT]]
+      } else {
+        shiny::validate(
+          shiny::need(
+            checkmate::test_string(input[[VP$ID$STAT_METHOD_CAT]], min.chars = 1),
+            "NO CAT METHOD TO CONSTANT"
+          )
+        )
+        method <- input[[VP$ID$STAT_METHOD_CAT]]
+      }
+      method
+    })
+
+    v_multiple_correction_method <- shiny::reactive({
+      shiny::validate(
+        shiny::need(
+          checkmate::test_string(input[[VP$ID$MULTIPLE_CORR_METHOD]], min.chars = 1),
+          "NO MULTIPLE CORRECTION TO CONSTANT"
+        )
+      )
+      input[[VP$ID$MULTIPLE_CORR_METHOD]]
+    })
+
+    # data reactives ----
+
+    stat_subset <- shiny::reactive({
+      # Reactive is resolved first as nested reactives do no "react"
+      # (pun intented) properly when used inside dplyr::filter
+      # The suspect is NSE, but further testing is needed.
+      message("stat_subset")
+      l_input_roc <- v_input_subset()
+
+      if (input[[VP$ID$CONT_CAT_RADIO]] == "cont") {
+        group_vect <- drop_nones(
+          stats::setNames(
+            c(l_input_roc[[INPUT_ID$CONT_VAR]]()),
+            c(CNT$VAR)
+          )
+        )
+        group_vals <- NULL
+      } else {
+        if (input[[VP$ID$CONT_CAT_RADIO]] == "cat") {
+          group_vect <- drop_nones(
+            stats::setNames(
+              c(l_input_roc[[INPUT_ID$CAT_VAR]]$col()),
+              c(CNT$VAR)
+            )
+          )
+          group_vals <- l_input_roc[[INPUT_ID$CAT_VAR]]$val()
+        } else {
+          rlang::abort("This should not happen")
+        }
+      }
+
+      vp_subset_data(
+        cat = l_input_roc[[INPUT_ID$PAR]][[VAR$CAT]](),
+        par = l_input_roc[[INPUT_ID$PAR]][[VAR$PAR]](),
+        val_col = l_input_roc[[INPUT_ID$VALUE]](),
+        vis = l_input_roc[[INPUT_ID$VISIT]](),
+        group_vect = group_vect,
+        group_vals = group_vals,
+        bm_ds = v_bm_dataset(),
+        group_ds = v_group_dataset(),
+        subj_col = VAR$SBJ,
+        cat_col = VAR$CAT,
+        par_col = VAR$PAR,
+        vis_col = VAR$VIS
+      ) |>
+        vp_compute_stats(v_input_subset()[[INPUT_ID$P_TH]](), v_stat_method(), v_multiple_correction_method())
+    })
+
+    brushed_points <- shiny::reactive({
+      brush <- input[[VP$ID$CHART_BRUSH]]
+      if (isTRUE(is.list(brush))) { # Check no brush yet
+        # Hack for log10 and inversed scales
+        # The chart as plotted in volcano_chart has custom scales log10 and inverse
+        # the brush does not contain information about these transformations
+        # therefore there is no way of solving this without external information from the chart creation
+        # the way it is solved here is by:
+        # 1. creating an alternative dataset *_extra
+        # 2. create an additional column _custom_transform
+        # 2. Change the y_var mapping to _custom_transform
+        # 3. Calculate the brushed points
+        # 4. Drop the _custom_transform column
+
+        CUSTOM_TRANSFORM <- "_custom_transform" # nolint Should this be contained in a POC
+        y_var <- strip_data_pronoun(brush[["mapping"]][["y"]])
+        stat_subset_extra <- stat_subset()
+        stat_subset_extra[[CUSTOM_TRANSFORM]] <- -log10(stat_subset_extra[[y_var]])
+        brushed <- shiny::brushedPoints(
+          stat_subset_extra,
+          brush = input[[VP$ID$CHART_BRUSH]],
+          xvar = strip_data_pronoun(brush[["mapping"]][["x"]]),
+          yvar = CUSTOM_TRANSFORM
+        )
+        brushed[, setdiff(names(brushed), CUSTOM_TRANSFORM)]
+      } else {
+        message("brushed")
+        data.frame()
+      }
+    })
+
+    # List of output arguments
+    output_arguments <- list()
+
+    # Volcano plot ----
+    output_arguments[[VP$ID$CHART]] <- shiny::reactive({
+      list(
+        ds = stat_subset(),
+        p_threshold = v_input_subset()[[INPUT_ID$P_TH]](),
+        highlight_threshold = v_input_subset()[[INPUT_ID$S_TH]]()
+      )
+    })
+    output[[VP$ID$CHART]] <- shiny::renderPlot({
+      message("renderPlot")
+      do.call(vp_get_volcano_output, output_arguments[[VP$ID$CHART]]())
+    })
+
+    # listings table ----
+    output_arguments[[VP$ID$TABLE_LISTING]] <- shiny::reactive(
+      list(
+        ds = brushed_points()
+      )
+    )
+    output[[VP$ID$TABLE_LISTING]] <- DT::renderDT({
+      do.call(vp_get_listing_output, output_arguments[[VP$ID$TABLE_LISTING]]())
+    })
+
+    # significance table ----
+    output_arguments[[VP$ID$TABLE_SIGNIFICANCE]] <- shiny::reactive(
+      list(
+        ds = stat_subset()
+      )
+    )
+    output[[VP$ID$TABLE_SIGNIFICANCE]] <- DT::renderDT({
+      do.call(vp_get_significance_output, output_arguments[[VP$ID$TABLE_SIGNIFICANCE]]())
+    })
+
+
+    # debug tab ----
+    if (..__is_db()) {
+      ..__db_server(
+        id = "debug",
+        debug_list = list(
+          list(
+            name = "Data subset",
+            ui = DT::DTOutput,
+            server = DT::renderDT({
+              stat_subset()
+            })
+          )
+        )
+      )
+    }
+
+    # test values ----
+    shiny::exportTestValues(
+      data_subset = stat_subset()
+    )
+
+    # return ----
+    NULL
+  }
+
+  shiny::moduleServer(id, module)
+}
+
+#' Invoke ROC module
+#'
+#' @param module_id `[character(1)]`
+#'
+#' Module identificator
+#'
+#' @param pred_disp,resp_disp,group_disp module manager dispatchers that will be used as `pred_dataset`,
+#' `resp_dataset` and `group_dataset`
+#'
+#' @inheritDotParams volcano_server
+#'
+#' @keywords main
+#'
+#' @export
+mod_volcano <- function(module_id, bm_disp, group_disp, ...) {
+  rlang::abort("Volcano plot is incomplete and unreleased")
+  mod <- list(
+    ui = volcano_UI,
+    server = function(afmm) {
+      volcano_server(
+        id = module_id,
+        bm_dataset = dv.manager::mm_resolve_dispatcher(bm_disp, afmm, flatten = TRUE),
+        group_dataset = dv.manager::mm_resolve_dispatcher(group_disp, afmm, flatten = TRUE),
+        dataset_name = afmm[["dataset_name"]],
+        ...
+      )
+    },
+    module_id = module_id
+  )
+  mod
+}
+# Logic functions ----
+
+# Data manipulation ----
+
+#' Subset datasets for volcano
+#'
+#' @description
+#'
+#' This functions prepares the basic input for the rest of the volcano functions.
+#'
+#' It subsets and joins the datasets based on the parameter and group selection.
+#'
+#' It is based on [subset_bds_param()] and [subset_adsl()] with additional error checking.
+#'
+#' @section Internal checks:
+#'
+#' ## Shiny validation errors:
+#'
+#' - Fails if `bm_ds` and `grp_ds` share column names, apart from `subj_col`, after selection.
+#' - If the returned dataset has 0 rows
+#'
+#' @details
+#'
+#' - factors are releveled so all extra levels not present after subsetting are dropped.
+#'
+#' - Possible `group_vect` names are `r CNT$MAIN_GROUP`, `r CNT$SUB_GROUP` and `r CNT$PAGE_GROUP`
+#'
+#' @inheritParams subset_bds_param
+#'
+#' @inheritParams subset_adsl
+#'
+#' @returns
+#'
+#' `doc_templates()[["vp_subset_return"]]`
+#'
+#' @keywords data
+#'
+
+
+vp_subset_data <- function(cat,
+                           cat_col,
+                           par,
+                           par_col,
+                           val_col,
+                           vis,
+                           vis_col,
+                           group_vect,
+                           group_vals,
+                           bm_ds,
+                           group_ds,
+                           subj_col) {
+  bm_fragment <- subset_bds_param(
+    ds = bm_ds, par = par, par_col = par_col,
+    cat = cat, cat_col = cat_col, val_col = val_col,
+    vis = vis, vis_col = vis_col, subj_col = subj_col
+  )
+
+  # Group data ----
+
+  # TODO: In this particular case it will always be grouped, although grouping is not exactly this case
+  # Some renaming is required to avoid confusions about the specific roles of each parameter
+
+  # Decorate function instead of catching error prefix
+  grp_fragment <- subset_adsl(
+    ds = group_ds, group_vect = group_vect, subj_col = subj_col
+  )
+
+  shiny::validate(
+    shiny::need(
+      {
+        bm_names <- names(bm_fragment)
+        grp_names <- names(grp_fragment)
+        bm_names <- bm_names[bm_names != c(CNT$SBJ)]
+        grp_names <- grp_names[grp_names != c(CNT$SBJ)]
+        checkmate::test_disjunct(bm_names, grp_names)
+      },
+      VP$MSG$VALIDATE$GROUP_COL_REPEATED
+    )
+  )
+
+  joint_data <- dplyr::left_join(
+    bm_fragment,
+    grp_fragment,
+    by = c(CNT$SBJ)
+  )
+
+  if (!is.numeric(joint_data[[CNT$VAR]])) {
+    joint_data <- dplyr::filter(joint_data, .data[[CNT$VAR]] %in% group_vals) |>
+      dplyr::mutate(
+        !!CNT$VAR := as_factor_if_not_factor(.data[[CNT$VAR]]) # nolint Force factor for later modelling
+      )
+  }
+
+  joint_data |>
+    set_lbls(get_lbls(bm_fragment)) |>
+    set_lbls(get_lbls(grp_fragment))
+
+  shiny::validate(
+    need_rows(joint_data)
+  )
+
+  joint_data |>
+    dplyr::mutate(dplyr::across(dplyr::where(is.factor), droplevels)) |>
+    set_lbls(get_lbls(joint_data))
+}
+
+# Chart functions ----
+
+vp_compute_stats <- function(ds, p_threshold, stat_method, multiple_correction_method) {
+  is_cat <- is.character(ds[[CNT$VAR]]) || is.factor(ds[[CNT$VAR]])
+  is_binary <- is_cat && length(unique(ds[[CNT$VAR]])) == 2
+
+  shiny::validate(
+    shiny::need(
+      is_binary && is_cat || !is_cat,
+      "Non binary categorical variables are not yet implemented"
+    )
+  )
+
+
+  reg_fun <- function(x) {
+    lmodel <- lm(x[[CNT$VAL]] ~ x[[CNT$VAR]])
+    broom::tidy(lmodel)[2, c("estimate", "p.value")]
+    # nolint start
+    # p <- anova(lmodel)[["Pr(>F)"]][[1]]
+    # dplyr::bind_rows(tidy_model, tibble::tibble(term = "Model", p.value = p))
+    # nolint end
+  }
+
+  corr_fun <- function(x) {
+    m <- stats::cor.test(x[[CNT$VAR]], x[[CNT$VAL]], method = "pearson", use = "complete.obs", exact = FALSE)
+    tm <- broom::tidy(m)
+    tm[setdiff(names(tm), "parameter")]
+  }
+
+  odds_fun <- function(x) {
+    # TODO: Check term parameter in tidy model, it contains a constant at the moment as it appears in the general model
+    m <- glm(x[[CNT$VAR]] ~ x[[CNT$VAL]], family = "binomial")
+    tm <- broom::tidy(m)
+    tm[2, setdiff(names(tm), "parameter")] |>
+      dplyr::mutate("estimate" = exp(.data[["estimate"]]))
+  }
+
+  stat_fun <- switch(stat_method,
+    Pearson = corr_fun,
+    Regression = reg_fun,
+    Odds = odds_fun,
+    Log2Fold = shiny::validate(shiny::need(FALSE, "Log2Fold method not implemented"))
+  )
+
+  multiple_correction_fun <- switch(multiple_correction_method,
+    FDR = purrr::partial(p.adjust, method = "fdr"),
+    Holm = purrr::partial(p.adjust, method = "holm")
+  )
+
+  ds |>
+    dplyr::group_by(dplyr::across(dplyr::all_of(CNT$PAR))) |>
+    dplyr::summarise(m = stat_fun(dplyr::cur_data())) |>
+    tidyr::unnest(.data[["m"]]) |>
+    dplyr::mutate(
+      adj.p.value = multiple_correction_fun(.data[["p.value"]]),
+      log10p = -log10(.data[["adj.p.value"]]),
+      significant = .data[["adj.p.value"]] < p_threshold
+    ) |>
+    set_lbl("estimate", paste(stat_method, "estimate")) |>
+    set_lbl("adj.p.value", paste(multiple_correction_method, "adjusted p.value"))
+}
+
+volcano_chart <- function(ds, p_threshold, highlight_threshold) {
+  # Define aes
+  ds[["label"]] <- dplyr::if_else(ds[["significant"]], as.character(ds[["parameter"]]), NA_character_)
+  ds[["color"]] <- dplyr::if_else(abs(ds[["estimate"]]) > highlight_threshold, "Highlight", "Non Highlighted")
+  x_limit <- c(-1, 1) * max(abs(range(ds[["estimate"]], na.rm = TRUE)))
+
+  aes <- ggplot2::aes(
+    x = .data[["estimate"]],
+    y = .data[["adj.p.value"]],
+    label = .data[["label"]],
+    color = .data[["color"]]
+  )
+
+  p <- ggplot2::ggplot(
+    data = ds,
+    mapping = aes
+  ) +
+    ggplot2::geom_point() +
+    ggplot2::scale_y_continuous(
+      trans = scales::compose_trans(scales::log10_trans(), scales::reverse_trans()), limits = c(1, NA)
+    ) +
+    ggplot2::xlim(x_limit) +
+    ggplot2::geom_text(vjust = "inward", hjust = "inward", show.legend = FALSE) +
+    ggplot2::geom_vline(xintercept = highlight_threshold, linetype = 2) +
+    ggplot2::geom_vline(xintercept = -highlight_threshold, linetype = 2) +
+    ggplot2::geom_hline(yintercept = p_threshold, linetype = 2) +
+    ggplot2::theme(
+      aspect.ratio = 1,
+      legend.position = "None",
+      axis.title = ggplot2::element_text(size = STYLE$AXIS_TITLE_SIZE),
+      axis.text.x = ggplot2::element_text(size = STYLE$AXIS_TEXT_SIZE),
+      axis.text.y = ggplot2::element_text(size = STYLE$AXIS_TEXT_SIZE),
+      strip.text.x = ggplot2::element_text(size = STYLE$STRIP_TEXT_SIZE),
+      strip.text.y = ggplot2::element_text(size = STYLE$STRIP_TEXT_SIZE)
+    ) +
+    ggplot2::labs(
+      y = get_lbl_robust(ds, "adj.p.value"),
+      x = get_lbl_robust(ds, "estimate")
+    )
+  p
+}
+
+# Composed functions ----
+
+vp_get_volcano_output <- function(ds, p_threshold, highlight_threshold) {
+  message("volcano_output")
+  volcano_chart(ds, p_threshold, highlight_threshold)
+}
+
+vp_get_significance_output <- function(ds, p_threshold, stat_method, multiple_correction_method) {
+  ds |>
+    dplyr::filter(.data[["significant"]]) |>
+    vp_round()
+}
+
+vp_get_listing_output <- function(ds) {
+  ds |>
+    vp_round()
+}
+
+
+# Helpers
+
+vp_round <- function(ds) {
+  ds |> dplyr::mutate(dplyr::across(dplyr::where(is.numeric), purrr::partial(round, digits = 2)))
+}

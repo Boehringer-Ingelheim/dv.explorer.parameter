@@ -1,0 +1,79 @@
+# nolint start
+test_that("produce histo spec (Snapshot)" |>
+  vdoc[["add_spec"]](
+    c(
+      specs$roc$outputs$histogram$facets,
+      specs$roc$outputs$histogram$axis,
+      specs$roc$outputs$histogram$plot
+    )
+  ), {
+  snap_file_svg <- list(path = tempfile(fileext = ".svg"), name = "spec.svg")
+  # snap_file_png <- list(path = tempfile(fileext = ".png"), name = "spec.png")
+  announce_snapshot_file(path = snap_file_svg[["path"]], name = snap_file_svg[["name"]])
+  # announce_snapshot_file(path = snap_file_png[["path"]], name = snap_file_png[["name"]])
+
+  # ds <- tibble::tibble(
+  #   !!CNT_ROC$PPAR := factor(c("P1", "P1", "P1", "P1", "P1", "P1", "P2", "P2")),
+  #   !!CNT_ROC$GRP :=  factor(c("G1", "G1", "G1", "G1", "G2", "G2", "G2", "G2")),
+  #   !!CNT_ROC$RVAL := factor(c( "A",  "A",  "B",  "B",  "A",  "A",  "A",  "A")),
+  #   !!CNT_ROC$BIN_COUNT_X :=      c(   0,    1,    2,    3,    4,    10,    2,  3),
+  #   !!CNT_ROC$BIN_COUNT_Y :=      c(   0,    1,    2,    3,    4,    10,    2,  3)
+  # )
+
+  ds <- tibble::tibble(
+    !!CNT_ROC$SBJ := factor(c("S1", "S1", "S1", "S1", "S1", "S1", "S1", "S1", "S1", "S1", "S1", "S1")), # Subject ID is not considered in this case
+    !!CNT_ROC$PPAR := factor(c("P1", "P1", "P1", "P1", "P1", "P1", "P1", "P1", "P3", "P3", "P3", "P3")),
+    !!CNT_ROC$GRP := factor(c("G1", "G1", "G1", "G1", "G2", "G2", "G2", "G2", "G1", "G1", "G1", "G1")),
+    !!CNT_ROC$PVAL := c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12),
+    !!CNT_ROC$RVAL := factor(c("A", "B", "A", "B", "A", "B", "A", "B", "A", "B", "A", "B")),
+    !!CNT_ROC$RPAR := factor("R1")
+  ) %>%
+    get_histo_data()
+
+  attr(ds[[CNT_ROC$PPAR]], "label") <- "Parameter"
+  attr(ds[[CNT_ROC$GRP]], "label") <- "Group"
+
+  spec <- get_histo_spec(ds, FALSE, 50)
+  expect_snapshot(spec %>% vegawidget::vw_as_json())
+
+  vegawidget::vw_write_svg(spec, path = snap_file_svg[["path"]]) %>% suppressWarnings()
+  # vegawidget::vw_write_png(spec, path = snap_file_png[["path"]]) %>% suppressWarnings()
+
+  expect_snapshot_file(snap_file_svg[["path"]], cran = TRUE, name = snap_file_svg[["name"]])
+  # expect_snapshot_file(snap_file_png[["path"]], cran = TRUE, name = snap_file_png[["name"]])
+})
+
+test_that("produce histo spec. Ungrouped. (Snapshot)" |>
+  vdoc[["add_spec"]](
+    c(
+      specs$roc$outputs$histogram$facets,
+      specs$roc$outputs$histogram$axis,
+      specs$roc$outputs$histogram$plot
+    )
+  ), {
+  snap_file_svg <- list(path = tempfile(fileext = ".svg"), name = "ungrouped_spec.svg")
+  # snap_file_png <- list(path = tempfile(fileext = ".png"), name = "ungrouped_spec.png")
+  announce_snapshot_file(path = snap_file_svg[["path"]], name = snap_file_svg[["name"]])
+  # announce_snapshot_file(path = snap_file_png[["path"]], name = snap_file_png[["name"]])
+
+  ds <- tibble::tibble(
+    !!CNT_ROC$SBJ := factor(c("S1", "S1", "S1", "S1", "S1", "S1", "S1", "S1", "S1", "S1", "S1", "S1")), # Subject ID is not considered in this case
+    !!CNT_ROC$PPAR := factor(c("P1", "P1", "P1", "P1", "P1", "P1", "P1", "P1", "P3", "P3", "P3", "P3")),
+    !!CNT_ROC$PVAL := c(1, 2, 3, 4, 5, 6, 7, 8, 91, 92, 93, 94),
+    !!CNT_ROC$RVAL := factor(c("A", "B", "A", "B", "A", "B", "A", "B", "A", "B", "A", "B")),
+    !!CNT_ROC$RPAR := factor("R1")
+  ) %>%
+    get_histo_data()
+
+  attr(ds[[CNT_ROC$PPAR]], "label") <- "Parameter"
+
+  spec <- get_histo_spec(ds, FALSE, 50)
+  expect_snapshot(spec %>% vegawidget::vw_as_json())
+
+  vegawidget::vw_write_svg(spec, path = snap_file_svg[["path"]]) %>% suppressWarnings()
+  # vegawidget::vw_write_png(spec, path = snap_file_png[["path"]]) %>% suppressWarnings()
+
+  expect_snapshot_file(snap_file_svg[["path"]], cran = TRUE, name = snap_file_svg[["name"]])
+  # expect_snapshot_file(snap_file_png[["path"]], cran = TRUE, name = snap_file_png[["name"]])
+})
+# nolint end

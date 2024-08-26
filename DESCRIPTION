@@ -1,0 +1,32 @@
+Package: dv.biomarker.general
+Type: Package
+Title: Biomarker Visualization Modules
+Version: 0.0.4-900
+Authors@R: c(
+        person("Boehringer-Ingelheim Pharma GmbH & Co.KG", role = c("cph", "fnd")),
+        person(given = "Luis", family = "Moris Fernandez", role = c("aut", "cre"), email = "luis.moris.fernandez@gmail.com"),
+        person(given = "Miguel", family = "Lechon", role = c("aut"), email = "miguel.lechon@gmail.com")
+        )
+Description: not-EBAS Modules.
+License: Apache License (>= 2)
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.1
+Suggests: dv.manager (>= 1.0.9.129), jsonlite, rmarkdown, testthat (>=
+        3.0.0), shinytest2, devtools, vdiffr, rvest, stringr, knitr,
+        safetyData, png, rsvg, withr
+Config/testthat/edition: 3
+Config/testthat/parallel: false
+Imports: shiny (>= 1.7.1),dplyr (>= 1.0.7), broom (>= 0.7.9), ggplot2
+        (>= 3.3.5), DT (>= 0.19), purrr (>= 0.3.4), tidyr (>= 1.1.4),
+        digest, rlang, tibble, checkmate (>= 2.0.0), GGally,
+        fontawesome, shinyvalidate, htmltools, RColorBrewer, scales,
+        shinyWidgets, r2d3, stats, Hmisc, base64enc, viridisLite,
+        vegawidget, pROC, gt, utils, precrec, glue
+Depends: R (>= 4.0)
+Date: Tue May 31 12:12:27 2022
+Branch: dev
+ParentCommit: 9edd5ae0b32a3c7afbcf7215187748f310087a8a
+VignetteBuilder: knitr
+Remotes: boehringer-ingelheim/dv.manager@v2.1.2

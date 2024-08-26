@@ -1,0 +1,55 @@
+mock_app_volcano <- function(in_fluid = TRUE, defaults = list()) {
+  container <- if (in_fluid) shiny::fluidPage else shiny::tagList
+
+  shiny::shinyApp(
+    ui = function(request) {
+      container(
+        volcano_UI("not_ebas"),
+        shiny::bookmarkButton()
+      )
+    },
+    server = function(input, output, session) {
+      # TODO PACK THIS MAGIC
+
+      shiny::observe({
+        shiny::reactiveValuesToList(input) # Trigger this observer every time an input changes
+        session$doBookmark()
+      })
+      shiny::onBookmarked(shiny::updateQueryString)
+
+
+      volcano_server(
+        "not_ebas",
+        bm_dataset = test_data()[["bm"]],
+        group_dataset = test_data()[["sl"]],
+        visit_var = "VISIT",
+        value_var = c("VALUE1", "VALUE2"),
+        subjid_var = "SUBJID",
+        cat_var = "PARCAT"
+      )
+    },
+    enableBookmarking = "url"
+  )
+}
+
+mock_app_volcano_mm <- function() {
+  module_list <- list(
+    "Volcano" = dv.biomarker.general::mod_volcano(
+      module_id = "vp",
+      bm_disp = dv.manager::mm_dispatch("filtered_dataset", "bm"),
+      group_disp = dv.manager::mm_dispatch("filtered_dataset", "sl"),
+      cat_var = "PARCAT1"
+    )
+  )
+
+  bm_dataset <- get_bm_dataset()
+  group_dataset <- get_group_dataset()
+
+  dv.manager::run_app(
+    data = list("DS" = list(bm = bm_dataset, sl = group_dataset)),
+    module_list = module_list,
+    filter_data = "sl",
+    filter_key = "SUBJID",
+    enableBookmarking = "url"
+  )
+}

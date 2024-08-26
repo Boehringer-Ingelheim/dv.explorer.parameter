@@ -1,0 +1,10 @@
+.*Rproj
+^\.Rproj\.user$
+^LICENSE$
+^README\.Rmd$
+^README\.md$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+.lintr
+inst/validation/results/.gitempty

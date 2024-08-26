@@ -1,0 +1,31 @@
+
+template:
+  bootstrap: 5
+  bootswatch: cerulean
+
+reference:
+  - title: Modules
+  - desc: Main functions to call the modules
+  - contents: 
+    - has_keyword("main")
+  - title: Mock Applications
+  - contents: 
+    - has_keyword("mock")
+  - title: Additional Documentation
+  - subtitle: Lineplot
+  - contents: 
+    - default_lineplot_functions
+  - subtitle: Forest plot
+  - contents: 
+    - fp_stats
+  - subtitle: Waterfall Plus Heatmap
+  - contents: 
+    - transformation
+  - subtitle: ROC
+  - contents:
+    - compute_metric
+    - compute_roc
+  - subtitle: Miscellaneous
+  - contents:
+    - has_keyword("misc")
+  
