@@ -1,7 +1,7 @@
 # dv.explorer.parameter 0.0.5
 
 * First Github release
-* Renamed to dv.explorer.parameters
+* Renamed to dv.explorer.parameter
 
 
 # dv.biomarker.general 0.0.4
