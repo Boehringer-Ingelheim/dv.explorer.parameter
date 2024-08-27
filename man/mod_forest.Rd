@@ -108,9 +108,9 @@ The module will offer the functions as part of its interface and will run each f
 The values returned by the functions are be captured on the output table and are also displayed
 as part of the forest plot.
 
-\code{numeric_numeric_functions} take two numeric parameters (e.g. \code{dv.biomarker.general::pearson_correlation})
+\code{numeric_numeric_functions} take two numeric parameters (e.g. \code{dv.explorer.parameter::pearson_correlation})
 and \code{numeric_factor_functions} should accept a numeric first parameter and a categorical (factor) second parameter
-(e.g. \code{dv.biomarker.general::odds_ratio}).}
+(e.g. \code{dv.explorer.parameter::odds_ratio}).}
 
 \item{subjid_var}{\verb{[character(1)]}
 

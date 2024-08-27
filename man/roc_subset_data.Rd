@@ -84,7 +84,7 @@ Additionally:
 }
 }
 \description{
-This functions prepares the basic input for the rest of dv.biomarker.general functions.
+This functions prepares the basic input for the rest of dv.explorer.parameter functions.
 
 It subsets and joins the datasets based on the predictor/response category/parameter/visit and group selections.
 }
