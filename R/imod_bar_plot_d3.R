@@ -330,7 +330,7 @@ bar_D3 <- function(data, # nolintr
 
   r2d3::r2d3(
     data = data,
-    script = system.file("www/dist/d3_barplot.js", package = "dv.biomarker.general", mustWork = TRUE),
+    script = system.file("www/dist/d3_barplot.js", package = "dv.explorer.parameter", mustWork = TRUE),
     options = list(
       parent = parent_id,
       x_axis = x_axis, y_axis = y_axis, z_axis = z_axis,

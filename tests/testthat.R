@@ -1,4 +1,4 @@
-pkg_name <- "dv.biomarker.general"
+pkg_name <- "dv.explorer.parameter"
 
 library(testthat)
 library(pkg_name, character.only = TRUE)

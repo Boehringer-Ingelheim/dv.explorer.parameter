@@ -66,7 +66,7 @@ mock_app_forest_mm <- function() {
   numeric_factor_functions <- list("Odds Ratio" = odds_ratio)
 
   module_list <- list(
-    "forest" = dv.biomarker.general::mod_forest(
+    "forest" = dv.explorer.parameter::mod_forest(
       module_id = "forest",
       bm_dataset_disp = dv.manager::mm_dispatch("filtered_dataset", "bm"),
       group_dataset_disp = dv.manager::mm_dispatch("filtered_dataset", "sl"),

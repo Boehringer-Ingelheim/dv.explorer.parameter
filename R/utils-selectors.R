@@ -404,7 +404,7 @@ add_warning_mark_dependency <- function() {
   htmltools::htmlDependency(
     "warning_mark_lib",
     "0.1",
-    src = system.file("warning_mark_lib", package = "dv.biomarker.general", mustWork = TRUE),
+    src = system.file("warning_mark_lib", package = "dv.explorer.parameter", mustWork = TRUE),
     script = "warning_mark.js",
     stylesheet = "warning_mark.css"
   )
@@ -414,7 +414,7 @@ add_top_menu_dependency <- function() {
   htmltools::htmlDependency(
     "top_menu",
     "0.1",
-    src = system.file("assets/css", package = "dv.biomarker.general", mustWork = TRUE),
+    src = system.file("assets/css", package = "dv.explorer.parameter", mustWork = TRUE),
     stylesheet = "top_menu.css"
   )
 }

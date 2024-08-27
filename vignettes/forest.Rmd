@@ -104,7 +104,7 @@ the data. Controls embedded in the table headings allow arbitrary reorderings of
 
 ```{r, eval=FALSE}
 adbm_dataset <- dplyr::mutate(
-  dv.biomarker.general::adbm_example,
+  dv.explorer.parameter::adbm_example,
   USUBJID = factor(USUBJID),
   PARCAT1 = factor(PARCAT1),
   PARAM = factor(PARAM),
@@ -112,22 +112,22 @@ adbm_dataset <- dplyr::mutate(
 )
 
 adsl_dataset <- dplyr::mutate(
-  dv.biomarker.general::adsl_example,
+  dv.explorer.parameter::adsl_example,
   USUBJID = factor(USUBJID)
 )
 
 fp_numeric_numeric_functions <- list(
-  "Pearson Correlation" = dv.biomarker.general::pearson_correlation,
-  "Spearman Correlation" = dv.biomarker.general::spearman_correlation
+  "Pearson Correlation" = dv.explorer.parameter::pearson_correlation,
+  "Spearman Correlation" = dv.explorer.parameter::spearman_correlation
 )
 fp_numeric_factor_functions <- list(
-  "Odds Ratio" = dv.biomarker.general::odds_ratio
+  "Odds Ratio" = dv.explorer.parameter::odds_ratio
 )
 
 dv.manager::run_app(
   data = list("DS" = list(adbm = adbm_dataset, adsl = adsl_dataset)),
   module_list = list(
-    "Forest Plot" = dv.biomarker.general::mod_forest(
+    "Forest Plot" = dv.explorer.parameter::mod_forest(
       "forestplot",
       bm_dataset_name = "adbm",
       group_dataset_name = "adsl",

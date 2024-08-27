@@ -29,7 +29,7 @@ ID <- poc( # nolint
   )
 )
 
-root_app <- start_app_driver(dv.biomarker.general::mock_app_lineplot())
+root_app <- start_app_driver(dv.explorer.parameter::mock_app_lineplot())
 
 on.exit(if ("stop" %in% names(root_app)) root_app$stop())
 
@@ -252,7 +252,7 @@ test_that("default values are set", {
 
   app <- start_app_driver(
     rlang::quo(
-      dv.biomarker.general::mock_app_lineplot(
+      dv.explorer.parameter::mock_app_lineplot(
         srv_defaults = !!srv_defaults
       )
     )
@@ -277,9 +277,9 @@ test_that("module tolerates the absence of visit-dependent data", {
   testthat::skip_if_not(run_shiny_tests)
   skip_if_suspect_check()
 
-  data <- dv.biomarker.general:::test_data()
+  data <- dv.explorer.parameter:::test_data()
   data[["bm"]] <- data[["bm"]][0, ] # zero rows, equivalent to dv.filtering everything out
-  app <- start_app_driver(rlang::quo(dv.biomarker.general::mock_app_lineplot(data = data)))
+  app <- start_app_driver(rlang::quo(dv.explorer.parameter::mock_app_lineplot(data = data)))
   testthat::expect_true(!is.null(app)) # `app` is NULL if it crashes on load
 })
 # nolint end

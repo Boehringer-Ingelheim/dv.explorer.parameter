@@ -344,7 +344,7 @@ heatmap_plot_d3 <- function(data,
 
   r2d3::r2d3(
     data = data,
-    script = system.file("www/dist/d3_heatmap.js", package = "dv.biomarker.general", mustWork = TRUE),
+    script = system.file("www/dist/d3_heatmap.js", package = "dv.explorer.parameter", mustWork = TRUE),
     options = list(
       parent = parent_id,
       x_axis = x_axis, y_axis = y_axis, z_axis = z_axis,

@@ -69,7 +69,7 @@ test_that("apply_correlation_function generates data for a heatmap", {
   a <- df[[CNT$VAL]][1:3]
   b <- df[[CNT$VAL]][4:6]
 
-  pearson <- dv.biomarker.general::pearson_correlation
+  pearson <- dv.explorer.parameter::pearson_correlation
   label <- "label"
   res <- apply_correlation_function(df, pearson, label)
   par_1_2_index <- res[["x"]] == "par_1" & res[["y"]] == "par_2"
@@ -77,7 +77,7 @@ test_that("apply_correlation_function generates data for a heatmap", {
   expected_v <- pearson(a, b)[["result"]]
   expect_equal(res[par_1_2_index, ][["z"]], expected_v)
 
-  spearman <- dv.biomarker.general::spearman_correlation
+  spearman <- dv.explorer.parameter::spearman_correlation
   res <- apply_correlation_function(df, spearman, label)
   par_1_2_index <- res[["x"]] == "par_1" & res[["y"]] == "par_2"
 
@@ -97,7 +97,7 @@ test_that("ch_listings_table returns unique combinations of heatmap data and sum
   }) |>
     type("data_subset")
 
-  pearson <- dv.biomarker.general::pearson_correlation |> type("fun")
+  pearson <- dv.explorer.parameter::pearson_correlation |> type("fun")
   label <- "label" |> type("S")
   corr_df <- apply_correlation_function(ds, pearson, label)
 

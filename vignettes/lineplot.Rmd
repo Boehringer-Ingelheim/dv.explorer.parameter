@@ -116,7 +116,7 @@ A table that provides the count of samples per group and time point for the whol
 
 ```{r, eval=FALSE}
 module_list <- list(
-  "lineplot" = dv.biomarker.general::mod_lineplot(
+  "lineplot" = dv.explorer.parameter::mod_lineplot(
     module_id = "lineplot",
     bm_dataset_name = "bm",
     group_dataset_name = "sl",

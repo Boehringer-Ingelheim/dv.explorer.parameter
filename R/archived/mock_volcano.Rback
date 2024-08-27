@@ -34,7 +34,7 @@ mock_app_volcano <- function(in_fluid = TRUE, defaults = list()) {
 
 mock_app_volcano_mm <- function() {
   module_list <- list(
-    "Volcano" = dv.biomarker.general::mod_volcano(
+    "Volcano" = dv.explorer.parameter::mod_volcano(
       module_id = "vp",
       bm_disp = dv.manager::mm_dispatch("filtered_dataset", "bm"),
       group_disp = dv.manager::mm_dispatch("filtered_dataset", "sl"),

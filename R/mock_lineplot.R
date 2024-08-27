@@ -132,7 +132,7 @@ mock_app_lineplot_mm <- function() {
     stop("Install dv.manager")
   }
   module_list <- list(
-    "lineplot" = dv.biomarker.general::mod_lineplot(
+    "lineplot" = dv.explorer.parameter::mod_lineplot(
       module_id = "lineplot",
       bm_dataset_disp = dv.manager::mm_dispatch("filtered_dataset", "bm"),
       group_dataset_disp = dv.manager::mm_dispatch("filtered_dataset", "sl"),
@@ -160,7 +160,7 @@ mock_app_lineplot_mm_safetyData <- function() { # nolint
   }
 
   module_list <- list(
-    "lineplot" = dv.biomarker.general::mod_lineplot(
+    "lineplot" = dv.explorer.parameter::mod_lineplot(
       module_id = "lineplot",
       bm_dataset_disp = dv.manager::mm_dispatch("filtered_dataset", "bm"),
       group_dataset_disp = dv.manager::mm_dispatch("filtered_dataset", "sl"),

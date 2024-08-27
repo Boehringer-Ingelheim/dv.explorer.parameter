@@ -59,7 +59,7 @@ inputs2 <- rlang::list2(
   !!ID$PRED$PAR := c("A1", "A2"),
   !!ID$RESP$PAR := c("BinA1")
 )
-app <- start_app_driver(dv.biomarker.general:::roc_test_app())
+app <- start_app_driver(dv.explorer.parameter:::roc_test_app())
 fail_if_app_not_started <- function() {
   if (is.null(app)) rlang::abort("App could not be started")
 }

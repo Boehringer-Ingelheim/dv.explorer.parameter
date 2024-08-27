@@ -9,14 +9,14 @@ safety_data <- function() {
   avisitn_mask <- is.finite(adlb[["AVISITN"]]) & adlb[["AVISITN"]] < 99
   adlb <- adlb[avisitn_mask, ]
 
-  adsl_labels <- dv.biomarker.general::get_lbls_robust(adsl)
-  adlb_labels <- dv.biomarker.general::get_lbls_robust(adlb)
+  adsl_labels <- dv.explorer.parameter::get_lbls_robust(adsl)
+  adlb_labels <- dv.explorer.parameter::get_lbls_robust(adlb)
 
   adsl <- adsl |>
     dplyr::mutate(
       dplyr::across(dplyr::where(is.character), factor)
     ) |>
-    dv.biomarker.general::set_lbls(adsl_labels)
+    dv.explorer.parameter::set_lbls(adsl_labels)
 
   visits_ <- unique(adlb[c("AVISITN", "VISIT")])
   visits <- visits_[order(visits_[["AVISITN"]]), ][["VISIT"]]
@@ -26,7 +26,7 @@ safety_data <- function() {
     dplyr::mutate(
       dplyr::across(dplyr::where(is.character), factor)
     ) |>
-    dv.biomarker.general::set_lbls(adlb_labels)
+    dv.explorer.parameter::set_lbls(adlb_labels)
 
   list(sl = adsl, bm = adlb)
 }
