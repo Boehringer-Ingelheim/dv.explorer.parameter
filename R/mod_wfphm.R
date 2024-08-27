@@ -2263,8 +2263,6 @@ tr_mapper_def <- function() {
 #' Dataset dispatcher. This parameter is incompatible with its `bm_dataset_name`/`group_dataset_name` counterpart.
 #' Only for advanced use.
 #'
-#' @param dataset_disp DEPRECATED
-#'
 #' @export
 mod_wfphm <- function(
     module_id, bm_dataset_name, group_dataset_name,

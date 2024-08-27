@@ -63,7 +63,7 @@ mock_app_scatterplot_mm <- function(in_fluid = TRUE, defaults = list(), update_q
         bm_dataset_disp = dv.manager::mm_dispatch("filtered_dataset", "bm"),
         group_dataset_disp = dv.manager::mm_dispatch("filtered_dataset", "adsl"),
         visit_var = "VISIT",
-        value_var = c("VALUE1", "VALUE2"),
+        value_vars = c("VALUE1", "VALUE2"),
         subjid_var = "SUBJID",
         cat_var = "PARCAT"
       )

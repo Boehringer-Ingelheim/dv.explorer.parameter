@@ -102,8 +102,6 @@ show x ticks in the parameter heatmap}
 
 \item{bm_dataset_disp, group_dataset_disp}{Dataset dispatcher. This parameter is incompatible with its \code{bm_dataset_name}/\code{group_dataset_name} counterpart.
 Only for advanced use.}
-
-\item{dataset_disp}{DEPRECATED}
 }
 \value{
 \subsection{UI}{

@@ -93,7 +93,7 @@ local({
   list(
     specs = specs,
     spec_id_list = spec_id_list,
-    add_spec = function(desc, spec, spec_id) {      
+    add_spec = function(desc, spec, spec_id) {
       if (missing(spec_id)) {
         if (!is.character(spec) || length(spec) == 0) stop("spec must be a non-empty character vector")
         s_spec <- substitute(spec)
