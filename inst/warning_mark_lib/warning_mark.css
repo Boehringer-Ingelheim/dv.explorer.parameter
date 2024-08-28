@@ -1,5 +1,0 @@
-.dv-bm-warning-text::before {
-    content: "\26A0"; /* HTML entity for the warning sign */
-    color: red;
-    margin-right: 0.5rem; /* Adjust spacing between the sign and text */
-  }
