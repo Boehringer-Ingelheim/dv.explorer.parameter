@@ -23,7 +23,7 @@ ID <- poc( # nolint
   )
 )
 
-root_app <- start_app_driver(dv.biomarker.general::mock_app_forest())
+root_app <- start_app_driver(dv.explorer.parameter::mock_app_forest())
 
 on.exit(if ("stop" %in% names(root_app)) root_app$stop())
 
@@ -191,7 +191,7 @@ test_that("default values are set. Odds", {
 
   app <- start_app_driver(
     rlang::quo(
-      dv.biomarker.general::mock_app_forest(
+      dv.explorer.parameter::mock_app_forest(
         ui_defaults = !!ui_defaults,
         srv_defaults = !!srv_defaults
       )
@@ -227,7 +227,7 @@ test_that("default values are set. Continuous", {
 
   app <- start_app_driver(
     rlang::quo(
-      dv.biomarker.general::mock_app_forest(
+      dv.explorer.parameter::mock_app_forest(
         ui_defaults = !!ui_defaults,
         srv_defaults = !!srv_defaults
       )

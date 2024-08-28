@@ -1401,9 +1401,6 @@ lineplot_server <- function(id, # nolint cyclomatic
 #' Name of the module receiving the selected subject ID in the single subject listing. The name must be present in
 #' the module list or NULL.
 #'
-#' @param ...
-#'
-#' Parameters passed to [lineplot_server]
 #'
 #' @name mod_lineplot
 #'

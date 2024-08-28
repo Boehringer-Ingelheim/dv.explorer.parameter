@@ -33,7 +33,7 @@ ID <- poc( # nolint
   )
 )
 
-root_app <- start_app_driver(dv.biomarker.general::mock_app_scatterplot())
+root_app <- start_app_driver(dv.explorer.parameter::mock_app_scatterplot())
 on.exit(if ("stop" %in% names(root_app)) root_app$stop())
 
 fail_if_app_not_started <- function() {
@@ -216,7 +216,7 @@ test_that("default values are set", {
 
   app <- start_app_driver(
     rlang::quo(
-      dv.biomarker.general::mock_app_scatterplot(
+      dv.explorer.parameter::mock_app_scatterplot(
         srv_defaults = !!srv_defaults
       )
     )

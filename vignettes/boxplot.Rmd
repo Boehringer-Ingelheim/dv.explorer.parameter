@@ -43,7 +43,7 @@ It supports bookmarking.
 
 # Arguments for the module
 
-`dv.biomarker.general::mod_boxplot()`
+`dv.explorer.parameter::mod_boxplot()`
 module uses several arguments with the following being mandatory and
 the rest optional. As part of app creation, the app
 creator should specify the values for these arguments as applicable.
@@ -67,7 +67,7 @@ creator should specify the values for these arguments as applicable.
     It expects a dataset with an structure similar to https://www.cdisc.org/kb/examples/adam-subject-level-analysis-adsl-dataset-80283806 , one record per subject
     It expects to contain, at least, `subjid_var`
 
-Refer to `dv.biomarker.general::mod_boxplot()` for the complete list of arguments and their description.
+Refer to `dv.explorer.parameter::mod_boxplot()` for the complete list of arguments and their description.
 
 # Input menus
 
@@ -118,7 +118,7 @@ A table containing a set of statistical tests comparing the means of different g
 # Creating a boxplot application
 
 ```{r, eval=FALSE}
-adbm_dataset <- dv.biomarker.general::adbm_example %>%
+adbm_dataset <- dv.explorer.parameter::adbm_example %>%
   dplyr::mutate(
     USUBJID = factor(USUBJID),
     PARCAT1 = factor(PARCAT1),
@@ -126,13 +126,13 @@ adbm_dataset <- dv.biomarker.general::adbm_example %>%
     AVISIT = factor(AVISIT)
   )
 
-adsl_dataset <- dv.biomarker.general::adsl_example %>%
+adsl_dataset <- dv.explorer.parameter::adsl_example %>%
   dplyr::mutate(USUBJID = factor(USUBJID))
 
 dv.manager::run_app(
   data = list(dummy = list(adbm = adbm_dataset, adsl = adsl_dataset)),
   module_list = list(
-    Boxplot = dv.biomarker.general::mod_boxplot(
+    Boxplot = dv.explorer.parameter::mod_boxplot(
       "boxplot",
       bm_dataset_name = "adbm",
       group_dataset_name = "adsl",

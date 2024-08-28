@@ -4,7 +4,7 @@
 poc <- pack_of_constants
 
 # nocov start
-# dv.biomarker.general
+# dv.explorer.parameter
 
 # IDs
 
@@ -1198,7 +1198,7 @@ test_one_cat_per_par <- function(ds, cat_col, par_col) {
 #'
 #' @description
 #'
-#' This functions prepares the basic input for the rest of dv.biomarker.general functions.
+#' This functions prepares the basic input for the rest of dv.explorer.parameter functions.
 #'
 #'
 #' It subsets and joins the datasets based on the predictor/response category/parameter/visit and group selections.
@@ -4214,9 +4214,9 @@ parse_ci <- function(str) {
 
 roc_dependencies <- function() {
   htmltools::htmlDependency(
-    name = "dv.biomarker.general",
+    name = "dv.explorer.parameter",
     version = "1.0",
-    package = "dv.biomarker.general",
+    package = "dv.explorer.parameter",
     src = "assets",
     stylesheet = "css/roc.css",
     all_files = FALSE
@@ -4619,7 +4619,7 @@ mock_roc_mm_app <- function(adbm = test_roc_data()[["adbm"]],
         )
       ),
       module_list = list(
-        "ROC" = dv.biomarker.general::mod_roc(
+        "ROC" = dv.explorer.parameter::mod_roc(
           module_id = "mod_roc",
           pred_dataset_name = "adbm",
           resp_dataset_disp = dv.manager::mm_dispatch("filtered_dataset", "adbin"),
@@ -4641,12 +4641,12 @@ mock_roc_mm_app <- function(adbm = test_roc_data()[["adbm"]],
 mock_roc_app <- function() {
   ui <- function(request) {
     shiny::fluidPage(
-      dv.biomarker.general::roc_UI("roc")
+      dv.explorer.parameter::roc_UI("roc")
     )
   }
 
   server <- function(input, output, session) {
-    dv.biomarker.general::roc_server(
+    dv.explorer.parameter::roc_server(
       id = "roc",
       pred_dataset = shiny::reactive(test_roc_data()[["adbm"]]),
       resp_dataset = shiny::reactive(test_roc_data()[["adbin"]]),
@@ -4684,7 +4684,7 @@ mock_roc_app_file_upload <- function() {
         multiple = FALSE,
         accept = c(".rda")
       ),
-      dv.biomarker.general::roc_UI("roc")
+      dv.explorer.parameter::roc_UI("roc")
     )
   }
 
@@ -4719,7 +4719,7 @@ mock_roc_app_file_upload <- function() {
       proceed(shiny::isolate(proceed() + 1))
     })
 
-    dv.biomarker.general::roc_server(
+    dv.explorer.parameter::roc_server(
       id = "roc",
       dataset_name = shiny::reactive(proceed()),
       pred_dataset = adbm,

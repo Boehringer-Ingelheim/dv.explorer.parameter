@@ -1,7 +1,7 @@
 test_that(
   "Generates proper SVG",
   {
-    type <- dv.biomarker.general:::type
+    type <- dv.explorer.parameter:::type
     output_size <- c(w = 100, h = 200) |> type("size")
     df <- data.frame(
       result = c(1, 2, 3),
@@ -11,7 +11,7 @@ test_that(
     table_row_order <- seq_len(nrow(df)) |> type("sequence_permutation")
     axis_config <- c(x_min = -1, x_max = 1, ref_line_x = 0, tick_count = 5) |> type("axis_config")
 
-    svg <- dv.biomarker.general:::gen_svg(output_size, df, table_row_order, axis_config)
+    svg <- dv.explorer.parameter:::gen_svg(output_size, df, table_row_order, axis_config)
     expect_snapshot(svg)
   }
 )

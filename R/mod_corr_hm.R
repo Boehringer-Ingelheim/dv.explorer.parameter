@@ -693,9 +693,9 @@ corr_hm_server <- function(id,
 
       corr_fun <- NULL
       if (method == CH_ID$CORR_METHOD_PEARSON) {
-        corr_fun <- dv.biomarker.general::pearson_correlation
+        corr_fun <- dv.explorer.parameter::pearson_correlation
       } else {
-        if (method == CH_ID$CORR_METHOD_SPEARMAN) corr_fun <- dv.biomarker.general::spearman_correlation
+        if (method == CH_ID$CORR_METHOD_SPEARMAN) corr_fun <- dv.explorer.parameter::spearman_correlation
       }
       shiny::req(corr_fun)
       corr_fun <- corr_fun

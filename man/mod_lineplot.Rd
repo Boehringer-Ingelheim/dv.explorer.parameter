@@ -141,8 +141,6 @@ the module list or NULL.}
 
 \item{bm_dataset_disp, group_dataset_disp}{\verb{[mm_dispatcher(1)]}
 module manager dispatchers that used as \code{bm_dataset} and \code{group_dataset} to \code{lineplot_server}}
-
-\item{...}{Parameters passed to \link{lineplot_server}}
 }
 \description{
 Display line plots of raw or summary data over time. Summaries include measures of central tendency

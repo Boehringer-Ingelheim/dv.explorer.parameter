@@ -24,7 +24,7 @@ mock_wfphm_mm_app <- function() {
           }),
           cat_var = "PARCAT",
           visit_var = "VISIT",
-          value_var = c("VALUE1", "VALUE2"),
+          value_vars = c("VALUE1", "VALUE2"),
           module_id = "mod_WF"
         )
       ),

@@ -103,6 +103,8 @@ Dataset dispatcher. This parameter is incompatible with its *_dataset_name count
 
 A function that will be applied to the server returned value.
 Only for advanced use. See the example in mod_box_plot_papo}
+
+\item{...}{Same set of parameters as \link{mod_boxplot}}
 }
 \description{
 \code{mod_boxplot} is a Shiny module prepared to display data with boxplot charts with different levels of grouping.

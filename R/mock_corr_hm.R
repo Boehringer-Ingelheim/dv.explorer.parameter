@@ -52,7 +52,7 @@ mock_app_correlation_hm_mm <- function() {
   }
 
   module_list <- list(
-    "correlation heatmap" = dv.biomarker.general::mod_corr_hm(
+    "correlation heatmap" = dv.explorer.parameter::mod_corr_hm(
       module_id = "corr_hm",
       bm_dataset_disp = dv.manager::mm_dispatch("filtered_dataset", "bm"),
       visit_var = "VISIT",
@@ -78,7 +78,7 @@ mock_app_correlation_hm_mm_safetyData <- function() { # nolint
   }
 
   module_list <- list(
-    "correlation heatmap" = dv.biomarker.general::mod_corr_hm(
+    "correlation heatmap" = dv.explorer.parameter::mod_corr_hm(
       module_id = "corr_hm",
       bm_dataset_disp = dv.manager::mm_dispatch("filtered_dataset", "bm"),
       visit_var = "VISIT",

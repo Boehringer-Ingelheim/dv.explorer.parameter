@@ -4,7 +4,7 @@ ebas_sel_css_dep <- function() {
   htmltools::htmlDependency(
     name = "ebas_sel",
     version = "1.0",
-    src = system.file("www/css", package = "dv.biomarker.general", mustWork = TRUE),
+    src = system.file("www/css", package = "dv.explorer.parameter", mustWork = TRUE),
     stylesheet = "ebas_sel.css"
   )
 }
@@ -14,7 +14,7 @@ dvd3h_dep <- function() {
   htmltools::htmlDependency(
     name = "dvd3h",
     version = "1.0",
-    src = system.file("www/dist", package = "dv.biomarker.general", mustWork = TRUE),
+    src = system.file("www/dist", package = "dv.explorer.parameter", mustWork = TRUE),
     script = "dv_d3_helpers.js"
   )
 }
@@ -25,8 +25,20 @@ screenshot_deps <- function() {
     htmltools::htmlDependency(
       name = "wfphm-msg-handlers",
       version = "1.0",
-      src = system.file("www/msg-handlers", package = "dv.biomarker.general", mustWork = TRUE),
+      src = system.file("www/msg-handlers", package = "dv.explorer.parameter", mustWork = TRUE),
       script = "msg-handlers.js"
     )
+  )
+}
+
+#' @keywords intermal
+roc_dependencies <- function() {
+  htmltools::htmlDependency(
+    name = "dv.explorer.parameter",
+    version = "1.0",
+    package = "dv.explorer.parameter",
+    src = "assets",
+    stylesheet = "css/bp.css",
+    all_files = FALSE
   )
 }

@@ -117,7 +117,7 @@ server <- function(input, output, session) {
     # Non reactive input should usually be first checked with shiny::req as there are no internal controls in the
     # module for "strange" values in them
 
-    returned_values <<- dv.biomarker.general:::heatmap_d3_server(
+    returned_values <<- dv.explorer.parameter:::heatmap_d3_server(
       "mod",
       data = solver(r_ipt[["data"]], as_reactive = TRUE),
       x_axis = solver(r_ipt[["x_axis"]], as_reactive = TRUE),
@@ -136,7 +136,7 @@ server <- function(input, output, session) {
     # UIs must be static
 
     shiny::tagList(
-      dv.biomarker.general:::heatmap_d3_UI("mod"),
+      dv.explorer.parameter:::heatmap_d3_UI("mod"),
       shiny::verbatimTextOutput("out")
     )
   })

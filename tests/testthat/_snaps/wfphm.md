@@ -4989,7 +4989,7 @@
           (x - mean(x, na.rm = TRUE))/stats::sd(x, na.rm = TRUE)
       }
       <bytecode: RANDOM VALUE - NO SNAPSHOT>
-      <environment: namespace:dv.biomarker.general>
+      <environment: namespace:dv.explorer.parameter>
       
       $tr_mapper$`Scale by result/Gini's Mean Difference of each parameter`
       function (x) 
@@ -4997,7 +4997,7 @@
           x/Hmisc::GiniMd(x, na.rm = TRUE)
       }
       <bytecode: RANDOM VALUE - NO SNAPSHOT>
-      <environment: namespace:dv.biomarker.general>
+      <environment: namespace:dv.explorer.parameter>
       
       $tr_mapper$`Scale by parameter with truncation`
       function (x, trunc_min = -3, trunc_max = 3) 
@@ -5008,7 +5008,7 @@
           z
       }
       <bytecode: RANDOM VALUE - NO SNAPSHOT>
-      <environment: namespace:dv.biomarker.general>
+      <environment: namespace:dv.explorer.parameter>
       
       $tr_mapper$`Normalize (result-min)/max`
       function (x) 
@@ -5017,7 +5017,7 @@
               na.rm = TRUE))
       }
       <bytecode: RANDOM VALUE - NO SNAPSHOT>
-      <environment: namespace:dv.biomarker.general>
+      <environment: namespace:dv.explorer.parameter>
       
       $tr_mapper$`Percentize (rank of result/maximal rank)`
       function (x) 
@@ -5030,7 +5030,7 @@
           }
       }
       <bytecode: RANDOM VALUE - NO SNAPSHOT>
-      <environment: namespace:dv.biomarker.general>
+      <environment: namespace:dv.explorer.parameter>
       
       
       $margin

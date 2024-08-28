@@ -505,9 +505,9 @@ gen_result_table_fun <- strict(gen_result_table_fun_)
 #' The values returned by the functions are be captured on the output table and are also displayed
 #' as part of the forest plot.
 #'
-#' `numeric_numeric_functions` take two numeric parameters (e.g. `dv.biomarker.general::pearson_correlation`)
+#' `numeric_numeric_functions` take two numeric parameters (e.g. `dv.explorer.parameter::pearson_correlation`)
 #' and `numeric_factor_functions` should accept a numeric first parameter and a categorical (factor) second parameter
-#' (e.g. `dv.biomarker.general::odds_ratio`).
+#' (e.g. `dv.explorer.parameter::odds_ratio`).
 #'
 #' @param subjid_var `[character(1)]`
 #'
