@@ -1,3 +1,8 @@
+# dv.explorer.parameter 0.0.6
+
+* Correlation heatmap:
+    * Provide clear error message when handed records with identical subject IDs, category, parameter and visit values.
+
 # dv.explorer.parameter 0.0.5
 
 * First Github release
