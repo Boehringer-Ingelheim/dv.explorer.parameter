@@ -62,7 +62,7 @@ CH_MSG <- poc( # nolint
     },
     LESS_THAN_2_PARAMETER = "Please select at least 2 parameters",
     TOO_MANY_ROWS = paste(
-      "The dataset provided contains repeat rows with identical subject, category, parameter and",
+      "The dataset provided contains repeated rows with identical subject, category, parameter and",
       "visit values. This module expects those to be unique. Here are the first few duplicates:"
     )
   )
