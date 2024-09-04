@@ -1084,11 +1084,8 @@ lineplot_server <- function(id, # nolint cyclomatic
     # Plot type
     it_relabel_button(
       id = LP_ID$PLOT_BUTTON,
-      label_if_valid = shiny::reactive({
-        res <- centrality()
-        shiny::req(res)
-        res
-      })
+      is_valid = shiny::reactive(test_not_empty(centrality())),
+      label_if_valid = shiny::reactive(centrality())
     )
 
     # Reactivity must be solved inside otherwise the function does not depend on the value

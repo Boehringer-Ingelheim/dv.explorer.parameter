@@ -60,7 +60,11 @@ CH_MSG <- poc( # nolint
     N_SUBJECT_EMPTY_RESPONSES = function(x) {
       paste(x, "subjects with empty responses!")
     },
-    LESS_THAN_2_PARAMETER = "Please select at least 2 parameters"
+    LESS_THAN_2_PARAMETER = "Please select at least 2 parameters",
+    TOO_MANY_ROWS = paste(
+      "The dataset provided contains repeated rows with identical subject, category, parameter and",
+      "visit values. This module expects those to be unique. Here are the first few duplicates:"
+    )
   )
 )
 # UI and server functions
@@ -555,6 +559,21 @@ corr_hm_server <- function(id,
         )
         checkmate::assert_factor(bm_dataset()[[VAR$SBJ]], .var.name = ns("bm_dataset"), add = ac)
         checkmate::reportAssertions(ac)
+
+        supposedly_unique <- bm_dataset()[c(VAR$SBJ, VAR$CAT, VAR$PAR, VAR$VIS)]
+        dups <- duplicated(supposedly_unique)
+        shiny::validate(
+          shiny::need(
+            !any(dups),
+            paste0(
+              c(
+                CH_MSG$VALIDATE$TOO_MANY_ROWS,
+                capture.output(print(head(supposedly_unique[dups, ], 5)))
+              )
+            )
+          )
+        )
+
         bm_dataset()
       },
       label = ns("v_ch_dataset")
