@@ -829,7 +829,7 @@ lineplot_server <- function(id, # nolint cyclomatic
 
       # TODO(miguel): Candidate for shared util? Give visibility to this recurrent problem
       fix_brush_position_under_mm <- function(elem) {
-        shiny::div(style = "height:70vh;position:relative", shiny::div(elem))
+        shiny::div(style = "position:relative", shiny::div(elem))
       }
 
       fix_brush_position_under_mm(plot)
