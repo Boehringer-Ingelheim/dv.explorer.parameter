@@ -1,3 +1,8 @@
+# dv.explorer.parameter 0.0.7
+
+* Lineplot:
+    * Fix overlap of plot and data listings.
+
 # dv.explorer.parameter 0.0.6
 
 * Lineplot:
