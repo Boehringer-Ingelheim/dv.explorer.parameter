@@ -1,0 +1,51 @@
+---
+name: Test and QC 🧪
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - ready_for_review
+    branches:
+      - main
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: test-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  TEMPLATE_REF: main
+  TEMPLATE_REPO: boehringer-ingelheim/dv.templates
+
+jobs:
+  test:
+    name: ${{ vars.CI_IMAGE }}
+    runs-on: ubuntu-latest
+    container:
+      image: ${{ vars.CI_IMAGE }}    
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: Checkout project ⬇️
+        uses: actions/checkout@v4
+
+      - name: Install package dependencies 📄
+        uses: boehringer-ingelheim/dv.templates/.github/actions/dependencies@main     
+
+      - name: Test and QC2 🧪        
+        run: Rscript build.R
+
+      - name: Archive snap results ⬆️
+        if: success() || failure()  
+        uses: actions/upload-artifact@v4
+        with:
+          name: snap_results
+          path: tests/testthat/_snaps
+          
