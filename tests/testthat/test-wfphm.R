@@ -155,9 +155,6 @@ test_that(
       retry <- retry - 1
     }
 
-    file.copy(png_file, file.path(Sys.getenv("GITHUB_WORKSPACE"), "tests/testthat/_snaps/wfphm/test.png"), recursive = TRUE)
-    file.copy(svg_file, file.path(Sys.getenv("GITHUB_WORKSPACE"), "tests/testthat/_snaps/wfphm/test.svg"), recursive = TRUE)
-
     expect_true(file_found)    
     expect_snapshot_file(path = png_file)
     expect_snapshot_file(path = svg_file)
