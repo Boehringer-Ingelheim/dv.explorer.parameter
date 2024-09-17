@@ -145,13 +145,22 @@ test_that(
     app$click(C$SAVE_SVG)
     app$wait_for_idle()
 
-    expect_snapshot_file(
-      path = file.path(down_dir, "filename.png")
-    )
+    png_file <- file.path(down_dir, sprintf("%s.png", filename))
+    svg_file <- file.path(down_dir, sprintf("%s.svg", filename))
 
-    expect_snapshot_file(
-      path = file.path(down_dir, "filename.svg")
-    )
+    retry <- 10
+    file_found <- FALSE
+    while(!file_found && retry>0){
+      file_found <- file.exists(png_file)
+      retry <- retry - 1
+    }
+
+    file.copy(png_file, "tests/testthat/_snaps/wfphm/test.png")
+    file.copy(svg_file, "tests/testthat/_snaps/wfphm/test.svg")
+
+    expect_true(file_found)    
+    expect_snapshot_file(path = png_file)
+    expect_snapshot_file(path = svg_file)
   }
 )
 
