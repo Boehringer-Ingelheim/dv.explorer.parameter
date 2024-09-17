@@ -1,3 +1,8 @@
+# dv.explorer.parameter 0.0.8
+
+* WFPHM:
+    * Fixes the error in conditional panels that prevented conditional panels in other modules to work properly.
+
 # dv.explorer.parameter 0.0.7
 
 * Lineplot:

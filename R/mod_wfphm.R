@@ -1861,8 +1861,6 @@ wfphm_hmpar_subset <- function(
     subj_col = subjid_var
   )
 
-  checkmate::assert_set_equal(levels(df[[CNT$SBJ]]), sorted_x) # Ignore
-
   shiny::validate(
     need_one_row_per_sbj(df, CNT$SBJ, CNT$PAR, msg = WFPHM_MSG$HMPAR$VALIDATE$TOO_MANY_ROWS)
   )
@@ -2040,11 +2038,16 @@ wfphm_UI <- function(id, tr_choices = names(tr_mapper_def())) { # nolint
       shiny::div(
         id = ns(WFPHM_ID$WFPHM$CHART_CONTAINER),
         wf_ui[["chart"]],
-        shiny::conditionalPanel(condition = "input['hmcat-cat-col-gen'].length>0", hmcat_ui[["chart"]], ns = ns),
-        shiny::conditionalPanel(condition = "input['hmcont-cont-col-gen'].length>0", hmcont_ui[["chart"]], ns = ns),
-        shiny::conditionalPanel(condition = " input['hmpar-par-par-val-gen'].length>0 && input['hmpar-value-col-gen'].length>0 && input['hmpar-visit-val-gen'].length>0 && input['hmpar-transform-gen'].length>0", hmpar_ui[["chart"]], ns = ns), # nolint
+        shiny::conditionalPanel(condition = "input['hmcat-cat-val']!== undefined && Object.hasOwn(input['hmcat-cat-val'], \"length\") ? input['hmcat-cat-val'].length>0 : false", hmcat_ui[["chart"]], ns = ns),
+        shiny::conditionalPanel(condition = "input['hmcont-cont-val']!== undefined &&Object.hasOwn(input['hmcont-cont-val'], \"length\") ? input['hmcont-cont-val'].length>0 : false", hmcont_ui[["chart"]], ns = ns),
+        shiny::conditionalPanel(condition = "
+          (input['hmpar-par-par_val']!== undefined && Object.hasOwn(input['hmpar-par-par_val'], \"length\") ? input['hmpar-par-par_val'].length>0 : false) &&
+          (input['hmpar-value-val']!== undefined && Object.hasOwn(input['hmpar-value-val'], \"length\") ? input['hmpar-value-val'].length>0 : false) &&
+          (input['hmpar-visit-val']!== undefined && Object.hasOwn(input['hmpar-visit-val'], \"length\") ? input['hmpar-visit-val'].length>0 : false) &&
+          (input['hmpar-transform']!== undefined && Object.hasOwn(input['hmpar-transform'], \"length\") ? input['hmpar-transform'].length>0 : false)
+          ", hmpar_ui[["chart"]], ns = ns), # nolint
         shiny::conditionalPanel(
-          condition = "input['hmcat-cat-col-gen'].length>0",
+          condition = "input['hmcat-cat-val']!== undefined && Object.hasOwn(input['hmcat-cat-val'], \"length\") ? input['hmcat-cat-val'].length>0 : false",
           shiny::div(
             shiny::h5("Categorical legend"),
             hmcat_ui[["legend"]]
