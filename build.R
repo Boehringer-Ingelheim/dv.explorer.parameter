@@ -27,16 +27,12 @@ message("##########################")
 message("###### TESTING  (S) ######")
 message("##########################")
 
-
-
-
-
 test_results <- tibble::as_tibble(
   withr::with_envvar(
     new = list(CI = TRUE, no_proxy = "127.0.0.1", NOT_CRAN = TRUE, TESTTHAT_CPUS = 1),
     code = {
         testthat::set_max_fails(Inf)
-      devtools::test()
+        testthat::test_package(pkg_name)
     }
   )
 )
