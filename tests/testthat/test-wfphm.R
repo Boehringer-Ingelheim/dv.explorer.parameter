@@ -150,12 +150,12 @@ test_that(
 
     retry <- 10
     file_found <- FALSE
-    while(!file_found && retry>0){
+    while (!file_found && retry > 0) {
       file_found <- file.exists(png_file)
       retry <- retry - 1
     }
 
-    expect_true(file_found)    
+    expect_true(file_found)
     expect_snapshot_file(path = png_file)
     expect_snapshot_file(path = svg_file)
   }
