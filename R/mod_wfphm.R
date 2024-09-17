@@ -2038,6 +2038,7 @@ wfphm_UI <- function(id, tr_choices = names(tr_mapper_def())) { # nolint
       shiny::div(
         id = ns(WFPHM_ID$WFPHM$CHART_CONTAINER),
         wf_ui[["chart"]],
+         # nolint start
         shiny::conditionalPanel(condition = "input['hmcat-cat-val']!== undefined && Object.hasOwn(input['hmcat-cat-val'], \"length\") ? input['hmcat-cat-val'].length>0 : false", hmcat_ui[["chart"]], ns = ns),
         shiny::conditionalPanel(condition = "input['hmcont-cont-val']!== undefined &&Object.hasOwn(input['hmcont-cont-val'], \"length\") ? input['hmcont-cont-val'].length>0 : false", hmcont_ui[["chart"]], ns = ns),
         shiny::conditionalPanel(condition = "
@@ -2054,6 +2055,7 @@ wfphm_UI <- function(id, tr_choices = names(tr_mapper_def())) { # nolint
           ),
           ns = ns
         )
+        # nolint end
       )
     ),
     style = "position:relative"
