@@ -42,7 +42,8 @@ jobs:
       - name: Test and QC2 🧪        
         run: Rscript build.R
 
-      - name: Archive snap results ⬆️        
+      - name: Archive snap results ⬆️
+        if: success() || failure()  
         uses: actions/upload-artifact@v4
         with:
           name: snap_results
