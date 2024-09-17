@@ -1022,10 +1022,7 @@ wfphm_hmcat_server <- function(id,
     )
 
     v_sorted_x <- shiny::reactive(
-      {
-        checkmate::assert_subset(sorted_x(), as.character(levels(v_dataset()[[subjid_var]])),
-          .var.name = paste_ctxt(sorted_x)
-        )
+      {        
         sorted_x()
       },
       label = ns(" v_sorted_x")
@@ -1334,10 +1331,7 @@ wfphm_hmcont_server <- function(id,
     )
 
     v_sorted_x <- shiny::reactive(
-      {
-        checkmate::assert_subset(sorted_x(), as.character(levels(v_dataset()[[subjid_var]])),
-          .var.name = paste_ctxt(sorted_x)
-        )
+      {        
         sorted_x()
       },
       label = ns(" v_sorted_x")
@@ -1757,10 +1751,7 @@ wfphm_hmpar_server <- function(id,
     )
 
     v_sorted_x <- shiny::reactive(
-      {
-        checkmate::assert_subset(sorted_x(), as.character(levels(v_dataset()[[subjid_var]])),
-          .var.name = paste_ctxt(sorted_x)
-        )
+      {        
         sorted_x()
       },
       label = ns(" v_sorted_x")
@@ -1881,6 +1872,9 @@ wfphm_hmpar_subset <- function(
 
   df[["y"]] <- droplevels(df[["y"]])
   df[["y"]] <- factor(df[["y"]], levels = par_selection)
+
+  # Not all values in sorted_x are present in the df subjid_var
+  # There maybe subjects with no measures at all
 
   df[["x"]] <- factor(df[["x"]], levels = sorted_x)
 
