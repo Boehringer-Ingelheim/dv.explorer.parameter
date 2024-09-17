@@ -155,8 +155,8 @@ test_that(
       retry <- retry - 1
     }
 
-    file.copy(png_file, "tests/testthat/_snaps/wfphm/test.png")
-    file.copy(svg_file, "tests/testthat/_snaps/wfphm/test.svg")
+    file.copy(png_file, "_snaps/wfphm/test.png")
+    file.copy(svg_file, "_snaps/wfphm/test.svg")
 
     expect_true(file_found)    
     expect_snapshot_file(path = png_file)
