@@ -119,8 +119,6 @@ get_rect_center <- function(n, app) {
   return(c(x, y))
 }
 
-browser()
-
 test_that(
   paste(component, "should show a heatmap with all the components when correct input is passed (continuous Z) (snapshot)"),
   {
