@@ -1023,9 +1023,6 @@ wfphm_hmcat_server <- function(id,
 
     v_sorted_x <- shiny::reactive(
       {
-        checkmate::assert_subset(sorted_x(), as.character(levels(v_dataset()[[subjid_var]])),
-          .var.name = paste_ctxt(sorted_x)
-        )
         sorted_x()
       },
       label = ns(" v_sorted_x")
@@ -1335,9 +1332,6 @@ wfphm_hmcont_server <- function(id,
 
     v_sorted_x <- shiny::reactive(
       {
-        checkmate::assert_subset(sorted_x(), as.character(levels(v_dataset()[[subjid_var]])),
-          .var.name = paste_ctxt(sorted_x)
-        )
         sorted_x()
       },
       label = ns(" v_sorted_x")
@@ -1758,9 +1752,6 @@ wfphm_hmpar_server <- function(id,
 
     v_sorted_x <- shiny::reactive(
       {
-        checkmate::assert_subset(sorted_x(), as.character(levels(v_dataset()[[subjid_var]])),
-          .var.name = paste_ctxt(sorted_x)
-        )
         sorted_x()
       },
       label = ns(" v_sorted_x")
@@ -1870,8 +1861,6 @@ wfphm_hmpar_subset <- function(
     subj_col = subjid_var
   )
 
-  checkmate::assert_set_equal(levels(df[[CNT$SBJ]]), sorted_x) # Ignore
-
   shiny::validate(
     need_one_row_per_sbj(df, CNT$SBJ, CNT$PAR, msg = WFPHM_MSG$HMPAR$VALIDATE$TOO_MANY_ROWS)
   )
@@ -1881,6 +1870,9 @@ wfphm_hmpar_subset <- function(
 
   df[["y"]] <- droplevels(df[["y"]])
   df[["y"]] <- factor(df[["y"]], levels = par_selection)
+
+  # Not all values in sorted_x are present in the df subjid_var
+  # There maybe subjects with no measures at all
 
   df[["x"]] <- factor(df[["x"]], levels = sorted_x)
 
@@ -2046,17 +2038,24 @@ wfphm_UI <- function(id, tr_choices = names(tr_mapper_def())) { # nolint
       shiny::div(
         id = ns(WFPHM_ID$WFPHM$CHART_CONTAINER),
         wf_ui[["chart"]],
-        shiny::conditionalPanel(condition = "input['hmcat-cat-col-gen'].length>0", hmcat_ui[["chart"]], ns = ns),
-        shiny::conditionalPanel(condition = "input['hmcont-cont-col-gen'].length>0", hmcont_ui[["chart"]], ns = ns),
-        shiny::conditionalPanel(condition = " input['hmpar-par-par-val-gen'].length>0 && input['hmpar-value-col-gen'].length>0 && input['hmpar-visit-val-gen'].length>0 && input['hmpar-transform-gen'].length>0", hmpar_ui[["chart"]], ns = ns), # nolint
+        # nolint start
+        shiny::conditionalPanel(condition = "input['hmcat-cat-val']!== undefined && Object.hasOwn(input['hmcat-cat-val'], \"length\") ? input['hmcat-cat-val'].length>0 : false", hmcat_ui[["chart"]], ns = ns),
+        shiny::conditionalPanel(condition = "input['hmcont-cont-val']!== undefined &&Object.hasOwn(input['hmcont-cont-val'], \"length\") ? input['hmcont-cont-val'].length>0 : false", hmcont_ui[["chart"]], ns = ns),
+        shiny::conditionalPanel(condition = "
+          (input['hmpar-par-par_val']!== undefined && Object.hasOwn(input['hmpar-par-par_val'], \"length\") ? input['hmpar-par-par_val'].length>0 : false) &&
+          (input['hmpar-value-val']!== undefined && Object.hasOwn(input['hmpar-value-val'], \"length\") ? input['hmpar-value-val'].length>0 : false) &&
+          (input['hmpar-visit-val']!== undefined && Object.hasOwn(input['hmpar-visit-val'], \"length\") ? input['hmpar-visit-val'].length>0 : false) &&
+          (input['hmpar-transform']!== undefined && Object.hasOwn(input['hmpar-transform'], \"length\") ? input['hmpar-transform'].length>0 : false)
+          ", hmpar_ui[["chart"]], ns = ns), # nolint
         shiny::conditionalPanel(
-          condition = "input['hmcat-cat-col-gen'].length>0",
+          condition = "input['hmcat-cat-val']!== undefined && Object.hasOwn(input['hmcat-cat-val'], \"length\") ? input['hmcat-cat-val'].length>0 : false",
           shiny::div(
             shiny::h5("Categorical legend"),
             hmcat_ui[["legend"]]
           ),
           ns = ns
         )
+        # nolint end
       )
     ),
     style = "position:relative"
