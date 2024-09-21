@@ -343,13 +343,13 @@ lineplot_chart <- function(data, title = NULL, ref_line_data = NULL, log_project
     scales = "free_y"
   )
 
-  # Optional log projection  
+  # Optional log projection
   if (isTRUE(log_projection)) {
-    # we use the deprecated `trans` argument instead of `transform` 
+    # we use the deprecated `trans` argument instead of `transform`
     # because the latter is only supported in ggplot2 >= 3.5.0
     fig <- fig + ggplot2::scale_y_continuous(trans = lp_pseudo_log_projection(base = 10))
   }
-  
+
   fig
 }
 
@@ -930,9 +930,9 @@ lineplot_server <- function(id,
     shiny::observe({
       click <- input[[LP_ID$CHART_CLICK]]
       brush <- input[[LP_ID$CHART_BRUSH]]
-      
+
       should_log_project <- identical(shiny::isolate(input[[LP_ID$TWEAK_Y_AXIS_PROJECTION]]), "Logarithmic")
-      
+
       # order matters because brush implies click
       points <- data.frame()
       df <- shiny::isolate(plot_data())
@@ -1016,14 +1016,14 @@ lineplot_server <- function(id,
         df[[log_projection_col_name]] <- lp_pseudo_log(df[[y_var]])
         y_var <- log_projection_col_name
       }
-      
+
       if (interaction_type == "click") {
         points <- shiny::nearPoints(df = df, coordinfo = interaction_data, xvar = xvar, yvar = y_var)
       } else {
         stopifnot(interaction_type == "brush")
         points <- shiny::brushedPoints(df = df, brush = interaction_data, xvar = xvar, yvar = y_var)
       }
-      
+
       if (should_log_project) {
         points <- drop_columns_by_name(points, log_projection_col_name)
       }
