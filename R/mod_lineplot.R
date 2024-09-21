@@ -1,5 +1,5 @@
 # LINEPLOT
-LP_ID <- poc( # nolint
+LP_ID <- poc(
   PAR_BUTTON = "par_button",
   GRP_BUTTON = "grp_button",
   VIS_BUTTON = "vis_button",
@@ -29,11 +29,12 @@ LP_ID <- poc( # nolint
     ERROR_BAR_WIDTH = 0.5
   ),
   TWEAK_TRANSPARENCY = "transparency",
+  TWEAK_Y_AXIS_PROJECTION = "y_axis_projection",
   SELECTED_SUBJECT = "selected_subject",
   LINE_HIGHLIGHT_MASK = "line_highlight_mask"
 )
 
-LP_MSG <- poc( # nolint
+LP_MSG <- poc(
   LABEL = poc(
     PAR_BUTTON = "Parameter",
     VIS_BUTTON = "Visit",
@@ -77,7 +78,7 @@ LP_MSG <- poc( # nolint
   )
 )
 
-LP_CNT <- poc( # nolint
+LP_CNT <- poc(
   PLOT_TYPE_SUBJECT_LEVEL = "Subject-level",
   CENTRALITY = "centrality",
   DISPERSION = "dispersion",
@@ -97,7 +98,7 @@ LP_CNT <- poc( # nolint
 #' @describeIn mod_lineplot UI
 # NOTE: id documented in lineplot_server
 #' @export
-lineplot_UI <- function(id) { # nolint
+lineplot_UI <- function(id) {
   # id assert ---- It goes on its own as id is used to provide context to the other assertions
   checkmate::assert_string(id, min.chars = 1)
 
@@ -154,7 +155,41 @@ lp_selected_line_mask <- function(data, selected_points) {
   res
 }
 
-lineplot_chart <- function(data, title = NULL, ref_line_data = NULL, alpha = 1) { # nolint cyclomatic
+# Pseudolog projection. Alternative to log projection that handles non-positive values.
+# (see https://win-vector.com/2012/03/01/modeling-trick-the-signed-pseudo-logarithm/amp/)
+#
+# We could use `scales::pseudo_log_trans(base = 10)`, but its default breaks are bad and won't get fixed:
+#  https://github.com/r-lib/scales/issues/219
+# We could also take the object returned by that function and modify its `breaks` field, but the structure of ggtplot2
+# transform objects is not documented and we can't assume it will remain stable.
+# The ggplot2 manual (`?ggplot2::scale_y_continuous`) says transformations must be created through calls to
+# `scales::trans_new` (ggplot2 >= 3.5.0) or `scales::new_transform` (ggplot2 >= 3.5.0).
+lp_pseudo_log <- function(x, base = 10) asinh(x / 2) / log(base)
+lp_inverse_pseudo_log <- function(x, base = 10) 2 * sinh(x * log(base))
+
+lp_pseudo_log_projection <- function(base = 10) {
+  breaks <- function(x) {
+    res <- NULL
+    if (all(x >= 0)) {
+      res <- scales::log_breaks(base)(x)
+    } else if (all(x <= 0)) {
+      res <- -scales::log_breaks(base)(abs(x))
+    } else {
+      max_limit <- max(c(2, abs(x)))
+      breaks <- scales::log_breaks(base)(c(1, max_limit))
+      res <- unique(c(-breaks, 0, breaks))
+    }
+    return(res)
+  }
+
+  scales::trans_new(
+    name = paste0("pseudolog-", format(base)),
+    transform = lp_pseudo_log, inverse = lp_inverse_pseudo_log,
+    breaks = breaks, domain = c(-Inf, Inf)
+  )
+}
+
+lineplot_chart <- function(data, title = NULL, ref_line_data = NULL, log_projection = FALSE, alpha = 1) {
   trace_grp1 <- CNT$PAR
   if (CNT$MAIN_GROUP %in% names(data)) trace_grp1 <- CNT$MAIN_GROUP
   if (CNT$SBJ %in% names(data)) trace_grp1 <- CNT$SBJ
@@ -302,11 +337,19 @@ lineplot_chart <- function(data, title = NULL, ref_line_data = NULL, alpha = 1) 
 
   fig <- fig + ggplot2::ggtitle(title)
 
-  # facetting
+  # Facetting
   fig <- fig + ggplot2::facet_grid(
     rows = ggplot2::vars(.data[[CNT$PAR]]),
     scales = "free_y"
   )
+
+  # Optional log projection  
+  if (isTRUE(log_projection)) {
+    # we use the deprecated `trans` argument instead of `transform` 
+    # because the latter is only supported in ggplot2 >= 3.5.0
+    fig <- fig + ggplot2::scale_y_continuous(trans = lp_pseudo_log_projection(base = 10))
+  }
+  
   fig
 }
 
@@ -521,7 +564,7 @@ lp_median_summary_functions <- list(
 #'
 #' @export
 #'
-lineplot_server <- function(id, # nolint cyclomatic
+lineplot_server <- function(id,
                             bm_dataset,
                             group_dataset,
                             dataset_name = shiny::reactive(character(0)),
@@ -576,7 +619,7 @@ lineplot_server <- function(id, # nolint cyclomatic
   checkmate::reportAssertions(ac)
 
   # module constants ----
-  VAR <- poc( # nolint Parameters from the function that will be considered constant across the function
+  VAR <- poc( # Parameters from the function that will be considered constant across the function
     CAT = cat_var,
     PAR = par_var,
     VAL = value_vars,
@@ -835,6 +878,14 @@ lineplot_server <- function(id, # nolint cyclomatic
       fix_brush_position_under_mm(plot)
     })
 
+    # Clear brush when switching Y-axis projection
+    shiny::observe({
+      shiny::req(input[[LP_ID$TWEAK_Y_AXIS_PROJECTION]])
+      brush <- shiny::isolate(input[[LP_ID$CHART_BRUSH]])
+      shiny::req(brush)
+      session$resetBrush(brush[["brushId"]])
+    })
+
     compute_group_text <- function(df, main_group, sub_group) {
       groups <- c(main_group, sub_group) |>
         setdiff("None") |>
@@ -859,11 +910,14 @@ lineplot_server <- function(id, # nolint cyclomatic
 
       ds[[LP_ID$LINE_HIGHLIGHT_MASK]] <- lp_selected_line_mask(ds, selected_points)
 
+      should_log_project <- identical(input[[LP_ID$TWEAK_Y_AXIS_PROJECTION]], "Logarithmic")
+
       plot <- shiny::maskReactiveContext(
         lineplot_chart(
           data = ds,
           title = NULL,
           ref_line_data = ref_line_data,
+          log_projection = should_log_project,
           alpha = alpha
         )
       )
@@ -876,13 +930,16 @@ lineplot_server <- function(id, # nolint cyclomatic
     shiny::observe({
       click <- input[[LP_ID$CHART_CLICK]]
       brush <- input[[LP_ID$CHART_BRUSH]]
+      
+      should_log_project <- identical(shiny::isolate(input[[LP_ID$TWEAK_Y_AXIS_PROJECTION]]), "Logarithmic")
+      
       # order matters because brush implies click
       points <- data.frame()
       df <- shiny::isolate(plot_data())
       if (!is.null(brush)) {
-        points <- get_selected_points(df, "brush", brush)
+        points <- get_selected_points(df, "brush", brush, should_log_project)
       } else if (!is.null(click)) {
-        points <- get_selected_points(df, "click", click)
+        points <- get_selected_points(df, "click", click, should_log_project)
       }
 
       visit_col <- input_lp[[LP_ID$PAR_VISIT_COL]]()
@@ -895,7 +952,7 @@ lineplot_server <- function(id, # nolint cyclomatic
       }
     })
 
-    get_selected_points <- function(df, interaction_type, interaction_data) {
+    get_selected_points <- function(df, interaction_type, interaction_data, should_log_project) {
       checkmate::assert_subset(interaction_type, c("click", "brush"))
 
       xvar <- CNT$VIS
@@ -915,7 +972,7 @@ lineplot_server <- function(id, # nolint cyclomatic
         # Here we give nearPoints a hand by adding a "dodged_x" column to the data frame.
 
         interaction_data[["domain"]][["discrete_limits"]] <- NULL # interpret as numeric instead of factor
-        # How to interpret DODGE_WIDTH :
+        # How to interpret DODGE_WIDTH:
         # https://stackoverflow.com/questions/34889766/what-is-the-width-argument-in-position-dodge
 
         df_has_main_group <- CNT$MAIN_GROUP %in% names(df)
@@ -952,11 +1009,23 @@ lineplot_server <- function(id, # nolint cyclomatic
         xvar <- "dodged_x"
       }
 
+      y_var <- CNT$VAL
+      log_projection_col_name <- character(0)
+      if (should_log_project) {
+        log_projection_col_name <- "_pseudolog_projection"
+        df[[log_projection_col_name]] <- lp_pseudo_log(df[[y_var]])
+        y_var <- log_projection_col_name
+      }
+      
       if (interaction_type == "click") {
-        points <- shiny::nearPoints(df = df, coordinfo = interaction_data, xvar = xvar, yvar = CNT$VAL)
+        points <- shiny::nearPoints(df = df, coordinfo = interaction_data, xvar = xvar, yvar = y_var)
       } else {
         stopifnot(interaction_type == "brush")
-        points <- shiny::brushedPoints(df = df, brush = interaction_data, xvar = xvar, yvar = CNT$VAL)
+        points <- shiny::brushedPoints(df = df, brush = interaction_data, xvar = xvar, yvar = y_var)
+      }
+      
+      if (should_log_project) {
+        points <- drop_columns_by_name(points, log_projection_col_name)
       }
 
       points
@@ -1024,6 +1093,13 @@ lineplot_server <- function(id, # nolint cyclomatic
           value = 1,
           step = 0.05,
           ticks = FALSE
+        ),
+        shiny::radioButtons(
+          ns(LP_ID$TWEAK_Y_AXIS_PROJECTION),
+          "Y-axis projection",
+          choices = c("Linear", "Logarithmic"),
+          selected = "Linear",
+          inline = TRUE
         )
       )
 

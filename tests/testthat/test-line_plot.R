@@ -71,7 +71,7 @@ test_that("lp_listings_table subsets a data frame based on the values of a one-r
 
 # count table
 
-test_that("lp_count_table counts the number of rows grouped by everything except CNT$SBJ and CNT$VAL and pivotted on visit", { # nolint
+test_that("lp_count_table counts the number of rows grouped by everything except CNT$SBJ and CNT$VAL and pivotted on visit", {
   df <- data.frame(row.names = seq(5))
   df[[CNT$SBJ]] <- c("sbj_1", "sbj_1", "sbj_2", "sbj_2", "sbj_3")
   df[[CNT$VIS]] <- c("vis_1", "vis_2", "vis_1", "vis_2", "vis_1")
