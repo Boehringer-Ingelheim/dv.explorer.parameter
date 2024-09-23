@@ -1,0 +1,23 @@
+.table>tbody>tr.indent-0 td {            
+    border-color: black;
+}
+
+.table>tbody>tr.no-border th {            
+    border-color: white;
+}
+
+.table>tbody>tr.indent-1 td {            
+    background-color: lightgray;
+}
+
+tr.indent-0 span{
+    font-weight: bold;    
+    font-size: 2rem;    
+}
+tr.indent-1 span {
+    padding-left: 2em;
+}
+
+tr.indent-2 span {
+    padding-left: 4em;
+}

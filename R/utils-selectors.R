@@ -209,6 +209,7 @@ col_menu_server <- function(id,
 
     include_none <- isTRUE(include_none)
 
+    order_selected <- shiny::reactiveVal(list(selected = NULL, trigger = NULL))
     output[["menu_cont"]] <- shiny::renderUI({
       shiny::req(data())
       include <- mapper(data(), include_func)
@@ -238,9 +239,23 @@ col_menu_server <- function(id,
       selected <- default %||% shiny::isolate(input[["val"]])
       default <<- NULL
 
+      trigger <- local({
+        prev_trigger <- shiny::isolate(order_selected()[["trigger"]])
+        trigger <- if(is.null(prev_trigger)) TRUE else !prev_trigger
+      })
+      order_selected(list(selected = selected, trigger = trigger))
+
       shiny::selectizeInput(
         ns("val"),
         label = label, multiple = multiple, choices = choices, selected = selected, options = options
+      )
+    })
+
+    shiny::observeEvent(order_selected(), {  
+      shiny::req(!is.null(order_selected()[["selected"]]))
+      shiny::updateSelectizeInput(
+        inputId = "val",
+        selected = order_selected()[["selected"]]
       )
     })
 
@@ -313,8 +328,13 @@ val_menu_server <- function(id,
           ID = ns("cat_val")
         ))
       }
+
       selected <- default %||% if (!all_on_change || !multiple) shiny::isolate(input[["val"]]) else choices
       default <<- NULL
+
+
+      browser()
+      
       shiny::selectizeInput(
         inputId = ns("val"),
         label = label,
@@ -323,6 +343,8 @@ val_menu_server <- function(id,
         selected = selected
       )
     })
+
+
 
     v_val <- shiny::reactive({
       if (checkmate::test_character(input[["val"]],
