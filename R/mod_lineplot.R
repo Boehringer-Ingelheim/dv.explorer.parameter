@@ -588,7 +588,9 @@ lineplot_server <- function(id,
                             default_visit_var = NULL,
                             default_visit_val = NULL,
                             default_main_group = NULL,
-                            default_sub_group = NULL) {
+                            default_sub_group = NULL,
+                            default_transparency = 1.,
+                            default_y_axis_projection = 'Linear') {
   ac <- checkmate::makeAssertCollection()
   # id assert ---- It goes on its own as id is used to provide context to the other assertions
   checkmate::assert_string(id, min.chars = 1, add = ac)
@@ -1090,7 +1092,7 @@ lineplot_server <- function(id,
           label = LP_MSG$LABEL$TWEAK_TRANSPARENCY,
           min = 0,
           max = 1,
-          value = 1,
+          value = default_transparency,
           step = 0.05,
           ticks = FALSE
         ),
@@ -1098,7 +1100,7 @@ lineplot_server <- function(id,
           ns(LP_ID$TWEAK_Y_AXIS_PROJECTION),
           "Y-axis projection",
           choices = c("Linear", "Logarithmic"),
-          selected = "Linear",
+          selected = default_y_axis_projection,
           inline = TRUE
         )
       )
@@ -1505,6 +1507,8 @@ mod_lineplot <- function(module_id,
                          default_visit_val = NULL,
                          default_main_group = NULL,
                          default_sub_group = NULL,
+                         default_transparency = 1.,
+                         default_y_axis_projection = 'Linear',
                          bm_dataset_disp, group_dataset_disp) {
   if (!missing(bm_dataset_name) && !missing(bm_dataset_disp)) {
     stop("`bm_dataset_name` and `bm_dataset_disp` cannot be used at the same time, use one or the other")
@@ -1553,7 +1557,9 @@ mod_lineplot <- function(module_id,
         default_visit_var = default_visit_var,
         default_visit_val = default_visit_val,
         default_main_group = default_main_group,
-        default_sub_group = default_sub_group
+        default_sub_group = default_sub_group,
+        default_transparency = default_transparency,
+        default_y_axis_projection = default_y_axis_projection
       )
     },
     module_id = module_id
