@@ -530,7 +530,16 @@ lp_median_summary_functions <- list(
 #'
 #' @param summary_functions `[list()]`
 #'
-#' TODO:
+#' Each element of this named list contains a summary function (e.g. a mean) and a collection of dispersion functions
+#' (e.g. standard deviation) defining ranges around the values returned by the summary function.
+#'
+#' The structure of each element is then a named list with the following elements:
+#' - `function`: Function that takes a numeric vector as its sole parameter and produces a scalar number.
+#' - `dispersion`: Named list of pairs functions that return the *top* and *bottom* dispersion ranges. They also take
+#'   a numeric vector as input and return a single numeric scalar
+#' - `y_prefix`: Prefix that will be prepended the Y axis label of the generated plot
+#'
+#' For an example, see `dv.explorer.parameter::lp_mean_summary_functions`.
 #'
 #' @param dataset_name `[shiny::reactive(*)]`
 #'
@@ -568,6 +577,14 @@ lp_median_summary_functions <- list(
 #'
 #' Default values for the selectors
 #'
+#' @param default_y_axis_projection `[character(1)|NULL]`
+#'
+#' Default values for the selectors
+#'
+#' @param default_transparency `[numeric(1)]`
+#'
+#' Default values for the selectors
+#'
 #' @export
 #'
 lineplot_server <- function(id,
@@ -599,22 +616,9 @@ lineplot_server <- function(id,
                             default_transparency = 1.,
                             default_y_axis_projection = "Linear") {
   ac <- checkmate::makeAssertCollection()
-  # id assert ---- It goes on its own as id is used to provide context to the other assertions
-  checkmate::assert_string(id, min.chars = 1, add = ac)
   # non reactive asserts
   checkmate::assert_string(cat_var, min.chars = 1, add = ac)
   checkmate::assert_string(par_var, min.chars = 1, add = ac)
-  checkmate::assert_character(
-    value_vars,
-    min.chars = 1, any.missing = FALSE,
-    all.missing = FALSE, unique = TRUE, min.len = 1, add = ac
-  )
-  checkmate::assert(
-    checkmate::check_character(visit_vars, min.chars = 1, min.len = 1),
-    checkmate::check_character(cdisc_visit_vars, min.chars = 1, min.len = 1),
-    add = ac
-  )
-  checkmate::assert_disjunct(visit_vars, cdisc_visit_vars, fmatch = FALSE, add = ac)
   checkmate::assert_character(additional_listing_vars, min.chars = 1, add = ac)
   checkmate::assert_string(default_centrality_function, min.chars = 1, add = ac, null.ok = TRUE)
   checkmate::assert_string(default_dispersion_function, min.chars = 1, add = ac, null.ok = TRUE)
@@ -628,7 +632,6 @@ lineplot_server <- function(id,
   )
   checkmate::assert_string(default_main_group, min.chars = 1, add = ac, null.ok = TRUE)
   checkmate::assert_string(default_sub_group, min.chars = 1, add = ac, null.ok = TRUE)
-  checkmate::assert_number(default_transparency, lower = 0.05, upper = 1)
   checkmate::assert_choice(default_y_axis_projection, choices = c("Linear", "Logarithmic"))
   checkmate::assert_string(subjid_var, min.chars = 1, add = ac)
 
@@ -681,6 +684,8 @@ lineplot_server <- function(id,
           .var.name = ns("bm_dataset"),
           add = ac
         )
+
+        # TODO: Move to check_lineplot_call
         unique_par_names <- df |>
           dplyr::distinct(dplyr::across(c(VAR$CAT, VAR$PAR))) |>
           dplyr::group_by(dplyr::across(c(VAR$PAR))) |>
@@ -691,16 +696,7 @@ lineplot_server <- function(id,
         unique_par_names <- unique_par_names == 1
         checkmate::assert_true(unique_par_names, .var.name = ns("bm_dataset"), add = ac)
         checkmate::assert_factor(df[[VAR$SBJ]], .var.name = ns("subject column"), add = ac)
-        unique_ref_values <- local({
-          res <- TRUE
-          if (is.data.frame(df) && all(ref_line_vars %in% names(df))) {
-            res <- nrow(unique(df[c(VAR$CAT, VAR$PAR, ref_line_vars)])) ==
-              nrow(unique(df[c(VAR$CAT, VAR$PAR)]))
-          }
-          res
-        })
-        # TODO: descriptive error message
-        checkmate::assert_true(unique_ref_values, .var.name = ns("bm_dataset"), add = ac)
+
         checkmate::reportAssertions(ac)
         df
       },
@@ -769,9 +765,6 @@ lineplot_server <- function(id,
     # input validation ----
     v_input_subset <- shiny::reactive(
       {
-        # Maybe TODO(miguel): this validate(need(...)) prints an "Error:" message on the console
-        #                     when the selection is invalid. It's annoying and it would be nice
-        #                     to get rid of it
         shiny::validate(
           shiny::need(
             param_iv$is_valid() && visit_iv$is_valid() && group_iv$is_valid(),
@@ -1337,13 +1330,19 @@ lineplot_server <- function(id,
       if ((nrow(points) > 0)) {
         df <- data_subset()
 
+        visit_var <- input_lp[[LP_ID$PAR_VISIT_COL]]()
+        time_var_is_cdisc <- (visit_var %in% VAR$VIS_CDISC)
+        if (time_var_is_cdisc) {
+          points[["visit"]] <- CD$to_CDISC_days(points[["visit"]])
+        }
+
         centrality <- centrality()
         shiny::req(centrality)
         if (centrality == LP_CNT$PLOT_TYPE_SUBJECT_LEVEL) {
           # NOTE(miguel): If we decide to generalize this feature to other modules, the natural
           # place for the appending of columns would be lp_subset_data when no grouping is active
           bm_df <- v_bm_dataset()
-          visit_var <- input_lp[[LP_ID$PAR_VISIT_COL]]()
+
           df <- shiny::maskReactiveContext(
             append_extra_vars_to_listing(df, bm_df, visit_var)
           )
@@ -1489,9 +1488,6 @@ lineplot_server <- function(id,
 #'
 #' Dataset names
 #'
-#' @param bm_dataset_disp,group_dataset_disp `[mm_dispatcher(1)]`
-#' module manager dispatchers that used as `bm_dataset` and `group_dataset` to `lineplot_server`
-#'
 #' @param receiver_id `[character(1)]`
 #'
 #' Name of the module receiving the selected subject ID in the single subject listing. The name must be present in
@@ -1530,29 +1526,72 @@ mod_lineplot <- function(module_id,
                          default_main_group = NULL,
                          default_sub_group = NULL,
                          default_transparency = 1.,
-                         default_y_axis_projection = "Linear",
-                         bm_dataset_disp, group_dataset_disp) {
-  if (!missing(bm_dataset_name) && !missing(bm_dataset_disp)) {
-    stop("`bm_dataset_name` and `bm_dataset_disp` cannot be used at the same time, use one or the other")
-  }
+                         default_y_axis_projection = "Linear") {
+  # preserves `missing` behavior through reactives, saves us some typing # TODO(miguel): Check if this works on dv.papo
+  args <- as.list(environment())
+  args <- Filter(f = function(x) !inherits(x, "name"), args)
+  function_call <- as.list(match.call())[1]
+  args <- append(function_call, args)
 
-  if (!missing(group_dataset_name) && !missing(group_dataset_disp)) {
-    stop("`group_dataset_name` and `group_dataset_disp` cannot be used at the same time, use one or the other")
-  }
-
-  if (!missing(bm_dataset_name)) {
-    bm_dataset_disp <- dv.manager::mm_dispatch("filtered_dataset", bm_dataset_name)
-  }
-
-  if (!missing(group_dataset_name)) {
-    group_dataset_disp <- dv.manager::mm_dispatch("filtered_dataset", group_dataset_name)
-  }
+  # NOTE(miguel): These two lines allow the caller to provide lists whenever `mod_patient_profile_server`
+  #               requires atomic arrays
+  args <- T_honor_as_array_flag(mod_lineplot_API, args)
+  list2env(args[setdiff(seq_along(args), 1)], environment()) # overwrite current arguments with modified `args`
 
   mod <- list(
-    ui = function(mod_id) {
-      lineplot_UI(id = mod_id)
+    ui = function(module_id) {
+      app_creator_feedback_ui(module_id) # NOTE: original UI gated by app_creator_feedback_server
     },
     server = function(afmm) {
+      fb <- shiny::reactive({
+        # NOTE: We check the call here and not inside the module server function because:
+        #       - app creators interact with the davinci module and not with the ui-server combo, so
+        #         errors reported with respect to the module signature will make sense to them.
+        #         The module server function might use a different function signature.
+        #       - Here we also have access to the unfiltered dataset, which allows us to ensure call
+        #         correctness independent of filter state or operation.
+        #         Also, as long as the unfiltered dataset does not change (and to date no davinci app
+        #         changes it dynamically) this check only runs once at the beginning of the application
+        #         and has no further impact on performance.
+        #       - "catch errors early"
+
+        # Overwrite first "argument" (the function call, in fact) with the datasets provided to module manager
+        names(args)[[1]] <- "datasets"
+        args[[1]] <- afmm[["unfiltered_dataset"]]()
+
+        do.call(check_lineplot_call, args)
+      })
+
+      fb_warn <- shiny::reactive(fb()[["warnings"]])
+      fb_err <- shiny::reactive(fb()[["errors"]])
+
+      app_creator_feedback_server(
+        id = module_id,
+        warning_messages = fb_warn,
+        error_messages = fb_err,
+        ui = dv.explorer.parameter::lineplot_UI(id = module_id)
+      )
+
+      filtered_mapped_datasets <- shiny::reactive(
+        T_honor_map_to_flag(afmm$filtered_dataset(), mod_lineplot_API, args)
+      )
+
+      bm_dataset <- shiny::reactive({
+        ds <- filtered_mapped_datasets()[[bm_dataset_name]]
+        shiny::validate(
+          shiny::need(!is.null(ds), paste("Could not find dataset", bm_dataset_name))
+        )
+        return(ds)
+      })
+
+      group_dataset <- shiny::reactive({
+        ds <- filtered_mapped_datasets()[[group_dataset_name]]
+        shiny::validate(
+          shiny::need(!is.null(ds), paste("Could not find dataset", group_dataset_name))
+        )
+        return(ds)
+      })
+
       on_sbj_click_fun <- NULL
       if (!is.null(receiver_id)) {
         on_sbj_click_fun <- function() afmm[["utils"]][["switch2"]](receiver_id)
@@ -1560,8 +1599,8 @@ mod_lineplot <- function(module_id,
 
       lineplot_server(
         id = module_id,
-        bm_dataset = dv.manager::mm_resolve_dispatcher(bm_dataset_disp, afmm, flatten = TRUE),
-        group_dataset = dv.manager::mm_resolve_dispatcher(group_dataset_disp, afmm, flatten = TRUE),
+        bm_dataset = bm_dataset,
+        group_dataset = group_dataset,
         on_sbj_click = on_sbj_click_fun,
         summary_functions = summary_functions,
         subjid_var = subjid_var,
