@@ -530,7 +530,16 @@ lp_median_summary_functions <- list(
 #'
 #' @param summary_functions `[list()]`
 #'
-#' TODO:
+#' Each element of this named list contains a summary function (e.g. a mean) and a collection of dispersion functions
+#' (e.g. standard deviation) defining ranges around the values returned by the summary function.
+#'
+#' The structure of each element is then a named list with the following elements:
+#' - `function`: Function that takes a numeric vector as its sole parameter and produces a scalar number.
+#' - `dispersion`: Named list of pairs functions that return the *top* and *bottom* dispersion ranges. They also take
+#'   a numeric vector as input and return a single numeric scalar
+#' - `y_prefix`: Prefix that will be prepended the Y axis label of the generated plot
+#'
+#' For an example, see `dv.explorer.parameter::lp_mean_summary_functions`.
 #'
 #' @param dataset_name `[shiny::reactive(*)]`
 #'
@@ -565,6 +574,14 @@ lp_median_summary_functions <- list(
 #' Default values for the selectors
 #'
 #' @param default_sub_group,default_val,default_centrality_function,default_dispersion_function `[character(1)|NULL]`
+#'
+#' Default values for the selectors
+#'
+#' @param default_y_axis_projection `[character(1)|NULL]`
+#'
+#' Default values for the selectors
+#'
+#' @param default_transparency `[numeric(1)]`
 #'
 #' Default values for the selectors
 #'
@@ -1471,9 +1488,6 @@ lineplot_server <- function(id,
 #'
 #' Dataset names
 #'
-#' @param bm_dataset_disp,group_dataset_disp `[mm_dispatcher(1)]`
-#' module manager dispatchers that used as `bm_dataset` and `group_dataset` to `lineplot_server`
-#'
 #' @param receiver_id `[character(1)]`
 #'
 #' Name of the module receiving the selected subject ID in the single subject listing. The name must be present in
@@ -1521,7 +1535,7 @@ mod_lineplot <- function(module_id,
 
   # NOTE(miguel): These two lines allow the caller to provide lists whenever `mod_patient_profile_server`
   #               requires atomic arrays
-  args <- T_honor_as_array_flag(mod_patient_profile_API, args)
+  args <- T_honor_as_array_flag(mod_lineplot_API, args)
   list2env(args[setdiff(seq_along(args), 1)], environment()) # overwrite current arguments with modified `args`
 
   mod <- list(
