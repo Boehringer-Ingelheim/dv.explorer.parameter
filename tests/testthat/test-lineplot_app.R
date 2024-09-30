@@ -1,11 +1,10 @@
-# nolint start
 # TODO: Refactor according to:
 # https://rstudio.github.io/shinytest2/articles/robust.html#assert-as-little-unnecessary-information
 # TODO: A failure to start the app will delete all snapshots as they are never declared
 
 tns <- tns_factory("not_ebas")
 
-ID <- poc( # nolint
+ID <- poc(
   INPUT = poc(
     CAT = tns(LP_ID$PAR, "cat_val"),
     PAR = tns(LP_ID$PAR, "par_val"),
@@ -282,4 +281,3 @@ test_that("module tolerates the absence of visit-dependent data", {
   app <- start_app_driver(rlang::quo(dv.explorer.parameter::mock_app_lineplot(data = data)))
   testthat::expect_true(!is.null(app)) # `app` is NULL if it crashes on load
 })
-# nolint end

@@ -1,3 +1,11 @@
+# dv.explorer.parameter 0.0.9
+
+* lineplot:
+    * Y axis log projection menu option.
+    * New `cdisc_visit_vars` parameter that accounts for missing Study Day 0 in CDISC datasets.
+    * New `default_transparency_value` parameter.
+    * Remove support for data dispatchers in favor of dataset names.
+
 # dv.explorer.parameter 0.0.8
 
 * WFPHM:

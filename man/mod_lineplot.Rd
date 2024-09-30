@@ -19,6 +19,7 @@ lineplot_server(
   cat_var = "PARCAT",
   par_var = "PARAM",
   visit_vars = c("AVISIT"),
+  cdisc_visit_vars = character(0),
   value_vars = c("AVAL", "PCHG"),
   additional_listing_vars = character(0),
   ref_line_vars = character(0),
@@ -31,7 +32,9 @@ lineplot_server(
   default_visit_var = NULL,
   default_visit_val = NULL,
   default_main_group = NULL,
-  default_sub_group = NULL
+  default_sub_group = NULL,
+  default_transparency = 1,
+  default_y_axis_projection = "Linear"
 )
 
 mod_lineplot(
@@ -45,6 +48,7 @@ mod_lineplot(
   cat_var = "PARCAT",
   par_var = "PARAM",
   visit_vars = c("AVISIT"),
+  cdisc_visit_vars = character(0),
   value_vars = c("AVAL", "PCHG"),
   additional_listing_vars = character(0),
   ref_line_vars = character(0),
@@ -57,8 +61,8 @@ mod_lineplot(
   default_visit_val = NULL,
   default_main_group = NULL,
   default_sub_group = NULL,
-  bm_dataset_disp,
-  group_dataset_disp
+  default_transparency = 1,
+  default_y_axis_projection = "Linear"
 )
 }
 \arguments{
@@ -92,7 +96,18 @@ A reactive that indicates a possible change in the column structure of any of th
 
 \item{summary_functions}{\verb{[list()]}
 
-TODO:}
+Each element of this named list contains a summary function (e.g. a mean) and a collection of dispersion functions
+(e.g. standard deviation) defining ranges around the values returned by the summary function.
+
+The structure of each element is then a named list with the following elements:
+\itemize{
+\item \code{function}: Function that takes a numeric vector as its sole parameter and produces a scalar number.
+\item \code{dispersion}: Named list of pairs functions that return the \emph{top} and \emph{bottom} dispersion ranges. They also take
+a numeric vector as input and return a single numeric scalar
+\item \code{y_prefix}: Prefix that will be prepended the Y axis label of the generated plot
+}
+
+For an example, see \code{dv.explorer.parameter::lp_mean_summary_functions}}
 
 \item{subjid_var}{\verb{[character(1)]}
 
@@ -126,6 +141,14 @@ Default values for the selectors}
 
 Default values for the selectors}
 
+\item{default_transparency}{\verb{[numeric(1)]}
+
+Default values for the selectors}
+
+\item{default_y_axis_projection}{\verb{[character(1)|NULL]}
+
+Default values for the selectors}
+
 \item{module_id}{Shiny ID \verb{[character(1)]}
 
 Module identifier}
@@ -138,9 +161,6 @@ Dataset names}
 
 Name of the module receiving the selected subject ID in the single subject listing. The name must be present in
 the module list or NULL.}
-
-\item{bm_dataset_disp, group_dataset_disp}{\verb{[mm_dispatcher(1)]}
-module manager dispatchers that used as \code{bm_dataset} and \code{group_dataset} to \code{lineplot_server}}
 }
 \description{
 Display line plots of raw or summary data over time. Summaries include measures of central tendency

@@ -154,3 +154,8 @@ to_shiny_bookmark_value <- function(v) {
 from_shiny_bookmark_value <- function(v) {
   list(unsafe = base64enc::base64decode(v) |> memDecompress(type = "gzip") |> unserialize())
 }
+
+drop_columns_by_name <- function(df, col_names) {
+  df[col_names] <- list(NULL)
+  return(df)
+}

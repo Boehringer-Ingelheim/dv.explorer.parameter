@@ -1,5 +1,5 @@
 # LINEPLOT
-LP_ID <- poc( # nolint
+LP_ID <- poc(
   PAR_BUTTON = "par_button",
   GRP_BUTTON = "grp_button",
   VIS_BUTTON = "vis_button",
@@ -29,11 +29,12 @@ LP_ID <- poc( # nolint
     ERROR_BAR_WIDTH = 0.5
   ),
   TWEAK_TRANSPARENCY = "transparency",
+  TWEAK_Y_AXIS_PROJECTION = "y_axis_projection",
   SELECTED_SUBJECT = "selected_subject",
   LINE_HIGHLIGHT_MASK = "line_highlight_mask"
 )
 
-LP_MSG <- poc( # nolint
+LP_MSG <- poc(
   LABEL = poc(
     PAR_BUTTON = "Parameter",
     VIS_BUTTON = "Visit",
@@ -77,7 +78,7 @@ LP_MSG <- poc( # nolint
   )
 )
 
-LP_CNT <- poc( # nolint
+LP_CNT <- poc(
   PLOT_TYPE_SUBJECT_LEVEL = "Subject-level",
   CENTRALITY = "centrality",
   DISPERSION = "dispersion",
@@ -97,7 +98,7 @@ LP_CNT <- poc( # nolint
 #' @describeIn mod_lineplot UI
 # NOTE: id documented in lineplot_server
 #' @export
-lineplot_UI <- function(id) { # nolint
+lineplot_UI <- function(id) {
   # id assert ---- It goes on its own as id is used to provide context to the other assertions
   checkmate::assert_string(id, min.chars = 1)
 
@@ -154,13 +155,53 @@ lp_selected_line_mask <- function(data, selected_points) {
   res
 }
 
-lineplot_chart <- function(data, title = NULL, ref_line_data = NULL, alpha = 1) { # nolint cyclomatic
+# Pseudolog projection. Alternative to log projection that handles non-positive values.
+# (see https://win-vector.com/2012/03/01/modeling-trick-the-signed-pseudo-logarithm/amp/)
+#
+# We could use `scales::pseudo_log_trans(base = 10)`, but its default breaks are bad and won't get fixed:
+#  https://github.com/r-lib/scales/issues/219
+# We could also take the object returned by that function and modify its `breaks` field, but the structure of ggtplot2
+# transform objects is not documented and we can't assume it will remain stable.
+# The ggplot2 manual (`?ggplot2::scale_y_continuous`) says transformations must be created through calls to
+# `scales::trans_new` (ggplot2 >= 3.5.0) or `scales::new_transform` (ggplot2 >= 3.5.0).
+lp_pseudo_log <- function(x, base = 10) asinh(x / 2) / log(base)
+lp_inverse_pseudo_log <- function(x, base = 10) 2 * sinh(x * log(base))
+
+lp_pseudo_log_projection <- function(base = 10) {
+  breaks <- function(x) {
+    res <- NULL
+    if (all(x >= 0)) {
+      res <- scales::log_breaks(base)(x)
+    } else if (all(x <= 0)) {
+      res <- -scales::log_breaks(base)(abs(x))
+    } else {
+      max_limit <- max(c(2, abs(x)))
+      breaks <- scales::log_breaks(base)(c(1, max_limit))
+      res <- unique(c(-breaks, 0, breaks))
+    }
+    return(res)
+  }
+
+  scales::trans_new(
+    name = paste0("pseudolog-", format(base)),
+    transform = lp_pseudo_log, inverse = lp_inverse_pseudo_log,
+    breaks = breaks, domain = c(-Inf, Inf)
+  )
+}
+
+lineplot_chart <- function(data, title = NULL, ref_line_data = NULL, log_project_y_axis = FALSE, time_var_is_cdisc = FALSE,
+                           alpha = 1) {
   trace_grp1 <- CNT$PAR
   if (CNT$MAIN_GROUP %in% names(data)) trace_grp1 <- CNT$MAIN_GROUP
   if (CNT$SBJ %in% names(data)) trace_grp1 <- CNT$SBJ
 
   trace_grp2 <- NULL
   if (CNT$SUB_GROUP %in% names(data)) trace_grp2 <- CNT$SUB_GROUP
+
+  original_numeric_x_labels <- sort(unique(data[[CNT$VIS]]))
+  if (is.numeric(data[[CNT$VIS]]) && isTRUE(time_var_is_cdisc)) {
+    data[[CNT$VIS]] <- CD$from_CDISC_days(data[[CNT$VIS]])
+  }
 
   x_label <- get_lbl_robust(data, CNT$VIS)
   y_label <- get_lbl_robust(data, CNT$VAL)
@@ -250,7 +291,7 @@ lineplot_chart <- function(data, title = NULL, ref_line_data = NULL, alpha = 1) 
     fig <- fig + ggplot2::scale_x_continuous(
       breaks = unique(data[[CNT$VIS]]),
       minor_breaks = NULL,
-      labels = unique(data[[CNT$VIS]])
+      labels = original_numeric_x_labels
     )
   } else {
     fig <- fig + ggplot2::scale_x_discrete(drop = FALSE)
@@ -302,11 +343,19 @@ lineplot_chart <- function(data, title = NULL, ref_line_data = NULL, alpha = 1) 
 
   fig <- fig + ggplot2::ggtitle(title)
 
-  # facetting
+  # Facetting
   fig <- fig + ggplot2::facet_grid(
     rows = ggplot2::vars(.data[[CNT$PAR]]),
     scales = "free_y"
   )
+
+  # Optional log projection
+  if (isTRUE(log_project_y_axis)) {
+    # we use the deprecated `trans` argument instead of `transform`
+    # because the latter is only supported in ggplot2 >= 3.5.0
+    fig <- fig + ggplot2::scale_y_continuous(trans = lp_pseudo_log_projection(base = 10))
+  }
+
   fig
 }
 
@@ -481,7 +530,16 @@ lp_median_summary_functions <- list(
 #'
 #' @param summary_functions `[list()]`
 #'
-#' TODO:
+#' Each element of this named list contains a summary function (e.g. a mean) and a collection of dispersion functions
+#' (e.g. standard deviation) defining ranges around the values returned by the summary function.
+#'
+#' The structure of each element is then a named list with the following elements:
+#' - `function`: Function that takes a numeric vector as its sole parameter and produces a scalar number.
+#' - `dispersion`: Named list of pairs functions that return the *top* and *bottom* dispersion ranges. They also take
+#'   a numeric vector as input and return a single numeric scalar
+#' - `y_prefix`: Prefix that will be prepended the Y axis label of the generated plot
+#'
+#' For an example, see `dv.explorer.parameter::lp_mean_summary_functions`.
 #'
 #' @param dataset_name `[shiny::reactive(*)]`
 #'
@@ -519,9 +577,17 @@ lp_median_summary_functions <- list(
 #'
 #' Default values for the selectors
 #'
+#' @param default_y_axis_projection `[character(1)|NULL]`
+#'
+#' Default values for the selectors
+#'
+#' @param default_transparency `[numeric(1)]`
+#'
+#' Default values for the selectors
+#'
 #' @export
 #'
-lineplot_server <- function(id, # nolint cyclomatic
+lineplot_server <- function(id,
                             bm_dataset,
                             group_dataset,
                             dataset_name = shiny::reactive(character(0)),
@@ -533,6 +599,7 @@ lineplot_server <- function(id, # nolint cyclomatic
                             cat_var = "PARCAT",
                             par_var = "PARAM",
                             visit_vars = c("AVISIT"),
+                            cdisc_visit_vars = character(0),
                             value_vars = c("AVAL", "PCHG"),
                             additional_listing_vars = character(0),
                             ref_line_vars = character(0),
@@ -545,19 +612,13 @@ lineplot_server <- function(id, # nolint cyclomatic
                             default_visit_var = NULL,
                             default_visit_val = NULL,
                             default_main_group = NULL,
-                            default_sub_group = NULL) {
+                            default_sub_group = NULL,
+                            default_transparency = 1.,
+                            default_y_axis_projection = "Linear") {
   ac <- checkmate::makeAssertCollection()
-  # id assert ---- It goes on its own as id is used to provide context to the other assertions
-  checkmate::assert_string(id, min.chars = 1, add = ac)
   # non reactive asserts
   checkmate::assert_string(cat_var, min.chars = 1, add = ac)
   checkmate::assert_string(par_var, min.chars = 1, add = ac)
-  checkmate::assert_character(
-    value_vars,
-    min.chars = 1, any.missing = FALSE,
-    all.missing = FALSE, unique = TRUE, min.len = 1, add = ac
-  )
-  checkmate::assert_character(visit_vars, min.chars = 1, min.len = 1, add = ac)
   checkmate::assert_character(additional_listing_vars, min.chars = 1, add = ac)
   checkmate::assert_string(default_centrality_function, min.chars = 1, add = ac, null.ok = TRUE)
   checkmate::assert_string(default_dispersion_function, min.chars = 1, add = ac, null.ok = TRUE)
@@ -571,19 +632,20 @@ lineplot_server <- function(id, # nolint cyclomatic
   )
   checkmate::assert_string(default_main_group, min.chars = 1, add = ac, null.ok = TRUE)
   checkmate::assert_string(default_sub_group, min.chars = 1, add = ac, null.ok = TRUE)
+  checkmate::assert_choice(default_y_axis_projection, choices = c("Linear", "Logarithmic"))
   checkmate::assert_string(subjid_var, min.chars = 1, add = ac)
 
   checkmate::reportAssertions(ac)
 
   # module constants ----
-  VAR <- poc( # nolint Parameters from the function that will be considered constant across the function
+  VAR <- poc( # Parameters from the function that will be considered constant across the function
     CAT = cat_var,
     PAR = par_var,
     VAL = value_vars,
     VIS = visit_vars,
+    VIS_CDISC = cdisc_visit_vars,
     SBJ = subjid_var
   )
-
 
   module <- function(input, output, session) {
     # sessions ----
@@ -617,11 +679,13 @@ lineplot_server <- function(id, # nolint cyclomatic
           names(df),
           type = "unique",
           must.include = c(
-            VAR$CAT, VAR$PAR, VAR$SBJ, VAR$VIS, VAR$VAL, ref_line_vars
+            VAR$CAT, VAR$PAR, VAR$SBJ, VAR$VIS, VAR$VIS_CDISC, VAR$VAL, ref_line_vars
           ),
           .var.name = ns("bm_dataset"),
           add = ac
         )
+
+        # TODO: Move to check_lineplot_call
         unique_par_names <- df |>
           dplyr::distinct(dplyr::across(c(VAR$CAT, VAR$PAR))) |>
           dplyr::group_by(dplyr::across(c(VAR$PAR))) |>
@@ -632,16 +696,7 @@ lineplot_server <- function(id, # nolint cyclomatic
         unique_par_names <- unique_par_names == 1
         checkmate::assert_true(unique_par_names, .var.name = ns("bm_dataset"), add = ac)
         checkmate::assert_factor(df[[VAR$SBJ]], .var.name = ns("subject column"), add = ac)
-        unique_ref_values <- local({
-          res <- TRUE
-          if (is.data.frame(df) && all(ref_line_vars %in% names(df))) {
-            res <- nrow(unique(df[c(VAR$CAT, VAR$PAR, ref_line_vars)])) ==
-              nrow(unique(df[c(VAR$CAT, VAR$PAR)]))
-          }
-          res
-        })
-        # TODO: descriptive error message
-        checkmate::assert_true(unique_ref_values, .var.name = ns("bm_dataset"), add = ac)
+
         checkmate::reportAssertions(ac)
         df
       },
@@ -674,7 +729,7 @@ lineplot_server <- function(id, # nolint cyclomatic
       data = v_bm_dataset,
       label = LP_MSG$LABEL$PAR_VISIT_COL,
       include_func = function(val, name) {
-        name %in% VAR$VIS
+        name %in% c(VAR$VIS, VAR$VIS_CDISC)
       },
       include_none = FALSE,
       default = default_visit_var
@@ -710,9 +765,6 @@ lineplot_server <- function(id, # nolint cyclomatic
     # input validation ----
     v_input_subset <- shiny::reactive(
       {
-        # Maybe TODO(miguel): this validate(need(...)) prints an "Error:" message on the console
-        #                     when the selection is invalid. It's annoying and it would be nice
-        #                     to get rid of it
         shiny::validate(
           shiny::need(
             param_iv$is_valid() && visit_iv$is_valid() && group_iv$is_valid(),
@@ -835,6 +887,14 @@ lineplot_server <- function(id, # nolint cyclomatic
       fix_brush_position_under_mm(plot)
     })
 
+    # Clear brush when switching Y-axis projection
+    shiny::observe({
+      shiny::req(input[[LP_ID$TWEAK_Y_AXIS_PROJECTION]])
+      brush <- shiny::isolate(input[[LP_ID$CHART_BRUSH]])
+      shiny::req(brush)
+      session$resetBrush(brush[["brushId"]])
+    })
+
     compute_group_text <- function(df, main_group, sub_group) {
       groups <- c(main_group, sub_group) |>
         setdiff("None") |>
@@ -859,11 +919,16 @@ lineplot_server <- function(id, # nolint cyclomatic
 
       ds[[LP_ID$LINE_HIGHLIGHT_MASK]] <- lp_selected_line_mask(ds, selected_points)
 
+      should_log_project <- identical(input[[LP_ID$TWEAK_Y_AXIS_PROJECTION]], "Logarithmic")
+      time_var_is_cdisc <- (input_lp[[LP_ID$PAR_VISIT_COL]]() %in% VAR$VIS_CDISC)
+
       plot <- shiny::maskReactiveContext(
         lineplot_chart(
           data = ds,
           title = NULL,
           ref_line_data = ref_line_data,
+          log_project_y_axis = should_log_project,
+          time_var_is_cdisc = time_var_is_cdisc,
           alpha = alpha
         )
       )
@@ -876,13 +941,17 @@ lineplot_server <- function(id, # nolint cyclomatic
     shiny::observe({
       click <- input[[LP_ID$CHART_CLICK]]
       brush <- input[[LP_ID$CHART_BRUSH]]
+
+      should_log_project <- identical(shiny::isolate(input[[LP_ID$TWEAK_Y_AXIS_PROJECTION]]), "Logarithmic")
+      time_var_is_cdisc <- (shiny::isolate(input_lp[[LP_ID$PAR_VISIT_COL]]()) %in% VAR$VIS_CDISC)
+
       # order matters because brush implies click
       points <- data.frame()
       df <- shiny::isolate(plot_data())
       if (!is.null(brush)) {
-        points <- get_selected_points(df, "brush", brush)
+        points <- get_selected_points(df, "brush", brush, should_log_project, time_var_is_cdisc)
       } else if (!is.null(click)) {
-        points <- get_selected_points(df, "click", click)
+        points <- get_selected_points(df, "click", click, should_log_project, time_var_is_cdisc)
       }
 
       visit_col <- input_lp[[LP_ID$PAR_VISIT_COL]]()
@@ -895,7 +964,7 @@ lineplot_server <- function(id, # nolint cyclomatic
       }
     })
 
-    get_selected_points <- function(df, interaction_type, interaction_data) {
+    get_selected_points <- function(df, interaction_type, interaction_data, should_log_project, time_var_is_cdisc) {
       checkmate::assert_subset(interaction_type, c("click", "brush"))
 
       xvar <- CNT$VIS
@@ -915,7 +984,7 @@ lineplot_server <- function(id, # nolint cyclomatic
         # Here we give nearPoints a hand by adding a "dodged_x" column to the data frame.
 
         interaction_data[["domain"]][["discrete_limits"]] <- NULL # interpret as numeric instead of factor
-        # How to interpret DODGE_WIDTH :
+        # How to interpret DODGE_WIDTH:
         # https://stackoverflow.com/questions/34889766/what-is-the-width-argument-in-position-dodge
 
         df_has_main_group <- CNT$MAIN_GROUP %in% names(df)
@@ -952,11 +1021,27 @@ lineplot_server <- function(id, # nolint cyclomatic
         xvar <- "dodged_x"
       }
 
+      y_var <- CNT$VAL
+      log_projection_col_name <- character(0)
+      if (should_log_project) {
+        log_projection_col_name <- "_pseudolog_projection"
+        df[[log_projection_col_name]] <- lp_pseudo_log(df[[y_var]])
+        y_var <- log_projection_col_name
+      }
+
+      if (time_var_is_cdisc) {
+        df[[CNT$VIS]] <- CD$from_CDISC_days(df[[CNT$VIS]])
+      }
+
       if (interaction_type == "click") {
-        points <- shiny::nearPoints(df = df, coordinfo = interaction_data, xvar = xvar, yvar = CNT$VAL)
+        points <- shiny::nearPoints(df = df, coordinfo = interaction_data, xvar = xvar, yvar = y_var)
       } else {
         stopifnot(interaction_type == "brush")
-        points <- shiny::brushedPoints(df = df, brush = interaction_data, xvar = xvar, yvar = CNT$VAL)
+        points <- shiny::brushedPoints(df = df, brush = interaction_data, xvar = xvar, yvar = y_var)
+      }
+
+      if (should_log_project) {
+        points <- drop_columns_by_name(points, log_projection_col_name)
       }
 
       points
@@ -1019,11 +1104,18 @@ lineplot_server <- function(id, # nolint cyclomatic
         shiny::sliderInput(
           inputId = ns(LP_ID$TWEAK_TRANSPARENCY),
           label = LP_MSG$LABEL$TWEAK_TRANSPARENCY,
-          min = 0,
+          min = 0.05,
           max = 1,
-          value = 1,
+          value = default_transparency,
           step = 0.05,
           ticks = FALSE
+        ),
+        shiny::radioButtons(
+          ns(LP_ID$TWEAK_Y_AXIS_PROJECTION),
+          "Y-axis projection",
+          choices = c("Linear", "Logarithmic"),
+          selected = default_y_axis_projection,
+          inline = TRUE
         )
       )
 
@@ -1238,13 +1330,19 @@ lineplot_server <- function(id, # nolint cyclomatic
       if ((nrow(points) > 0)) {
         df <- data_subset()
 
+        visit_var <- input_lp[[LP_ID$PAR_VISIT_COL]]()
+        time_var_is_cdisc <- (visit_var %in% VAR$VIS_CDISC)
+        if (time_var_is_cdisc) {
+          points[["visit"]] <- CD$to_CDISC_days(points[["visit"]])
+        }
+
         centrality <- centrality()
         shiny::req(centrality)
         if (centrality == LP_CNT$PLOT_TYPE_SUBJECT_LEVEL) {
           # NOTE(miguel): If we decide to generalize this feature to other modules, the natural
           # place for the appending of columns would be lp_subset_data when no grouping is active
           bm_df <- v_bm_dataset()
-          visit_var <- input_lp[[LP_ID$PAR_VISIT_COL]]()
+
           df <- shiny::maskReactiveContext(
             append_extra_vars_to_listing(df, bm_df, visit_var)
           )
@@ -1390,9 +1488,6 @@ lineplot_server <- function(id, # nolint cyclomatic
 #'
 #' Dataset names
 #'
-#' @param bm_dataset_disp,group_dataset_disp `[mm_dispatcher(1)]`
-#' module manager dispatchers that used as `bm_dataset` and `group_dataset` to `lineplot_server`
-#'
 #' @param receiver_id `[character(1)]`
 #'
 #' Name of the module receiving the selected subject ID in the single subject listing. The name must be present in
@@ -1417,6 +1512,7 @@ mod_lineplot <- function(module_id,
                          cat_var = "PARCAT",
                          par_var = "PARAM",
                          visit_vars = c("AVISIT"),
+                         cdisc_visit_vars = character(0),
                          value_vars = c("AVAL", "PCHG"),
                          additional_listing_vars = character(0),
                          ref_line_vars = character(0),
@@ -1429,28 +1525,73 @@ mod_lineplot <- function(module_id,
                          default_visit_val = NULL,
                          default_main_group = NULL,
                          default_sub_group = NULL,
-                         bm_dataset_disp, group_dataset_disp) {
-  if (!missing(bm_dataset_name) && !missing(bm_dataset_disp)) {
-    stop("`bm_dataset_name` and `bm_dataset_disp` cannot be used at the same time, use one or the other")
-  }
+                         default_transparency = 1.,
+                         default_y_axis_projection = "Linear") {
+  # preserves `missing` behavior through reactives, saves us some typing # TODO(miguel): Check if this works on dv.papo
+  args <- as.list(environment())
+  args <- Filter(f = function(x) !inherits(x, "name"), args)
+  function_call <- as.list(match.call())[1]
+  args <- append(function_call, args)
 
-  if (!missing(group_dataset_name) && !missing(group_dataset_disp)) {
-    stop("`group_dataset_name` and `group_dataset_disp` cannot be used at the same time, use one or the other")
-  }
-
-  if (!missing(bm_dataset_name)) {
-    bm_dataset_disp <- dv.manager::mm_dispatch("filtered_dataset", bm_dataset_name)
-  }
-
-  if (!missing(group_dataset_name)) {
-    group_dataset_disp <- dv.manager::mm_dispatch("filtered_dataset", group_dataset_name)
-  }
+  # NOTE(miguel): These two lines allow the caller to provide lists whenever `mod_patient_profile_server`
+  #               requires atomic arrays
+  args <- T_honor_as_array_flag(mod_lineplot_API, args)
+  list2env(args[setdiff(seq_along(args), 1)], environment()) # overwrite current arguments with modified `args`
 
   mod <- list(
-    ui = function(mod_id) {
-      lineplot_UI(id = mod_id)
+    ui = function(module_id) {
+      app_creator_feedback_ui(module_id) # NOTE: original UI gated by app_creator_feedback_server
     },
     server = function(afmm) {
+      fb <- shiny::reactive({
+        # NOTE: We check the call here and not inside the module server function because:
+        #       - app creators interact with the davinci module and not with the ui-server combo, so
+        #         errors reported with respect to the module signature will make sense to them.
+        #         The module server function might use a different function signature.
+        #       - Here we also have access to the unfiltered dataset, which allows us to ensure call
+        #         correctness independent of filter state or operation.
+        #         Also, as long as the unfiltered dataset does not change (and to date no davinci app
+        #         changes it dynamically) this check only runs once at the beginning of the application
+        #         and has no further impact on performance.
+        #       - "catch errors early"
+
+        # Overwrite first "argument" (the function call, in fact) with the datasets provided to module manager
+        names(args)[[1]] <- "datasets"
+        args[[1]] <- afmm[["unfiltered_dataset"]]()
+
+        do.call(check_lineplot_call, args)
+      })
+
+      fb_warn <- shiny::reactive(fb()[["warnings"]])
+      fb_err <- shiny::reactive(fb()[["errors"]])
+
+      app_creator_feedback_server(
+        id = module_id,
+        warning_messages = fb_warn,
+        error_messages = fb_err,
+        ui = dv.explorer.parameter::lineplot_UI(id = module_id)
+      )
+
+      filtered_mapped_datasets <- shiny::reactive(
+        T_honor_map_to_flag(afmm$filtered_dataset(), mod_lineplot_API, args)
+      )
+
+      bm_dataset <- shiny::reactive({
+        ds <- filtered_mapped_datasets()[[bm_dataset_name]]
+        shiny::validate(
+          shiny::need(!is.null(ds), paste("Could not find dataset", bm_dataset_name))
+        )
+        return(ds)
+      })
+
+      group_dataset <- shiny::reactive({
+        ds <- filtered_mapped_datasets()[[group_dataset_name]]
+        shiny::validate(
+          shiny::need(!is.null(ds), paste("Could not find dataset", group_dataset_name))
+        )
+        return(ds)
+      })
+
       on_sbj_click_fun <- NULL
       if (!is.null(receiver_id)) {
         on_sbj_click_fun <- function() afmm[["utils"]][["switch2"]](receiver_id)
@@ -1458,14 +1599,15 @@ mod_lineplot <- function(module_id,
 
       lineplot_server(
         id = module_id,
-        bm_dataset = dv.manager::mm_resolve_dispatcher(bm_dataset_disp, afmm, flatten = TRUE),
-        group_dataset = dv.manager::mm_resolve_dispatcher(group_dataset_disp, afmm, flatten = TRUE),
+        bm_dataset = bm_dataset,
+        group_dataset = group_dataset,
         on_sbj_click = on_sbj_click_fun,
         summary_functions = summary_functions,
         subjid_var = subjid_var,
         cat_var = cat_var,
         par_var = par_var,
         visit_vars = visit_vars,
+        cdisc_visit_vars = cdisc_visit_vars,
         value_vars = value_vars,
         additional_listing_vars = additional_listing_vars,
         ref_line_vars = ref_line_vars,
@@ -1477,7 +1619,9 @@ mod_lineplot <- function(module_id,
         default_visit_var = default_visit_var,
         default_visit_val = default_visit_val,
         default_main_group = default_main_group,
-        default_sub_group = default_sub_group
+        default_sub_group = default_sub_group,
+        default_transparency = default_transparency,
+        default_y_axis_projection = default_y_axis_projection
       )
     },
     module_id = module_id
