@@ -134,8 +134,8 @@ mock_app_lineplot_mm <- function() {
   module_list <- list(
     "lineplot" = dv.explorer.parameter::mod_lineplot(
       module_id = "lineplot",
-      bm_dataset_disp = dv.manager::mm_dispatch("filtered_dataset", "bm"),
-      group_dataset_disp = dv.manager::mm_dispatch("filtered_dataset", "sl"),
+      bm_dataset_name = "bm",
+      group_dataset_name = "sl",
       visit_var = "VISIT",
       value_var = c("VALUE1", "VALUE2"),
       subjid_var = "SUBJID",
@@ -162,8 +162,8 @@ mock_app_lineplot_mm_safetyData <- function() { # nolint
   module_list <- list(
     "lineplot" = dv.explorer.parameter::mod_lineplot(
       module_id = "lineplot",
-      bm_dataset_disp = dv.manager::mm_dispatch("filtered_dataset", "bm"),
-      group_dataset_disp = dv.manager::mm_dispatch("filtered_dataset", "sl"),
+      bm_dataset_name = "bm",
+      group_dataset_name = "sl",
       visit_vars = c("VISIT", "AVISITN"),
       value_var = c("AVAL", "CHG"),
       subjid_var = "SUBJID",

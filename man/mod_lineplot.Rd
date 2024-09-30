@@ -19,6 +19,7 @@ lineplot_server(
   cat_var = "PARCAT",
   par_var = "PARAM",
   visit_vars = c("AVISIT"),
+  cdisc_visit_vars = character(0),
   value_vars = c("AVAL", "PCHG"),
   additional_listing_vars = character(0),
   ref_line_vars = character(0),
@@ -31,7 +32,9 @@ lineplot_server(
   default_visit_var = NULL,
   default_visit_val = NULL,
   default_main_group = NULL,
-  default_sub_group = NULL
+  default_sub_group = NULL,
+  default_transparency = 1,
+  default_y_axis_projection = "Linear"
 )
 
 mod_lineplot(
@@ -45,6 +48,7 @@ mod_lineplot(
   cat_var = "PARCAT",
   par_var = "PARAM",
   visit_vars = c("AVISIT"),
+  cdisc_visit_vars = character(0),
   value_vars = c("AVAL", "PCHG"),
   additional_listing_vars = character(0),
   ref_line_vars = character(0),
@@ -57,8 +61,8 @@ mod_lineplot(
   default_visit_val = NULL,
   default_main_group = NULL,
   default_sub_group = NULL,
-  bm_dataset_disp,
-  group_dataset_disp
+  default_transparency = 1,
+  default_y_axis_projection = "Linear"
 )
 }
 \arguments{

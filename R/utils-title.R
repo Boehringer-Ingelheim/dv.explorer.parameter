@@ -81,7 +81,7 @@ it_error_highlight <- function(s) paste0('<span style="color:#a94442;font-style:
 it_relabel_button <- function(id,
                               is_valid = shiny::reactive(TRUE),
                               label_if_valid,
-                              label_if_not_valid = shiny::reactive(""),
+                              label_if_not_valid = shiny::reactive("_"),
                               session = shiny::getDefaultReactiveDomain()) {
   shiny::observe({
     is_valid <- is_valid()
