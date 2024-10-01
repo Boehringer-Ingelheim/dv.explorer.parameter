@@ -12,7 +12,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">dv.explorer.parameter</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.8</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.9</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -76,6 +76,7 @@
 <span>  cat_var <span class="op">=</span> <span class="st">"PARCAT"</span>,</span>
 <span>  par_var <span class="op">=</span> <span class="st">"PARAM"</span>,</span>
 <span>  visit_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"AVISIT"</span><span class="op">)</span>,</span>
+<span>  cdisc_visit_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span>,</span>
 <span>  value_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"AVAL"</span>, <span class="st">"PCHG"</span><span class="op">)</span>,</span>
 <span>  additional_listing_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span>,</span>
 <span>  ref_line_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span>,</span>
@@ -88,7 +89,9 @@
 <span>  default_visit_var <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  default_visit_val <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  default_main_group <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  default_sub_group <span class="op">=</span> <span class="cn">NULL</span></span>
+<span>  default_sub_group <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  default_transparency <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  default_y_axis_projection <span class="op">=</span> <span class="st">"Linear"</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">mod_lineplot</span><span class="op">(</span></span>
@@ -102,6 +105,7 @@
 <span>  cat_var <span class="op">=</span> <span class="st">"PARCAT"</span>,</span>
 <span>  par_var <span class="op">=</span> <span class="st">"PARAM"</span>,</span>
 <span>  visit_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"AVISIT"</span><span class="op">)</span>,</span>
+<span>  cdisc_visit_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span>,</span>
 <span>  value_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"AVAL"</span>, <span class="st">"PCHG"</span><span class="op">)</span>,</span>
 <span>  additional_listing_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span>,</span>
 <span>  ref_line_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span>,</span>
@@ -114,8 +118,8 @@
 <span>  default_visit_val <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  default_main_group <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  default_sub_group <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  <span class="va">bm_dataset_disp</span>,</span>
-<span>  <span class="va">group_dataset_disp</span></span>
+<span>  default_transparency <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  default_y_axis_projection <span class="op">=</span> <span class="st">"Linear"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -153,7 +157,13 @@ with one record per subject.</p>
 
 <dt>summary_functions</dt>
 <dd><p><code>[list()]</code></p>
-<p>TODO:</p></dd>
+<p>Each element of this named list contains a summary function (e.g. a mean) and a collection of dispersion functions
+(e.g. standard deviation) defining ranges around the values returned by the summary function.</p>
+<p>The structure of each element is then a named list with the following elements:</p><ul><li><p><code>function</code>: Function that takes a numeric vector as its sole parameter and produces a scalar number.</p></li>
+<li><p><code>dispersion</code>: Named list of pairs functions that return the <em>top</em> and <em>bottom</em> dispersion ranges. They also take
+a numeric vector as input and return a single numeric scalar</p></li>
+<li><p><code>y_prefix</code>: Prefix that will be prepended the Y axis label of the generated plot</p></li>
+</ul><p>For an example, see <code><a href="default_lineplot_functions.html">dv.explorer.parameter::lp_mean_summary_functions</a></code></p></dd>
 
 
 <dt>subjid_var</dt>
@@ -196,6 +206,16 @@ with one record per subject.</p>
 <p>Default values for the selectors</p></dd>
 
 
+<dt>default_transparency</dt>
+<dd><p><code>[numeric(1)]</code></p>
+<p>Default values for the selectors</p></dd>
+
+
+<dt>default_y_axis_projection</dt>
+<dd><p><code>[character(1)|NULL]</code></p>
+<p>Default values for the selectors</p></dd>
+
+
 <dt>module_id</dt>
 <dd><p>Shiny ID <code>[character(1)]</code></p>
 <p>Module identifier</p></dd>
@@ -210,11 +230,6 @@ with one record per subject.</p>
 <dd><p><code>[character(1)]</code></p>
 <p>Name of the module receiving the selected subject ID in the single subject listing. The name must be present in
 the module list or NULL.</p></dd>
-
-
-<dt>bm_dataset_disp, group_dataset_disp</dt>
-<dd><p><code>[mm_dispatcher(1)]</code>
-module manager dispatchers that used as <code>bm_dataset</code> and <code>group_dataset</code> to <code>lineplot_server</code></p></dd>
 
 </dl></div>
     <div class="section level2">
