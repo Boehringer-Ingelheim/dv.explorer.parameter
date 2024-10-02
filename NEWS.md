@@ -1,3 +1,8 @@
+# dv.explorer.parameter 0.0.10
+
+* lineplot hotfix:
+    * Prevent suspendWhenHidden of dynamic UI.
+
 # dv.explorer.parameter 0.0.9
 
 * lineplot:
