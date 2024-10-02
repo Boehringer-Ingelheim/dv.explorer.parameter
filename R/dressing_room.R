@@ -1319,6 +1319,7 @@ app_creator_feedback_server <- function(id, warning_messages, error_messages, ui
         if (length(error_messages()) == 0) res <- append(res, list(ui))
         return(res)
       })
+      shiny::outputOptions(output, "ui", suspendWhenHidden = FALSE)
     }
   )
 
