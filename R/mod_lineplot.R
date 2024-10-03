@@ -569,13 +569,17 @@ lp_median_summary_functions <- list(
 #'
 #' Function to invoke when a subject is clicked in the single-subject listing
 #'
-#' @param default_cat,default_par,default_visit_var,default_visit_val,default_main_group `[character(1)|NULL]`
+#' @param default_cat,default_par,default_visit_var,default_main_group `[character(1)|NULL]`
 #'
 #' Default values for the selectors
 #'
 #' @param default_sub_group,default_val,default_centrality_function,default_dispersion_function `[character(1)|NULL]`
-#'
+#' 
 #' Default values for the selectors
+#' 
+#' @param default_visit_val `list([character(n)|numeric(n)])`
+#' 
+#' Named list of default values associated to specific `visit_var`s
 #'
 #' @param default_y_axis_projection `[character(1)|NULL]`
 #'
@@ -625,11 +629,8 @@ lineplot_server <- function(id,
   checkmate::assert_character(default_cat, min.chars = 1, add = ac, null.ok = TRUE)
   checkmate::assert_character(default_par, min.chars = 1, add = ac, null.ok = TRUE)
   checkmate::assert_string(default_visit_var, min.chars = 1, add = ac, null.ok = TRUE)
-  checkmate::assert(
-    checkmate::check_character(default_visit_val, min.chars = 1, null.ok = TRUE),
-    checkmate::check_numeric(default_visit_val, null.ok = TRUE),
-    add = ac
-  )
+  checkmate::assert_list(default_visit_val, types = c('character', 'numeric'), names = 'unique', null.ok = TRUE, 
+                         add = ac)
   checkmate::assert_string(default_main_group, min.chars = 1, add = ac, null.ok = TRUE)
   checkmate::assert_string(default_sub_group, min.chars = 1, add = ac, null.ok = TRUE)
   checkmate::assert_choice(default_y_axis_projection, choices = c("Linear", "Logarithmic"))
@@ -739,7 +740,7 @@ lineplot_server <- function(id,
       label = LP_MSG$LABEL$PAR_VISIT,
       data = v_bm_dataset,
       var = input_lp[[LP_ID$PAR_VISIT_COL]],
-      default = default_visit_val,
+      defaults_per_var = default_visit_val,
       multiple = TRUE,
       all_on_change = FALSE
     )

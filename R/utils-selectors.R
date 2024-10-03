@@ -277,6 +277,7 @@ val_menu_server <- function(id,
                             label = "Select a value",
                             var,
                             default = NULL,
+                            defaults_per_var = NULL,
                             multiple = FALSE,
                             all_on_change = FALSE) {
   mod <- function(input, output, session) {
@@ -299,6 +300,9 @@ val_menu_server <- function(id,
       } else if (is.numeric(choices)) {
         choices <- sort(unique(choices))
       }
+     
+      # explicitly defined defaults for this variable take precedence
+      default <- defaults_per_var[[r_var()]] %||% default
 
       if (is_not_null(default) && !checkmate::test_subset(default, choices)) {
         log_warn(ssub("`DEFAULT` not found in `SET` for selector `ID`",
