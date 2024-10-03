@@ -16,6 +16,30 @@ EC <- poc(
   )
 )
 
+#' Computes an event table with subject counts and percentages
+#'
+#' @param event_df `data.frame`
+#' A data frame containing the event data. It should have columns corresponding to subjects, hierarchy levels, and group variables.
+#'
+#' @param pop_df `data.frame`
+#' A data frame containing the population data. It must have columns corresponding to subjects and group variables.
+#'
+#' @param hierarchy `character(0)`
+#' A character vector of column names from `event_df` to use as the hierarchy. Can be one or two levels.
+#'
+#' @param group_var `character(0)`
+#' A string representing the column name in `pop_df` used for grouping the population data.
+#'
+#' @param subjid_var `character(0)`
+#' A string representing the subject identifier column name. This column must be present in both `event_df` and `pop_df`.
+#'
+#' @param .special_char `character(0)`
+#' A special character used internally for naming and processing hierarchy levels. Default is `"\x1d"`.
+#'
+#' @return A list containing:
+#' - `df`: A data frame with the processed event data, including counts and percentages.
+#' - `meta`: A list containing metadata related to the hierarchy, group variable, and subject counts.
+#'
 compute_events_table <- function(event_df, pop_df, hierarchy = character(0), group_var = character(0), subjid_var, .special_char = "\x1d") {
 
   total_column_name <- "Total"
@@ -113,6 +137,13 @@ compute_events_table <- function(event_df, pop_df, hierarchy = character(0), gro
   res
 }
 
+#' Orders event table by subject counts
+#'
+#' @param d `list`
+#' A list returned from `compute_events_table()` containing the event data and metadata.
+#'
+#' @return A data frame with the event data sorted by subject counts within each hierarchy level.
+#'
 compute_order_events_table <- function(d) {
 
   checkmate::assert_data_frame(d[["df"]]) # DP 
@@ -162,6 +193,18 @@ compute_order_events_table <- function(d) {
   res
 }
 
+#' Converts the event table to wide format
+#'
+#' @param d `list`
+#' A list returned from `compute_events_table()` containing the event data and metadata.
+#'
+#' @param min_percent `numeric`
+#' The minimum percentage threshold for filtering events. Rows where the percentage of subjects is below this threshold will be removed from the output.
+#'
+#' @return A list containing:
+#' - `df`: A wide-format data frame with the event counts and percentages for each group and hierarchy level.
+#' - `meta`: A list of metadata related to the event table.
+#'
 pivot_wide_format_events_table <- function(d, min_percent) {
 
   checkmate::assert_data_frame(d[["df"]]) # DP 
@@ -198,6 +241,18 @@ pivot_wide_format_events_table <- function(d, min_percent) {
 
 }
 
+#' Sorts the wide-format event table by the overall subject count ranking
+#'
+#' @param event_d `list`
+#' A list returned from `pivot_wide_format_events_table()` containing the wide-format event data and metadata.
+#'
+#' @param sort_df `data.frame`
+#' A data frame returned from `compute_order_events_table()` containing the sorted event data by subject counts.
+#'
+#' @return A list containing:
+#' - `df`: A sorted wide-format data frame of event counts and percentages.
+#' - `meta`: Metadata updated with the ranking information.
+#'
 sort_wider_formatter_events_table <- function(event_d, sort_df) {
 
   checkmate::assert_data_frame(event_d[["df"]]) # DP   
@@ -229,6 +284,17 @@ sort_wider_formatter_events_table <- function(event_d, sort_df) {
   res
 }
 
+
+#' Renders the wide-format event table as an HTML table
+#'
+#' @param d `list`
+#' A list returned from `sort_wider_formatter_events_table()` containing the sorted wide-format event data and metadata.
+#'
+#' @param on_cell_click `character(0)`
+#' A JavaScript callback function to be executed when a table cell is clicked. Default is `NULL`.
+#'
+#' @return An HTML table generated using `shiny::tags` and formatted for interactive display.
+#'
 sort_wide_format_event_table_to_HTML <- function(d, on_cell_click = NULL) {
   checkmate::assert_data_frame(d[["df"]]) # DP 
   checkmate::assert_list(d[["meta"]]) # DP 
@@ -319,6 +385,13 @@ sort_wide_format_event_table_to_HTML <- function(d, on_cell_click = NULL) {
   )
 }
 
+#' UI for the event count module
+#'
+#' @param id `character(0)`
+#' The ID for the event count module instance.
+#'
+#' @return A `shiny::tagList` containing the user interface for selecting hierarchy, group, and minimum percentage for event counting.
+#'
 event_count_ui <- function(id) {
   ns <- shiny::NS(id)
   shiny::tagList(
@@ -331,7 +404,31 @@ event_count_ui <- function(id) {
   )
 }
 
-# Counts patients with at least that event once
+#' Server logic for the event count module
+#'
+#' @param id `character(0)`
+#' The ID for the event count module instance.
+#'
+#' @param table_dataset `data.frame`
+#' A reactive dataset containing the event data.
+#'
+#' @param pop_dataset `data.frame`
+#' A reactive dataset containing the population data.
+#'
+#' @param subjid_var `character(1)`
+#' A string representing the subject identifier column in both datasets.
+#'
+#' @param show_modal_on_click `logical(1)`
+#' A flag to indicate whether clicking a table cell should display a modal dialog with the subject IDs.
+#'
+#' @param default_hierarchy `character(1|2)|NULL`
+#' A default value for the hierarchy variables (optional).
+#'
+#' @param default_group `character(1)|NULL`
+#' A default value for the group variable (optional).
+#'
+#' @return A reactive value containing the list of subjects in the clicked cell, if applicable.
+#'
 event_count_server <- function(id, table_dataset, pop_dataset, subjid_var, show_modal_on_click = FALSE, default_hierarchy = NULL, default_group = NULL) {
   mod <- function(input, output, session) {
 
@@ -440,6 +537,19 @@ event_count_server <- function(id, table_dataset, pop_dataset, subjid_var, show_
   )
 }
 
+#' Invoke boxplot module
+#'
+#' @param module_id `[character(1)]`
+#'
+#' Module Shiny id
+#'
+#' @param table_dataset_name,group_dataset_name `[character(1)]`
+#'
+#' Name of the dataset
+#'
+#' @keywords main
+#'
+#' @export 
 mod_event_count <- function(module_id,
                         table_dataset_name,
                         pop_dataset_name,
