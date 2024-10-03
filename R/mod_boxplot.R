@@ -718,8 +718,6 @@ boxplot_server <- function(id,
 #'
 #' @param receiver_id Name of the tab containing the receiver module
 #'
-#' @param ... Same set of parameters as [mod_boxplot]
-#'
 #' @keywords main
 #'
 #'
