@@ -17,7 +17,7 @@ it_custom_styles <- shiny::tags[["head"]](
 
     .selector_as_link .selectize-dropdown.single { width:auto !important }     /* wider drop-down options */
 
-    .button_as_link.drop-menu-input button { /* horizontally aligned with rest of text */
+    .button_as_link.drop-menu-input .action-button { /* horizontally aligned with rest of text */
       vertical-align:top; border:0px; padding: 0; color:#069
     }
 
