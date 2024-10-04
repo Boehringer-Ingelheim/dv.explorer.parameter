@@ -289,7 +289,7 @@ lineplot_chart <- function(data, title = NULL, ref_line_data = NULL, log_project
   # Ticks for continuous time variable
   if (is.numeric(data[[CNT$VIS]])) {
     fig <- fig + ggplot2::scale_x_continuous(
-      breaks = unique(data[[CNT$VIS]]),
+      breaks = sort(unique(data[[CNT$VIS]])),
       minor_breaks = NULL,
       labels = original_numeric_x_labels
     )

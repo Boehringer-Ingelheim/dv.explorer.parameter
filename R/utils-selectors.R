@@ -303,7 +303,7 @@ val_menu_server <- function(id,
       }
 
       # explicitly defined defaults for this variable take precedence
-      default <- intersect(defaults_per_var[[r_var()]] %||% default, choices)
+      default <- intersect(choices, defaults_per_var[[r_var()]] %||% default)
 
       if (is_not_null(default) && !checkmate::test_subset(default, choices)) {
         log_warn(ssub("`DEFAULT` not found in `SET` for selector `ID`",
