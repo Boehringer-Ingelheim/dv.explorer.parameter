@@ -579,7 +579,8 @@ lp_median_summary_functions <- list(
 #'
 #' @param default_visit_val `list([character(n)|numeric(n)])`
 #'
-#' Named list of default values associated to specific `visit_var`s
+#' Named list of default values associated to specific `visit_var`s, e.g.
+#' `default_visit_val = list(VISIT = c('VISIT1', 'VISIT2'), AVISITN = c(1, 2))`
 #'
 #' @param default_y_axis_projection `[character(1)|NULL]`
 #'
