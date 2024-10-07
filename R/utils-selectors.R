@@ -277,8 +277,10 @@ val_menu_server <- function(id,
                             label = "Select a value",
                             var,
                             default = NULL,
+                            defaults_per_var = NULL,
                             multiple = FALSE,
-                            all_on_change = FALSE) {
+                            all_on_change = FALSE,
+                            use_picker = FALSE) {
   mod <- function(input, output, session) {
     ns <- session[["ns"]]
 
@@ -300,6 +302,10 @@ val_menu_server <- function(id,
         choices <- sort(unique(choices))
       }
 
+      # explicitly defined defaults for this variable take precedence
+      # order dictated by `choices` takes precedence over the one from `defaults_per_var`
+      default <- intersect(choices, defaults_per_var[[r_var()]] %||% default)
+
       if (is_not_null(default) && !checkmate::test_subset(default, choices)) {
         log_warn(ssub("`DEFAULT` not found in `SET` for selector `ID`",
           DEFAULT = paste(default,
@@ -315,13 +321,28 @@ val_menu_server <- function(id,
       }
       selected <- default %||% if (!all_on_change || !multiple) shiny::isolate(input[["val"]]) else choices
       default <<- NULL
-      shiny::selectizeInput(
-        inputId = ns("val"),
-        label = label,
-        choices = choices,
-        multiple = multiple,
-        selected = selected
-      )
+
+      res <- NULL
+      if (use_picker) {
+        res <- shinyWidgets::pickerInput(
+          inputId = ns("val"),
+          label = label,
+          choices = choices,
+          multiple = multiple,
+          selected = selected,
+          options = shinyWidgets::pickerOptions(actionsBox = TRUE)
+        )
+      } else {
+        res <- shiny::selectizeInput(
+          inputId = ns("val"),
+          label = label,
+          choices = choices,
+          multiple = multiple,
+          selected = selected
+        )
+      }
+
+      return(res)
     })
 
     v_val <- shiny::reactive({
@@ -343,11 +364,19 @@ val_menu_server <- function(id,
     v_val <- v_val |>
       set_id(val = paste0(id, "-", "val")) |>
       set_update(val = function(selected = NULL) {
-        shiny::updateSelectizeInput(
-          session = session,
-          inputId = "val",
-          selected = selected
-        )
+        if (use_picker) {
+          shinyWidgets::updatePickerInput(
+            session,
+            inputId = "val",
+            selected = selected %||% character(0) # Explained in ?shinyWidgets::updatePickerInput
+          )
+        } else {
+          shiny::updateSelectizeInput(
+            session = session,
+            inputId = "val",
+            selected = selected
+          )
+        }
       })
     return(v_val)
   }

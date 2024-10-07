@@ -289,7 +289,7 @@ lineplot_chart <- function(data, title = NULL, ref_line_data = NULL, log_project
   # Ticks for continuous time variable
   if (is.numeric(data[[CNT$VIS]])) {
     fig <- fig + ggplot2::scale_x_continuous(
-      breaks = unique(data[[CNT$VIS]]),
+      breaks = sort(unique(data[[CNT$VIS]])),
       minor_breaks = NULL,
       labels = original_numeric_x_labels
     )
@@ -569,13 +569,18 @@ lp_median_summary_functions <- list(
 #'
 #' Function to invoke when a subject is clicked in the single-subject listing
 #'
-#' @param default_cat,default_par,default_visit_var,default_visit_val,default_main_group `[character(1)|NULL]`
+#' @param default_cat,default_par,default_visit_var,default_main_group `[character(1)|NULL]`
 #'
 #' Default values for the selectors
 #'
 #' @param default_sub_group,default_val,default_centrality_function,default_dispersion_function `[character(1)|NULL]`
 #'
 #' Default values for the selectors
+#'
+#' @param default_visit_val `list([character(n)|numeric(n)])`
+#'
+#' Named list of default values associated to specific `visit_var`s, e.g.
+#' `default_visit_val = list(VISIT = c('VISIT1', 'VISIT2'), AVISITN = c(1, 2))`
 #'
 #' @param default_y_axis_projection `[character(1)|NULL]`
 #'
@@ -625,9 +630,8 @@ lineplot_server <- function(id,
   checkmate::assert_character(default_cat, min.chars = 1, add = ac, null.ok = TRUE)
   checkmate::assert_character(default_par, min.chars = 1, add = ac, null.ok = TRUE)
   checkmate::assert_string(default_visit_var, min.chars = 1, add = ac, null.ok = TRUE)
-  checkmate::assert(
-    checkmate::check_character(default_visit_val, min.chars = 1, null.ok = TRUE),
-    checkmate::check_numeric(default_visit_val, null.ok = TRUE),
+  checkmate::assert_list(default_visit_val,
+    types = c("character", "numeric"), names = "unique", null.ok = TRUE,
     add = ac
   )
   checkmate::assert_string(default_main_group, min.chars = 1, add = ac, null.ok = TRUE)
@@ -739,9 +743,10 @@ lineplot_server <- function(id,
       label = LP_MSG$LABEL$PAR_VISIT,
       data = v_bm_dataset,
       var = input_lp[[LP_ID$PAR_VISIT_COL]],
-      default = default_visit_val,
+      defaults_per_var = default_visit_val,
       multiple = TRUE,
-      all_on_change = FALSE
+      all_on_change = TRUE,
+      use_picker = TRUE
     )
     input_lp[[LP_ID$MAIN_GRP]] <- col_menu_server(
       id = LP_ID$MAIN_GRP,

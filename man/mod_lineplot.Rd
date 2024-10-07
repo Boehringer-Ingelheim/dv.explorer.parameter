@@ -107,7 +107,7 @@ a numeric vector as input and return a single numeric scalar
 \item \code{y_prefix}: Prefix that will be prepended the Y axis label of the generated plot
 }
 
-For an example, see \code{dv.explorer.parameter::lp_mean_summary_functions}}
+For an example, see \code{dv.explorer.parameter::lp_mean_summary_functions}.}
 
 \item{subjid_var}{\verb{[character(1)]}
 
@@ -133,9 +133,14 @@ Columns for \code{bm_dataset} specifying reference values for parameters}
 
 Function to invoke when a subject is clicked in the single-subject listing}
 
-\item{default_cat, default_par, default_visit_var, default_visit_val, default_main_group}{\verb{[character(1)|NULL]}
+\item{default_cat, default_par, default_visit_var, default_main_group}{\verb{[character(1)|NULL]}
 
 Default values for the selectors}
+
+\item{default_visit_val}{\verb{list([character(n)|numeric(n)])}
+
+Named list of default values associated to specific \code{visit_var}s, e.g.
+\code{default_visit_val = list(VISIT = c('VISIT1', 'VISIT2'), AVISITN = c(1, 2))}}
 
 \item{default_sub_group, default_val, default_centrality_function, default_dispersion_function}{\verb{[character(1)|NULL]}
 

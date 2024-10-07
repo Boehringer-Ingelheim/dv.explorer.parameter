@@ -120,8 +120,8 @@ module_list <- list(
     module_id = "lineplot",
     bm_dataset_name = "bm",
     group_dataset_name = "sl",
-    visit_var = "VISIT",
-    value_var = c("VALUE1", "VALUE2"),
+    visit_vars = "VISIT",
+    value_vars = c("VALUE1", "VALUE2"),
     subjid_var = "SUBJID",
     cat_var = "PARCAT"
   )

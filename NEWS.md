@@ -1,3 +1,9 @@
+# dv.explorer.parameter 0.0.11
+
+* lineplot:
+    * Per-column default visit values. Breaking change, as it changes the expected type of `default_visit_val`.
+    * Fixes order of x-axis visit ticks for continuous variables.
+
 # dv.explorer.parameter 0.0.10
 
 * lineplot hotfix:
