@@ -12,7 +12,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">dv.explorer.parameter</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.10</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.11</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -163,7 +163,7 @@ with one record per subject.</p>
 <li><p><code>dispersion</code>: Named list of pairs functions that return the <em>top</em> and <em>bottom</em> dispersion ranges. They also take
 a numeric vector as input and return a single numeric scalar</p></li>
 <li><p><code>y_prefix</code>: Prefix that will be prepended the Y axis label of the generated plot</p></li>
-</ul><p>For an example, see <code><a href="default_lineplot_functions.html">dv.explorer.parameter::lp_mean_summary_functions</a></code></p></dd>
+</ul><p>For an example, see <code><a href="default_lineplot_functions.html">dv.explorer.parameter::lp_mean_summary_functions</a></code>.</p></dd>
 
 
 <dt>subjid_var</dt>
@@ -196,9 +196,15 @@ a numeric vector as input and return a single numeric scalar</p></li>
 <p>Function to invoke when a subject is clicked in the single-subject listing</p></dd>
 
 
-<dt>default_cat, default_par, default_visit_var, default_visit_val, default_main_group</dt>
+<dt>default_cat, default_par, default_visit_var, default_main_group</dt>
 <dd><p><code>[character(1)|NULL]</code></p>
 <p>Default values for the selectors</p></dd>
+
+
+<dt>default_visit_val</dt>
+<dd><p><code>list([character(n)|numeric(n)])</code></p>
+<p>Named list of default values associated to specific <code>visit_var</code>s, e.g.
+<code>default_visit_val = list(VISIT = c('VISIT1', 'VISIT2'), AVISITN = c(1, 2))</code></p></dd>
 
 
 <dt>default_sub_group, default_val, default_centrality_function, default_dispersion_function</dt>
