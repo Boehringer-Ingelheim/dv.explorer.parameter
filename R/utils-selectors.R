@@ -303,6 +303,7 @@ val_menu_server <- function(id,
       }
 
       # explicitly defined defaults for this variable take precedence
+      # order dictated by `choices` takes precedence over the one from `defaults_per_var`
       default <- intersect(choices, defaults_per_var[[r_var()]] %||% default)
 
       if (is_not_null(default) && !checkmate::test_subset(default, choices)) {
