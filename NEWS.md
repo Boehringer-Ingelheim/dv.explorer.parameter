@@ -1,3 +1,8 @@
+# dv.explorer.parameter 0.0.12
+
+* lineplot:
+    * Prevent spurious reactive update
+
 # dv.explorer.parameter 0.0.11
 
 * lineplot:
