@@ -98,6 +98,7 @@ test_communication_with_papo <- function(mod, data, trigger_input_id) {
     unfiltered_dataset = datasets,
     filtered_dataset = datasets,
     module_output = function() list(),
+    module_names = list(papo = "Papo"),
     utils = list(switch2 = function(id) NULL),
     dataset_metadata = list(name = shiny::reactive("dummy_dataset_name"))
   )
