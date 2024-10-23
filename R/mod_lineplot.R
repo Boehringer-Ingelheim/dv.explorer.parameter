@@ -1495,8 +1495,8 @@ lineplot_server <- function(id,
 #'
 #' @param receiver_id `[character(1)]`
 #'
-#' Name of the module receiving the selected subject ID in the single subject listing. The name must be present in
-#' the module list or NULL.
+#' Shiny ID of the module receiving the selected subject ID in the single subject listing. This ID must
+#' be present in the app or be NULL.
 #'
 #'
 #' @name mod_lineplot
@@ -1564,6 +1564,9 @@ mod_lineplot <- function(module_id,
         names(args)[[1]] <- "datasets"
         args[[1]] <- shiny::isolate(afmm[["unfiltered_dataset"]]())
 
+        # Prepend afmm to args to allow checking receiver_ids
+        args <- append(list(afmm = afmm), args)
+
         do.call(check_lineplot_call, args)
       })
 
@@ -1599,7 +1602,8 @@ mod_lineplot <- function(module_id,
 
       on_sbj_click_fun <- NULL
       if (!is.null(receiver_id)) {
-        on_sbj_click_fun <- function() afmm[["utils"]][["switch2"]](receiver_id)
+        receiver_label <- afmm[["module_names"]][[receiver_id]]
+        on_sbj_click_fun <- function() afmm[["utils"]][["switch2"]](receiver_label)
       }
 
       lineplot_server(
