@@ -4212,17 +4212,6 @@ parse_ci <- function(str) {
   sort(unique(as.numeric(strsplit(str, ";", fixed = TRUE)[[1]])))
 }
 
-roc_dependencies <- function() {
-  htmltools::htmlDependency(
-    name = "dv.explorer.parameter",
-    version = "1.0",
-    package = "dv.explorer.parameter",
-    src = "assets",
-    stylesheet = "css/roc.css",
-    all_files = FALSE
-  )
-}
-
 # https://github.com/vegawidget/vegawidget/issues/217
 # https://github.com/vegawidget/vegawidget/issues/218
 # To fix this issue we will wrap the elements in a renderUI that will solve this problem
