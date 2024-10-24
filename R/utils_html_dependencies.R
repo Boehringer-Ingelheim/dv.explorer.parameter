@@ -34,8 +34,7 @@ screenshot_deps <- function() {
 roc_dependencies <- function() {
   htmltools::htmlDependency(
     name = "dv.explorer.parameter",
-    version = "1.0",
-    package = "dv.explorer.parameter",
+    version = "1.0",    
     src = system.file("assets", package = "dv.explorer.parameter", mustWork = TRUE),
     stylesheet = "css/roc.css",
     all_files = FALSE
