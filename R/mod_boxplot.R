@@ -716,12 +716,12 @@ boxplot_server <- function(id,
 #' A function that will be applied to the server returned value.
 #' Only for advanced use. See the example in mod_box_plot_papo
 #'
-#' @param receiver_id Name of the tab containing the receiver module
+#' @param receiver_id `[character(1)]`
 #'
-#' @param ... Same set of parameters as [mod_boxplot]
+#' Shiny ID of the module receiving the selected subject ID in the data listing. This ID must
+#' be present in the app or be NULL.
 #'
 #' @keywords main
-#'
 #'
 #' @export
 
@@ -767,7 +767,8 @@ mod_boxplot <- function(module_id,
         on_sbj_click_fun <- function() NULL
       } else {
         on_sbj_click_fun <- function() {
-          afmm[["utils"]][["switch2"]](receiver_id)
+          receiver_label <- afmm[["module_names"]][[receiver_id]]
+          afmm[["utils"]][["switch2"]](receiver_label)
         }
       }
 

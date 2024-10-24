@@ -3,7 +3,7 @@
 # TODO: Generate from mod_lineplot_API
 # This function has been written manually, but mod_lineplot_API carries
 # enough information to derive most of it automatically
-check_lineplot_call <- function(datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id,
+check_lineplot_call <- function(afmm, datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id,
                                 summary_functions, subjid_var, cat_var, par_var, visit_vars, cdisc_visit_vars,
                                 value_vars, additional_listing_vars, ref_line_vars, default_centrality_function,
                                 default_dispersion_function, default_cat, default_par, default_val, default_visit_var,
@@ -95,7 +95,12 @@ check_lineplot_call <- function(datasets, module_id, bm_dataset_name, group_data
     used_dataset_names[["group_dataset_name"]] <- group_dataset_name
   }
 
-  # TODO: receiver_id
+  # receiver_id
+  allowed_receiver_ids <- names(afmm$module_names)
+  assert_err(is.null(receiver_id) || (checkmate::test_string(receiver_id) && receiver_id %in% allowed_receiver_ids),
+             sprintf("`receiver_id` (%s) not found among module list. Possible choices are: %s",
+                     receiver_id, paste(allowed_receiver_ids, collapse = ", ")))
+
   # TODO: summary_functions
 
   # subjid_var

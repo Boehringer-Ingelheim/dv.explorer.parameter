@@ -1,7 +1,12 @@
+# dv.explorer.parameter 0.0.13
+
+* lineplot, boxplot:
+    * Make receiver_id accept module identifiers instead of labels.
+
 # dv.explorer.parameter 0.0.12
 
 * lineplot:
-    * Prevent spurious reactive update
+    * Prevent spurious reactive update.
 
 # dv.explorer.parameter 0.0.11
 
