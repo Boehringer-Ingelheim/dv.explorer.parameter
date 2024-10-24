@@ -721,10 +721,7 @@ boxplot_server <- function(id,
 #' Shiny ID of the module receiving the selected subject ID in the data listing. This ID must
 #' be present in the app or be NULL.
 #'
-#' @param ... Same set of parameters as [mod_boxplot]
-#'
 #' @keywords main
-#'
 #'
 #' @export
 
