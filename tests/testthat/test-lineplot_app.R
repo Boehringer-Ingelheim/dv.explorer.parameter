@@ -244,7 +244,7 @@ test_that("default values are set", {
     default_par = c("PARAM22", "PARAM23"),
     default_val = "VALUE2",
     default_visit_var = "VISIT2",
-    default_visit_val = c(1, 9),
+    default_visit_val = list(VISIT2 = c(1, 9)),
     default_main_group = "CAT2",
     default_sub_group = "CAT2"
   )
@@ -265,7 +265,7 @@ test_that("default values are set", {
   expect_equal(input_values[[ID$INPUT$CENT]], srv_defaults[["default_centrality_function"]])
   expect_equal(input_values[[ID$INPUT$DISP]], srv_defaults[["default_dispersion_function"]])
   expect_equal(input_values[[ID$INPUT$VIS_COL]], srv_defaults[["default_visit_var"]])
-  expect_equal(input_values[[ID$INPUT$VIS]], as.character(srv_defaults[["default_visit_val"]]))
+  expect_equal(input_values[[ID$INPUT$VIS]], as.character(srv_defaults[["default_visit_val"]][["VISIT2"]]))
   expect_equal(input_values[[ID$INPUT$VAL]], srv_defaults[["default_val"]])
   expect_equal(input_values[[ID$INPUT$MGRP]], srv_defaults[["default_main_group"]])
   expect_equal(input_values[[ID$INPUT$SGRP]], srv_defaults[["default_sub_group"]])
