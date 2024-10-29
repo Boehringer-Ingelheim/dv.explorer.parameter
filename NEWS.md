@@ -1,3 +1,8 @@
+# dv.explorer.parameter 0.0.14
+
+* lineplot, boxplot:
+    * Use dv.manager's switch2mod instead of deprecated switch2.
+
 # dv.explorer.parameter 0.0.13
 
 * lineplot, boxplot:

@@ -1602,8 +1602,7 @@ mod_lineplot <- function(module_id,
 
       on_sbj_click_fun <- NULL
       if (!is.null(receiver_id)) {
-        receiver_label <- afmm[["module_names"]][[receiver_id]]
-        on_sbj_click_fun <- function() afmm[["utils"]][["switch2"]](receiver_label)
+        on_sbj_click_fun <- function() afmm[["utils"]][["switch2mod"]](receiver_id)
       }
 
       lineplot_server(

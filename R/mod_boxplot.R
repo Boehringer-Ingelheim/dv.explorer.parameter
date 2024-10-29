@@ -767,8 +767,7 @@ mod_boxplot <- function(module_id,
         on_sbj_click_fun <- function() NULL
       } else {
         on_sbj_click_fun <- function() {
-          receiver_label <- afmm[["module_names"]][[receiver_id]]
-          afmm[["utils"]][["switch2"]](receiver_label)
+          afmm[["utils"]][["switch2mod"]](receiver_id)
         }
       }
 
