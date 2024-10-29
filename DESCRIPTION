@@ -1,7 +1,7 @@
 Package: dv.explorer.parameter
 Type: Package
 Title: Parameter exploration modules
-Version: 0.0.13
+Version: 0.0.14
 Authors@R: c(
         person("Boehringer-Ingelheim Pharma GmbH & Co.KG", role = c("cph", "fnd")),
         person(given = "Luis", family = "Moris Fernandez", role = c("aut", "cre"), email = "luis.moris.fernandez@gmail.com"),
@@ -13,7 +13,7 @@ Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.1
-Suggests: dv.manager (>= 1.0.9.129), jsonlite, rmarkdown, testthat (>=
+Suggests: dv.manager (>= 2.1.3), jsonlite, rmarkdown, testthat (>=
         3.0.0), shinytest2, devtools, vdiffr, rvest, stringr, knitr,
         safetyData, png, rsvg, withr
 Config/testthat/edition: 3
@@ -29,4 +29,4 @@ Date: Tue May 31 12:12:27 2022
 Branch: dev
 ParentCommit: 9edd5ae0b32a3c7afbcf7215187748f310087a8a
 VignetteBuilder: knitr
-Remotes: boehringer-ingelheim/dv.manager@v2.1.2
+Remotes: boehringer-ingelheim/dv.manager@v2.1.3
