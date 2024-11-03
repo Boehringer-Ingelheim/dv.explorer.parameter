@@ -1577,7 +1577,7 @@ mod_lineplot <- function(module_id,
         id = module_id,
         warning_messages = fb_warn,
         error_messages = fb_err,
-        ui = dv.explorer.parameter::lineplot_UI(id = module_id)
+        ui = shiny::reactive(dv.explorer.parameter::lineplot_UI(id = module_id))
       )
 
       filtered_mapped_datasets <- shiny::reactive(

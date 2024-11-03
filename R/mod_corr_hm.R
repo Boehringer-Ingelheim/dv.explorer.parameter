@@ -94,10 +94,7 @@ NULL
 #' Shiny ID
 #'
 #' @export
-corr_hm_UI <- function(id, default_cat = NULL, default_par = NULL, default_visit = NULL, default_corr_method = NULL) { # nolint
-  # id assert ---- It goes on its own as id is used to provide context to the other assertions
-  checkmate::assert_string(id, min.chars = 1)
-
+corr_hm_UI <- function(id, default_cat = NULL, default_par = NULL, default_visit = NULL, default_corr_method = NULL) {
   # argument asserts ----
 
   # UI ----
@@ -508,7 +505,7 @@ corr_hm_server <- function(id,
                            visit_var = "AVISIT",
                            value_vars = c("AVAL", "PCHG"),
                            default_value = NULL) {
-  if (FALSE) { # TODO: (Miguel)
+  if (FALSE) { # TODO(miguel): Move into check_call_manual_corr_hm
     # id assert ---- It goes on its own as id is used to provide context to the other assertions
     ac <- checkmate::makeAssertCollection() # nolint
     checkmate::assert_string(id, min.chars = 1, add = ac)
@@ -558,6 +555,8 @@ corr_hm_server <- function(id,
           add = ac
         )
         checkmate::assert_factor(bm_dataset()[[VAR$SBJ]], .var.name = ns("bm_dataset"), add = ac)
+        shiny::req(ac$isEmpty())
+
         checkmate::reportAssertions(ac)
 
         supposedly_unique <- bm_dataset()[c(VAR$SBJ, VAR$CAT, VAR$PAR, VAR$VIS)]
@@ -911,22 +910,76 @@ mod_corr_hm <- function(module_id, bm_dataset_name,
                         visit_var = "AVISIT",
                         value_vars = c("AVAL", "PCHG"),
                         default_cat = NULL, default_par = NULL, default_visit = NULL,
-                        default_value = NULL, bm_dataset_disp) {
-  if (!missing(bm_dataset_name) && !missing(bm_dataset_disp)) {
-    rlang::abort("`bm_dataset_name` and `bm_dataset_disp` cannot be used at the same time, use one or the other")
-  }
-  if (!missing(bm_dataset_name)) {
-    bm_dataset_disp <- dv.manager::mm_dispatch("filtered_dataset", bm_dataset_name)
-  }
+                        default_value = NULL) {
+  args <- as.list(environment())
+  args <- Filter(f = function(x) !inherits(x, "name"), args)
+  function_call <- as.list(match.call())[1]
+  args <- append(function_call, args)
 
+  # NOTE(miguel): These two lines allow the caller to provide lists whenever `mod_patient_profile_server`
+  #               requires atomic arrays
+  args <- T_honor_as_array_flag(mod_lineplot_API, args)
+  list2env(args[setdiff(seq_along(args), 1)], environment()) # overwrite current arguments with modified `args`
+
+  # TODO(miguel): Isolate the pattern of transforming the bundle of vanilla UI+server into the static-feedback version
   mod <- list(
-    ui = function(mod_id) {
-      corr_hm_UI(id = mod_id, default_cat = default_cat, default_par = default_par, default_visit = default_visit)
+    ui = function(module_id) {
+      app_creator_feedback_ui(module_id) # NOTE: original UI gated by app_creator_feedback_server
     },
     server = function(afmm) {
+      fb <- shiny::reactive({
+        # NOTE: We check the call here and not inside the module server function because:
+        #       - app creators interact with the davinci module and not with the ui-server combo, so
+        #         errors reported with respect to the module signature will make sense to them.
+        #         The module server function might use a different function signature.
+        #       - Here we also have access to the unfiltered dataset, which allows us to ensure call
+        #         correctness independent of filter state or operation.
+        #         Also, as long as the unfiltered dataset does not change (and to date no davinci app
+        #         changes it dynamically) this check only runs once at the beginning of the application
+        #         and has no further impact on performance.
+        #       - "catch errors early"
+
+        # Overwrite first "argument" (the function call, in fact) with the datasets provided to module manager
+        names(args)[[1]] <- "datasets"
+        args[[1]] <- shiny::isolate(afmm[["unfiltered_dataset"]]())
+
+        # Prepend afmm to args to allow checking receiver_ids
+        args <- append(list(afmm = afmm), args)
+
+        do.call(check_corr_hm_call, args)
+      })
+
+      fb_warn <- shiny::reactive(fb()[["warnings"]])
+      fb_err <- shiny::reactive(fb()[["errors"]])
+
+      app_creator_feedback_server(
+        id = module_id,
+        warning_messages = fb_warn,
+        error_messages = fb_err,
+        ui = shiny::reactive({
+          dv.explorer.parameter::corr_hm_UI(
+            id = module_id, default_cat = default_cat,
+            default_par = default_par, default_visit = default_visit
+          )
+        })
+      )
+
+      filtered_mapped_datasets <- shiny::reactive(
+        T_honor_map_to_flag(afmm$filtered_dataset(), mod_lineplot_API, args)
+      )
+
+      bm_dataset <- shiny::reactive({
+        shiny::req(bm_dataset_name)
+        ds <- filtered_mapped_datasets()[[bm_dataset_name]]
+        shiny::validate(
+          shiny::need(!is.null(ds), paste("Could not find dataset", bm_dataset_name))
+        )
+        return(ds)
+      })
+
       corr_hm_server(
         id = module_id,
-        bm_dataset = dv.manager::mm_resolve_dispatcher(bm_dataset_disp, afmm, flatten = TRUE),
+        bm_dataset = bm_dataset,
         default_value = default_value, subjid_var = subjid_var, cat_var = cat_var, par_var = par_var,
         visit_var = visit_var, value_vars = value_vars
       )

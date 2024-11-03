@@ -27,6 +27,8 @@ T_col <- function(dataset_name, sub_kind = T_anything()) {
 T_color <- function() list(kind = "color")
 T_CDISC_study_day <- function() list(kind = "cdisc_study_day", min = NA, max = NA)
 T_YN <- function() list(kind = "YN")
+T_choice_from_col_contents <- function(param) list(kind = "choice_from_col_contents", param = param)
+T_choice <- function(param) list(kind = "choice", param = param)
 
 T_is_of_kind <- function(var, type) {
   res <- FALSE
@@ -106,6 +108,10 @@ T_get_type_as_text <- function(elem) {
 
   if (elem$kind == "or") {
     res <- paste(Map(T_get_type_as_text, elem$options), collapse = "|")
+  } else if (elem$kind == "choice") {
+    res <- "character" # FIXME: Refer to the type of the column
+  } else if (elem$kind == "choice_from_col_contents") {
+    res <- "character" # FIXME: Refer to the type of the column
   } else if (!(elem$kind %in% names(types))) {
     message(paste("Missing kind", elem$kind))
   } else {
@@ -139,6 +145,10 @@ T_get_use_as_text_lines <- function(elem) {
     res <- "Represents a CDISC (non-zero) Study Day"
   } else if (elem$kind == "color") {
     res <- "Contains either an HTML (#xxxxxx) or an R color"
+  } else if (elem$kind == "choice") {
+    res <- "<placeholder>" # TODO: Refer to the actual column
+  } else if (elem$kind == "choice_from_col_contents") {
+    res <- "<placeholder>" # TODO: Refer to the actual column
   } else if (elem$kind %in% c("integer", "numeric", "character", "group")) {
     # nothing
   } else {
@@ -334,6 +344,7 @@ inline_shiny_input <- function(elem, label = NULL, name_selector = NULL, label_e
 }
 
 enable_nicer_unnamed_multicolumn_selection <- TRUE
+enable_nicer_multichoice_selection <- TRUE
 
 color_picker_input <- function(inputId, value = NULL) {
   # https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/color +
@@ -507,6 +518,74 @@ message_well <- function(title, contents, color = "f5f5f5") {
   return(res)
 }
 
+# Solves https://github.com/rstudio/shiny/issues/825#issuecomment-496679761
+observer_dedup <- local({
+  # Evaluates `expr` under a reactive domain identified by `id` while keeping track of all observers created by it.
+  # On repeated calls to this function, the old tracked observers are destroyed prior to evaluating `expr`.
+
+  states <- list() # One state per `id`. Each state is an environment for mutation purposes.
+
+  observer_dedup_func <- function(id, expr, session = shiny::getDefaultReactiveDomain(), verbose = FALSE) {
+    # New state if unknown `id`
+    if (!(id %in% names(states))) {
+      states[[id]] <<- list2env(
+        list(
+          subdomain = list(end = function() NULL),
+          captured_callbacks = list()
+        ),
+        parent = emptyenv()
+      )
+    }
+
+    state <- states[[id]] # The only state that concerns us
+
+    # Glorified append
+    capture_callbacks <- function(callback) {
+      return(state[["captured_callbacks"]][[length(state[["captured_callbacks"]]) + 1]] <<- callback)
+    }
+
+    make_scope_that_captures_callbacks <- function(namespace) {
+      parent <- get("parent", envir = state[["subdomain"]])
+      ns <- shiny::NS(namespace)
+      scope <- parent$makeScope(namespace)
+      overrides <- get("overrides", scope)
+      overrides[["onEnded"]] <- capture_callbacks
+      overrides[["makeScope"]] <- function(namespace) make_scope_that_captures_callbacks(ns(namespace))
+      scope[["overrides"]] <- overrides
+      return(scope)
+    }
+
+    invoke_and_remove_callbacks <- function() {
+      for (cb in state[["captured_callbacks"]]) {
+        if (verbose) {
+          owner <- environment(cb)
+          if (inherits(owner, "Observer")) {
+            message(sprintf("Destroying observer %s %s", owner$.reactId, owner$.label))
+          } else {
+            browser()
+          }
+        }
+        cb()
+      }
+      state[["captured_callbacks"]] <<- list()
+    }
+
+    state[["subdomain"]]$end() # Destroy tracked observers from the previous observer_dedup invokation
+    state[["subdomain"]] <- shiny:::createSessionProxy( # Session that tracks observers even inside nested shiny modules
+      session,
+      makeScope = make_scope_that_captures_callbacks,
+      onEnded = capture_callbacks,
+      end = invoke_and_remove_callbacks
+    )
+
+    expr <- substitute(expr)
+    env <- parent.frame()
+    result <- shiny::withReactiveDomain(state[["subdomain"]], eval(expr, env))
+    return(result)
+  }
+  return(observer_dedup_func)
+})
+
 explorer_server_with_datasets <- function(caller_datasets = NULL) {
   explorer_server <- function(input, output, session) {
     shiny::observe({
@@ -576,7 +655,31 @@ explorer_server_with_datasets <- function(caller_datasets = NULL) {
       return(res)
     }
 
-    column_selector <- function(elem, datasets, visible_datasets, inputs, id, multiple) {
+    choices_from_dataset_and_columns <- function(datasets, dataset_slot, columns) {
+      res <- NULL
+      if (!is.null(dataset_slot) && length(columns)) {
+        # Derive choices from dataset and columns
+        dataset <- datasets[[dataset_slot]]
+        if (length(columns) == 1) {
+          col_data <- dataset[[columns]]
+          if (is.factor(col_data)) {
+            res <- levels(col_data)
+          } else if (is.character(col_data)) {
+            browser()
+          } else if (is.numeric(col_data)) {
+            res <- sort(unique(col_data))
+          } else {
+            browser()
+          }
+        } else {
+          stopifnot(length(columns) > 1)
+          browser() # TODO: Implement this: only present on mod_lineplot default_visit_val at the moment
+        }
+      }
+      return(res)
+    }
+
+    column_selector <- function(elem, datasets, visible_datasets, visible_col_selectors, inputs, id, multiple) {
       dataset_name <- elem[["dataset_name"]]
       dataset_slot <- mget(dataset_name, envir = visible_datasets, ifnotfound = list(NULL), inherits = TRUE)[[1]]
 
@@ -597,15 +700,17 @@ explorer_server_with_datasets <- function(caller_datasets = NULL) {
 
       if (length(choices) == 0) choices <- inputs[[id]]
 
+      selected <- as.character(inputs[[id]])
       ui <- T_select_input(
-        inputId = id, label = NULL, choices = as.character(choices), selected = as.character(inputs[[id]]),
-        multiple = multiple
+        inputId = id, label = NULL, choices = as.character(choices), selected = selected, multiple = multiple
       )
+
+      visible_col_selectors[[id]] <- list(dataset_slot = dataset_slot, columns = selected)
 
       return(ui)
     }
 
-    compute_ui_info_inner <- function(visible_datasets, label, name, elem, inputs, datasets, counts) {
+    compute_ui_info_inner <- function(visible_datasets, visible_col_selectors, label, name, elem, inputs, datasets, counts) {
       if (isTRUE(attr(elem, "ignore"))) {
         # NOTE: This element should have been filtered out at this point
         return(list(
@@ -637,7 +742,7 @@ explorer_server_with_datasets <- function(caller_datasets = NULL) {
         input_ids <- name
         deps[[length(deps) + 1]] <- name # columns depend on datasets, so we ask for another pass
       } else if (elem[["kind"]] == "col") {
-        ui <- column_selector(elem, datasets, visible_datasets, inputs, name, multiple = FALSE)
+        ui <- column_selector(elem, datasets, visible_datasets, visible_col_selectors, inputs, name, multiple = FALSE)
         input_ids <- name
       } else if (elem[["kind"]] == "integer" || elem[["kind"]] == "numeric" ||
         elem[["kind"]] == "cdisc_study_day") {
@@ -654,6 +759,7 @@ explorer_server_with_datasets <- function(caller_datasets = NULL) {
         input_ids <- name
       } else if (elem[["kind"]] == "group") {
         child_visible_datasets <- new.env(parent = visible_datasets)
+        child_visible_col_selectors <- new.env(parent = visible_col_selectors)
 
         input_ids <- list()
         for (child_param in seq_along(elem$elements)) {
@@ -662,6 +768,7 @@ explorer_server_with_datasets <- function(caller_datasets = NULL) {
 
           child_info <- compute_ui_info_outer(
             child_visible_datasets,
+            child_visible_col_selectors,
             label = child_name,
             name = paste(c(name, child_name), collapse = "-"),
             child_elem, inputs, datasets, counts
@@ -671,6 +778,18 @@ explorer_server_with_datasets <- function(caller_datasets = NULL) {
           input_ids[[child_name]] <- child_info[["input_ids"]]
           deps <- append(deps, child_info[["dependencies"]])
         }
+      } else if (elem[["kind"]] == "choice_from_col_contents") {
+        param <- elem$param
+        browser() # TODO
+      } else if (elem[["kind"]] == "choice") {
+        param <- elem$param
+        choices <- visible_col_selectors[[param]][["columns"]]
+        ui <- T_select_input(
+          inputId = name, label = NULL, choices = as.character(choices), selected = as.character(inputs[[name]]),
+          multiple = FALSE
+        )
+        input_ids <- name
+        deps <- c(deps, param)
       } else {
         ui <- shiny::p(paste("TODO: ", elem[["kind"]]))
         input_ids <- list()
@@ -736,7 +855,20 @@ explorer_server_with_datasets <- function(caller_datasets = NULL) {
       }
     })
 
-    compute_ui_info_outer <- function(visible_datasets, label, name, elem, inputs, datasets, counts) {
+    hacky_select_input_align <- function(optional_ui, label, hover_info, ui) {
+      label_elem <- list(shiny::tags$span(optional_ui,
+        shiny::tags$label(`for` = NULL, label, title = hover_info),
+        style = "display:inline-flex; align-items:baseline; padding-top:0.7rem;"
+      ))
+
+      ui <- shiny::tags[["div"]](
+        style = "display: flex; align-items: flex-start; place-content: space-between; column-gap:1rem",
+        label_elem, ui
+      )
+      return(ui)
+    }
+
+    compute_ui_info_outer <- function(visible_datasets, visible_col_selectors, label, name, elem, inputs, datasets, counts) {
       if (isTRUE(attr(elem, "ignore"))) {
         return(list(ui = NULL, input_ids = NULL, dependencies = NULL))
       } # NOTE: early out
@@ -784,21 +916,32 @@ explorer_server_with_datasets <- function(caller_datasets = NULL) {
 
       if (enable_nicer_unnamed_multicolumn_selection && zero_or_more && !named && elem$kind == "col") {
         # NOTE: special-case with a multiselector for a more streamlined interface
-        ui <- column_selector(elem, datasets, visible_datasets, inputs, name, multiple = TRUE)
+        ui <- column_selector(elem, datasets, visible_datasets, visible_col_selectors, inputs, name, multiple = TRUE)
         input_ids <- name
 
-        ui$attribs$class <- paste(ui$attribs$class, "margin_bottom_0px")
+        ui <- hacky_select_input_align(optional_ui, label, hover_info, ui)
 
-        # Hacky alignment of selectInput
-        label_elem <- list(shiny::tags$span(optional_ui,
-          shiny::tags$label(`for` = NULL, label, title = hover_info),
-          style = "display:inline-flex; align-items:baseline; padding-top:0.7rem;"
-        ))
+        res <- list(ui = ui, input_ids = input_ids, dependencies = dependencies)
+      } else if (enable_nicer_multichoice_selection && zero_or_more && elem$kind == "choice_from_col_contents") {
+        param <- elem$param
 
-        ui <- shiny::tags[["div"]](
-          style = "display: flex; align-items: flex-start; place-content: space-between; column-gap:1rem",
-          label_elem, ui
+        choices <- character(0)
+        info <- visible_col_selectors[[param]]
+        if (length(info[["columns"]])) {
+          choices <- choices_from_dataset_and_columns(
+            datasets, info[["dataset_slot"]], info[["columns"]] # TODO(miguel): Try datasets[[dataset_slot]] instead
+          )
+        }
+
+        ui <- T_select_input(
+          inputId = name, label = NULL, choices = as.character(choices), selected = as.character(inputs[[name]]),
+          multiple = TRUE
         )
+        input_ids <- name
+
+        ui <- hacky_select_input_align(optional_ui, label, hover_info, ui)
+
+        dependencies <- c(dependencies, param)
 
         res <- list(ui = ui, input_ids = input_ids, dependencies = dependencies)
       } else if (zero_or_more) {
@@ -828,7 +971,8 @@ explorer_server_with_datasets <- function(caller_datasets = NULL) {
             )
           }
 
-          child_info <- compute_ui_info_inner(visible_datasets,
+          child_info <- compute_ui_info_inner(
+            visible_datasets, visible_col_selectors,
             label = NULL, child_name, elem,
             inputs, datasets, counts
           )
@@ -861,7 +1005,7 @@ explorer_server_with_datasets <- function(caller_datasets = NULL) {
 
         res <- list(ui = ui, input_ids = input_ids, dependencies = dependencies)
       } else {
-        res <- compute_ui_info_inner(visible_datasets, label, name, elem, inputs, datasets, counts)
+        res <- compute_ui_info_inner(visible_datasets, visible_col_selectors, label, name, elem, inputs, datasets, counts)
         res[["dependencies"]] <- c(dependencies, res[["dependencies"]])
 
         if (elem$kind == "group") { # repeats #eenahw partially; not ready to compress it yet
@@ -908,11 +1052,12 @@ explorer_server_with_datasets <- function(caller_datasets = NULL) {
       }
 
       visible_datasets <- new.env(parent = emptyenv())
+      visible_col_selectors <- new.env(parent = emptyenv())
       spec_elements <- module_specifications[[selected_spec]]
 
       counts <- shiny::isolate(shiny::reactiveValuesToList(counts_rv))
       info <- shiny::maskReactiveContext(
-        compute_ui_info_inner(visible_datasets, "placeholder_label", name = NULL, spec_elements, inputs, datasets, counts)
+        compute_ui_info_inner(visible_datasets, visible_col_selectors, "placeholder_label", name = NULL, spec_elements, inputs, datasets, counts)
       )
       ui <- info[["ui"]]
       input_ids <- info[["input_ids"]]
@@ -1118,12 +1263,6 @@ explorer_server_with_datasets <- function(caller_datasets = NULL) {
     #  so either I'm doing something wrong or createMockDomain is no longer enough to
     #  fake a shiny session
     #
-    # > domain <- shiny:::createMockDomain()
-    # > shiny::observeEvent(list(input[["manual_code"]], code(), input[["spec"]]), {
-    # >   domain$end()
-    # >   domain <<- shiny:::createMockDomain()
-    # >   shiny::withReactiveDomain(domain,
-
     shiny::observe({
       code_to_eval <- NULL
       if (isTRUE(input[["edit_code"]])) {
@@ -1222,8 +1361,13 @@ explorer_server_with_datasets <- function(caller_datasets = NULL) {
           module_output = function() list()
         )
 
-        # TODO: ? Execute inside a separate domain using withReactiveDomain?
-        server_return_val <- try(ui_server_id[["server"]](afmm), silent = TRUE)
+        # Executes server on a separate reactive domain and destroys its observers when reinvoked
+        server_return_val <- observer_dedup(
+          id = "unique_dedup_id",
+          try(ui_server_id[["server"]](afmm), silent = TRUE),
+          session = session
+        )
+
         if (inherits(server_return_val, "try-error")) {
           return(build_error(
             title = "Module Development Error",
@@ -1240,9 +1384,6 @@ explorer_server_with_datasets <- function(caller_datasets = NULL) {
       error_and_ui_rv[["error"]] <- error_and_ui[["error"]]
     })
 
-    # See #eecohg
-    #   ) # ends withReactiveDomain
-    # })
 
     output[["module"]] <- shiny::renderUI({
       ui <- error_and_ui_rv[["ui"]]
@@ -1273,7 +1414,7 @@ explorer_server_with_datasets <- function(caller_datasets = NULL) {
 
 # TODO: Export when finished
 
-# Interactive demo/configuration tool for [mod_patient_profile()]
+# Interactive module demo/configuration tool
 #
 # Launch an interactive configuration app for [mod_patient_profile()]. This application guides the user through the
 # configuration of the module, offering an experimental point-and-click interface to the module API. Help is accessible
@@ -1316,7 +1457,7 @@ app_creator_feedback_server <- function(id, warning_messages, error_messages, ui
           res[[length(res) + 1]] <- message_well("Module configuration errors", Map(shiny::p, err), color = "#f4d7d7")
         }
 
-        if (length(error_messages()) == 0) res <- append(res, list(ui))
+        if (length(error_messages()) == 0) res <- append(res, list(ui()))
         return(res)
       })
       shiny::outputOptions(output, "ui", suspendWhenHidden = FALSE)
