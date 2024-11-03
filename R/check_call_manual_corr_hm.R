@@ -4,12 +4,12 @@
 # This function has been written manually, but mod_corr_hm_API carries
 # enough information to derive most of it automatically
 
-check_corr_hm_call <- function(afmm, datasets, module_id, bm_dataset_name, subjid_var, cat_var, par_var, visit_var, 
+check_corr_hm_call <- function(afmm, datasets, module_id, bm_dataset_name, subjid_var, cat_var, par_var, visit_var,
                                value_vars, default_cat, default_par, default_visit, default_value) {
   # styler: off
   warn <- character(0)
   err <- character(0)
-  
+
   assert_warn <- function(cond, msg, do_assert = TRUE) {
     ok <- FALSE
     if (isTRUE(do_assert)) {
@@ -72,7 +72,7 @@ check_corr_hm_call <- function(afmm, datasets, module_id, bm_dataset_name, subji
   if (bm_dataset_ok) {
     used_dataset_names[["bm_dataset_name"]] <- bm_dataset_name
   }
-  
+
   # # group_dataset_name
   # group_dataset_ok <- (
   #   assert_err(!missing(group_dataset_name), "`group_dataset_name` missing") &&
