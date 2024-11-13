@@ -29,7 +29,6 @@ mod_corr_hm_API <- T_group(
   default_val = T_choice("value_vars") |> T_flag("optional") # FIXME(miguel): Should be called default_value_var
 ) |> T_attach_docs(mod_corr_hm_API_docs)
 
-
 # Lineplot module interface description ----
 mod_lineplot_API_docs <- list(
   "Line Plot",

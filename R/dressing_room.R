@@ -1,4 +1,4 @@
-# Ad-hoc type system ----
+# Ad-hoc "T_"ype system ----
 
 # basic types
 T_logical <- function() list(kind = "logical")
@@ -570,7 +570,7 @@ observer_dedup <- local({
       state[["captured_callbacks"]] <<- list()
     }
 
-    state[["subdomain"]]$end() # Destroy tracked observers from the previous observer_dedup invokation
+    state[["subdomain"]]$end() # Destroy tracked observers from the previous observer_dedup invocation
     state[["subdomain"]] <- shiny:::createSessionProxy( # Session that tracks observers even inside nested shiny modules
       session,
       makeScope = make_scope_that_captures_callbacks,
@@ -1384,7 +1384,6 @@ explorer_server_with_datasets <- function(caller_datasets = NULL) {
       error_and_ui_rv[["error"]] <- error_and_ui[["error"]]
     })
 
-
     output[["module"]] <- shiny::renderUI({
       ui <- error_and_ui_rv[["ui"]]
       error <- error_and_ui_rv[["error"]]
@@ -1466,3 +1465,113 @@ app_creator_feedback_server <- function(id, warning_messages, error_messages, ui
 
   return(module)
 }
+
+# Ad-hoc "C_"hecks system ----
+
+# Wrap the UI and server of a module so that, once parameterized, they go through a check function prior to running.
+# The check function resides in `C_check_call[[namespaced_mod_name]]`.
+# That function could be generated on the fly from the module API specification, but we go to the trouble of storing it
+# as text inside the package so that its easy to step through and read.
+C_module <- function(module) {
+  where <- function(name, env = parent.frame()) { # lifted from http://adv-r.had.co.nz/Environments.html
+    res <- NULL
+    if (identical(env, emptyenv())) stop("Can't find ", name, call. = FALSE)
+    else if (exists(name, envir = env, inherits = FALSE)) res <- env
+    else res <- where(name, parent.env(env))
+    return(res)
+  }
+  
+  wrapper <- function(...){
+    args <- as.list(match.call())
+
+    namespaced_mod_name <- deparse(args[[1]])
+    if(!grepl("::", namespaced_mod_name, fixed = TRUE)) { # TODO: Too hacky?
+      namespaced_mod_name <- paste0(where('mod_corr_hm')[[".packageName"]], "::", namespaced_mod_name)
+    }
+    
+    evaluated_module <- do.call(module, args[-1]) # FIXME: First arg is the function call, rest are the args
+    module_ui <- evaluated_module[["ui"]]
+    module_server <- evaluated_module[["server"]]
+    module_id <- evaluated_module[["module_id"]]
+    
+    res <- list(
+      ui = function(module_id) app_creator_feedback_ui(module_id), # `module` UI gated by app_creator_feedback_server
+      server = function(afmm) {
+        fb <- shiny::reactive({
+          # NOTE: We check the call here and not inside the module server function because:
+          #       - app creators interact with the davinci module and not with the ui-server combo, so
+          #         errors reported with respect to the module signature will make sense to them.
+          #         The module server function might use a different function signature.
+          #       - Here we also have access to the unfiltered dataset, which allows us to ensure call
+          #         correctness independent of filter state or operation.
+          #         Also, as long as the unfiltered dataset does not change (and to date no davinci app
+          #         changes it dynamically) this check only runs once at the beginning of the application
+          #         and has no further impact on performance.
+          #       - "catch errors early"
+
+          # Overwrite first "argument" (the function call, in fact) with the datasets provided to module manager
+          names(args)[[1]] <- "datasets"
+          args[[1]] <- shiny::isolate(afmm[["unfiltered_dataset"]]())
+
+          # Prepend afmm to args to allow checking receiver_ids
+          args <- append(list(afmm = afmm), args)
+          
+          where('mod_corr_hm')[[".packageName"]]
+          check_call_function <- C_check_call[[namespaced_mod_name]]
+          if(!is.function(check_call_function)) sprintf("Missing C_check_call function: %s", namespaced_mod_name)
+          res <- do.call(check_call_function, args)
+          res
+        })
+
+        fb_warn <- shiny::reactive(fb()[["warnings"]])
+        fb_err <- shiny::reactive(fb()[["errors"]])
+
+        app_creator_feedback_server(
+          id = module_id, warning_messages = fb_warn, error_messages = fb_err,
+          ui = shiny::reactive(module_ui(module_id))
+        )
+
+        # TODO: Modify afmm to the `map_to` flags in the API. `dv.papo` relies on this
+        if(FALSE) { 
+          filtered_mapped_datasets <- shiny::reactive(
+            T_honor_map_to_flag(afmm$filtered_dataset(), mod_lineplot_API, args)
+          )
+          
+          bm_dataset <- shiny::reactive({
+            shiny::req(bm_dataset_name)
+            ds <- filtered_mapped_datasets()[[bm_dataset_name]]
+            shiny::validate(
+              shiny::need(!is.null(ds), paste("Could not find dataset", bm_dataset_name))
+            )
+            return(ds)
+          })
+          
+          # TODO: 
+          corr_hm_server(
+            id = module_id,
+            bm_dataset = bm_dataset,
+            default_value = default_value, subjid_var = subjid_var, cat_var = cat_var, par_var = par_var,
+            visit_var = visit_var, value_vars = value_vars
+          )
+        }
+
+        module_server(afmm)
+      },
+      module_id = module_id
+    ) 
+    
+    return(res)
+  }
+  
+  return(wrapper)
+}
+
+C_container <- function() list2env(x = list(messages = character(0)), parent = emptyenv())
+C_assert <- function(container, cond, msg) {
+  ok <- isTRUE(cond)
+  if (!ok) container[["messages"]] <- c(container[["messages"]], msg)
+  return(ok)
+}
+
+C_is_valid_shiny_id <- function(s) grepl("^$|^[a-zA-Z][a-zA-Z0-9_-]*$", s)
+
