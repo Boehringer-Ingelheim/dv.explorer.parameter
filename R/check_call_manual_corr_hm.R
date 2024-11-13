@@ -12,7 +12,11 @@ C_check_call[["dv.explorer.parameter::mod_corr_hm"]] <- function(
   warn <- C_container()
   err <- C_container()
 
-  check_corr_hm_call_auto()
+  check_mod_corr_hm_auto(
+    afmm, datasets, module_id, bm_dataset_name, subjid_var, cat_var, par_var, visit_var,
+    value_vars, default_cat, default_par, default_visit, default_value,
+    warn, err
+  )
 
   # is_date_lower_or_equal <- function(a, b) all(as.POSIXct(a) <= as.POSIXct(b), na.rm = TRUE)
 

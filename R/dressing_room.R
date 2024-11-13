@@ -1578,3 +1578,50 @@ C_assert <- function(container, cond, msg) {
 }
 
 C_is_valid_shiny_id <- function(s) grepl("^$|^[a-zA-Z][a-zA-Z0-9_-]*$", s)
+
+C_generate_check_function <- function(spec) {
+  res <- character(0)
+  push <- function(s) res <<- c(res, s)
+  push("function(afmm, datasets,")
+  param_names <- paste(names(spec$elements), collapse = ',')
+  push(param_names)
+  push("){\n")
+
+  push("NULL\n") # TODO: Write checks here
+
+  push("}\n")
+
+  return(res)
+}
+
+
+C_generate_check_functions <- function(specs = module_specifications, output_file = 'R/check_call_auto.R') {
+  styler_off <- "({\n# styler: off"
+  styler_on <- "\n\n})\n# styler: on\n"
+
+  res <- c("# Automatically generated module API check functions. Think twice before editing them manually.\n")
+  res <- c(res, styler_off)
+
+  style_code <- function(code){
+    s <- paste(code, collapse = '')
+    s <- parse(text = s, keep.source = FALSE)[[1]] |> deparse() |> trimws('right') |> paste(collapse = '\n')
+    return(s)
+  }
+
+  for(spec_name in names(specs)) {
+    if (!grepl("::", spec_name, fixed = TRUE)) stop(paste("Expected API spec name to be namespaced (`::`):", spec_name))
+    denamespaced_spec_name <- strsplit(spec_name, '::')[[1]][[2]]
+    check_function_name <- paste0('check_', denamespaced_spec_name, '_auto')
+    res <- c(res, sprintf("\n\n# %s\n%s <- ", spec_name, check_function_name))
+    res <- c(res, 
+      C_generate_check_function(specs[[spec_name]]) |> style_code()
+    )
+  }
+
+  res <- c(res, styler_on)
+
+  contents <- paste(res, collapse = '')
+  writeChar(contents, output_file, eos = NULL)
+
+  return(NULL)
+}
