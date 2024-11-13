@@ -7,8 +7,7 @@
 C_check_call <- list()
 C_check_call[["dv.explorer.parameter::mod_corr_hm"]] <- function(
     afmm, datasets, module_id, bm_dataset_name, subjid_var, cat_var, par_var, visit_var,
-    value_vars, default_cat, default_par, default_visit, default_value
-) {
+    value_vars, default_cat, default_par, default_visit, default_value) {
   # styler: off
   warn <- C_container()
   err <- C_container()
@@ -31,7 +30,7 @@ C_check_call[["dv.explorer.parameter::mod_corr_hm"]] <- function(
   C_assert(err, !missing(module_id), "`module_id` missing") &&
     C_assert(err, checkmate::test_string(module_id), "`module_id` should be a string") &&
     C_assert(warn, nchar(module_id) > 0, "Consider providing a non-empty `module_id`.") &&
-    C_assert(err, 
+    C_assert(err,
       C_is_valid_shiny_id(module_id),
       paste(
         "`module_id` should be a valid identifier, starting with a letter and followed by",
@@ -42,11 +41,11 @@ C_check_call[["dv.explorer.parameter::mod_corr_hm"]] <- function(
   # bm_dataset_name
   bm_dataset_ok <- (
     C_assert(err, !missing(bm_dataset_name), "`bm_dataset_name` missing") &&
-      C_assert(err, 
+      C_assert(err,
         checkmate::test_string(bm_dataset_name, min.chars = 1),
         "`bm_dataset_name` should be a non-empty string"
       ) &&
-      C_assert(err, 
+      C_assert(err,
         bm_dataset_name %in% names(datasets),
         paste(
           "`bm_dataset_name` does not refer to any of the available datasets:",
@@ -61,11 +60,11 @@ C_check_call[["dv.explorer.parameter::mod_corr_hm"]] <- function(
   # # group_dataset_name
   # group_dataset_ok <- (
   #   C_assert(err, !missing(group_dataset_name), "`group_dataset_name` missing") &&
-  #     C_assert(err, 
+  #     C_assert(err,
   #       checkmate::test_string(group_dataset_name, min.chars = 1),
   #       "`group_dataset_name` should be a non-empty string"
   #     ) &&
-  #     C_assert(err, 
+  #     C_assert(err,
   #       group_dataset_name %in% names(datasets),
   #       paste(
   #         "`group_dataset_name` does not refer to any of the available datasets:",
@@ -95,7 +94,7 @@ C_check_call[["dv.explorer.parameter::mod_corr_hm"]] <- function(
   # if (subjid_var_ok) {
   #   dataset <- datasets[[group_dataset_name]]
   #   C_assert(err, subjid_var %in% names(dataset), "`subjid_var` not a column of `group_dataset_name`")
-  #   C_assert(err, 
+  #   C_assert(err,
   #     !any(duplicated(dataset[[subjid_var]])),
   #     sprintf(
   #       "`subjid_var` (%s) does not uniquely identify rows of `group_dataset_name` (%s)",
@@ -140,7 +139,7 @@ C_check_call[["dv.explorer.parameter::mod_corr_hm"]] <- function(
   #   dataset <- datasets[[bm_dataset_name]]
   #   excess_cols <- setdiff(cdisc_visit_vars, names(dataset))
 
-  #   cdisc_visit_vars_ok <- C_assert(err, 
+  #   cdisc_visit_vars_ok <- C_assert(err,
   #     length(excess_cols) == 0,
   #     sprintf("`cdisc_visit_vars` refers to unknown dataset variables (%s)", paste(excess_cols, collapse = ", "))
   #   )
@@ -163,7 +162,7 @@ C_check_call[["dv.explorer.parameter::mod_corr_hm"]] <- function(
   #   dataset <- datasets[[bm_dataset_name]]
   #   excess_cols <- setdiff(value_vars, names(dataset))
 
-  #   C_assert(err, 
+  #   C_assert(err,
   #     length(excess_cols) == 0,
   #     sprintf("`value_vars` refers to unknown dataset variables (%s)", paste(excess_cols, collapse = ", "))
   #   )
@@ -176,7 +175,7 @@ C_check_call[["dv.explorer.parameter::mod_corr_hm"]] <- function(
   #   dataset <- datasets[[bm_dataset_name]]
   #   excess_cols <- setdiff(additional_listing_vars, names(dataset))
 
-  #   C_assert(err, 
+  #   C_assert(err,
   #     length(excess_cols) == 0,
   #     sprintf("`additional_listing_vars` refers to unknown dataset variables (%s)", paste(excess_cols, collapse = ", "))
   #   )
@@ -189,7 +188,7 @@ C_check_call[["dv.explorer.parameter::mod_corr_hm"]] <- function(
   #   dataset <- datasets[[bm_dataset_name]]
   #   excess_cols <- setdiff(ref_line_vars, names(dataset))
 
-  #   ref_line_vars_ok <- C_assert(err, 
+  #   ref_line_vars_ok <- C_assert(err,
   #     length(excess_cols) == 0,
   #     sprintf("`ref_line_vars` refers to unknown dataset variables (%s)", paste(excess_cols, collapse = ", "))
   #   )
@@ -204,7 +203,7 @@ C_check_call[["dv.explorer.parameter::mod_corr_hm"]] <- function(
   #   #browser()
 
   #   # TODO: Provide more detail
-  #   ref_line_vars_ok <- C_assert(err, 
+  #   ref_line_vars_ok <- C_assert(err,
   #     unique_ref_values,
   #     sprintf("`ref_line_vars` (%s) are not unique across combinations of category and parameter",
   #             paste(ref_line_vars, collapse = ", "))

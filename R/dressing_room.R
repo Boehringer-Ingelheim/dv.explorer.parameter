@@ -1475,25 +1475,29 @@ app_creator_feedback_server <- function(id, warning_messages, error_messages, ui
 C_module <- function(module) {
   where <- function(name, env = parent.frame()) { # lifted from http://adv-r.had.co.nz/Environments.html
     res <- NULL
-    if (identical(env, emptyenv())) stop("Can't find ", name, call. = FALSE)
-    else if (exists(name, envir = env, inherits = FALSE)) res <- env
-    else res <- where(name, parent.env(env))
+    if (identical(env, emptyenv())) {
+      stop("Can't find ", name, call. = FALSE)
+    } else if (exists(name, envir = env, inherits = FALSE)) {
+      res <- env
+    } else {
+      res <- where(name, parent.env(env))
+    }
     return(res)
   }
-  
-  wrapper <- function(...){
+
+  wrapper <- function(...) {
     args <- as.list(match.call())
 
     namespaced_mod_name <- deparse(args[[1]])
-    if(!grepl("::", namespaced_mod_name, fixed = TRUE)) { # TODO: Too hacky?
-      namespaced_mod_name <- paste0(where('mod_corr_hm')[[".packageName"]], "::", namespaced_mod_name)
+    if (!grepl("::", namespaced_mod_name, fixed = TRUE)) { # TODO: Too hacky?
+      namespaced_mod_name <- paste0(where("mod_corr_hm")[[".packageName"]], "::", namespaced_mod_name)
     }
-    
+
     evaluated_module <- do.call(module, args[-1]) # FIXME: First arg is the function call, rest are the args
     module_ui <- evaluated_module[["ui"]]
     module_server <- evaluated_module[["server"]]
     module_id <- evaluated_module[["module_id"]]
-    
+
     res <- list(
       ui = function(module_id) app_creator_feedback_ui(module_id), # `module` UI gated by app_creator_feedback_server
       server = function(afmm) {
@@ -1515,10 +1519,10 @@ C_module <- function(module) {
 
           # Prepend afmm to args to allow checking receiver_ids
           args <- append(list(afmm = afmm), args)
-          
-          where('mod_corr_hm')[[".packageName"]]
+
+          where("mod_corr_hm")[[".packageName"]]
           check_call_function <- C_check_call[[namespaced_mod_name]]
-          if(!is.function(check_call_function)) sprintf("Missing C_check_call function: %s", namespaced_mod_name)
+          if (!is.function(check_call_function)) sprintf("Missing C_check_call function: %s", namespaced_mod_name)
           res <- do.call(check_call_function, args)
           res
         })
@@ -1532,11 +1536,11 @@ C_module <- function(module) {
         )
 
         # TODO: Modify afmm to the `map_to` flags in the API. `dv.papo` relies on this
-        if(FALSE) { 
+        if (FALSE) {
           filtered_mapped_datasets <- shiny::reactive(
             T_honor_map_to_flag(afmm$filtered_dataset(), mod_lineplot_API, args)
           )
-          
+
           bm_dataset <- shiny::reactive({
             shiny::req(bm_dataset_name)
             ds <- filtered_mapped_datasets()[[bm_dataset_name]]
@@ -1545,8 +1549,8 @@ C_module <- function(module) {
             )
             return(ds)
           })
-          
-          # TODO: 
+
+          # TODO:
           corr_hm_server(
             id = module_id,
             bm_dataset = bm_dataset,
@@ -1558,11 +1562,11 @@ C_module <- function(module) {
         module_server(afmm)
       },
       module_id = module_id
-    ) 
-    
+    )
+
     return(res)
   }
-  
+
   return(wrapper)
 }
 
@@ -1574,4 +1578,3 @@ C_assert <- function(container, cond, msg) {
 }
 
 C_is_valid_shiny_id <- function(s) grepl("^$|^[a-zA-Z][a-zA-Z0-9_-]*$", s)
-

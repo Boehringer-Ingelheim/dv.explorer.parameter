@@ -904,13 +904,13 @@ ch_subset_data <- function(sel, cat_col, par_col, val_col, vis_col, bm_ds, subj_
 #' @export
 #'
 mod_corr_hm_ <- function(module_id, bm_dataset_name,
-                        subjid_var = "SUBJID",
-                        cat_var = "PARCAT",
-                        par_var = "PARAM",
-                        visit_var = "AVISIT",
-                        value_vars = c("AVAL", "PCHG"),
-                        default_cat = NULL, default_par = NULL, default_visit = NULL,
-                        default_value = NULL, bm_dataset_disp) {
+                         subjid_var = "SUBJID",
+                         cat_var = "PARCAT",
+                         par_var = "PARAM",
+                         visit_var = "AVISIT",
+                         value_vars = c("AVAL", "PCHG"),
+                         default_cat = NULL, default_par = NULL, default_visit = NULL,
+                         default_value = NULL, bm_dataset_disp) {
   if (!missing(bm_dataset_name) && !missing(bm_dataset_disp)) {
     rlang::abort("`bm_dataset_name` and `bm_dataset_disp` cannot be used at the same time, use one or the other")
   }
