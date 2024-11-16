@@ -12,7 +12,7 @@ C_check_call[["dv.explorer.parameter::mod_corr_hm"]] <- function(
   warn <- C_container()
   err <- C_container()
 
-  check_mod_corr_hm_auto(
+  OK <- check_mod_corr_hm_auto(
     afmm, datasets, module_id, bm_dataset_name, subjid_var, cat_var, par_var, visit_var,
     value_vars, default_cat, default_par, default_visit, default_value,
     warn, err
@@ -28,38 +28,7 @@ C_check_call[["dv.explorer.parameter::mod_corr_hm"]] <- function(
 
   # afmm_datasets <- paste(names(datasets), collapse = ", ")
 
-  used_dataset_names <- list() # name identifies parameter, value stores dataset name
-
-  # module_id
-  C_assert(err, !missing(module_id), "`module_id` missing") &&
-    C_assert(err, checkmate::test_string(module_id), "`module_id` should be a string") &&
-    C_assert(warn, nchar(module_id) > 0, "Consider providing a non-empty `module_id`.") &&
-    C_assert(err,
-      C_is_valid_shiny_id(module_id),
-      paste(
-        "`module_id` should be a valid identifier, starting with a letter and followed by",
-        "alphanumeric characters, hyphens and underscores"
-      )
-    )
-
-  # bm_dataset_name
-  bm_dataset_ok <- (
-    C_assert(err, !missing(bm_dataset_name), "`bm_dataset_name` missing") &&
-      C_assert(err,
-        checkmate::test_string(bm_dataset_name, min.chars = 1),
-        "`bm_dataset_name` should be a non-empty string"
-      ) &&
-      C_assert(err,
-        bm_dataset_name %in% names(datasets),
-        paste(
-          "`bm_dataset_name` does not refer to any of the available datasets:",
-          afmm_datasets
-        )
-      )
-  )
-  if (bm_dataset_ok) {
-    used_dataset_names[["bm_dataset_name"]] <- bm_dataset_name
-  }
+  # used_dataset_names <- list() # name identifies parameter, value stores dataset name
 
   # # group_dataset_name
   # group_dataset_ok <- (
@@ -107,6 +76,7 @@ C_check_call[["dv.explorer.parameter::mod_corr_hm"]] <- function(
   #   )
   # }
 
+  bm_dataset_ok <- FALSE
   # cat_var
   cat_var_ok <- FALSE
   if (bm_dataset_ok &&

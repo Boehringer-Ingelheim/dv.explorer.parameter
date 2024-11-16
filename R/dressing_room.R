@@ -70,7 +70,7 @@ T_flag <- function(x, ...) {
   unknown_flags <- setdiff(
     flag_names,
     c( # common flags
-      "optional", "zero_or_more", "as_array", "named", "ignore",
+      "optional", "zero_or_more", "one_or_more", "as_array", "named", "ignore",
       # domain-specific flags
       "subject_level_dataset_name", "subjid_var"
     )
@@ -201,8 +201,9 @@ T_eval_args <- function(args, eval_env) {
 # Permit caller to provide lists when arrays are desired by the module ----
 
 T_honor_as_array_flag_inner <- function(api_field, elem) {
-  if (isTRUE(attr(api_field, "zero_or_more"))) {
+  if (isTRUE(attr(api_field, "zero_or_more")) || isTRUE(attr(api_field, "zero_or_more"))) {
     attr(api_field, "zero_or_more") <- FALSE
+    attr(api_field, "one_or_more") <- FALSE
     for (i in seq_along(elem)) {
       elem[[i]] <- T_honor_as_array_flag_inner(api_field, elem[[i]])
     }
@@ -237,8 +238,9 @@ T_honor_as_array_flag <- function(mod_API, args) {
 T_honor_map_to_flag_inner <- function(datasets, api_field, elem, field_to_dataset_map, current_field_name) {
   res <- list(map = field_to_dataset_map, actions = list())
 
-  if (isTRUE(attr(api_field, "zero_or_more"))) {
+  if (isTRUE(attr(api_field, "zero_or_more")) || isTRUE(attr(api_field, "zero_or_more"))) {
     attr(api_field, "zero_or_more") <- FALSE
+    attr(api_field, "one_or_more") <- FALSE
     for (i in seq_along(elem)) {
       res <- T_honor_map_to_flag_inner(datasets, api_field, elem[[i]], field_to_dataset_map, current_field_name)
     }
@@ -913,8 +915,10 @@ explorer_server_with_datasets <- function(caller_datasets = NULL) {
 
       named <- isTRUE(attr(elem, "named"))
       zero_or_more <- isTRUE(attr(elem, "zero_or_more"))
+      one_or_more <- isTRUE(attr(elem, "one_or_more"))
+      zero_or_one_or_more <- zero_or_more || one_or_more
 
-      if (enable_nicer_unnamed_multicolumn_selection && zero_or_more && !named && elem$kind == "col") {
+      if (enable_nicer_unnamed_multicolumn_selection && zero_or_one_or_more && !named && elem$kind == "col") {
         # NOTE: special-case with a multiselector for a more streamlined interface
         ui <- column_selector(elem, datasets, visible_datasets, visible_col_selectors, inputs, name, multiple = TRUE)
         input_ids <- name
@@ -922,7 +926,7 @@ explorer_server_with_datasets <- function(caller_datasets = NULL) {
         ui <- hacky_select_input_align(optional_ui, label, hover_info, ui)
 
         res <- list(ui = ui, input_ids = input_ids, dependencies = dependencies)
-      } else if (enable_nicer_multichoice_selection && zero_or_more && elem$kind == "choice_from_col_contents") {
+      } else if (enable_nicer_multichoice_selection && zero_or_one_or_more && elem$kind == "choice_from_col_contents") {
         param <- elem$param
 
         choices <- character(0)
@@ -944,8 +948,9 @@ explorer_server_with_datasets <- function(caller_datasets = NULL) {
         dependencies <- c(dependencies, param)
 
         res <- list(ui = ui, input_ids = input_ids, dependencies = dependencies)
-      } else if (zero_or_more) {
+      } else if (zero_or_one_or_more) {
         attr(elem, "zero_or_more") <- FALSE
+        attr(elem, "one_or_more") <- FALSE
 
         input_ids <- list()
 
@@ -1163,6 +1168,11 @@ explorer_server_with_datasets <- function(caller_datasets = NULL) {
       params <- local({
         res <- c()
         ids <- ui_and_ids()[["input_ids"]]
+        
+        # block execution until all inputs exist
+        missing_ids <- setdiff(ids, shiny::isolate(names(input)))
+        shiny::req(length(missing_ids) == 0)
+        
         for (i_val in seq_along(ids)) {
           param_name <- names(ids)[[i_val]]
           id <- ids[[i_val]]
@@ -1364,7 +1374,7 @@ explorer_server_with_datasets <- function(caller_datasets = NULL) {
         # Executes server on a separate reactive domain and destroys its observers when reinvoked
         server_return_val <- observer_dedup(
           id = "unique_dedup_id",
-          try(ui_server_id[["server"]](afmm), silent = TRUE),
+          ui_server_id[["server"]](afmm),
           session = session
         )
 
@@ -1484,47 +1494,74 @@ C_module <- function(module) {
     }
     return(res)
   }
+  
+  mandatory_module_args <- local({
+    args <- formals(module)
+    names(args)[sapply(args, function(x) is.name(x) && nchar(x) == 0)]
+  }) 
 
   wrapper <- function(...) {
     args <- as.list(match.call())
-
+    
+    missing_args <- setdiff(mandatory_module_args, names(args[-1]))
+    
+    module_ui <- function(...) list()
+    module_server <- function(...) NULL
+    module_id <- ""
+    if(length(missing_args) == 0) {
+      evaluated_module <- do.call(module, args[-1]) # First arg is the function call, rest are the args
+      module_ui <- evaluated_module[["ui"]]
+      module_server <- evaluated_module[["server"]]
+      module_id <- evaluated_module[["module_id"]]
+    }
+    
     namespaced_mod_name <- deparse(args[[1]])
     if (!grepl("::", namespaced_mod_name, fixed = TRUE)) { # TODO: Too hacky?
       namespaced_mod_name <- paste0(where("mod_corr_hm")[[".packageName"]], "::", namespaced_mod_name)
     }
 
-    evaluated_module <- do.call(module, args[-1]) # FIXME: First arg is the function call, rest are the args
-    module_ui <- evaluated_module[["ui"]]
-    module_server <- evaluated_module[["server"]]
-    module_id <- evaluated_module[["module_id"]]
+    # TODO: If at some point all `unfiltered_dataset`s become available in a non-reactive form, we could do all checks
+    #       prior to reactive time to have fewer moving parts. All `shiny::reactive`s from here until the end of the
+    #       function would evaporate.
 
     res <- list(
       ui = function(module_id) app_creator_feedback_ui(module_id), # `module` UI gated by app_creator_feedback_server
       server = function(afmm) {
         fb <- shiny::reactive({
-          # NOTE: We check the call here and not inside the module server function because:
-          #       - app creators interact with the davinci module and not with the ui-server combo, so
-          #         errors reported with respect to the module signature will make sense to them.
-          #         The module server function might use a different function signature.
-          #       - Here we also have access to the unfiltered dataset, which allows us to ensure call
-          #         correctness independent of filter state or operation.
-          #         Also, as long as the unfiltered dataset does not change (and to date no davinci app
-          #         changes it dynamically) this check only runs once at the beginning of the application
-          #         and has no further impact on performance.
-          #       - "catch errors early"
+          res <- NULL
+          if(length(missing_args)) {
+            res <- list(
+              warnings = character(0),
+              errors = sprintf("Missing mandatory argument `%s`.", missing_args)
+            )
+          } else {
+            # NOTE: We check the call here and not inside the module server function because:
+            #       - app creators interact with the davinci module and not with the ui-server combo, so
+            #         errors reported with respect to the module signature will make sense to them.
+            #         The module server function might use a different function signature.
+            #       - Here we also have access to the unfiltered dataset, which allows us to ensure call
+            #         correctness independent of filter state or operation.
+            #         Also, as long as the unfiltered dataset does not change (and to date no davinci app
+            #         changes it dynamically) this check only runs once at the beginning of the application
+            #         and has no further impact on performance.
+            #       - "catch errors early"
 
-          # Overwrite first "argument" (the function call, in fact) with the datasets provided to module manager
-          names(args)[[1]] <- "datasets"
-          args[[1]] <- shiny::isolate(afmm[["unfiltered_dataset"]]())
+            # Overwrite first "argument" (the function call, in fact) with the datasets provided to module manager
+            names(args)[[1]] <- "datasets"
+            args[[1]] <- shiny::isolate(afmm[["unfiltered_dataset"]]())
 
-          # Prepend afmm to args to allow checking receiver_ids
-          args <- append(list(afmm = afmm), args)
+            # Prepend afmm to args to allow checking receiver_ids
+            args <- append(list(afmm = afmm), args)
 
-          where("mod_corr_hm")[[".packageName"]]
-          check_call_function <- C_check_call[[namespaced_mod_name]]
-          if (!is.function(check_call_function)) sprintf("Missing C_check_call function: %s", namespaced_mod_name)
-          res <- do.call(check_call_function, args)
-          res
+            check_call_function <- C_check_call[[namespaced_mod_name]]
+            if (!is.function(check_call_function)) sprintf("Missing C_check_call function: %s", namespaced_mod_name)
+
+            # check functions do not have defaults, so we extract them from the formals of the module for consistency
+            missing_args <- setdiff(names(formals(module)), names(args))
+            args <- c(args, formals(module)[missing_args])
+            res <- do.call(check_call_function, args)
+          }
+          return(res)
         })
 
         fb_warn <- shiny::reactive(fb()[["warnings"]])
@@ -1559,7 +1596,14 @@ C_module <- function(module) {
           )
         }
 
-        module_server(afmm)
+        res <- shiny::reactive({
+          res <- NULL
+          fb <- fb()
+          if(length(fb[["errors"]]) == 0) {
+            res <- try(module_server(afmm), silent = TRUE)
+          }
+        })
+        return(res())
       },
       module_id = module_id
     )
@@ -1580,20 +1624,44 @@ C_assert <- function(container, cond, msg) {
 C_is_valid_shiny_id <- function(s) grepl("^$|^[a-zA-Z][a-zA-Z0-9_-]*$", s)
 
 C_generate_check_function <- function(spec) {
+  stopifnot(spec$kind == "group")
+  
   res <- character(0)
   push <- function(s) res <<- c(res, s)
   push("function(afmm, datasets,")
   param_names <- paste(names(spec$elements), collapse = ',')
   push(param_names)
-  push("){\n")
+  push(", warn, err){\n")
 
-  push("NULL\n") # TODO: Write checks here
+  push("OK <- logical(0)\n")
+  push("used_dataset_names <- new.env(parent = emptyenv())\n")
+
+  for(elem_name in names(spec$elements)){
+    elem <- spec$elements[[elem_name]]
+    attrs <- setdiff(names(attributes(elem)), c('names', 'docs')) 
+    
+    if(elem$kind == 'mod'){
+      push(sprintf("OK[['%s']] <- C_check_module_id('%s', %s, warn, err)\n", elem_name, elem_name, elem_name))
+    } else if(elem$kind == 'dataset_name'){
+      push(sprintf("OK[['%s']] <- C_check_dataset_name('%s', %s, datasets, used_dataset_names, warn, err)\n", 
+                   elem_name, elem_name, elem_name))
+    } else if(elem$kind == 'col'){
+      push(sprintf("subkind <- %s\n", deparse(elem$sub_kind) |> paste(collapse = "")))
+      push(sprintf("flags <- %s\n", deparse(attributes(elem)[attrs]) |> paste(collapse = "")))
+      push(sprintf("OK[['%s']] <- OK[['%s']] && C_check_dataset_colum_name('%s', %s, subkind, flags, %s, datasets[[%s]], warn, err)\n", 
+                   elem_name, elem$dataset_name, elem_name, elem_name, elem$dataset_name, elem$dataset_name))
+    } else {
+      push(sprintf("'TODO: %s (%s)'\n", elem_name, elem$kind))
+    }
+  }
+
+
+  push(sprintf("return(OK)\n"))
 
   push("}\n")
 
   return(res)
 }
-
 
 C_generate_check_functions <- function(specs = module_specifications, output_file = 'R/check_call_auto.R') {
   styler_off <- "({\n# styler: off"
@@ -1604,7 +1672,7 @@ C_generate_check_functions <- function(specs = module_specifications, output_fil
 
   style_code <- function(code){
     s <- paste(code, collapse = '')
-    s <- parse(text = s, keep.source = FALSE)[[1]] |> deparse() |> trimws('right') |> paste(collapse = '\n')
+    s <- parse(text = s, keep.source = FALSE)[[1]] |> deparse(width.cutoff = 100) |> trimws('right') |> paste(collapse = '\n')
     return(s)
   }
 
@@ -1612,9 +1680,9 @@ C_generate_check_functions <- function(specs = module_specifications, output_fil
     if (!grepl("::", spec_name, fixed = TRUE)) stop(paste("Expected API spec name to be namespaced (`::`):", spec_name))
     denamespaced_spec_name <- strsplit(spec_name, '::')[[1]][[2]]
     check_function_name <- paste0('check_', denamespaced_spec_name, '_auto')
-    res <- c(res, sprintf("\n\n# %s\n%s <- ", spec_name, check_function_name))
+    res <- c(res, sprintf("\n\n# %s\n", spec_name))
     res <- c(res, 
-      C_generate_check_function(specs[[spec_name]]) |> style_code()
+      c(check_function_name, '<-', C_generate_check_function(specs[[spec_name]])) |> style_code()
     )
   }
 
@@ -1624,4 +1692,75 @@ C_generate_check_functions <- function(specs = module_specifications, output_fil
   writeChar(contents, output_file, eos = NULL)
 
   return(NULL)
+}
+
+C_test_string <- function(s) {
+  is.character(s) && length(s) == 1
+}
+
+C_check_module_id <- function(name, value, warn, err) {
+  C_assert(err, C_test_string(value), sprintf("`%s` should be a string", name)) &&
+    C_assert(warn, nchar(value) > 0, sprintf("Consider providing a non-empty `%s`.", name)) &&
+    C_assert(err,
+      C_is_valid_shiny_id(value),
+      paste(
+        sprintf("`%s` should be a valid identifier, starting with a letter and followed by", name),
+        "alphanumeric characters, hyphens and underscores"
+      )
+    )
+}
+
+C_check_dataset_name <- function(name, value, available_datasets, used_dataset_names, warn, err) {
+  ok <- (
+    C_assert(err, !missing(value), sprintf("`%s` missing", name)) && # TODO: ? Remove this one
+      C_assert(err,
+        C_test_string(value) && 
+        value %in% names(available_datasets),
+        paste(
+          sprintf("`%s` should be a string referring to one of the available datasets: ", name),
+          paste(sprintf('"%s"', names(available_datasets)), collapse = ", "), "."
+        )
+      )
+  )
+  if(ok) used_dataset_names[[name]] <- value
+  return(ok)
+}
+
+C_list_columns_of_kind <- function(dataset, type) {
+  res <- names(dataset)[sapply(seq_len(ncol(dataset)), function(x) T_is_of_kind(dataset[[x]], type))]
+  return(res)
+}
+
+C_check_dataset_colum_name <- function(name, value, subkind, flags, dataset_name, dataset_value, warn, err) {
+  ok <- FALSE
+  
+  valid_column_names <- C_list_columns_of_kind(dataset_value, subkind)
+  
+  zero_or_more <- isTRUE(flags[["zero_or_more"]])
+  one_or_more <- isTRUE(flags[["one_or_more"]])
+  zero_or_one_or_more <- zero_or_more || one_or_more
+  if(zero_or_one_or_more) {
+    min_len <- 0
+    if(one_or_more) min_len <- 1
+    ok <- C_assert(err,
+      is.character(value) && 
+      all(value %in% valid_column_names) &&
+      length(value) >= min_len,
+      paste(
+        sprintf("`%s` should be a character vector of length greater than %s referring to one of the following columns of dataset `%s`: ", 
+                name, c('zero', 'one')[[min_len+1]], dataset_name),
+        paste(sprintf('"%s"', valid_column_names), collapse = ", "), "."
+      )
+    )
+  } else {
+    ok <- C_assert(err,
+      C_test_string(value) && 
+      all(value %in% valid_column_names),
+      paste(
+        sprintf("`%s` should be a string referring to one of the following columns of dataset `%s`: ", name, dataset_name),
+        paste(sprintf('"%s"', valid_column_names), collapse = ", "), "."
+      )
+    )
+  }
+  return(ok)
 }

@@ -22,7 +22,7 @@ mod_corr_hm_API <- T_group(
   cat_var = T_col("bm_dataset_name", T_or(T_character(), T_factor())),
   par_var = T_col("bm_dataset_name", T_or(T_character(), T_factor())),
   visit_var = T_col("bm_dataset_name", T_or(T_character(), T_factor(), T_numeric())),
-  value_vars = T_col("bm_dataset_name", T_numeric()) |> T_flag("zero_or_more"), # FIXME: one_or_more?
+  value_vars = T_col("bm_dataset_name", T_numeric()) |> T_flag("one_or_more"),
   default_cat = T_choice_from_col_contents("cat_var") |> T_flag("zero_or_more", "optional"),
   default_par = T_choice_from_col_contents("par_var") |> T_flag("zero_or_more", "optional"),
   default_visit = T_choice_from_col_contents("visit_var") |> T_flag("zero_or_more", "optional"),

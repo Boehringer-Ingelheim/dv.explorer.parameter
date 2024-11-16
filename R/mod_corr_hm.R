@@ -505,26 +505,6 @@ corr_hm_server <- function(id,
                            visit_var = "AVISIT",
                            value_vars = c("AVAL", "PCHG"),
                            default_value = NULL) {
-  if (FALSE) { # TODO(miguel): Move into check_call_manual_corr_hm
-    # id assert ---- It goes on its own as id is used to provide context to the other assertions
-    ac <- checkmate::makeAssertCollection() # nolint
-    checkmate::assert_string(id, min.chars = 1, add = ac)
-    # non reactive asserts
-    ###### Check types of reactive variables, pred_dataset, ...
-    checkmate::assert_string(cat_var, min.chars = 1, add = ac)
-    checkmate::assert_string(par_var, min.chars = 1, add = ac)
-    checkmate::assert_character(
-      value_vars,
-      min.chars = 1, any.missing = FALSE,
-      all.missing = FALSE, unique = TRUE, min.len = 1, add = ac
-    )
-    checkmate::assert_string(visit_var, min.chars = 1, add = ac)
-    checkmate::assert_string(subjid_var, min.chars = 1, add = ac)
-    checkmate::assert_string(default_value, min.chars = 1, null.ok = TRUE, add = ac)
-
-    checkmate::reportAssertions(ac)
-  }
-
   # module constants ----
   VAR <- poc( # nolint Parameters from the function that will be considered constant across the function
     CAT = cat_var,
@@ -543,6 +523,7 @@ corr_hm_server <- function(id,
     # dataset validation ----
     v_ch_dataset <- shiny::reactive(
       {
+        # TODO: Remove once dataset checks are in place
         ac <- checkmate::makeAssertCollection()
         checkmate::assert_data_frame(bm_dataset(), min.rows = 1, .var.name = ns("bm_dataset"), add = ac)
         checkmate::assert_names(
@@ -881,7 +862,7 @@ ch_subset_data <- function(sel, cat_col, par_col, val_col, vis_col, bm_ds, subj_
   res
 }
 
-#' Correlation Heatmap DaVinci module
+#' Correlation Heatmap module
 #'
 #' Display a heatmap of correlation coefficients (Pearson, Spearman) along with confidence intervals
 #' and p-values between dataset parameters over a single visit.
@@ -893,9 +874,6 @@ ch_subset_data <- function(sel, cat_col, par_col, val_col, vis_col, bm_ds, subj_
 #' @param bm_dataset_name `[character(1)]`
 #'
 #' Biomarker dataset name
-#'
-#' @param bm_dataset_disp `[mm_dispatcher(1)]`
-#' module manager dispatchers passed as `bm_dataset` and `group_dataset` to `corr_hm_server`
 #'
 #' @name mod_corr_hm
 #'
@@ -910,14 +888,7 @@ mod_corr_hm_ <- function(module_id, bm_dataset_name,
                          visit_var = "AVISIT",
                          value_vars = c("AVAL", "PCHG"),
                          default_cat = NULL, default_par = NULL, default_visit = NULL,
-                         default_value = NULL, bm_dataset_disp) {
-  if (!missing(bm_dataset_name) && !missing(bm_dataset_disp)) {
-    rlang::abort("`bm_dataset_name` and `bm_dataset_disp` cannot be used at the same time, use one or the other")
-  }
-  if (!missing(bm_dataset_name)) {
-    bm_dataset_disp <- dv.manager::mm_dispatch("filtered_dataset", bm_dataset_name)
-  }
-
+                         default_value = NULL) {
   mod <- list(
     ui = function(mod_id) {
       corr_hm_UI(id = mod_id, default_cat = default_cat, default_par = default_par, default_visit = default_visit)
@@ -925,7 +896,7 @@ mod_corr_hm_ <- function(module_id, bm_dataset_name,
     server = function(afmm) {
       corr_hm_server(
         id = module_id,
-        bm_dataset = dv.manager::mm_resolve_dispatcher(bm_dataset_disp, afmm, flatten = TRUE),
+        bm_dataset = shiny::reactive(afmm[["unfiltered_dataset"]]()[[bm_dataset_name]]),
         default_value = default_value, subjid_var = subjid_var, cat_var = cat_var, par_var = par_var,
         visit_var = visit_var, value_vars = value_vars
       )
