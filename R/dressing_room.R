@@ -1168,11 +1168,11 @@ explorer_server_with_datasets <- function(caller_datasets = NULL) {
       params <- local({
         res <- c()
         ids <- ui_and_ids()[["input_ids"]]
-        
+
         # block execution until all inputs exist
         missing_ids <- setdiff(ids, shiny::isolate(names(input)))
         shiny::req(length(missing_ids) == 0)
-        
+
         for (i_val in seq_along(ids)) {
           param_name <- names(ids)[[i_val]]
           id <- ids[[i_val]]
@@ -1494,27 +1494,27 @@ C_module <- function(module) {
     }
     return(res)
   }
-  
+
   mandatory_module_args <- local({
     args <- formals(module)
     names(args)[sapply(args, function(x) is.name(x) && nchar(x) == 0)]
-  }) 
+  })
 
   wrapper <- function(...) {
     args <- as.list(match.call())
-    
+
     missing_args <- setdiff(mandatory_module_args, names(args[-1]))
-    
+
     module_ui <- function(...) list()
     module_server <- function(...) NULL
     module_id <- ""
-    if(length(missing_args) == 0) {
+    if (length(missing_args) == 0) {
       evaluated_module <- do.call(module, args[-1]) # First arg is the function call, rest are the args
       module_ui <- evaluated_module[["ui"]]
       module_server <- evaluated_module[["server"]]
       module_id <- evaluated_module[["module_id"]]
     }
-    
+
     namespaced_mod_name <- deparse(args[[1]])
     if (!grepl("::", namespaced_mod_name, fixed = TRUE)) { # TODO: Too hacky?
       namespaced_mod_name <- paste0(where("mod_corr_hm")[[".packageName"]], "::", namespaced_mod_name)
@@ -1529,7 +1529,7 @@ C_module <- function(module) {
       server = function(afmm) {
         fb <- shiny::reactive({
           res <- NULL
-          if(length(missing_args)) {
+          if (length(missing_args)) {
             res <- list(
               warnings = character(0),
               errors = sprintf("Missing mandatory argument `%s`.", missing_args)
@@ -1599,7 +1599,7 @@ C_module <- function(module) {
         res <- shiny::reactive({
           res <- NULL
           fb <- fb()
-          if(length(fb[["errors"]]) == 0) {
+          if (length(fb[["errors"]]) == 0) {
             res <- try(module_server(afmm), silent = TRUE)
           }
         })
@@ -1625,31 +1625,35 @@ C_is_valid_shiny_id <- function(s) grepl("^$|^[a-zA-Z][a-zA-Z0-9_-]*$", s)
 
 C_generate_check_function <- function(spec) {
   stopifnot(spec$kind == "group")
-  
+
   res <- character(0)
   push <- function(s) res <<- c(res, s)
   push("function(afmm, datasets,")
-  param_names <- paste(names(spec$elements), collapse = ',')
+  param_names <- paste(names(spec$elements), collapse = ",")
   push(param_names)
   push(", warn, err){\n")
 
   push("OK <- logical(0)\n")
   push("used_dataset_names <- new.env(parent = emptyenv())\n")
 
-  for(elem_name in names(spec$elements)){
+  for (elem_name in names(spec$elements)) {
     elem <- spec$elements[[elem_name]]
-    attrs <- setdiff(names(attributes(elem)), c('names', 'docs')) 
-    
-    if(elem$kind == 'mod'){
+    attrs <- setdiff(names(attributes(elem)), c("names", "docs"))
+
+    if (elem$kind == "mod") {
       push(sprintf("OK[['%s']] <- C_check_module_id('%s', %s, warn, err)\n", elem_name, elem_name, elem_name))
-    } else if(elem$kind == 'dataset_name'){
-      push(sprintf("OK[['%s']] <- C_check_dataset_name('%s', %s, datasets, used_dataset_names, warn, err)\n", 
-                   elem_name, elem_name, elem_name))
-    } else if(elem$kind == 'col'){
+    } else if (elem$kind == "dataset_name") {
+      push(sprintf(
+        "OK[['%s']] <- C_check_dataset_name('%s', %s, datasets, used_dataset_names, warn, err)\n",
+        elem_name, elem_name, elem_name
+      ))
+    } else if (elem$kind == "col") {
       push(sprintf("subkind <- %s\n", deparse(elem$sub_kind) |> paste(collapse = "")))
       push(sprintf("flags <- %s\n", deparse(attributes(elem)[attrs]) |> paste(collapse = "")))
-      push(sprintf("OK[['%s']] <- OK[['%s']] && C_check_dataset_colum_name('%s', %s, subkind, flags, %s, datasets[[%s]], warn, err)\n", 
-                   elem_name, elem$dataset_name, elem_name, elem_name, elem$dataset_name, elem$dataset_name))
+      push(sprintf(
+        "OK[['%s']] <- OK[['%s']] && C_check_dataset_colum_name('%s', %s, subkind, flags, %s, datasets[[%s]], warn, err)\n",
+        elem_name, elem$dataset_name, elem_name, elem_name, elem$dataset_name, elem$dataset_name
+      ))
     } else {
       push(sprintf("'TODO: %s (%s)'\n", elem_name, elem$kind))
     }
@@ -1663,32 +1667,36 @@ C_generate_check_function <- function(spec) {
   return(res)
 }
 
-C_generate_check_functions <- function(specs = module_specifications, output_file = 'R/check_call_auto.R') {
+C_generate_check_functions <- function(specs = module_specifications, output_file = "R/check_call_auto.R") {
   styler_off <- "({\n# styler: off"
   styler_on <- "\n\n})\n# styler: on\n"
 
   res <- c("# Automatically generated module API check functions. Think twice before editing them manually.\n")
   res <- c(res, styler_off)
 
-  style_code <- function(code){
-    s <- paste(code, collapse = '')
-    s <- parse(text = s, keep.source = FALSE)[[1]] |> deparse(width.cutoff = 100) |> trimws('right') |> paste(collapse = '\n')
+  style_code <- function(code) {
+    s <- paste(code, collapse = "")
+    s <- parse(text = s, keep.source = FALSE)[[1]] |>
+      deparse(width.cutoff = 100) |>
+      trimws("right") |>
+      paste(collapse = "\n")
     return(s)
   }
 
-  for(spec_name in names(specs)) {
+  for (spec_name in names(specs)) {
     if (!grepl("::", spec_name, fixed = TRUE)) stop(paste("Expected API spec name to be namespaced (`::`):", spec_name))
-    denamespaced_spec_name <- strsplit(spec_name, '::')[[1]][[2]]
-    check_function_name <- paste0('check_', denamespaced_spec_name, '_auto')
+    denamespaced_spec_name <- strsplit(spec_name, "::")[[1]][[2]]
+    check_function_name <- paste0("check_", denamespaced_spec_name, "_auto")
     res <- c(res, sprintf("\n\n# %s\n", spec_name))
-    res <- c(res, 
-      c(check_function_name, '<-', C_generate_check_function(specs[[spec_name]])) |> style_code()
+    res <- c(
+      res,
+      c(check_function_name, "<-", C_generate_check_function(specs[[spec_name]])) |> style_code()
     )
   }
 
   res <- c(res, styler_on)
 
-  contents <- paste(res, collapse = '')
+  contents <- paste(res, collapse = "")
   writeChar(contents, output_file, eos = NULL)
 
   return(NULL)
@@ -1701,7 +1709,8 @@ C_test_string <- function(s) {
 C_check_module_id <- function(name, value, warn, err) {
   C_assert(err, C_test_string(value), sprintf("`%s` should be a string", name)) &&
     C_assert(warn, nchar(value) > 0, sprintf("Consider providing a non-empty `%s`.", name)) &&
-    C_assert(err,
+    C_assert(
+      err,
       C_is_valid_shiny_id(value),
       paste(
         sprintf("`%s` should be a valid identifier, starting with a letter and followed by", name),
@@ -1713,16 +1722,17 @@ C_check_module_id <- function(name, value, warn, err) {
 C_check_dataset_name <- function(name, value, available_datasets, used_dataset_names, warn, err) {
   ok <- (
     C_assert(err, !missing(value), sprintf("`%s` missing", name)) && # TODO: ? Remove this one
-      C_assert(err,
-        C_test_string(value) && 
-        value %in% names(available_datasets),
+      C_assert(
+        err,
+        C_test_string(value) &&
+          value %in% names(available_datasets),
         paste(
           sprintf("`%s` should be a string referring to one of the available datasets: ", name),
           paste(sprintf('"%s"', names(available_datasets)), collapse = ", "), "."
         )
       )
   )
-  if(ok) used_dataset_names[[name]] <- value
+  if (ok) used_dataset_names[[name]] <- value
   return(ok)
 }
 
@@ -1733,29 +1743,33 @@ C_list_columns_of_kind <- function(dataset, type) {
 
 C_check_dataset_colum_name <- function(name, value, subkind, flags, dataset_name, dataset_value, warn, err) {
   ok <- FALSE
-  
+
   valid_column_names <- C_list_columns_of_kind(dataset_value, subkind)
-  
+
   zero_or_more <- isTRUE(flags[["zero_or_more"]])
   one_or_more <- isTRUE(flags[["one_or_more"]])
   zero_or_one_or_more <- zero_or_more || one_or_more
-  if(zero_or_one_or_more) {
+  if (zero_or_one_or_more) {
     min_len <- 0
-    if(one_or_more) min_len <- 1
-    ok <- C_assert(err,
-      is.character(value) && 
-      all(value %in% valid_column_names) &&
-      length(value) >= min_len,
+    if (one_or_more) min_len <- 1
+    ok <- C_assert(
+      err,
+      is.character(value) &&
+        all(value %in% valid_column_names) &&
+        length(value) >= min_len,
       paste(
-        sprintf("`%s` should be a character vector of length greater than %s referring to one of the following columns of dataset `%s`: ", 
-                name, c('zero', 'one')[[min_len+1]], dataset_name),
+        sprintf(
+          "`%s` should be a character vector of length greater than %s referring to one of the following columns of dataset `%s`: ",
+          name, c("zero", "one")[[min_len + 1]], dataset_name
+        ),
         paste(sprintf('"%s"', valid_column_names), collapse = ", "), "."
       )
     )
   } else {
-    ok <- C_assert(err,
-      C_test_string(value) && 
-      all(value %in% valid_column_names),
+    ok <- C_assert(
+      err,
+      C_test_string(value) &&
+        all(value %in% valid_column_names),
       paste(
         sprintf("`%s` should be a string referring to one of the following columns of dataset `%s`: ", name, dataset_name),
         paste(sprintf('"%s"', valid_column_names), collapse = ", "), "."
