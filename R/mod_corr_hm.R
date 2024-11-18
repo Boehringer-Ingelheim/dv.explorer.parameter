@@ -886,7 +886,7 @@ mod_corr_hm_ <- function(module_id, bm_dataset_name,
                          cat_var = "PARCAT",
                          par_var = "PARAM",
                          visit_var = "AVISIT",
-                         value_vars = c("AVAL", "PCHG"),
+                         value_vars = "AVAL",
                          default_cat = NULL, default_par = NULL, default_visit = NULL,
                          default_value = NULL) {
   mod <- list(
@@ -919,10 +919,9 @@ mod_corr_hm_API_docs <- list(
   default_cat = "",
   default_par = "",
   default_visit = "",
-  default_val = "" # FIXME(miguel): Should be called default_value_var
+  default_value = "" # FIXME(miguel): Should be called default_value_var
 )
 
-# TODO: Complete
 mod_corr_hm_API <- T_group(
   module_id = T_mod_ID(),
   bm_dataset_name = T_dataset_name(),
@@ -934,7 +933,7 @@ mod_corr_hm_API <- T_group(
   default_cat = T_choice_from_col_contents("cat_var") |> T_flag("zero_or_more", "optional"),
   default_par = T_choice_from_col_contents("par_var") |> T_flag("zero_or_more", "optional"),
   default_visit = T_choice_from_col_contents("visit_var") |> T_flag("zero_or_more", "optional"),
-  default_val = T_choice("value_vars") |> T_flag("optional") # FIXME(miguel): Should be called default_value_var
+  default_value = T_choice("value_vars") |> T_flag("optional") # FIXME(miguel): Should be called default_value_var
 ) |> T_attach_docs(mod_corr_hm_API_docs)
 
 
