@@ -906,4 +906,36 @@ mod_corr_hm_ <- function(module_id, bm_dataset_name,
   return(mod)
 }
 
+# Correlation heatmap module interface description ----
+mod_corr_hm_API_docs <- list(
+  "Correlation Heatmap",
+  module_id = "",
+  bm_dataset_name = "",
+  subjid_var = "",
+  cat_var = "",
+  par_var = "",
+  visit_var = "",
+  value_vars = "",
+  default_cat = "",
+  default_par = "",
+  default_visit = "",
+  default_val = "" # FIXME(miguel): Should be called default_value_var
+)
+
+# TODO: Complete
+mod_corr_hm_API <- T_group(
+  module_id = T_mod_ID(),
+  bm_dataset_name = T_dataset_name(),
+  subjid_var = T_col("bm_dataset_name", T_factor()) |> T_flag("subjid_var"),
+  cat_var = T_col("bm_dataset_name", T_or(T_character(), T_factor())),
+  par_var = T_col("bm_dataset_name", T_or(T_character(), T_factor())),
+  visit_var = T_col("bm_dataset_name", T_or(T_character(), T_factor(), T_numeric())),
+  value_vars = T_col("bm_dataset_name", T_numeric()) |> T_flag("one_or_more"),
+  default_cat = T_choice_from_col_contents("cat_var") |> T_flag("zero_or_more", "optional"),
+  default_par = T_choice_from_col_contents("par_var") |> T_flag("zero_or_more", "optional"),
+  default_visit = T_choice_from_col_contents("visit_var") |> T_flag("zero_or_more", "optional"),
+  default_val = T_choice("value_vars") |> T_flag("optional") # FIXME(miguel): Should be called default_value_var
+) |> T_attach_docs(mod_corr_hm_API_docs)
+
+
 mod_corr_hm <- C_module(mod_corr_hm_)

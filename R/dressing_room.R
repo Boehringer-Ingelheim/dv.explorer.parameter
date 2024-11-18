@@ -1667,6 +1667,7 @@ C_generate_check_function <- function(spec) {
   return(res)
 }
 
+# NOTE: For the moment call by running: devtools::load_all(); C_generate_check_functions()
 C_generate_check_functions <- function(specs = module_specifications, output_file = "R/check_call_auto.R") {
   styler_off <- "({\n# styler: off"
   styler_on <- "\n\n})\n# styler: on\n"
