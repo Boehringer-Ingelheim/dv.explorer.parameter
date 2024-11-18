@@ -1171,7 +1171,7 @@ explorer_server_with_datasets <- function(caller_datasets = NULL) {
         ids <- ui_and_ids()[["input_ids"]]
 
         missing_ids <- setdiff(ids, shiny::isolate(names(input)))
-        for(id in missing_ids) input[[id]] # depend on missing expected inputs
+        for (id in missing_ids) input[[id]] # depend on missing expected inputs
         shiny::req(length(missing_ids) == 0) # but block execution until all inputs exist
 
         for (i_val in seq_along(ids)) {
@@ -1659,15 +1659,15 @@ C_generate_check_function <- function(spec) {
       dataset_param_name <- spec$elements[[elem$param]]$dataset_name
       push(sprintf("flags <- %s\n", deparse(attributes(elem)[attrs]) |> paste(collapse = "")))
       push(sprintf(
-        "OK[['%s']] <- OK[['%s']] && C_check_choice_from_col_contents('%s', %s, flags, '%s', datasets[[%s]], %s, warn, err)\n", 
-        elem_name, elem$param, elem_name, elem_name, dataset_param_name, dataset_param_name, elem$param)
-      )
+        "OK[['%s']] <- OK[['%s']] && C_check_choice_from_col_contents('%s', %s, flags, '%s', datasets[[%s]], %s, warn, err)\n",
+        elem_name, elem$param, elem_name, elem_name, dataset_param_name, dataset_param_name, elem$param
+      ))
     } else if (elem$kind == "choice") {
       push(sprintf("flags <- %s\n", deparse(attributes(elem)[attrs]) |> paste(collapse = "")))
       push(sprintf(
-        "OK[['%s']] <- OK[['%s']] && C_check_choice('%s', %s, flags, '%s', %s, warn, err)\n", 
-        elem_name, elem$param, elem_name, elem_name, elem$param, elem$param)
-      )
+        "OK[['%s']] <- OK[['%s']] && C_check_choice('%s', %s, flags, '%s', %s, warn, err)\n",
+        elem_name, elem$param, elem_name, elem_name, elem$param, elem$param
+      ))
     } else {
       push(sprintf("'TODO: %s (%s)'\n", elem_name, elem$kind))
     }
@@ -1795,56 +1795,73 @@ C_check_dataset_colum_name <- function(name, value, subkind, flags, dataset_name
 }
 
 C_list_values <- function(v) {
-  res <- ''
-  if(is.factor(v)) res <- sprintf('"%s"', levels(v))
-  else if(is.character(v)) res <- sprintf('"%s"', unique(v))
-  else browser()
-  
+  res <- ""
+  if (is.factor(v)) {
+    res <- sprintf('"%s"', levels(v))
+  } else if (is.character(v)) {
+    res <- sprintf('"%s"', unique(v))
+  } else {
+    browser()
+  }
+
   res <- paste(res, collapse = ", ")
-  
+
   return(res)
 }
 
 C_check_length <- function(name, value, flags, warn, err) {
   ok <- FALSE
-  if(isTRUE(flags[["optional"]]) && is.null(value)) {
+  if (isTRUE(flags[["optional"]]) && is.null(value)) {
     ok <- TRUE
   } else {
     min_len <- max_len <- 1L
-    if(isTRUE(flags[["zero_or_more"]])){
+    if (isTRUE(flags[["zero_or_more"]])) {
       min_len <- 0L
       max_len <- +Inf
-    } else if(isTRUE(flags[["one_or_more"]])) { 
+    } else if (isTRUE(flags[["one_or_more"]])) {
       min_len <- 1L
       max_len <- +Inf
     }
 
-    ok <- C_assert(err, min_len <= length(value) && length(value) <= max_len,
-                   ifelse(min_len < max_len,
-                          sprintf("`%s` has length %s but should have length in the range [%s, %s].",
-                                  name, length(value), min_len, max_len),
-                          sprintf("`%s` has length %s but should have length %s.",
-                                  name, length(value), min_len))
+    ok <- C_assert(
+      err, min_len <= length(value) && length(value) <= max_len,
+      ifelse(min_len < max_len,
+        sprintf(
+          "`%s` has length %s but should have length in the range [%s, %s].",
+          name, length(value), min_len, max_len
+        ),
+        sprintf(
+          "`%s` has length %s but should have length %s.",
+          name, length(value), min_len
+        )
+      )
     )
-
   }
   return(ok)
 }
 
 C_check_choice_from_col_contents <- function(name, value, flags, dataset_name, dataset_value, column, warn, err) {
   ok <- C_check_length(name, value, flags, warn, err) &&
-    C_assert(err, all(value %in% dataset_value[[column]]), 
-             sprintf("`%s` should contain only values present in column `%s` of dataset `%s`: %s.", 
-                     name, column, dataset_name, C_list_values(dataset_value[[column]])))
-  
+    C_assert(
+      err, all(value %in% dataset_value[[column]]),
+      sprintf(
+        "`%s` should contain only values present in column `%s` of dataset `%s`: %s.",
+        name, column, dataset_name, C_list_values(dataset_value[[column]])
+      )
+    )
+
   return(ok)
 }
 
 C_check_choice <- function(name, value, flags, values_name, values, warn, err) {
   ok <- C_check_length(name, value, flags, warn, err) &&
-    C_assert(err, all(value %in% values), 
-             sprintf("`%s` should contain only the following values: %s.", 
-                     name, C_list_values(values)))
+    C_assert(
+      err, all(value %in% values),
+      sprintf(
+        "`%s` should contain only the following values: %s.",
+        name, C_list_values(values)
+      )
+    )
 
   return(ok)
 }

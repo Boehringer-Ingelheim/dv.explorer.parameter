@@ -1694,5 +1694,3 @@ mod_lineplot_API <- T_group(
   default_transparency = T_numeric(min = 0.05, max = 1.) |> T_flag("optional")
   # default_y_axis_projection = ?? # FIXME: T_enum(c())
 ) |> T_attach_docs(mod_lineplot_API_docs) # TODO: Attach
-
-
