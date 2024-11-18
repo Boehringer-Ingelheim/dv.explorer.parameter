@@ -4,7 +4,7 @@
 
 # dv.explorer.parameter::mod_corr_hm
 check_mod_corr_hm_auto <- function(afmm, datasets, module_id, bm_dataset_name, subjid_var, cat_var, par_var,
-    visit_var, value_vars, default_cat, default_par, default_visit, default_val, warn, err) {
+    visit_var, value_vars, default_cat, default_par, default_visit, default_value, warn, err) {
     OK <- logical(0)
     used_dataset_names <- new.env(parent = emptyenv())
     OK[["module_id"]] <- C_check_module_id("module_id", module_id, warn, err)
@@ -31,10 +31,18 @@ check_mod_corr_hm_auto <- function(afmm, datasets, module_id, bm_dataset_name, s
     flags <- list(one_or_more = TRUE)
     OK[["value_vars"]] <- OK[["bm_dataset_name"]] && C_check_dataset_colum_name("value_vars", value_vars,
         subkind, flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
-    "TODO: default_cat (choice_from_col_contents)"
-    "TODO: default_par (choice_from_col_contents)"
-    "TODO: default_visit (choice_from_col_contents)"
-    "TODO: default_val (choice)"
+    flags <- list(zero_or_more = TRUE, optional = TRUE)
+    OK[["default_cat"]] <- OK[["cat_var"]] && C_check_choice_from_col_contents("default_cat", default_cat,
+        flags, "bm_dataset_name", datasets[[bm_dataset_name]], cat_var, warn, err)
+    flags <- list(zero_or_more = TRUE, optional = TRUE)
+    OK[["default_par"]] <- OK[["par_var"]] && C_check_choice_from_col_contents("default_par", default_par,
+        flags, "bm_dataset_name", datasets[[bm_dataset_name]], par_var, warn, err)
+    flags <- list(zero_or_more = TRUE, optional = TRUE)
+    OK[["default_visit"]] <- OK[["visit_var"]] && C_check_choice_from_col_contents("default_visit", default_visit,
+        flags, "bm_dataset_name", datasets[[bm_dataset_name]], visit_var, warn, err)
+    flags <- list(optional = TRUE)
+    OK[["default_value"]] <- OK[["value_vars"]] && C_check_choice("default_value", default_value, flags,
+        "value_vars", value_vars, warn, err)
     return(OK)
 }
 
