@@ -1459,12 +1459,20 @@ app_creator_feedback_server <- function(id, warning_messages, error_messages, ui
         res <- list()
         warn <- warning_messages()
         if (length(warn)) {
-          res[[length(res) + 1]] <- message_well("Module configuration warnings", Map(shiny::p, warn), color = "#fff7ef")
+          res[[length(res) + 1]] <-
+            message_well("Module configuration warnings",
+              Map(function(x) htmltools::p(htmltools::HTML(paste("\u2022", x))), warn),
+              color = "#fff7ef"
+            )
         }
 
         err <- error_messages()
         if (length(err)) {
-          res[[length(res) + 1]] <- message_well("Module configuration errors", Map(shiny::p, err), color = "#f4d7d7")
+          res[[length(res) + 1]] <-
+            message_well("Module configuration errors",
+              Map(function(x) htmltools::p(htmltools::HTML(paste("\u2022", x))), err),
+              color = "#f4d7d7"
+            )
         }
 
         if (length(error_messages()) == 0) res <- append(res, list(ui()))
@@ -1729,7 +1737,7 @@ C_check_module_id <- function(name, value, warn, err) {
       C_is_valid_shiny_id(value),
       paste(
         sprintf("`%s` should be a valid identifier, starting with a letter and followed by", name),
-        "alphanumeric characters, hyphens and underscores"
+        "alphanumeric characters, hyphens and underscores."
       )
     )
 }
@@ -1864,4 +1872,8 @@ C_check_choice <- function(name, value, flags, values_name, values, warn, err) {
     )
 
   return(ok)
+}
+
+C_format_inline_asis <- function(s) {
+  paste("<code style='white-space: pre; color:#333'>", s, "</code>")
 }

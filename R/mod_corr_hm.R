@@ -535,24 +535,9 @@ corr_hm_server <- function(id,
           .var.name = ns("bm_dataset"),
           add = ac
         )
-        checkmate::assert_factor(bm_dataset()[[VAR$SBJ]], .var.name = ns("bm_dataset"), add = ac)
         shiny::req(ac$isEmpty())
 
         checkmate::reportAssertions(ac)
-
-        supposedly_unique <- bm_dataset()[c(VAR$SBJ, VAR$CAT, VAR$PAR, VAR$VIS)]
-        dups <- duplicated(supposedly_unique)
-        shiny::validate(
-          shiny::need(
-            !any(dups),
-            paste0(
-              c(
-                CH_MSG$VALIDATE$TOO_MANY_ROWS,
-                capture.output(print(head(supposedly_unique[dups, ], 5)))
-              )
-            )
-          )
-        )
 
         bm_dataset()
       },
