@@ -907,7 +907,7 @@ mod_corr_hm_API_docs <- list(
   default_value = "" # FIXME(miguel): Should be called default_value_var
 )
 
-mod_corr_hm_API <- T_group(
+mod_corr_hm_API_spec <- T_group(
   module_id = T_mod_ID(),
   bm_dataset_name = T_dataset_name(),
   subjid_var = T_col("bm_dataset_name", T_factor()) |> T_flag("subjid_var"),
@@ -922,4 +922,43 @@ mod_corr_hm_API <- T_group(
 ) |> T_attach_docs(mod_corr_hm_API_docs)
 
 
-mod_corr_hm <- C_module(mod_corr_hm_)
+check_mod_corr_hm <- function(
+    afmm, datasets, module_id, bm_dataset_name, subjid_var, cat_var, par_var, visit_var,
+    value_vars, default_cat, default_par, default_visit, default_value) {
+  warn <- C_container()
+  err <- C_container()
+
+  # TODO: Replace this function with a generic one that performs the checks based on mod_corr_hm_API_spec.
+  # Something along the lines of OK <- C_check_API(mod_corr_hm_API_spec, args = match.call(), warn, err)
+  
+  OK <- check_mod_corr_hm_auto(
+    afmm, datasets, module_id, bm_dataset_name, subjid_var, cat_var, par_var, visit_var,
+    value_vars, default_cat, default_par, default_visit, default_value,
+    warn, err
+  )
+
+  # Checks that API spec does not (yet?) capture
+  if (OK[["bm_dataset_name"]] && OK[["subjid_var"]]) {
+    dataset <- datasets[[bm_dataset_name]]
+    C_assert(err, is.factor(dataset[[subjid_var]]), "Column referenced by `subjid_var` should be a factor.")
+  }
+
+  if (OK[["bm_dataset_name"]] && OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] && OK[["visit_var"]]) {
+    dataset <- datasets[[bm_dataset_name]]
+    supposedly_unique <- dataset[c(subjid_var, cat_var, par_var, visit_var)]
+    dups <- duplicated(supposedly_unique)
+
+    C_assert(err, !any(dups), {
+      dups <- capture.output(print(head(supposedly_unique[dups, ], 5))) |> paste(collapse = "\n")
+      paste("The dataset provided contains repeated rows with identical subject, category, parameter and",
+            "visit values. This module expects them to be unique. Here are the first few duplicates:",
+            paste("<pre>", dups, "</pre>"))
+    })
+  }
+
+  res <- list(warnings = warn[["messages"]], errors = err[["messages"]])
+  return(res)
+}
+
+
+mod_corr_hm <- C_module(mod_corr_hm_, check_mod_corr_hm)

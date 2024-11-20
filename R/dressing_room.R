@@ -1488,10 +1488,7 @@ app_creator_feedback_server <- function(id, warning_messages, error_messages, ui
 # Ad-hoc "C_"hecks system ----
 
 # Wrap the UI and server of a module so that, once parameterized, they go through a check function prior to running.
-# The check function resides in `C_check_call[[namespaced_mod_name]]`.
-# That function could be generated on the fly from the module API specification, but we go to the trouble of storing it
-# as text inside the package so that its easy to step through and read.
-C_module <- function(module) {
+C_module <- function(module, check_mod_function) {
   where <- function(name, env = parent.frame()) { # lifted from http://adv-r.had.co.nz/Environments.html
     res <- NULL
     if (identical(env, emptyenv())) {
@@ -1524,11 +1521,6 @@ C_module <- function(module) {
       module_id <- evaluated_module[["module_id"]]
     }
 
-    namespaced_mod_name <- deparse(args[[1]])
-    if (!grepl("::", namespaced_mod_name, fixed = TRUE)) { # TODO: Too hacky?
-      namespaced_mod_name <- paste0(where("mod_corr_hm")[[".packageName"]], "::", namespaced_mod_name)
-    }
-
     # TODO: If at some point all `unfiltered_dataset`s become available in a non-reactive form, we could do all checks
     #       prior to reactive time to have fewer moving parts. All `shiny::reactive`s from here until the end of the
     #       function would evaporate.
@@ -1538,7 +1530,7 @@ C_module <- function(module) {
       server = function(afmm) {
         fb <- shiny::reactive({
           res <- NULL
-          if (length(missing_args)) {
+          if (length(missing_args) > 0) {
             res <- list(
               warnings = character(0),
               errors = sprintf("Missing mandatory argument `%s`.", missing_args)
@@ -1561,14 +1553,11 @@ C_module <- function(module) {
 
             # Prepend afmm to args to allow checking receiver_ids
             args <- append(list(afmm = afmm), args)
-
-            check_call_function <- C_check_call[[namespaced_mod_name]]
-            if (!is.function(check_call_function)) sprintf("Missing C_check_call function: %s", namespaced_mod_name)
-
+            
             # check functions do not have defaults, so we extract them from the formals of the module for consistency
             missing_args <- setdiff(names(formals(module)), names(args))
             args <- c(args, formals(module)[missing_args])
-            res <- do.call(check_call_function, args)
+            res <- do.call(check_mod_function, args)
           }
           return(res)
         })
