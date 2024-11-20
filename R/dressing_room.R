@@ -1582,6 +1582,7 @@ C_module <- function(module) {
         )
 
         # TODO: Modify afmm to the `map_to` flags in the API. `dv.papo` relies on this
+        # nolint start
         if (FALSE) {
           filtered_mapped_datasets <- shiny::reactive(
             T_honor_map_to_flag(afmm$filtered_dataset(), mod_lineplot_API, args)
@@ -1604,6 +1605,7 @@ C_module <- function(module) {
             visit_var = visit_var, value_vars = value_vars
           )
         }
+        # nolint end
 
         res <- shiny::reactive({
           res <- NULL
