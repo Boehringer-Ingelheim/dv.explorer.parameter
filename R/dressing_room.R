@@ -1597,7 +1597,7 @@ C_module <- function(module, check_mod_function) {
         # nolint end
 
         # TODO: Only execute the server if length(fb()[["errors"]]) == 0
-        #       once afmm offers a non-reactive version of unfiltered_dataset and feedback 
+        #       once afmm offers a non-reactive version of unfiltered_dataset and feedback
         #       can be computed prior to reactive time
         res <- try(module_server(afmm), silent = TRUE)
         return(res)

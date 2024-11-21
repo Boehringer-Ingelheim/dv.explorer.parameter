@@ -1244,25 +1244,9 @@ mod_forest <- function(module_id,
                        default_value = NULL,
                        default_var = NULL,
                        default_group = NULL,
-                       default_categorical_A = NULL, # nolint
-                       default_categorical_B = NULL, # nolint
+                       default_categorical_A = NULL,
+                       default_categorical_B = NULL,
                        bm_dataset_disp, group_dataset_disp) {
-  if (!missing(bm_dataset_name) && !missing(bm_dataset_disp)) {
-    rlang::abort("`bm_dataset_name` and `bm_dataset_disp` cannot be used at the same time, use one or the other")
-  }
-
-  if (!missing(group_dataset_name) && !missing(group_dataset_disp)) {
-    rlang::abort("`group_dataset_name` and `group_dataset_disp` cannot be used at the same time, use one or the other")
-  }
-
-  if (!missing(bm_dataset_name)) {
-    bm_dataset_disp <- dv.manager::mm_dispatch("filtered_dataset", bm_dataset_name)
-  }
-
-  if (!missing(group_dataset_name)) {
-    group_dataset_disp <- dv.manager::mm_dispatch("filtered_dataset", group_dataset_name)
-  }
-
   numeric_numeric_function_names <- names(numeric_numeric_functions)
   numeric_factor_function_names <- names(numeric_factor_functions)
 
@@ -1277,8 +1261,8 @@ mod_forest <- function(module_id,
     server = function(afmm) {
       forest_server(
         id = module_id,
-        bm_dataset = dv.manager::mm_resolve_dispatcher(bm_dataset_disp, afmm, flatten = TRUE),
-        group_dataset = dv.manager::mm_resolve_dispatcher(group_dataset_disp, afmm, flatten = TRUE),
+        bm_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[bm_dataset_name]]),
+        group_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[group_dataset_name]]),
         numeric_numeric_functions = numeric_numeric_functions,
         numeric_factor_functions = numeric_factor_functions,
         subjid_var = subjid_var,
