@@ -54,9 +54,9 @@ mock_app_correlation_hm_mm <- function() {
   module_list <- list(
     "correlation heatmap" = dv.explorer.parameter::mod_corr_hm(
       module_id = "corr_hm",
-      bm_dataset_disp = dv.manager::mm_dispatch("filtered_dataset", "bm"),
+      bm_dataset_name = "bm",
       visit_var = "VISIT",
-      value_var = c("VALUE1", "VALUE2"),
+      value_vars = c("VALUE1", "VALUE2"),
       subjid_var = "SUBJID",
       cat_var = "PARCAT"
     )
@@ -80,9 +80,9 @@ mock_app_correlation_hm_mm_safetyData <- function() { # nolint
   module_list <- list(
     "correlation heatmap" = dv.explorer.parameter::mod_corr_hm(
       module_id = "corr_hm",
-      bm_dataset_disp = dv.manager::mm_dispatch("filtered_dataset", "bm"),
+      bm_dataset_name = "bm",
       visit_var = "VISIT",
-      value_var = c("AVAL", "CHG"),
+      value_vars = c("AVAL", "CHG"),
       subjid_var = "SUBJID",
       cat_var = "PARCAT1"
     )

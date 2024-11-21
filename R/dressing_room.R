@@ -1553,7 +1553,7 @@ C_module <- function(module, check_mod_function) {
 
             # Prepend afmm to args to allow checking receiver_ids
             args <- append(list(afmm = afmm), args)
-            
+
             # check functions do not have defaults, so we extract them from the formals of the module for consistency
             missing_args <- setdiff(names(formals(module)), names(args))
             args <- c(args, formals(module)[missing_args])
@@ -1596,14 +1596,11 @@ C_module <- function(module, check_mod_function) {
         }
         # nolint end
 
-        res <- shiny::reactive({
-          res <- NULL
-          fb <- fb()
-          if (length(fb[["errors"]]) == 0) {
-            res <- try(module_server(afmm), silent = TRUE)
-          }
-        })
-        return(res())
+        # TODO: Only execute the server if length(fb()[["errors"]]) == 0
+        #       once afmm offers a non-reactive version of unfiltered_dataset and feedback 
+        #       can be computed prior to reactive time
+        res <- try(module_server(afmm), silent = TRUE)
+        return(res)
       },
       module_id = module_id
     )

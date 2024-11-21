@@ -881,7 +881,7 @@ mod_corr_hm_ <- function(module_id, bm_dataset_name,
     server = function(afmm) {
       corr_hm_server(
         id = module_id,
-        bm_dataset = shiny::reactive(afmm[["unfiltered_dataset"]]()[[bm_dataset_name]]),
+        bm_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[bm_dataset_name]]),
         default_value = default_value, subjid_var = subjid_var, cat_var = cat_var, par_var = par_var,
         visit_var = visit_var, value_vars = value_vars
       )
@@ -930,7 +930,7 @@ check_mod_corr_hm <- function(
 
   # TODO: Replace this function with a generic one that performs the checks based on mod_corr_hm_API_spec.
   # Something along the lines of OK <- C_check_API(mod_corr_hm_API_spec, args = match.call(), warn, err)
-  
+
   OK <- check_mod_corr_hm_auto(
     afmm, datasets, module_id, bm_dataset_name, subjid_var, cat_var, par_var, visit_var,
     value_vars, default_cat, default_par, default_visit, default_value,
@@ -950,9 +950,11 @@ check_mod_corr_hm <- function(
 
     C_assert(err, !any(dups), {
       dups <- capture.output(print(head(supposedly_unique[dups, ], 5))) |> paste(collapse = "\n")
-      paste("The dataset provided contains repeated rows with identical subject, category, parameter and",
-            "visit values. This module expects them to be unique. Here are the first few duplicates:",
-            paste("<pre>", dups, "</pre>"))
+      paste(
+        "The dataset provided contains repeated rows with identical subject, category, parameter and",
+        "visit values. This module expects them to be unique. Here are the first few duplicates:",
+        paste("<pre>", dups, "</pre>")
+      )
     })
   }
 
