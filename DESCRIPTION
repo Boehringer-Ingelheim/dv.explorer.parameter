@@ -29,4 +29,4 @@ Date: Tue May 31 12:12:27 2022
 Branch: dev
 ParentCommit: 9edd5ae0b32a3c7afbcf7215187748f310087a8a
 VignetteBuilder: knitr
-Remotes: boehringer-ingelheim/dv.manager@v2.1.4
+Remotes: boehringer-ingelheim/dv.manager@147212b3e4d8930fe8d9d564938617f9dac55082
