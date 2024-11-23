@@ -1252,7 +1252,6 @@ mod_forest_ <- function(module_id,
   return(mod)
 }
 
-
 # Forest plot module interface description ----
 # TODO: Fill in
 mod_forest_API_docs <- list(
@@ -1297,7 +1296,6 @@ mod_forest_API_spec <- T_group(
   default_categorical_A = T_choice_from_col_contents("default_var") |> T_flag("optional"), # TODO: Check
   default_categorical_B = T_choice_from_col_contents("default_var") |> T_flag("optional") # TODO: Check
 ) |> T_attach_docs(mod_forest_API_docs)
-
 
 check_mod_forest <- function(
     afmm, datasets, module_id, bm_dataset_name, group_dataset_name, numeric_numeric_functions,

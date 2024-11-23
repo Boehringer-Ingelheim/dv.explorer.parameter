@@ -1515,17 +1515,22 @@ app_creator_feedback_server <- function(id, warning_messages, error_messages, ui
 
 # Wrap the UI and server of a module so that, once parameterized, they go through a check function prior to running.
 C_module <- function(module, check_mod_function) {
-  where <- function(name, env = parent.frame()) { # lifted from http://adv-r.had.co.nz/Environments.html
-    res <- NULL
-    if (identical(env, emptyenv())) {
-      stop("Can't find ", name, call. = FALSE)
-    } else if (exists(name, envir = env, inherits = FALSE)) {
-      res <- env
-    } else {
-      res <- where(name, parent.env(env))
+  local({
+    # Make sure that the signature of `check_mod_function` matches that of `module` except for the expected differences
+    check_formals <- names(formals(check_mod_function))
+    if (!identical(head(check_formals, 2), c("afmm", "datasets"))) {
+      stop("The first two arguments of check functions passed onto `C_module` should be `afmm` and `datasets`")
     }
-    return(res)
-  }
+    check_formals <- check_formals[c(-1, -2)]
+
+    mod_formals <- names(formals(module))
+    if (!identical(check_formals, mod_formals)) {
+      stop(paste(
+        "Check function arguments do not exactly match those of the module function",
+        "(after discarding `afmm` and `datasets`)"
+      ))
+    }
+  })
 
   mandatory_module_args <- local({
     args <- formals(module)
@@ -1533,55 +1538,59 @@ C_module <- function(module, check_mod_function) {
   })
 
   wrapper <- function(...) {
-    args <- list(...)
-
-    missing_args <- setdiff(mandatory_module_args, names(args))
+    # Match arguments explicitly to provide graphical error feedback
+    # https://cran.r-project.org/doc/manuals/r-release/R-lang.html#Argument-matching
 
     module_ui <- function(...) list()
     module_server <- function(...) NULL
-    module_id <- ""
-    if (length(missing_args) == 0) {
+    module_id <- "error_id"
+
+    matched_args <- try(as.list(match.call(module)), silent = TRUE)
+    error_message <- attr(matched_args, "condition")$message
+    if (is.null(error_message)) {
+      missing_args <- setdiff(mandatory_module_args, names(matched_args))
+      if (length(missing_args)) {
+        error_message <- sprintf("Missing mandatory arguments: `%s`.", paste(missing_args, collapse = ", "))
+      }
+    }
+
+    if (is.null(error_message)) {
+      args <- list(...)
       evaluated_module <- do.call(module, args)
       module_ui <- evaluated_module[["ui"]]
       module_server <- evaluated_module[["server"]]
       module_id <- evaluated_module[["module_id"]]
     }
 
-
     res <- list(
       ui = function(module_id) app_creator_feedback_ui(module_id), # `module` UI gated by app_creator_feedback_server
       server = function(afmm) {
-        # We take advantage of the non-reactive afmm[["data"]] slot to do all checks prior to reactive time.
-        datasets <- afmm[["data"]][[1]]
-
         fb <- local({
           res <- NULL
-          if (length(missing_args) > 0) {
+          if (!is.null(error_message)) {
             res <- list(
               warnings = character(0),
-              errors = sprintf("Missing mandatory argument `%s`.", missing_args)
+              errors = error_message
             )
           } else {
             # NOTE: We check the call here and not inside the module server function because:
             #       - app creators interact with the davinci module and not with the ui-server combo, so
             #         errors reported with respect to the module signature will make sense to them.
             #         The module server function might use a different function signature.
-            #       - Here we also have access to the unfiltered dataset, which allows us to ensure call
-            #         correctness independent of filter state or operation.
-            #         Also, as long as the unfiltered dataset does not change (and to date no davinci app
-            #         changes it dynamically) this check only runs once at the beginning of the application
-            #         and has no further impact on performance.
+            #       - Here we also have access to the original datasets, which allows us to ensure call
+            #         correctness independent of filter state or operation in a single pass.
             #       - "catch errors early"
 
-            # Prepend afmm to args to allow checking receiver_ids
-            # Prepend resolved datasets to args
             args <- append(
-              list(afmm = afmm, datasets = datasets),
+              list(
+                afmm = afmm, # To check receiver_ids, among others
+                datasets = afmm[["data"]][[1]] # Allows data checks prior to reactive time
+              ),
               args
             )
 
             # check functions do not have defaults, so we extract them from the formals of the module for consistency
-            missing_args <- setdiff(names(formals(module)), names(args))
+            missing_args <- setdiff(names(formals(module)), names(matched_args))
             args <- c(args, formals(module)[missing_args])
             res <- do.call(check_mod_function, args)
           }
@@ -1920,6 +1929,10 @@ C_format_inline_asis <- function(s) {
 C_check_function <- function(name, value, arg_count, flags, warn, err) {
   ok <- C_check_flags(name, value, flags, warn, err)
   if (ok) {
+    if (is.function(value)) {
+      value <- list(value) # make single functions behave like vectors of one element, for simplicity
+    }
+
     for (i in seq_along(value)) {
       f <- value[[i]]
       ok <- ok && C_assert(
