@@ -29,6 +29,7 @@ T_CDISC_study_day <- function() list(kind = "cdisc_study_day", min = NA, max = N
 T_YN <- function() list(kind = "YN")
 T_choice_from_col_contents <- function(param) list(kind = "choice_from_col_contents", param = param)
 T_choice <- function(param) list(kind = "choice", param = param)
+T_function <- function(arg_count) list(kind = "function", arg_count = arg_count)
 
 T_is_of_kind <- function(var, type) {
   res <- FALSE
@@ -103,7 +104,8 @@ T_get_type_as_text <- function(elem) {
     character = "character",
     date = "Date",
     datetime = "POSIXt",
-    YN = '"Y"/"N"'
+    YN = '"Y"/"N"',
+    `function` = "function"
   )
 
   if (elem$kind == "or") {
@@ -149,7 +151,7 @@ T_get_use_as_text_lines <- function(elem) {
     res <- "<placeholder>" # TODO: Refer to the actual column
   } else if (elem$kind == "choice_from_col_contents") {
     res <- "<placeholder>" # TODO: Refer to the actual column
-  } else if (elem$kind %in% c("integer", "numeric", "character", "group")) {
+  } else if (elem$kind %in% c("integer", "numeric", "character", "group", "function")) {
     # nothing
   } else {
     message(paste("Missing use for kind", elem$kind))
@@ -1170,8 +1172,30 @@ explorer_server_with_datasets <- function(caller_datasets = NULL) {
         res <- c()
         ids <- ui_and_ids()[["input_ids"]]
 
-        missing_ids <- setdiff(ids, shiny::isolate(names(input)))
-        for (id in missing_ids) input[[id]] # depend on missing expected inputs
+        flatten_id_tree <- function(tree) {
+          res <- character(0)
+          for (i in seq_along(tree)) {
+            elem <- tree[[i]]
+            if (is.character(elem)) {
+              res <- c(res, elem)
+            } else if (is.list(elem)) {
+              res <- c(res, flatten_id_tree(elem))
+            } else {
+              browser()
+            }
+
+            name_input_ids <- attr(elem, "name_input_ids")
+            if (!is.null(name_input_ids)) res <- c(res, name_input_ids)
+          }
+
+          return(res)
+        }
+
+        missing_ids <- setdiff(flatten_id_tree(ids), shiny::isolate(names(input)))
+        for (id in missing_ids) {
+          if (length(id) != 1) browser()
+          input[[id]] # depend on missing expected inputs
+        }
         shiny::req(length(missing_ids) == 0) # but block execution until all inputs exist
 
         for (i_val in seq_along(ids)) {
@@ -1367,6 +1391,7 @@ explorer_server_with_datasets <- function(caller_datasets = NULL) {
         if (is.function(ui_server_id[["ui"]])) ui <- ui_server_id[["ui"]](id)
 
         afmm <- list(
+          data = list(DS = datasets()),
           unfiltered_dataset = datasets,
           filtered_dataset = datasets,
           module_output = function() list()
@@ -1457,7 +1482,7 @@ app_creator_feedback_server <- function(id, warning_messages, error_messages, ui
     function(input, output, session) {
       output[["ui"]] <- shiny::renderUI({
         res <- list()
-        warn <- warning_messages()
+        warn <- warning_messages
         if (length(warn)) {
           res[[length(res) + 1]] <-
             message_well("Module configuration warnings",
@@ -1466,7 +1491,7 @@ app_creator_feedback_server <- function(id, warning_messages, error_messages, ui
             )
         }
 
-        err <- error_messages()
+        err <- error_messages
         if (length(err)) {
           res[[length(res) + 1]] <-
             message_well("Module configuration errors",
@@ -1475,7 +1500,8 @@ app_creator_feedback_server <- function(id, warning_messages, error_messages, ui
             )
         }
 
-        if (length(error_messages()) == 0) res <- append(res, list(ui()))
+        if (length(error_messages) == 0) res <- append(res, list(ui()))
+
         return(res)
       })
       shiny::outputOptions(output, "ui", suspendWhenHidden = FALSE)
@@ -1507,28 +1533,28 @@ C_module <- function(module, check_mod_function) {
   })
 
   wrapper <- function(...) {
-    args <- as.list(match.call())
+    args <- list(...)
 
-    missing_args <- setdiff(mandatory_module_args, names(args[-1]))
+    missing_args <- setdiff(mandatory_module_args, names(args))
 
     module_ui <- function(...) list()
     module_server <- function(...) NULL
     module_id <- ""
     if (length(missing_args) == 0) {
-      evaluated_module <- do.call(module, args[-1]) # First arg is the function call, rest are the args
+      evaluated_module <- do.call(module, args)
       module_ui <- evaluated_module[["ui"]]
       module_server <- evaluated_module[["server"]]
       module_id <- evaluated_module[["module_id"]]
     }
 
-    # TODO: If at some point all `unfiltered_dataset`s become available in a non-reactive form, we could do all checks
-    #       prior to reactive time to have fewer moving parts. All `shiny::reactive`s from here until the end of the
-    #       function would evaporate.
 
     res <- list(
       ui = function(module_id) app_creator_feedback_ui(module_id), # `module` UI gated by app_creator_feedback_server
       server = function(afmm) {
-        fb <- shiny::reactive({
+        # We take advantage of the non-reactive afmm[["data"]] slot to do all checks prior to reactive time.
+        datasets <- afmm[["data"]][[1]]
+
+        fb <- local({
           res <- NULL
           if (length(missing_args) > 0) {
             res <- list(
@@ -1547,12 +1573,12 @@ C_module <- function(module, check_mod_function) {
             #         and has no further impact on performance.
             #       - "catch errors early"
 
-            # Overwrite first "argument" (the function call, in fact) with the datasets provided to module manager
-            names(args)[[1]] <- "datasets"
-            args[[1]] <- shiny::isolate(afmm[["unfiltered_dataset"]]())
-
             # Prepend afmm to args to allow checking receiver_ids
-            args <- append(list(afmm = afmm), args)
+            # Prepend resolved datasets to args
+            args <- append(
+              list(afmm = afmm, datasets = datasets),
+              args
+            )
 
             # check functions do not have defaults, so we extract them from the formals of the module for consistency
             missing_args <- setdiff(names(formals(module)), names(args))
@@ -1562,11 +1588,8 @@ C_module <- function(module, check_mod_function) {
           return(res)
         })
 
-        fb_warn <- shiny::reactive(fb()[["warnings"]])
-        fb_err <- shiny::reactive(fb()[["errors"]])
-
         app_creator_feedback_server(
-          id = module_id, warning_messages = fb_warn, error_messages = fb_err,
+          id = module_id, warning_messages = fb[["warnings"]], error_messages = fb[["errors"]],
           ui = shiny::reactive(module_ui(module_id))
         )
 
@@ -1596,10 +1619,10 @@ C_module <- function(module, check_mod_function) {
         }
         # nolint end
 
-        # TODO: Only execute the server if length(fb()[["errors"]]) == 0
-        #       once afmm offers a non-reactive version of unfiltered_dataset and feedback
-        #       can be computed prior to reactive time
-        res <- try(module_server(afmm), silent = TRUE)
+        if (length(fb[["errors"]]) == 0) {
+          res <- try(module_server(afmm), silent = TRUE)
+        }
+
         return(res)
       },
       module_id = module_id
@@ -1622,6 +1645,8 @@ C_is_valid_shiny_id <- function(s) grepl("^$|^[a-zA-Z][a-zA-Z0-9_-]*$", s)
 
 C_generate_check_function <- function(spec) {
   stopifnot(spec$kind == "group")
+
+  # TODO: Check that arguments that depend on arguments T_flagged as optional are optional too.
 
   res <- character(0)
   push <- function(s) res <<- c(res, s)
@@ -1663,6 +1688,12 @@ C_generate_check_function <- function(spec) {
       push(sprintf(
         "OK[['%s']] <- OK[['%s']] && C_check_choice('%s', %s, flags, '%s', %s, warn, err)\n",
         elem_name, elem$param, elem_name, elem_name, elem$param, elem$param
+      ))
+    } else if (elem$kind == "function") {
+      push(sprintf("flags <- %s\n", deparse(attributes(elem)[attrs]) |> paste(collapse = "")))
+      push(sprintf(
+        "OK[['%s']] <- C_check_function('%s', %s, %d, flags, warn, err)\n",
+        elem_name, elem_name, elem_name, elem$arg_count
       ))
     } else {
       push(sprintf("'TODO: %s (%s)'\n", elem_name, elem$kind))
@@ -1752,7 +1783,16 @@ C_list_columns_of_kind <- function(dataset, type) {
   return(res)
 }
 
+# TODO: Extend to all `C_` checker functions
+C_optional_and_empty <- function(flags, value) {
+  return(isTRUE(flags[["optional"]]) && length(value) == 0)
+}
+
 C_check_dataset_colum_name <- function(name, value, subkind, flags, dataset_name, dataset_value, warn, err) {
+  if (C_optional_and_empty(flags, value)) {
+    return(TRUE)
+  }
+
   ok <- FALSE
 
   valid_column_names <- C_list_columns_of_kind(dataset_value, subkind)
@@ -1805,12 +1845,12 @@ C_list_values <- function(v) {
   return(res)
 }
 
-C_check_length <- function(name, value, flags, warn, err) {
+C_check_flags <- function(name, value, flags, warn, err) {
   ok <- FALSE
+  min_len <- max_len <- 1L
   if (isTRUE(flags[["optional"]]) && is.null(value)) {
     ok <- TRUE
   } else {
-    min_len <- max_len <- 1L
     if (isTRUE(flags[["zero_or_more"]])) {
       min_len <- 0L
       max_len <- +Inf
@@ -1833,11 +1873,22 @@ C_check_length <- function(name, value, flags, warn, err) {
       )
     )
   }
+
+  if (ok && isTRUE(flags[["named"]])) {
+    ok <- C_assert(
+      err, length(value) == length(names(value)) && all(nchar(names(value)) > 0),
+      sprintf("All elements of `%s` should be named", name)
+    )
+  }
+
   return(ok)
 }
 
 C_check_choice_from_col_contents <- function(name, value, flags, dataset_name, dataset_value, column, warn, err) {
-  ok <- C_check_length(name, value, flags, warn, err) &&
+  if (C_optional_and_empty(flags, value)) {
+    return(TRUE)
+  }
+  ok <- C_check_flags(name, value, flags, warn, err) &&
     C_assert(
       err, all(value %in% dataset_value[[column]]),
       sprintf(
@@ -1850,7 +1901,7 @@ C_check_choice_from_col_contents <- function(name, value, flags, dataset_name, d
 }
 
 C_check_choice <- function(name, value, flags, values_name, values, warn, err) {
-  ok <- C_check_length(name, value, flags, warn, err) &&
+  ok <- C_check_flags(name, value, flags, warn, err) &&
     C_assert(
       err, all(value %in% values),
       sprintf(
@@ -1864,4 +1915,19 @@ C_check_choice <- function(name, value, flags, values_name, values, warn, err) {
 
 C_format_inline_asis <- function(s) {
   paste("<code style='white-space: pre; color:#333'>", s, "</code>")
+}
+
+C_check_function <- function(name, value, arg_count, flags, warn, err) {
+  ok <- C_check_flags(name, value, flags, warn, err)
+  if (ok) {
+    for (i in seq_along(value)) {
+      f <- value[[i]]
+      ok <- ok && C_assert(
+        err, is.function(f) && length(formals(f)) == arg_count,
+        sprintf("`%s[[%d]]` should be a function of %d arguments", name, i, arg_count)
+      )
+    }
+  }
+
+  return(ok)
 }

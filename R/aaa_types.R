@@ -1,4 +1,4 @@
-# types for mod_forest and mod_corr_hm
+# types for mod_forest
 TYPES <- poc( # nolint
   size = function(e) {
     checkmate::qassert(e, "N2")
@@ -50,14 +50,6 @@ TYPES <- poc( # nolint
   },
   S = function(e) {
     checkmate::qassert(e, "S")
-  },
-  heatmap_df = function(e) {
-    checkmate::assert_data_frame(e, min.rows = 1)
-    checkmate::assert_subset(c("x", "y", "z"), names(e))
-  },
-  corr_listing_df = function(e) {
-    checkmate::assert_data_frame(e, min.rows = 1)
-    checkmate::assert_subset(c("x", "y", "N"), names(e))
   },
   ggplot = function(e) {
     checkmate::assert_class(e, "ggplot")
@@ -117,9 +109,9 @@ check_type <- function(e, t) {
   TYPES[[t]](e)
 }
 
-type <- function(e, t, allow_NULL = FALSE) { # nolint
+type <- function(e, t, allow_NULL = FALSE) {
   if (allow_NULL == FALSE || !is.null(e)) {
-    attr(e, "_type") <- t # nolint
+    attr(e, "_type") <- t
     check_type(e, t)
   }
   e

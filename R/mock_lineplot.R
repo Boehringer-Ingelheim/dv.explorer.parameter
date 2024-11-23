@@ -136,8 +136,8 @@ mock_app_lineplot_mm <- function() {
       module_id = "lineplot",
       bm_dataset_name = "bm",
       group_dataset_name = "sl",
-      visit_var = "VISIT",
-      value_var = c("VALUE1", "VALUE2"),
+      visit_vars = "VISIT",
+      value_vars = c("VALUE1", "VALUE2"),
       subjid_var = "SUBJID",
       cat_var = "PARCAT"
     )
@@ -154,7 +154,7 @@ mock_app_lineplot_mm <- function() {
   )
 }
 
-mock_app_lineplot_mm_safetyData <- function() { # nolint
+mock_app_lineplot_mm_safetyData <- function() {
   if (!requireNamespace("dv.manager")) {
     stop("Install dv.manager")
   }
@@ -165,7 +165,7 @@ mock_app_lineplot_mm_safetyData <- function() { # nolint
       bm_dataset_name = "bm",
       group_dataset_name = "sl",
       visit_vars = c("VISIT", "AVISITN"),
-      value_var = c("AVAL", "CHG"),
+      value_vars = c("AVAL", "CHG"),
       subjid_var = "SUBJID",
       cat_var = "PARCAT1",
       default_centrality_function = "Mean",

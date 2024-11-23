@@ -27,7 +27,7 @@
 
 # FOREST PLOT
 
-FP_ID <- poc( # nolint
+FP_ID <- poc(
   PAR_BUTTON = "par_button",
   GRP_BUTTON = "grp_button",
   CATEGORICAL_VAR_BUTTON = "categorical_var_button",
@@ -50,7 +50,7 @@ FP_ID <- poc( # nolint
   FOREST_SVG = "forest_svg"
 )
 
-FP_MSG <- poc( # nolint
+FP_MSG <- poc(
   LABEL = poc(
     PAR_BUTTON = "Parameter", # inline selector "these parameters",
     CATEGORICAL_VAR_BUTTON = "these groups",
@@ -123,8 +123,8 @@ NULL
 #' Default function
 #'
 #' @export
-forest_UI <- function(id, numeric_numeric_function_names = character(0), numeric_factor_function_names = character(0), # nolint
-                      default_function = NULL) { # nolint
+forest_UI <- function(id, numeric_numeric_function_names = character(0), numeric_factor_function_names = character(0),
+                      default_function = NULL) {
   # FIXME? Asking the caller to pass the names of the functions handed to the server is error-prone
   #        but saves us some renderUI trouble
   # id assert ---- It goes on its own as id is used to provide context to the other assertions
@@ -304,11 +304,11 @@ gen_svg_ <- function(output_size, df, table_row_order, axis_config) {
     X_MIN = x_min, RANGE = x_range, VIEWBOX_HEIGHT = viewbox_height
   )
   ref_line <- ssub(
-    '<line x1="REF_LINE_X" y1="0" x2="REF_LINE_X" y2="AXIS_Y" style="stroke:rgb(0,0,0);stroke-opacity:0.3;stroke-width:REF_LINE_STROKE_WIDTH"/>', # nolint
+    '<line x1="REF_LINE_X" y1="0" x2="REF_LINE_X" y2="AXIS_Y" style="stroke:rgb(0,0,0);stroke-opacity:0.3;stroke-width:REF_LINE_STROKE_WIDTH"/>',
     REF_LINE_X = ref_line_x
   )
   axis <- ssub(
-    '<line x1="X_MIN" y1="AXIS_Y" x2="X_MAX" y2="AXIS_Y" style="stroke:rgb(0,0,0);stroke-opacity:0.8;stroke-width:AXIS_STROKE_WIDTH"/>', # nolint
+    '<line x1="X_MIN" y1="AXIS_Y" x2="X_MAX" y2="AXIS_Y" style="stroke:rgb(0,0,0);stroke-opacity:0.8;stroke-width:AXIS_STROKE_WIDTH"/>',
     X_MIN = x_min, X_MAX = x_max
   )
 
@@ -317,10 +317,8 @@ gen_svg_ <- function(output_size, df, table_row_order, axis_config) {
     font_size <- cell_height / 3
     for (x in seq(from = x_min, to = x_max, length.out = tick_count)) {
       tick <- ssub(
-        # nolint start
         '<line x1="X" y1="AXIS_Y" x2="X" y2="TICK_Y2" style="stroke:rgb(0,0,0);stroke-opacity:0.8;stroke-width:AXIS_STROKE_WIDTH" stroke-linecap="round"/>
        <text x="X" y="TICK_Y2" dy=DY text-anchor="middle" dominant-baseline="hanging" font-size=FONT_SIZE>TEXT</text>',
-        # nolint end
         TICK_Y2 = x_range * ratio + font_size / 2,
         X = x, TEXT = x, FONT_SIZE = font_size, DY = font_size / 2
       )
@@ -350,7 +348,6 @@ gen_svg_ <- function(output_size, df, table_row_order, axis_config) {
       y <- i_row * cell_height - cell_height / 2
 
       tree <- ssub(
-        # nolint start
         '<line x1="X1" y1="Y" x2="X2" y2="Y" style="stroke:rgb(0,0,0);stroke-opacity:0.8;stroke-width:TREE_STROKE_WIDTH"/>
          <line x1="X1" y1="Y1" x2="X1" y2="Y2" style="stroke:rgb(0,0,0);stroke-opacity:0.8;stroke-width:TREE_STROKE_WIDTH"/>
          <!-- right marker -->
@@ -358,7 +355,6 @@ gen_svg_ <- function(output_size, df, table_row_order, axis_config) {
          <line x1="X2" y1="Y" x2="X2_ENDS" y2="Y2" style="stroke:rgb(0,0,0);stroke-opacity:0.8;stroke-width:TREE_STROKE_WIDTH"/>
          <rect x="SQUARE_X" y="SQUARE_Y" width="SQUARE_SIDE" height="SQUARE_SIDE" style="fill:rgb(65,105,225)" />
          ',
-        # nolint end
         Y = y,
         Y1 = y - whisker_height / 2,
         Y2 = y + whisker_height / 2,
@@ -531,7 +527,7 @@ gen_result_table_fun <- strict(gen_result_table_fun_)
 #'
 #' @export
 #'
-forest_server <- function(id, # nolint cyclomatic
+forest_server <- function(id,
                           bm_dataset,
                           group_dataset,
                           dataset_name = shiny::reactive(character(0)),
@@ -548,42 +544,15 @@ forest_server <- function(id, # nolint cyclomatic
                           default_value = NULL,
                           default_var = NULL,
                           default_group = NULL,
-                          default_categorical_A = NULL, # nolint
-                          default_categorical_B = NULL) { # nolint
-  if (FALSE) { # TODO: (Miguel)
-    ac <- checkmate::makeAssertCollection() # nolint
-    # id assert ---- It goes on its own as id is used to provide context to the other assertions
-    checkmate::assert_string(id, min.chars = 1, add = ac)
-    # non reactive asserts
-    ###### Check types of reactive variables, pred_dataset, ...
-    checkmate::assert_string(cat_var, min.chars = 1, add = ac)
-    checkmate::assert_string(par_var, min.chars = 1, add = ac)
-    checkmate::assert_character(
-      value_vars,
-      min.chars = 1, any.missing = FALSE,
-      all.missing = FALSE, unique = TRUE, min.len = 1, add = ac
-    )
-    checkmate::assert_string(visit_var, min.chars = 1, add = ac)
-    checkmate::assert_character(default_cat, min.chars = 1, add = ac, null.ok = TRUE)
-    checkmate::assert_character(default_par, min.chars = 1, add = ac, null.ok = TRUE)
-    checkmate::assert_string(default_visit, min.chars = 1, add = ac, null.ok = TRUE)
-    checkmate::assert_string(default_categorical_A, min.chars = 1, add = ac, null.ok = TRUE)
-    checkmate::assert_string(default_categorical_B, min.chars = 1, add = ac, null.ok = TRUE)
-    checkmate::assert_string(default_visit, min.chars = 1, add = ac, null.ok = TRUE)
-    checkmate::assert_string(default_var, min.chars = 1, add = ac, null.ok = TRUE)
-    checkmate::assert_string(default_group, min.chars = 1, add = ac, null.ok = TRUE)
-    checkmate::assert_string(default_val, min.chars = 1, add = ac, null.ok = TRUE)
-    checkmate::assert_string(subjid_var, min.chars = 1, add = ac)
-    checkmate::reportAssertions(ac)
-  }
-
+                          default_categorical_A = NULL,
+                          default_categorical_B = NULL) {
   numeric_numeric_functions <- numeric_numeric_functions |> type("named_function_list")
   numeric_factor_functions <- numeric_factor_functions |> type("named_function_list")
   is_continuous_forest <- function(kind) kind %in% names(numeric_numeric_functions)
   is_categorical_forest <- function(kind) kind %in% names(numeric_factor_functions)
 
   # module constants ----
-  VAR <- poc( # nolint Parameters from the function that will be considered constant across the function
+  VAR <- poc( # Parameters from the function that will be considered constant across the function
     CAT = cat_var,
     PAR = par_var,
     VAL = value_vars,
@@ -598,8 +567,8 @@ forest_server <- function(id, # nolint cyclomatic
     # argument asserts ----
 
     # bookmark ---
-    default_a <- default_categorical_A # nolint
-    default_b <- default_categorical_B # nolint
+    default_a <- default_categorical_A
+    default_b <- default_categorical_B
 
     shiny::onRestore(function(state) {
       default_a <<- if (FP_ID$CATEGORICAL_VAL_A %in% names(state$input)) {
@@ -688,7 +657,10 @@ forest_server <- function(id, # nolint cyclomatic
       var = VAR$VIS,
       default = default_visit
     )
-    input_fp[[FP_ID$FOREST_KIND]] <- shiny::reactive(input[[FP_ID$FOREST_KIND]] |> type("forest_kind"))
+    input_fp[[FP_ID$FOREST_KIND]] <- shiny::reactive({
+      shiny::req(input[[FP_ID$FOREST_KIND]])
+      input[[FP_ID$FOREST_KIND]] |> type("forest_kind")
+    })
     input_fp[[FP_ID$CONT_VAR]] <- col_menu_server(
       id = FP_ID$CONT_VAR,
       data = v_sl_dataset,
@@ -1009,7 +981,7 @@ forest_server <- function(id, # nolint cyclomatic
       # TODO? Simplify custom headers with https://premium.shinyapps.io/CustomDataTableHeaders/
       container <- htmltools::tags[["table"]](
         class = "display", style = "white-space:nowrap",
-        htmltools::tags[["thead"]]( # nolint
+        htmltools::tags[["thead"]](
           do.call(htmltools::tags[["tr"]], th_list)
         )
       )
@@ -1219,36 +1191,32 @@ fp_subset_data <- function(cat, cat_col, par, par_col, val_col, vis, vis_col, gr
 #'
 #' Dataset names
 #'
-#' @param bm_dataset_disp,group_dataset_disp `[mm_dispatcher(1)]`
-#' module manager dispatchers passed as `bm_dataset` and `group_dataset` to `forest_server`
-#'
 #' @name mod_forest
 #'
 #' @keywords main
 #'
 #' @export
 #'
-mod_forest <- function(module_id,
-                       bm_dataset_name,
-                       group_dataset_name,
-                       numeric_numeric_functions = list(),
-                       numeric_factor_functions = list(),
-                       subjid_var = "SUBJID",
-                       cat_var = "PARCAT",
-                       par_var = "PARAM",
-                       visit_var = "AVISIT",
-                       value_vars = c("AVAL", "PCHG"),
-                       default_cat = NULL,
-                       default_par = NULL,
-                       default_visit = NULL,
-                       default_value = NULL,
-                       default_var = NULL,
-                       default_group = NULL,
-                       default_categorical_A = NULL,
-                       default_categorical_B = NULL,
-                       bm_dataset_disp, group_dataset_disp) {
-  numeric_numeric_function_names <- names(numeric_numeric_functions)
-  numeric_factor_function_names <- names(numeric_factor_functions)
+mod_forest_ <- function(module_id,
+                        bm_dataset_name,
+                        group_dataset_name,
+                        numeric_numeric_functions = list(),
+                        numeric_factor_functions = list(),
+                        subjid_var = "SUBJID",
+                        cat_var = "PARCAT",
+                        par_var = "PARAM",
+                        visit_var = "AVISIT",
+                        value_vars = c("AVAL", "PCHG"),
+                        default_cat = NULL,
+                        default_par = NULL,
+                        default_visit = NULL,
+                        default_value = NULL,
+                        default_var = NULL,
+                        default_group = NULL,
+                        default_categorical_A = NULL,
+                        default_categorical_B = NULL) {
+  numeric_numeric_function_names <- names(numeric_numeric_functions) %||% character(0)
+  numeric_factor_function_names <- names(numeric_factor_functions) %||% character(0)
 
   mod <- list(
     ui = function(mod_id) {
@@ -1283,6 +1251,88 @@ mod_forest <- function(module_id,
   )
   return(mod)
 }
+
+
+# Forest plot module interface description ----
+# TODO: Fill in
+mod_forest_API_docs <- list(
+  "Forest plot",
+  module_id = "",
+  bm_dataset_name = "",
+  group_dataset_name = "",
+  numeric_numeric_functions = "",
+  numeric_factor_functions = "",
+  subjid_var = "",
+  cat_var = "",
+  par_var = "",
+  visit_var = "",
+  value_vars = "",
+  default_cat = "",
+  default_par = "",
+  default_visit = "",
+  default_value = "", # FIXME(miguel): ? Should be called default_value_var
+  default_var = "", # TODO: Check FIXME: ? Should it communicate "default categorical var"
+  default_group = "", # TODO: Check FIXME: ? Should it communicate "default grouping var"
+  default_categorical_A = "", # TODO: Check
+  default_categorical_B = "" # TODO: Check
+)
+
+mod_forest_API_spec <- T_group(
+  module_id = T_mod_ID(),
+  bm_dataset_name = T_dataset_name(),
+  group_dataset_name = T_dataset_name(),
+  numeric_numeric_functions = T_function(arg_count = 2) |> T_flag("optional", "zero_or_more", "named"),
+  numeric_factor_functions = T_function(arg_count = 2) |> T_flag("optional", "zero_or_more", "named"),
+  subjid_var = T_col("group_dataset_name", T_factor()) |> T_flag("subjid_var"),
+  cat_var = T_col("bm_dataset_name", T_or(T_character(), T_factor())),
+  par_var = T_col("bm_dataset_name", T_or(T_character(), T_factor())),
+  visit_var = T_col("bm_dataset_name", T_or(T_character(), T_factor(), T_numeric())),
+  value_vars = T_col("bm_dataset_name", T_numeric()) |> T_flag("one_or_more"),
+  default_cat = T_choice_from_col_contents("cat_var") |> T_flag("zero_or_more", "optional"),
+  default_par = T_choice_from_col_contents("par_var") |> T_flag("zero_or_more", "optional"),
+  default_visit = T_choice_from_col_contents("visit_var") |> T_flag("zero_or_more", "optional"),
+  default_value = T_choice("value_vars") |> T_flag("optional"), # FIXME(miguel): ? Should be called default_value_var
+  default_var = T_col("group_dataset_name", T_or(T_character(), T_factor())) |> T_flag("optional"), # TODO: Check FIXME: ? Should it communicate "default categorical var"
+  default_group = T_col("group_dataset_name", T_or(T_character(), T_factor())) |> T_flag("optional"), # TODO: Check FIXME: ? Should it communicate "default grouping var"
+  default_categorical_A = T_choice_from_col_contents("default_var") |> T_flag("optional"), # TODO: Check
+  default_categorical_B = T_choice_from_col_contents("default_var") |> T_flag("optional") # TODO: Check
+) |> T_attach_docs(mod_forest_API_docs)
+
+
+check_mod_forest <- function(
+    afmm, datasets, module_id, bm_dataset_name, group_dataset_name, numeric_numeric_functions,
+    numeric_factor_functions, subjid_var, cat_var, par_var, visit_var, value_vars,
+    default_cat, default_par, default_visit, default_value, default_var, default_group,
+    default_categorical_A, default_categorical_B) {
+  warn <- C_container()
+  err <- C_container()
+
+  # TODO: Replace this function with a generic one that performs the checks based on mod_forest_API_spec.
+  # Something along the lines of OK <- C_check_API(mod_corr_hm_API_spec, args = match.call(), warn, err)
+
+  OK <- check_mod_forest_auto(
+    afmm, datasets, module_id, bm_dataset_name, group_dataset_name, numeric_numeric_functions,
+    numeric_factor_functions, subjid_var, cat_var, par_var, visit_var, value_vars,
+    default_cat, default_par, default_visit, default_value, default_var, default_group,
+    default_categorical_A, default_categorical_B, warn, err
+  )
+
+  # Checks that API spec does not (yet?) capture
+  if (OK[["numeric_numeric_functions"]] && OK[["numeric_factor_functions"]]) {
+    C_assert(
+      err, length(numeric_numeric_functions) + length(numeric_factor_functions) > 0,
+      paste(
+        "Provide at least one function through `numeric_numeric_functions` or `numeric_numeric_functions`,",
+        "otherwise this module is useless."
+      )
+    )
+  }
+
+  res <- list(warnings = warn[["messages"]], errors = err[["messages"]])
+  return(res)
+}
+
+mod_forest <- C_module(mod_forest_, check_mod_forest)
 
 # TODO: Move pearson_correlation and spearman_correlation to their own file
 # TODO: Maybe odds_ratio too
@@ -1323,7 +1373,7 @@ pearson_correlation <- function(a, b) {
 #' @export
 spearman_correlation <- function(a, b) {
   # Adapted from https://stats.stackexchange.com/a/506367
-  spearman_CI <- function(x, y, rho, alpha = 0.05) { # nolint
+  spearman_CI <- function(x, y, rho, alpha = 0.05) {
     n <- sum(stats::complete.cases(x, y))
     if (n <= 3) {
       res <- c(NA, NA)

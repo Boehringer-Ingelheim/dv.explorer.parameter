@@ -892,6 +892,7 @@ mod_corr_hm_ <- function(module_id, bm_dataset_name,
 }
 
 # Correlation heatmap module interface description ----
+# TODO: Fill in
 mod_corr_hm_API_docs <- list(
   "Correlation Heatmap",
   module_id = "",
@@ -961,6 +962,5 @@ check_mod_corr_hm <- function(
   res <- list(warnings = warn[["messages"]], errors = err[["messages"]])
   return(res)
 }
-
 
 mod_corr_hm <- C_module(mod_corr_hm_, check_mod_corr_hm)

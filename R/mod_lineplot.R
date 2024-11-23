@@ -99,11 +99,6 @@ LP_CNT <- poc(
 # NOTE: id documented in lineplot_server
 #' @export
 lineplot_UI <- function(id) {
-  # id assert ---- It goes on its own as id is used to provide context to the other assertions
-  checkmate::assert_string(id, min.chars = 1)
-
-  # argument asserts ----
-
   # UI ----
   ns <- shiny::NS(id)
 
@@ -1498,108 +1493,44 @@ lineplot_server <- function(id,
 #' Shiny ID of the module receiving the selected subject ID in the single subject listing. This ID must
 #' be present in the app or be NULL.
 #'
-#'
 #' @name mod_lineplot
 #'
 #' @keywords main
 #'
 #' @export
 #'
-mod_lineplot <- function(module_id,
-                         bm_dataset_name,
-                         group_dataset_name,
-                         receiver_id = NULL,
-                         summary_functions = list(
-                           `Mean` = lp_mean_summary_functions,
-                           `Median` = lp_median_summary_functions
-                         ),
-                         subjid_var = "SUBJID",
-                         cat_var = "PARCAT",
-                         par_var = "PARAM",
-                         visit_vars = c("AVISIT"),
-                         cdisc_visit_vars = character(0),
-                         value_vars = c("AVAL", "PCHG"),
-                         additional_listing_vars = character(0),
-                         ref_line_vars = character(0),
-                         default_centrality_function = NULL,
-                         default_dispersion_function = NULL,
-                         default_cat = NULL,
-                         default_par = NULL,
-                         default_val = NULL,
-                         default_visit_var = NULL,
-                         default_visit_val = NULL,
-                         default_main_group = NULL,
-                         default_sub_group = NULL,
-                         default_transparency = 1.,
-                         default_y_axis_projection = "Linear") {
-  # preserves `missing` behavior through reactives, saves us some typing # TODO(miguel): Check if this works on dv.papo
-  args <- as.list(environment())
-  args <- Filter(f = function(x) !inherits(x, "name"), args)
-  function_call <- as.list(match.call())[1]
-  args <- append(function_call, args)
-
-  # NOTE(miguel): These two lines allow the caller to provide lists whenever `mod_patient_profile_server`
-  #               requires atomic arrays
-  args <- T_honor_as_array_flag(mod_lineplot_API_spec, args)
-  list2env(args[setdiff(seq_along(args), 1)], environment()) # overwrite current arguments with modified `args`
-
+mod_lineplot_ <- function(module_id,
+                          bm_dataset_name,
+                          group_dataset_name,
+                          receiver_id = NULL,
+                          summary_functions = list(
+                            `Mean` = lp_mean_summary_functions,
+                            `Median` = lp_median_summary_functions
+                          ),
+                          subjid_var = "SUBJID",
+                          cat_var = "PARCAT",
+                          par_var = "PARAM",
+                          visit_vars = c("AVISIT"),
+                          cdisc_visit_vars = character(0),
+                          value_vars = c("AVAL", "PCHG"),
+                          additional_listing_vars = character(0),
+                          ref_line_vars = character(0),
+                          default_centrality_function = NULL,
+                          default_dispersion_function = NULL,
+                          default_cat = NULL,
+                          default_par = NULL,
+                          default_val = NULL,
+                          default_visit_var = NULL,
+                          default_visit_val = NULL,
+                          default_main_group = NULL,
+                          default_sub_group = NULL,
+                          default_transparency = 1.,
+                          default_y_axis_projection = "Linear") {
   mod <- list(
-    ui = function(module_id) {
-      app_creator_feedback_ui(module_id) # NOTE: original UI gated by app_creator_feedback_server
+    ui = function(mod_id) {
+      lineplot_UI(id = mod_id)
     },
     server = function(afmm) {
-      fb <- shiny::reactive({
-        # NOTE: We check the call here and not inside the module server function because:
-        #       - app creators interact with the davinci module and not with the ui-server combo, so
-        #         errors reported with respect to the module signature will make sense to them.
-        #         The module server function might use a different function signature.
-        #       - Here we also have access to the unfiltered dataset, which allows us to ensure call
-        #         correctness independent of filter state or operation.
-        #         Also, as long as the unfiltered dataset does not change (and to date no davinci app
-        #         changes it dynamically) this check only runs once at the beginning of the application
-        #         and has no further impact on performance.
-        #       - "catch errors early"
-
-        # Overwrite first "argument" (the function call, in fact) with the datasets provided to module manager
-        names(args)[[1]] <- "datasets"
-        args[[1]] <- shiny::isolate(afmm[["unfiltered_dataset"]]())
-
-        # Prepend afmm to args to allow checking receiver_ids
-        args <- append(list(afmm = afmm), args)
-
-        do.call(check_lineplot_call, args)
-      })
-
-      fb_warn <- shiny::reactive(fb()[["warnings"]])
-      fb_err <- shiny::reactive(fb()[["errors"]])
-
-      app_creator_feedback_server(
-        id = module_id,
-        warning_messages = fb_warn,
-        error_messages = fb_err,
-        ui = shiny::reactive(dv.explorer.parameter::lineplot_UI(id = module_id))
-      )
-
-      filtered_mapped_datasets <- shiny::reactive(
-        T_honor_map_to_flag(afmm$filtered_dataset(), mod_lineplot_API_spec, args)
-      )
-
-      bm_dataset <- shiny::reactive({
-        ds <- filtered_mapped_datasets()[[bm_dataset_name]]
-        shiny::validate(
-          shiny::need(!is.null(ds), paste("Could not find dataset", bm_dataset_name))
-        )
-        return(ds)
-      })
-
-      group_dataset <- shiny::reactive({
-        ds <- filtered_mapped_datasets()[[group_dataset_name]]
-        shiny::validate(
-          shiny::need(!is.null(ds), paste("Could not find dataset", group_dataset_name))
-        )
-        return(ds)
-      })
-
       on_sbj_click_fun <- NULL
       if (!is.null(receiver_id)) {
         on_sbj_click_fun <- function() afmm[["utils"]][["switch2mod"]](receiver_id)
@@ -1607,8 +1538,8 @@ mod_lineplot <- function(module_id,
 
       lineplot_server(
         id = module_id,
-        bm_dataset = bm_dataset,
-        group_dataset = group_dataset,
+        bm_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[bm_dataset_name]]),
+        group_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[group_dataset_name]]),
         on_sbj_click = on_sbj_click_fun,
         summary_functions = summary_functions,
         subjid_var = subjid_var,
@@ -1694,3 +1625,63 @@ mod_lineplot_API_spec <- T_group(
   default_transparency = T_numeric(min = 0.05, max = 1.) |> T_flag("optional")
   # default_y_axis_projection = ?? # FIXME: T_enum(c())
 ) |> T_attach_docs(mod_lineplot_API_docs) # TODO: Attach
+
+
+check_mod_lineplot <- function(
+    afmm, datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id, summary_functions,
+    subjid_var, cat_var, par_var, visit_vars, cdisc_visit_vars, value_vars, additional_listing_vars,
+    ref_line_vars, default_centrality_function, default_dispersion_function, default_cat, default_par,
+    default_val, default_visit_var, default_visit_val, default_main_group, default_sub_group,
+    default_transparency, default_y_axis_projection) {
+  warn <- C_container()
+  err <- C_container()
+
+  # TODO: Replace this function with a generic one that performs the checks based on mod_corr_hm_API_spec.
+  # Something along the lines of OK <- C_check_API(mod_corr_hm_API_spec, args = match.call(), warn, err)
+
+  OK <- check_mod_lineplot_auto(
+    afmm, datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id,
+    # summary_functions,
+    subjid_var, cat_var, par_var, visit_vars, cdisc_visit_vars, value_vars, additional_listing_vars,
+    ref_line_vars,
+    # default_centrality_function,
+    # default_dispersion_function,
+    # default_cat,
+    # default_par,
+    # default_val,
+    # default_visit_var,
+    # default_visit_val,
+    # default_main_group,
+    # default_sub_group,
+    default_transparency,
+    # default_y_axis_projection,
+    warn, err
+  )
+
+  # TODO: Move specific tests here
+  # # Checks that API spec does not (yet?) capture
+  # if (OK[["bm_dataset_name"]] && OK[["subjid_var"]]) {
+  #   dataset <- datasets[[bm_dataset_name]]
+  #   C_assert(err, is.factor(dataset[[subjid_var]]), "Column referenced by `subjid_var` should be a factor.")
+  # }
+
+  # if (OK[["bm_dataset_name"]] && OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] && OK[["visit_var"]]) {
+  #   dataset <- datasets[[bm_dataset_name]]
+  #   supposedly_unique <- dataset[c(subjid_var, cat_var, par_var, visit_var)]
+  #   dups <- duplicated(supposedly_unique)
+
+  #   C_assert(err, !any(dups), {
+  #     dups <- capture.output(print(head(supposedly_unique[dups, ], 5))) |> paste(collapse = "\n")
+  #     paste(
+  #       "The dataset provided contains repeated rows with identical subject, category, parameter and",
+  #       "visit values. This module expects them to be unique. Here are the first few duplicates:",
+  #       paste("<pre>", dups, "</pre>")
+  #     )
+  #   })
+  # }
+
+  res <- list(warnings = warn[["messages"]], errors = err[["messages"]])
+  return(res)
+}
+
+mod_lineplot <- C_module(mod_lineplot_, check_mod_lineplot)

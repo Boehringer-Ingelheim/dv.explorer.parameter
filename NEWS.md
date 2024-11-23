@@ -1,3 +1,8 @@
+# dv.explorer.parameter 0.1.0
+
+* correlation heatmap, forest plot:
+    * Provide early feedback of module misconfiguration.
+
 # dv.explorer.parameter 0.0.14
 
 * lineplot, boxplot:

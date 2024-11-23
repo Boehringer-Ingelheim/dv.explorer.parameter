@@ -46,6 +46,76 @@ check_mod_corr_hm_auto <- function(afmm, datasets, module_id, bm_dataset_name, s
     return(OK)
 }
 
+# dv.explorer.parameter::mod_forest
+check_mod_forest_auto <- function(afmm, datasets, module_id, bm_dataset_name, group_dataset_name, numeric_numeric_functions,
+    numeric_factor_functions, subjid_var, cat_var, par_var, visit_var, value_vars, default_cat, default_par,
+    default_visit, default_value, default_var, default_group, default_categorical_A, default_categorical_B,
+    warn, err) {
+    OK <- logical(0)
+    used_dataset_names <- new.env(parent = emptyenv())
+    OK[["module_id"]] <- C_check_module_id("module_id", module_id, warn, err)
+    OK[["bm_dataset_name"]] <- C_check_dataset_name("bm_dataset_name", bm_dataset_name, datasets, used_dataset_names,
+        warn, err)
+    OK[["group_dataset_name"]] <- C_check_dataset_name("group_dataset_name", group_dataset_name, datasets,
+        used_dataset_names, warn, err)
+    flags <- list(optional = TRUE, zero_or_more = TRUE, named = TRUE)
+    OK[["numeric_numeric_functions"]] <- C_check_function("numeric_numeric_functions", numeric_numeric_functions,
+        2, flags, warn, err)
+    flags <- list(optional = TRUE, zero_or_more = TRUE, named = TRUE)
+    OK[["numeric_factor_functions"]] <- C_check_function("numeric_factor_functions", numeric_factor_functions,
+        2, flags, warn, err)
+    subkind <- list(kind = "factor")
+    flags <- list(subjid_var = TRUE)
+    OK[["subjid_var"]] <- OK[["group_dataset_name"]] && C_check_dataset_colum_name("subjid_var", subjid_var,
+        subkind, flags, group_dataset_name, datasets[[group_dataset_name]], warn, err)
+    subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
+    flags <- structure(list(), names = character(0))
+    OK[["cat_var"]] <- OK[["bm_dataset_name"]] && C_check_dataset_colum_name("cat_var", cat_var, subkind,
+        flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
+    subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
+    flags <- structure(list(), names = character(0))
+    OK[["par_var"]] <- OK[["bm_dataset_name"]] && C_check_dataset_colum_name("par_var", par_var, subkind,
+        flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
+    subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor"), list(kind = "numeric",
+        min = NA, max = NA)))
+    flags <- structure(list(), names = character(0))
+    OK[["visit_var"]] <- OK[["bm_dataset_name"]] && C_check_dataset_colum_name("visit_var", visit_var,
+        subkind, flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
+    subkind <- list(kind = "numeric", min = NA, max = NA)
+    flags <- list(one_or_more = TRUE)
+    OK[["value_vars"]] <- OK[["bm_dataset_name"]] && C_check_dataset_colum_name("value_vars", value_vars,
+        subkind, flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
+    flags <- list(zero_or_more = TRUE, optional = TRUE)
+    OK[["default_cat"]] <- OK[["cat_var"]] && C_check_choice_from_col_contents("default_cat", default_cat,
+        flags, "bm_dataset_name", datasets[[bm_dataset_name]], cat_var, warn, err)
+    flags <- list(zero_or_more = TRUE, optional = TRUE)
+    OK[["default_par"]] <- OK[["par_var"]] && C_check_choice_from_col_contents("default_par", default_par,
+        flags, "bm_dataset_name", datasets[[bm_dataset_name]], par_var, warn, err)
+    flags <- list(zero_or_more = TRUE, optional = TRUE)
+    OK[["default_visit"]] <- OK[["visit_var"]] && C_check_choice_from_col_contents("default_visit", default_visit,
+        flags, "bm_dataset_name", datasets[[bm_dataset_name]], visit_var, warn, err)
+    flags <- list(optional = TRUE)
+    OK[["default_value"]] <- OK[["value_vars"]] && C_check_choice("default_value", default_value, flags,
+        "value_vars", value_vars, warn, err)
+    subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
+    flags <- list(optional = TRUE)
+    OK[["default_var"]] <- OK[["group_dataset_name"]] && C_check_dataset_colum_name("default_var", default_var,
+        subkind, flags, group_dataset_name, datasets[[group_dataset_name]], warn, err)
+    subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
+    flags <- list(optional = TRUE)
+    OK[["default_group"]] <- OK[["group_dataset_name"]] && C_check_dataset_colum_name("default_group",
+        default_group, subkind, flags, group_dataset_name, datasets[[group_dataset_name]], warn, err)
+    flags <- list(optional = TRUE)
+    OK[["default_categorical_A"]] <- OK[["default_var"]] && C_check_choice_from_col_contents("default_categorical_A",
+        default_categorical_A, flags, "group_dataset_name", datasets[[group_dataset_name]], default_var,
+        warn, err)
+    flags <- list(optional = TRUE)
+    OK[["default_categorical_B"]] <- OK[["default_var"]] && C_check_choice_from_col_contents("default_categorical_B",
+        default_categorical_B, flags, "group_dataset_name", datasets[[group_dataset_name]], default_var,
+        warn, err)
+    return(OK)
+}
+
 # dv.explorer.parameter::mod_lineplot
 check_mod_lineplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id,
     subjid_var, cat_var, par_var, visit_vars, cdisc_visit_vars, value_vars, additional_listing_vars,
