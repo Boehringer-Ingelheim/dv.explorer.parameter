@@ -475,6 +475,7 @@ wfphm_wf_server <- function(id,
 
     v_input_subset <- shiny::reactive(
       {
+        shiny::req(!is.null(inputs[["check"]]()))
         valid <- ((!inputs[["check"]]() && par_iv$is_valid()) || (inputs[["check"]]() && cont_iv$is_valid())) &&
           group_iv$is_valid()
 
@@ -586,6 +587,7 @@ wfphm_wf_server <- function(id,
       sorted_x = sorted_x,
       margin = chart_info[["margin"]],
       valid = shiny::reactive({
+        shiny::req(!is.null(inputs[["check"]]()))
         ((!inputs[["check"]]() && par_iv$is_valid()) || (inputs[["check"]]() && cont_iv$is_valid())) &&
           group_iv$is_valid()
       })
@@ -1947,7 +1949,7 @@ wfphm_hmpar_subset <- function(
 #'
 #' @param cat_palette `[list(functions)]`
 #'
-#' list of functions that receive the values of the variale and returns a vector with the colors for each of the values.
+#' list of functions that receive the values of the variable and returns a vector with the colors for each of the values.
 #' Each palette is applied when the name of the entry in the list matches the name of the selected categorical
 #' variable
 #'
@@ -2244,7 +2246,7 @@ tr_mapper_def <- function() {
     "Original" = tr_identity,
     "Scale by (result-mean)/SD of each parameter" = tr_z_score,
     "Scale by result/Gini's Mean Difference of each parameter" = tr_gini,
-    "Scale by parameter with truncation" = tr_trunc_z_score,
+    "Scale by parameter with truncation" = tr_trunc_z_score_3_3,
     "Normalize (result-min)/max" = tr_min_max,
     "Percentize (rank of result/maximal rank)" = tr_percentize
   )
@@ -2299,3 +2301,66 @@ mod_wfphm <- function(
   )
   mod
 }
+
+# wfphm module interface description ----
+# TODO: Fill in
+mod_wfphm_API_docs <- list(
+  "Waterfall Plus Heatmap",
+  module_id = "",
+  bm_dataset_name = "",
+  group_dataset_name = "",
+  cat_var = "",
+  par_var = "",
+  visit_var = "",
+  subjid_var = "",
+  value_vars = "",
+  bar_group_palette = "",
+  cat_palette = "",
+  tr_mapper = "",
+  show_x_ticks = ""
+)
+
+mod_wfphm_API_spec <- T_group(
+  module_id = T_mod_ID(),
+  bm_dataset_name = T_dataset_name(),
+  group_dataset_name = T_dataset_name() |> T_flag("subject_level_dataset_name"),
+  cat_var = T_col("bm_dataset_name", T_or(T_character(), T_factor())),
+  par_var = T_col("bm_dataset_name", T_or(T_character(), T_factor())),
+  visit_var = T_col("bm_dataset_name", T_or(T_character(), T_factor(), T_numeric())),
+  subjid_var = T_col("group_dataset_name", T_factor()) |> T_flag("subjid_var"),
+  value_vars = T_col("bm_dataset_name", T_numeric()) |> T_flag("one_or_more"),
+  bar_group_palette = T_function(arg_count = 1) |> T_flag("optional", "zero_or_more", "named"),
+  cat_palette = T_function(arg_count = 1) |> T_flag("optional", "zero_or_more", "named"),
+  tr_mapper = T_function(arg_count = 1) |> T_flag("optional", "zero_or_more", "named"),
+  show_x_ticks = T_logical()
+) |> T_attach_docs(mod_wfphm_API_docs)
+
+
+check_mod_wfphm <- function(
+    afmm, datasets, module_id, bm_dataset_name, group_dataset_name, cat_var, par_var, visit_var, subjid_var,
+    value_vars, bar_group_palette, cat_palette, tr_mapper, show_x_ticks) {
+  warn <- C_container()
+  err <- C_container()
+
+  # TODO: Replace this function with a generic one that performs the checks based on mod_boxplot_API_spec.
+  # Something along the lines of OK <- C_check_API(mod_corr_hm_API_spec, args = match.call(), warn, err)
+  OK <- check_mod_wfphm_auto(
+    afmm, datasets, module_id, bm_dataset_name, group_dataset_name, cat_var, par_var, visit_var, subjid_var,
+    value_vars, bar_group_palette, cat_palette, tr_mapper, show_x_ticks, warn, err
+  )
+
+  # Checks that API spec does not (yet?) capture
+
+  # #ahwopu
+  if (OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] && OK[["visit_var"]]) {
+    C_check_unique_sub_cat_par_vis(
+      datasets, "bm_dataset_name", bm_dataset_name,
+      subjid_var, cat_var, par_var, visit_var, warn, err
+    )
+  }
+
+  res <- list(warnings = warn[["messages"]], errors = err[["messages"]])
+  return(res)
+}
+
+mod_wfphm <- C_module(mod_wfphm, check_mod_wfphm)
