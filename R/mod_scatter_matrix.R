@@ -527,6 +527,68 @@ mod_scatterplotmatrix <- function(module_id,
   mod
 }
 
+
+# scatterplotmatrix module interface description ----
+# TODO: Fill in
+mod_scatterplotmatrix_API_docs <- list(
+  "Scatter plot matrix",
+  module_id = "",
+  bm_dataset_name = "",
+  group_dataset_name = "",
+  cat_var = "",
+  par_var = "",
+  value_vars = "",
+  visit_var = "",
+  subjid_var = "",
+  default_cat = "",
+  default_par = "",
+  default_visit = "",
+  default_value = "",
+  default_main_group = ""
+)
+
+mod_scatterplotmatrix_API_spec <- T_group(
+  module_id = T_mod_ID(),
+  bm_dataset_name = T_dataset_name(),
+  group_dataset_name = T_dataset_name() |> T_flag("subject_level_dataset_name"),
+  cat_var = T_col("bm_dataset_name", T_or(T_character(), T_factor())),
+  par_var = T_col("bm_dataset_name", T_or(T_character(), T_factor())),
+  value_vars = T_col("bm_dataset_name", T_numeric()) |> T_flag("one_or_more"),
+  visit_var = T_col("bm_dataset_name", T_or(T_character(), T_factor(), T_numeric())),
+  subjid_var = T_col("group_dataset_name", T_factor()) |> T_flag("subjid_var"),
+  default_cat = T_choice_from_col_contents("cat_var") |> T_flag("zero_or_more", "optional"),
+  default_par = T_choice_from_col_contents("par_var") |> T_flag("zero_or_more", "optional"),
+  default_visit = T_choice_from_col_contents("visit_var") |> T_flag("optional"),
+  default_value = T_choice("value_vars") |> T_flag("optional"), # FIXME(miguel): ? Should be called default_value_var
+  default_main_group = T_col("group_dataset_name", T_or(T_character(), T_factor())) |> T_flag("optional")
+) |> T_attach_docs(mod_scatterplotmatrix_API_docs)
+
+check_mod_scatterplotmatrix <- function(
+    afmm, datasets, module_id, bm_dataset_name, group_dataset_name, cat_var, par_var, value_vars, visit_var,
+    subjid_var, default_cat, default_par, default_visit, default_value, default_main_group) {
+  warn <- C_container()
+  err <- C_container()
+
+  # TODO: Replace this function with a generic one that performs the checks based on mod_boxplot_API_spec.
+  # Something along the lines of OK <- C_check_API(mod_corr_hm_API_spec, args = match.call(), warn, err)
+  OK <- check_mod_scatterplotmatrix_auto(
+    afmm, datasets, module_id, bm_dataset_name, group_dataset_name, cat_var, par_var, value_vars, visit_var,
+    subjid_var, default_cat, default_par, default_visit, default_value, default_main_group, warn, err
+  )
+
+  # Checks that API spec does not (yet?) capture
+  if (OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] && OK[["visit_var"]]) {
+    C_check_unique_sub_cat_par_vis(
+      datasets, "bm_dataset_name", bm_dataset_name, subjid_var, cat_var, par_var, visit_var, warn, err
+    )
+  }
+
+  res <- list(warnings = warn[["messages"]], errors = err[["messages"]])
+  return(res)
+}
+
+mod_scatterplotmatrix <- C_module(mod_scatterplotmatrix, check_mod_scatterplotmatrix)
+
 # Logic functions ----
 
 # Data manipulation ----
