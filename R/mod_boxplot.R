@@ -803,7 +803,7 @@ mod_boxplot_API_docs <- list(
 mod_boxplot_API_spec <- T_group(
   module_id = T_mod_ID(),
   bm_dataset_name = T_dataset_name(),
-  group_dataset_name = T_dataset_name(),
+  group_dataset_name = T_dataset_name() |> T_flag("subject_level_dataset_name"),
   receiver_id = T_character() |> T_flag("optional", "ignore"),
   cat_var = T_col("bm_dataset_name", T_or(T_character(), T_factor())),
   par_var = T_col("bm_dataset_name", T_or(T_character(), T_factor())),

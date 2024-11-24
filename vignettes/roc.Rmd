@@ -37,7 +37,7 @@ to evaluate how predictive is a continuous parameter of binary endpoint.
 `dv.roc` features the following plots:
 
 -   A set of ROC curves
--   A set of histograms showing the distribution of the continuos parameter values
+-   A set of histograms showing the distribution of the continuous parameter values
 -   A set of probability density plots showing the distribution of the continuous parameter values
 -   A set of raincloud plots showing the distribution of the continuous parameter values
 -   A set of line plots showing metrics for the results of the classification
