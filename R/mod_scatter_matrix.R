@@ -484,10 +484,6 @@ scatterplotmatrix_server <- function(id,
 #'
 #' Name of the dataset
 #'
-#' @param bm_dataset_disp,group_dataset_disp `[mm_dispatcher(1)]`
-#'
-#' Dataset dispatcher. This parameter is incompatible with its *_dataset_name counterpart. Only for advanced use.
-#'
 #'
 #' @keywords main
 #'
@@ -505,32 +501,14 @@ mod_scatterplotmatrix <- function(module_id,
                                   default_par = NULL,
                                   default_visit = NULL,
                                   default_value = NULL,
-                                  default_main_group = NULL,
-                                  bm_dataset_disp,
-                                  group_dataset_disp) {
-  if (!missing(bm_dataset_name) && !missing(bm_dataset_disp)) {
-    rlang::abort("`bm_dataset_name` and `bm_dataset_disp` cannot be used at the same time, use one or the other")
-  }
-
-  if (!missing(group_dataset_name) && !missing(group_dataset_disp)) {
-    rlang::abort("`group_dataset_name` and `group_dataset_disp` cannot be used at the same time, use one or the other")
-  }
-
-  if (!missing(bm_dataset_name)) {
-    bm_dataset_disp <- dv.manager::mm_dispatch("filtered_dataset", bm_dataset_name)
-  }
-
-  if (!missing(group_dataset_name)) {
-    group_dataset_disp <- dv.manager::mm_dispatch("filtered_dataset", group_dataset_name)
-  }
-
+                                  default_main_group = NULL) {
   mod <- list(
     ui = scatterplotmatrix_UI,
     server = function(afmm) {
       scatterplotmatrix_server(
         id = module_id,
-        bm_dataset = dv.manager::mm_resolve_dispatcher(bm_dataset_disp, afmm, flatten = TRUE),
-        group_dataset = dv.manager::mm_resolve_dispatcher(group_dataset_disp, afmm, flatten = TRUE),
+        bm_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[bm_dataset_name]]),
+        group_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[group_dataset_name]]),
         dataset_name = afmm[["dataset_name"]],
         cat_var = cat_var,
         par_var = par_var,

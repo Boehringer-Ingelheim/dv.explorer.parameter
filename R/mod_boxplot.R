@@ -710,10 +710,6 @@ boxplot_server <- function(id,
 #'
 #' Name of the dataset
 #'
-#' @param bm_dataset_disp,group_dataset_disp `[mm_dispatcher(1)]`
-#'
-#' Dataset dispatcher. This parameter is incompatible with its *_dataset_name counterpart. Only for advanced use.
-#'
 #' @param server_wrapper_func `[function()]`
 #'
 #' A function that will be applied to the server returned value.
