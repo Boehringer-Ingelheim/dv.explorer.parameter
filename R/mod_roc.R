@@ -1020,10 +1020,6 @@ roc_server <- function(id,
 #'
 #' Name of the dataset
 #'
-#' @param pred_dataset_disp,resp_dataset_disp,group_dataset_disp
-#'
-#' Dataset dispatcher. This parameter is incompatible with its *_dataset_name counterpart. Only for advanced use.
-#'
 #' @keywords main
 #'
 #' @export
@@ -1040,40 +1036,15 @@ mod_roc <- function(
     resp_visit_var = "AVISIT",
     subjid_var = "SUBJID",
     compute_roc_fn = compute_roc_data,
-    compute_metric_fn = compute_metric_data,
-    pred_dataset_disp, resp_dataset_disp, group_dataset_disp) {
-  if (!missing(resp_dataset_name) && !missing(resp_dataset_disp)) {
-    rlang::abort("`resp_dataset_name` and `resp_dataset_disp` cannot be used at the same time, use one or the other")
-  }
-
-  if (!missing(pred_dataset_name) && !missing(pred_dataset_disp)) {
-    rlang::abort("`pred_dataset_name` and `pred_dataset_disp` cannot be used at the same time, use one or the other")
-  }
-
-  if (!missing(group_dataset_name) && !missing(group_dataset_disp)) {
-    rlang::abort("`group_dataset_name` and `group_dataset_disp` cannot be used at the same time, use one or the other")
-  }
-
-  if (!missing(pred_dataset_name)) {
-    pred_dataset_disp <- dv.manager::mm_dispatch("filtered_dataset", pred_dataset_name)
-  }
-
-  if (!missing(resp_dataset_name)) {
-    resp_dataset_disp <- dv.manager::mm_dispatch("filtered_dataset", resp_dataset_name)
-  }
-
-  if (!missing(group_dataset_name)) {
-    group_dataset_disp <- dv.manager::mm_dispatch("filtered_dataset", group_dataset_name)
-  }
-
+    compute_metric_fn = compute_metric_data) {
   mod <- list(
     ui = roc_UI,
     server = function(afmm) {
       roc_server(
         id = module_id,
-        pred_dataset = dv.manager::mm_resolve_dispatcher(pred_dataset_disp, afmm, flatten = TRUE),
-        resp_dataset = dv.manager::mm_resolve_dispatcher(resp_dataset_disp, afmm, flatten = TRUE),
-        group_dataset = dv.manager::mm_resolve_dispatcher(group_dataset_disp, afmm, flatten = TRUE),
+        pred_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[pred_dataset_name]]),
+        resp_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[resp_dataset_name]]),
+        group_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[group_dataset_name]]),
         dataset_name = afmm[["dataset_name"]],
         pred_cat_var = pred_cat_var,
         pred_par_var = pred_par_var,
@@ -4611,8 +4582,8 @@ mock_roc_mm_app <- function(adbm = test_roc_data()[["adbm"]],
         "ROC" = dv.explorer.parameter::mod_roc(
           module_id = "mod_roc",
           pred_dataset_name = "adbm",
-          resp_dataset_disp = dv.manager::mm_dispatch("filtered_dataset", "adbin"),
-          group_dataset_disp = dv.manager::mm_dispatch("filtered_dataset", "adsl")
+          resp_dataset_name = "adbin",
+          group_dataset_name = "adsl"
         )
       ),
       filter_data = "adsl",
