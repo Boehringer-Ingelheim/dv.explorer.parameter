@@ -784,8 +784,21 @@ explorer_server_with_datasets <- function(caller_datasets = NULL) {
         }
       } else if (elem[["kind"]] == "choice_from_col_contents") {
         param <- elem$param
+
+        choices <- character(0)
+        info <- visible_col_selectors[[param]]
+        if (length(info[["columns"]])) {
+          choices <- choices_from_dataset_and_columns(
+            datasets, info[["dataset_slot"]], info[["columns"]] # TODO(miguel): Try datasets[[dataset_slot]] instead
+          )
+        }
+
+        ui <- T_select_input(
+          inputId = name, label = NULL, choices = as.character(choices), selected = as.character(inputs[[name]]),
+          multiple = FALSE
+        )
+        input_ids <- name
         deps <- c(deps, param)
-        browser() # TODO
       } else if (elem[["kind"]] == "choice") {
         param <- elem$param
         choices <- visible_col_selectors[[param]][["columns"]]
