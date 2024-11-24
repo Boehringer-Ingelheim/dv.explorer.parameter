@@ -694,10 +694,6 @@ scatterplot_server <- function(id,
 #'
 #' Name of the dataset
 #'
-#' @param bm_dataset_disp,group_dataset_disp `[mm_dispatcher(1)]`
-#'
-#' Dataset dispatcher. This parameter is incompatible with its *_dataset_name counterpart. Only for advanced use.
-#'
 #' @keywords main
 #'
 #'
@@ -721,32 +717,14 @@ mod_scatterplot <- function(module_id,
                             default_y_visit = NULL,
                             default_group = NULL,
                             default_color = NULL,
-                            compute_lm_cor_fn = sp_compute_lm_cor_default,
-                            bm_dataset_disp,
-                            group_dataset_disp) {
-  if (!missing(bm_dataset_name) && !missing(bm_dataset_disp)) {
-    rlang::abort("`bm_dataset_name` and `bm_dataset_disp` cannot be used at the same time, use one or the other")
-  }
-
-  if (!missing(group_dataset_name) && !missing(group_dataset_disp)) {
-    rlang::abort("`group_dataset_name` and `group_dataset_disp` cannot be used at the same time, use one or the other")
-  }
-
-  if (!missing(bm_dataset_name)) {
-    bm_dataset_disp <- dv.manager::mm_dispatch("filtered_dataset", bm_dataset_name)
-  }
-
-  if (!missing(group_dataset_name)) {
-    group_dataset_disp <- dv.manager::mm_dispatch("filtered_dataset", group_dataset_name)
-  }
-
+                            compute_lm_cor_fn = sp_compute_lm_cor_default) {
   mod <- list(
     ui = scatterplot_UI,
     server = function(afmm) {
       scatterplot_server(
         id = module_id,
-        bm_dataset = dv.manager::mm_resolve_dispatcher(bm_dataset_disp, afmm, flatten = TRUE),
-        group_dataset = dv.manager::mm_resolve_dispatcher(group_dataset_disp, afmm, flatten = TRUE),
+        bm_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[bm_dataset_name]]),
+        group_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[group_dataset_name]]),
         dataset_name = afmm[["dataset_name"]],
         cat_var = cat_var,
         par_var = par_var,
