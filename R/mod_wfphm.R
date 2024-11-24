@@ -2257,11 +2257,6 @@ tr_mapper_def <- function() {
 #'
 #' The name of the dataset
 #'
-#' @param bm_dataset_disp,group_dataset_disp
-#'
-#' Dataset dispatcher. This parameter is incompatible with its `bm_dataset_name`/`group_dataset_name` counterpart.
-#' Only for advanced use.
-#'
 #' @export
 mod_wfphm <- function(
     module_id, bm_dataset_name, group_dataset_name,
@@ -2282,41 +2277,14 @@ mod_wfphm <- function(
     bar_group_palette = list(),
     cat_palette = list(),
     tr_mapper = tr_mapper_def(),
-    show_x_ticks = TRUE,
-    bm_dataset_disp, group_dataset_disp) {
-  if (!missing(bm_dataset_name) && !missing(bm_dataset_disp)) {
-    rlang::abort("`bm_dataset_name` and `bm_dataset_disp` cannot be used at the same time, use one or the other")
-  }
-
-  if (!missing(group_dataset_name) && !missing(group_dataset_disp)) {
-    rlang::abort("`group_dataset_name` and `group_dataset_disp` cannot be used at the same time, use one or the other")
-  }
-
-  if (!missing(bm_dataset_name)) {
-    bm_dataset_disp <- dv.manager::mm_dispatch("filtered_dataset", bm_dataset_name)
-  }
-
-  if (!missing(group_dataset_name)) {
-    group_dataset_disp <- dv.manager::mm_dispatch("filtered_dataset", group_dataset_name)
-  }
-
+    show_x_ticks = TRUE) {
   mod <- list(
     ui = function(id) wfphm_UI(id, names(tr_mapper)),
     server = function(afmm) {
       wfphm_server(
         id = module_id,
-        bm_dataset = {
-          if (utils::packageVersion("dv.manager") <= "2.0") dv.manager::mm_resolve_dispatcher(bm_dataset_disp, afmm)
-          if (utils::packageVersion("dv.manager") > "2.0") {
-            dv.manager::mm_resolve_dispatcher(bm_dataset_disp, afmm, flatten = TRUE)
-          }
-        },
-        group_dataset = {
-          if (utils::packageVersion("dv.manager") <= "2.0") dv.manager::mm_resolve_dispatcher(group_dataset_disp, afmm)
-          if (utils::packageVersion("dv.manager") > "2.0") {
-            dv.manager::mm_resolve_dispatcher(group_dataset_disp, afmm, flatten = TRUE)
-          }
-        },
+        bm_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[bm_dataset_name]]),
+        group_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[group_dataset_name]]),
         cat_var = cat_var,
         visit_var = visit_var,
         subjid_var = subjid_var,
