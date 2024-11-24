@@ -442,5 +442,52 @@ check_mod_scatterplotmatrix_auto <- function(afmm, datasets, module_id, bm_datas
     return(OK)
 }
 
+# dv.explorer.parameter::mod_wfphm
+check_mod_wfphm_auto <- function(afmm, datasets, module_id, bm_dataset_name, group_dataset_name, cat_var,
+    par_var, visit_var, subjid_var, value_vars, bar_group_palette, cat_palette, tr_mapper, show_x_ticks,
+    warn, err) {
+    OK <- logical(0)
+    used_dataset_names <- new.env(parent = emptyenv())
+    OK[["module_id"]] <- C_check_module_id("module_id", module_id, warn, err)
+    OK[["bm_dataset_name"]] <- C_check_dataset_name("bm_dataset_name", bm_dataset_name, datasets, used_dataset_names,
+        warn, err)
+    OK[["group_dataset_name"]] <- C_check_dataset_name("group_dataset_name", group_dataset_name, datasets,
+        used_dataset_names, warn, err)
+    subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
+    flags <- structure(list(), names = character(0))
+    OK[["cat_var"]] <- OK[["bm_dataset_name"]] && C_check_dataset_colum_name("cat_var", cat_var, subkind,
+        flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
+    subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
+    flags <- structure(list(), names = character(0))
+    OK[["par_var"]] <- OK[["bm_dataset_name"]] && C_check_dataset_colum_name("par_var", par_var, subkind,
+        flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
+    subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor"), list(kind = "numeric",
+        min = NA, max = NA)))
+    flags <- structure(list(), names = character(0))
+    OK[["visit_var"]] <- OK[["bm_dataset_name"]] && C_check_dataset_colum_name("visit_var", visit_var,
+        subkind, flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
+    subkind <- list(kind = "factor")
+    flags <- list(subjid_var = TRUE)
+    OK[["subjid_var"]] <- OK[["group_dataset_name"]] && C_check_dataset_colum_name("subjid_var", subjid_var,
+        subkind, flags, group_dataset_name, datasets[[group_dataset_name]], warn, err)
+    subkind <- list(kind = "numeric", min = NA, max = NA)
+    flags <- list(one_or_more = TRUE)
+    OK[["value_vars"]] <- OK[["bm_dataset_name"]] && C_check_dataset_colum_name("value_vars", value_vars,
+        subkind, flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
+    flags <- list(optional = TRUE, zero_or_more = TRUE, named = TRUE)
+    OK[["bar_group_palette"]] <- C_check_function("bar_group_palette", bar_group_palette, 1, flags, warn,
+        err)
+    flags <- list(optional = TRUE, zero_or_more = TRUE, named = TRUE)
+    OK[["cat_palette"]] <- C_check_function("cat_palette", cat_palette, 1, flags, warn, err)
+    flags <- list(optional = TRUE, zero_or_more = TRUE, named = TRUE)
+    OK[["tr_mapper"]] <- C_check_function("tr_mapper", tr_mapper, 1, flags, warn, err)
+    "TODO: show_x_ticks (logical)"
+    for (ds_name in names(used_dataset_names)) {
+        OK[["subjid_var"]] <- OK[["subjid_var"]] && C_check_subjid_col(datasets, ds_name, get(ds_name),
+            "subjid_var", subjid_var, warn, err)
+    }
+    return(OK)
+}
+
 })
 # styler: on

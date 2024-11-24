@@ -151,7 +151,7 @@ T_get_use_as_text_lines <- function(elem) {
     res <- "<placeholder>" # TODO: Refer to the actual column
   } else if (elem$kind == "choice_from_col_contents") {
     res <- "<placeholder>" # TODO: Refer to the actual column
-  } else if (elem$kind %in% c("integer", "numeric", "character", "group", "function")) {
+  } else if (elem$kind %in% c("logical", "integer", "numeric", "character", "group", "function")) {
     # nothing
   } else {
     message(paste("Missing use for kind", elem$kind))
@@ -747,6 +747,11 @@ explorer_server_with_datasets <- function(caller_datasets = NULL) {
         deps[[length(deps) + 1]] <- name # columns depend on datasets, so we ask for another pass
       } else if (elem[["kind"]] == "col") {
         ui <- column_selector(elem, datasets, visible_datasets, visible_col_selectors, inputs, name, multiple = FALSE)
+        input_ids <- name
+      } else if (elem[["kind"]] == "logical") {
+        ui <- shiny::checkboxInput(inputId = name, label = NULL, value = FALSE, width = NULL)
+        # FIXME: Doesn't get hackier that this alignment right here:
+        ui[["children"]][[1]][["children"]][[1]][["children"]][[1]][["attribs"]][["style"]] <- "position:relative"
         input_ids <- name
       } else if (elem[["kind"]] == "integer" || elem[["kind"]] == "numeric" ||
         elem[["kind"]] == "cdisc_study_day") {
