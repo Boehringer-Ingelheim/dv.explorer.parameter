@@ -1024,7 +1024,7 @@ roc_server <- function(id,
 #'
 #' @export
 
-mod_roc <- function(
+mod_roc_ <- function(
     module_id, pred_dataset_name, resp_dataset_name, group_dataset_name,
     pred_cat_var = "PARCAT",
     pred_par_var = "PARAM",
@@ -1063,6 +1063,87 @@ mod_roc <- function(
   )
   mod
 }
+
+# ROC module interface description ----
+# TODO: Fill in
+mod_roc_API_docs <- list(
+  "ROC",
+  module_id = "",
+  pred_dataset_name = "",
+  resp_dataset_name = "",
+  group_dataset_name = "",
+  pred_cat_var = "",
+  pred_par_var = "",
+  pred_value_vars = "",
+  pred_visit_var = "",
+  resp_cat_var = "",
+  resp_par_var = "",
+  resp_value_vars = "",
+  resp_visit_var = "",
+  subjid_var = "",
+  compute_roc_fn = "",
+  compute_metric_fn = ""
+)
+
+mod_roc_API_spec <- T_group(
+  module_id = T_mod_ID(),
+  pred_dataset_name = T_dataset_name(),
+  resp_dataset_name = T_dataset_name(),
+  group_dataset_name = T_dataset_name() |> T_flag("subject_level_dataset_name"),
+  pred_cat_var = T_col("pred_dataset_name", T_or(T_character(), T_factor())),
+  pred_par_var = T_col("pred_dataset_name", T_or(T_character(), T_factor())),
+  pred_value_vars = T_col("pred_dataset_name", T_numeric()) |> T_flag("one_or_more"),
+  pred_visit_var = T_col("pred_dataset_name", T_or(T_character(), T_factor(), T_numeric())),
+  resp_cat_var = T_col("resp_dataset_name", T_or(T_character(), T_factor())),
+  resp_par_var = T_col("resp_dataset_name", T_or(T_character(), T_factor())),
+  resp_value_vars = T_col("resp_dataset_name", T_or(T_character(), T_factor())) |> T_flag("one_or_more"),
+  resp_visit_var = T_col("resp_dataset_name", T_or(T_character(), T_factor(), T_numeric())),
+  subjid_var = T_col("group_dataset_name", T_factor()) |> T_flag("subjid_var"),
+  compute_roc_fn = T_function(arg_count = 4) |> T_flag("optional"),
+  compute_metric_fn = T_function(arg_count = 2) |> T_flag("optional")
+) |> T_attach_docs(mod_roc_API_docs)
+
+check_mod_roc <- function(
+    afmm, datasets, module_id, pred_dataset_name, resp_dataset_name, group_dataset_name, pred_cat_var,
+    pred_par_var, pred_value_vars, pred_visit_var, resp_cat_var, resp_par_var, resp_value_vars,
+    resp_visit_var, subjid_var, compute_roc_fn, compute_metric_fn) {
+  warn <- C_container()
+  err <- C_container()
+
+  # TODO: Replace this function with a generic one that performs the checks based on mod_boxplot_API_spec.
+  # Something along the lines of OK <- C_check_API(mod_corr_hm_API_spec, args = match.call(), warn, err)
+  OK <- check_mod_roc_auto(
+    afmm, datasets, module_id, pred_dataset_name, resp_dataset_name, group_dataset_name, pred_cat_var,
+    pred_par_var, pred_value_vars, pred_visit_var, resp_cat_var, resp_par_var, resp_value_vars,
+    resp_visit_var, subjid_var, compute_roc_fn, compute_metric_fn, warn, err
+  )
+
+  # Checks that API spec does not (yet?) capture
+
+  # #ouhigo
+  if (OK[["subjid_var"]] && OK[["pred_cat_var"]] && OK[["pred_par_var"]] && OK[["pred_visit_var"]]) {
+    C_check_unique_sub_cat_par_vis(
+      datasets, "pred_dataset_name", pred_dataset_name,
+      subjid_var, pred_cat_var, pred_par_var, pred_visit_var,
+      warn, err
+    )
+  }
+
+  if (OK[["subjid_var"]] && OK[["resp_cat_var"]] && OK[["resp_par_var"]] && OK[["resp_visit_var"]]) {
+    C_check_unique_sub_cat_par_vis(
+      datasets, "resp_dataset_name", resp_dataset_name,
+      subjid_var, resp_cat_var, resp_par_var, resp_visit_var,
+      warn, err
+    )
+  }
+
+  # TODO: check resp_value_vars are binary?
+
+  res <- list(warnings = warn[["messages"]], errors = err[["messages"]])
+  return(res)
+}
+
+mod_roc <- C_module(mod_roc_, check_mod_roc)
 
 # Server Logic
 
@@ -1390,11 +1471,11 @@ roc_subset_data <- function(pred_cat,
 
   shiny::validate(
     shiny::need(
-      test_one_row_per_sbj(pred_data, CNT_ROC$SBJ, CNT_ROC$PPAR),
+      test_one_row_per_sbj(pred_data, CNT_ROC$SBJ, CNT_ROC$PPAR), # Covered by #ouhigo
       ROC_MSG$ROC$VALIDATE$PRED_TOO_MANY_ROWS
     ),
     shiny::need(
-      test_one_row_per_sbj(resp_data, CNT_ROC$SBJ, CNT_ROC$RPAR),
+      test_one_row_per_sbj(resp_data, CNT_ROC$SBJ, CNT_ROC$RPAR), # Covered by #ouhigo
       ROC_MSG$ROC$VALIDATE$RESP_TOO_MANY_ROWS
     )
   )

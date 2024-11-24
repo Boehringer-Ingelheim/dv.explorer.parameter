@@ -65,6 +65,10 @@ check_mod_boxplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, g
     flags <- list(optional = TRUE)
     OK[["server_wrapper_func"]] <- C_check_function("server_wrapper_func", server_wrapper_func, 1, flags,
         warn, err)
+    for (ds_name in names(used_dataset_names)) {
+        OK[["subjid_var"]] <- OK[["subjid_var"]] && C_check_subjid_col(datasets, ds_name, get(ds_name),
+            "subjid_var", subjid_var, warn, err)
+    }
     return(OK)
 }
 
@@ -109,6 +113,10 @@ check_mod_corr_hm_auto <- function(afmm, datasets, module_id, bm_dataset_name, s
     flags <- list(optional = TRUE)
     OK[["default_value"]] <- OK[["value_vars"]] && C_check_choice("default_value", default_value, flags,
         "value_vars", value_vars, warn, err)
+    for (ds_name in names(used_dataset_names)) {
+        OK[["subjid_var"]] <- OK[["subjid_var"]] && C_check_subjid_col(datasets, ds_name, get(ds_name),
+            "subjid_var", subjid_var, warn, err)
+    }
     return(OK)
 }
 
@@ -179,6 +187,10 @@ check_mod_forest_auto <- function(afmm, datasets, module_id, bm_dataset_name, gr
     OK[["default_categorical_B"]] <- OK[["default_var"]] && C_check_choice_from_col_contents("default_categorical_B",
         default_categorical_B, flags, "group_dataset_name", datasets[[group_dataset_name]], default_var,
         warn, err)
+    for (ds_name in names(used_dataset_names)) {
+        OK[["subjid_var"]] <- OK[["subjid_var"]] && C_check_subjid_col(datasets, ds_name, get(ds_name),
+            "subjid_var", subjid_var, warn, err)
+    }
     return(OK)
 }
 
@@ -229,6 +241,73 @@ check_mod_lineplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, 
     OK[["ref_line_vars"]] <- OK[["bm_dataset_name"]] && C_check_dataset_colum_name("ref_line_vars", ref_line_vars,
         subkind, flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
     "TODO: default_transparency (numeric)"
+    for (ds_name in names(used_dataset_names)) {
+        OK[["subjid_var"]] <- OK[["subjid_var"]] && C_check_subjid_col(datasets, ds_name, get(ds_name),
+            "subjid_var", subjid_var, warn, err)
+    }
+    return(OK)
+}
+
+# dv.explorer.parameter::mod_roc
+check_mod_roc_auto <- function(afmm, datasets, module_id, pred_dataset_name, resp_dataset_name, group_dataset_name,
+    pred_cat_var, pred_par_var, pred_value_vars, pred_visit_var, resp_cat_var, resp_par_var, resp_value_vars,
+    resp_visit_var, subjid_var, compute_roc_fn, compute_metric_fn, warn, err) {
+    OK <- logical(0)
+    used_dataset_names <- new.env(parent = emptyenv())
+    OK[["module_id"]] <- C_check_module_id("module_id", module_id, warn, err)
+    OK[["pred_dataset_name"]] <- C_check_dataset_name("pred_dataset_name", pred_dataset_name, datasets,
+        used_dataset_names, warn, err)
+    OK[["resp_dataset_name"]] <- C_check_dataset_name("resp_dataset_name", resp_dataset_name, datasets,
+        used_dataset_names, warn, err)
+    OK[["group_dataset_name"]] <- C_check_dataset_name("group_dataset_name", group_dataset_name, datasets,
+        used_dataset_names, warn, err)
+    subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
+    flags <- structure(list(), names = character(0))
+    OK[["pred_cat_var"]] <- OK[["pred_dataset_name"]] && C_check_dataset_colum_name("pred_cat_var", pred_cat_var,
+        subkind, flags, pred_dataset_name, datasets[[pred_dataset_name]], warn, err)
+    subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
+    flags <- structure(list(), names = character(0))
+    OK[["pred_par_var"]] <- OK[["pred_dataset_name"]] && C_check_dataset_colum_name("pred_par_var", pred_par_var,
+        subkind, flags, pred_dataset_name, datasets[[pred_dataset_name]], warn, err)
+    subkind <- list(kind = "numeric", min = NA, max = NA)
+    flags <- list(one_or_more = TRUE)
+    OK[["pred_value_vars"]] <- OK[["pred_dataset_name"]] && C_check_dataset_colum_name("pred_value_vars",
+        pred_value_vars, subkind, flags, pred_dataset_name, datasets[[pred_dataset_name]], warn, err)
+    subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor"), list(kind = "numeric",
+        min = NA, max = NA)))
+    flags <- structure(list(), names = character(0))
+    OK[["pred_visit_var"]] <- OK[["pred_dataset_name"]] && C_check_dataset_colum_name("pred_visit_var",
+        pred_visit_var, subkind, flags, pred_dataset_name, datasets[[pred_dataset_name]], warn, err)
+    subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
+    flags <- structure(list(), names = character(0))
+    OK[["resp_cat_var"]] <- OK[["resp_dataset_name"]] && C_check_dataset_colum_name("resp_cat_var", resp_cat_var,
+        subkind, flags, resp_dataset_name, datasets[[resp_dataset_name]], warn, err)
+    subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
+    flags <- structure(list(), names = character(0))
+    OK[["resp_par_var"]] <- OK[["resp_dataset_name"]] && C_check_dataset_colum_name("resp_par_var", resp_par_var,
+        subkind, flags, resp_dataset_name, datasets[[resp_dataset_name]], warn, err)
+    subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
+    flags <- list(one_or_more = TRUE)
+    OK[["resp_value_vars"]] <- OK[["resp_dataset_name"]] && C_check_dataset_colum_name("resp_value_vars",
+        resp_value_vars, subkind, flags, resp_dataset_name, datasets[[resp_dataset_name]], warn, err)
+    subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor"), list(kind = "numeric",
+        min = NA, max = NA)))
+    flags <- structure(list(), names = character(0))
+    OK[["resp_visit_var"]] <- OK[["resp_dataset_name"]] && C_check_dataset_colum_name("resp_visit_var",
+        resp_visit_var, subkind, flags, resp_dataset_name, datasets[[resp_dataset_name]], warn, err)
+    subkind <- list(kind = "factor")
+    flags <- list(subjid_var = TRUE)
+    OK[["subjid_var"]] <- OK[["group_dataset_name"]] && C_check_dataset_colum_name("subjid_var", subjid_var,
+        subkind, flags, group_dataset_name, datasets[[group_dataset_name]], warn, err)
+    flags <- list(optional = TRUE)
+    OK[["compute_roc_fn"]] <- C_check_function("compute_roc_fn", compute_roc_fn, 4, flags, warn, err)
+    flags <- list(optional = TRUE)
+    OK[["compute_metric_fn"]] <- C_check_function("compute_metric_fn", compute_metric_fn, 2, flags, warn,
+        err)
+    for (ds_name in names(used_dataset_names)) {
+        OK[["subjid_var"]] <- OK[["subjid_var"]] && C_check_subjid_col(datasets, ds_name, get(ds_name),
+            "subjid_var", subjid_var, warn, err)
+    }
     return(OK)
 }
 
