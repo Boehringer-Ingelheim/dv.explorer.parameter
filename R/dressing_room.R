@@ -1655,7 +1655,7 @@ C_is_valid_shiny_id <- function(s) grepl("^$|^[a-zA-Z][a-zA-Z0-9_-]*$", s)
 C_generate_check_function <- function(spec) {
   stopifnot(spec$kind == "group")
 
-  # TODO: Check that arguments that depend on arguments T_flagged as optional are optional too.
+  # TODO: Check that arguments that depend on arguments T_flagged as `optional` are optional too.
 
   res <- character(0)
   push <- function(s) res <<- c(res, s)
@@ -1667,9 +1667,16 @@ C_generate_check_function <- function(spec) {
   push("OK <- logical(0)\n")
   push("used_dataset_names <- new.env(parent = emptyenv())\n")
 
+  subjid_vars <- character(0)
+
   for (elem_name in names(spec$elements)) {
     elem <- spec$elements[[elem_name]]
-    attrs <- setdiff(names(attributes(elem)), c("names", "docs"))
+    attrs_ids <- setdiff(names(attributes(elem)), c("names", "docs"))
+    attrs <- attributes(elem)[attrs_ids]
+
+    if (isTRUE(attrs[["subjid_var"]])) {
+      subjid_vars <- c(subjid_vars, elem_name)
+    }
 
     if (elem$kind == "mod") {
       push(sprintf("OK[['%s']] <- C_check_module_id('%s', %s, warn, err)\n", elem_name, elem_name, elem_name))
@@ -1680,26 +1687,26 @@ C_generate_check_function <- function(spec) {
       ))
     } else if (elem$kind == "col") {
       push(sprintf("subkind <- %s\n", deparse(elem$sub_kind) |> paste(collapse = "")))
-      push(sprintf("flags <- %s\n", deparse(attributes(elem)[attrs]) |> paste(collapse = "")))
+      push(sprintf("flags <- %s\n", deparse(attrs) |> paste(collapse = "")))
       push(sprintf(
         "OK[['%s']] <- OK[['%s']] && C_check_dataset_colum_name('%s', %s, subkind, flags, %s, datasets[[%s]], warn, err)\n",
         elem_name, elem$dataset_name, elem_name, elem_name, elem$dataset_name, elem$dataset_name
       ))
     } else if (elem$kind == "choice_from_col_contents") {
       dataset_param_name <- spec$elements[[elem$param]]$dataset_name
-      push(sprintf("flags <- %s\n", deparse(attributes(elem)[attrs]) |> paste(collapse = "")))
+      push(sprintf("flags <- %s\n", deparse(attrs) |> paste(collapse = "")))
       push(sprintf(
         "OK[['%s']] <- OK[['%s']] && C_check_choice_from_col_contents('%s', %s, flags, '%s', datasets[[%s]], %s, warn, err)\n",
         elem_name, elem$param, elem_name, elem_name, dataset_param_name, dataset_param_name, elem$param
       ))
     } else if (elem$kind == "choice") {
-      push(sprintf("flags <- %s\n", deparse(attributes(elem)[attrs]) |> paste(collapse = "")))
+      push(sprintf("flags <- %s\n", deparse(attrs) |> paste(collapse = "")))
       push(sprintf(
         "OK[['%s']] <- OK[['%s']] && C_check_choice('%s', %s, flags, '%s', %s, warn, err)\n",
         elem_name, elem$param, elem_name, elem_name, elem$param, elem$param
       ))
     } else if (elem$kind == "function") {
-      push(sprintf("flags <- %s\n", deparse(attributes(elem)[attrs]) |> paste(collapse = "")))
+      push(sprintf("flags <- %s\n", deparse(attrs) |> paste(collapse = "")))
       push(sprintf(
         "OK[['%s']] <- C_check_function('%s', %s, %d, flags, warn, err)\n",
         elem_name, elem_name, elem_name, elem$arg_count
@@ -1709,6 +1716,22 @@ C_generate_check_function <- function(spec) {
     }
   }
 
+  if (length(subjid_vars) > 1) {
+    stop(sprintf("This API specifies more than one subjid variable: ", paste(subjid_vars, collapse = ", ")))
+  }
+
+  if (length(subjid_vars) == 1) {
+    subjid_var <- subjid_vars[[1]]
+    push("for(ds_name in names(used_dataset_names)){\n")
+    push(sprintf(
+      "OK[['%s']] <- OK[['%s']] && C_check_subjid_col(datasets, ds_name, get(ds_name), '%s', %s, warn, err)",
+      subjid_var, subjid_var, subjid_var, subjid_var
+    ))
+    push("}\n")
+    # TODO: If there is a dataset flagged as `subject_level_dataset_name`:
+    #       [ ] check that subjid_var is unique
+    #       [ ] check that the subjid_var values of all other datasets are a subset of its values
+  }
 
   push(sprintf("return(OK)\n"))
 
@@ -1942,5 +1965,16 @@ C_check_function <- function(name, value, arg_count, flags, warn, err) {
     }
   }
 
+  return(ok)
+}
+
+C_check_subjid_col <- function(datasets, ds_name, ds_value, col_name, col_var, warn, err) {
+  ok <- C_assert(
+    err, col_var %in% names(datasets[[ds_value]]),
+    sprintf(
+      "Expected `%s` value (%s) to be present in the dataset indicated by name `%s` (%s)",
+      col_name, col_var, ds_name, ds_value
+    )
+  )
   return(ok)
 }
