@@ -1024,7 +1024,7 @@ roc_server <- function(id,
 #'
 #' @export
 
-mod_roc_ <- function(
+mod_roc <- function(
     module_id, pred_dataset_name, resp_dataset_name, group_dataset_name,
     pred_cat_var = "PARCAT",
     pred_par_var = "PARAM",
@@ -1143,7 +1143,7 @@ check_mod_roc <- function(
   return(res)
 }
 
-mod_roc <- C_module(mod_roc_, check_mod_roc)
+mod_roc <- C_module(mod_roc, check_mod_roc)
 
 # Server Logic
 

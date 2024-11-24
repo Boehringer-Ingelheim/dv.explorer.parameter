@@ -866,14 +866,14 @@ ch_subset_data <- function(sel, cat_col, par_col, val_col, vis_col, bm_ds, subj_
 #'
 #' @export
 #'
-mod_corr_hm_ <- function(module_id, bm_dataset_name,
-                         subjid_var = "SUBJID",
-                         cat_var = "PARCAT",
-                         par_var = "PARAM",
-                         visit_var = "AVISIT",
-                         value_vars = "AVAL",
-                         default_cat = NULL, default_par = NULL, default_visit = NULL,
-                         default_value = NULL) {
+mod_corr_hm <- function(module_id, bm_dataset_name,
+                        subjid_var = "SUBJID",
+                        cat_var = "PARCAT",
+                        par_var = "PARAM",
+                        visit_var = "AVISIT",
+                        value_vars = "AVAL",
+                        default_cat = NULL, default_par = NULL, default_visit = NULL,
+                        default_value = NULL) {
   mod <- list(
     ui = function(mod_id) {
       corr_hm_UI(id = mod_id, default_cat = default_cat, default_par = default_par, default_visit = default_visit)
@@ -955,4 +955,4 @@ check_mod_corr_hm <- function(
   return(res)
 }
 
-mod_corr_hm <- C_module(mod_corr_hm_, check_mod_corr_hm)
+mod_corr_hm <- C_module(mod_corr_hm, check_mod_corr_hm)

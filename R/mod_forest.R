@@ -1197,24 +1197,24 @@ fp_subset_data <- function(cat, cat_col, par, par_col, val_col, vis, vis_col, gr
 #'
 #' @export
 #'
-mod_forest_ <- function(module_id,
-                        bm_dataset_name,
-                        group_dataset_name,
-                        numeric_numeric_functions = list(),
-                        numeric_factor_functions = list(),
-                        subjid_var = "SUBJID",
-                        cat_var = "PARCAT",
-                        par_var = "PARAM",
-                        visit_var = "AVISIT",
-                        value_vars = c("AVAL", "PCHG"),
-                        default_cat = NULL,
-                        default_par = NULL,
-                        default_visit = NULL,
-                        default_value = NULL,
-                        default_var = NULL,
-                        default_group = NULL,
-                        default_categorical_A = NULL,
-                        default_categorical_B = NULL) {
+mod_forest <- function(module_id,
+                       bm_dataset_name,
+                       group_dataset_name,
+                       numeric_numeric_functions = list(),
+                       numeric_factor_functions = list(),
+                       subjid_var = "SUBJID",
+                       cat_var = "PARCAT",
+                       par_var = "PARAM",
+                       visit_var = "AVISIT",
+                       value_vars = c("AVAL", "PCHG"),
+                       default_cat = NULL,
+                       default_par = NULL,
+                       default_visit = NULL,
+                       default_value = NULL,
+                       default_var = NULL,
+                       default_group = NULL,
+                       default_categorical_A = NULL,
+                       default_categorical_B = NULL) {
   numeric_numeric_function_names <- names(numeric_numeric_functions) %||% character(0)
   numeric_factor_function_names <- names(numeric_factor_functions) %||% character(0)
 
@@ -1330,7 +1330,7 @@ check_mod_forest <- function(
   return(res)
 }
 
-mod_forest <- C_module(mod_forest_, check_mod_forest)
+mod_forest <- C_module(mod_forest, check_mod_forest)
 
 # TODO: Move pearson_correlation and spearman_correlation to their own file
 # TODO: Maybe odds_ratio too

@@ -1499,33 +1499,33 @@ lineplot_server <- function(id,
 #'
 #' @export
 #'
-mod_lineplot_ <- function(module_id,
-                          bm_dataset_name,
-                          group_dataset_name,
-                          receiver_id = NULL,
-                          summary_functions = list(
-                            `Mean` = lp_mean_summary_functions,
-                            `Median` = lp_median_summary_functions
-                          ),
-                          subjid_var = "SUBJID",
-                          cat_var = "PARCAT",
-                          par_var = "PARAM",
-                          visit_vars = c("AVISIT"),
-                          cdisc_visit_vars = character(0),
-                          value_vars = c("AVAL", "PCHG"),
-                          additional_listing_vars = character(0),
-                          ref_line_vars = character(0),
-                          default_centrality_function = NULL,
-                          default_dispersion_function = NULL,
-                          default_cat = NULL,
-                          default_par = NULL,
-                          default_val = NULL,
-                          default_visit_var = NULL,
-                          default_visit_val = NULL,
-                          default_main_group = NULL,
-                          default_sub_group = NULL,
-                          default_transparency = 1.,
-                          default_y_axis_projection = "Linear") {
+mod_lineplot <- function(module_id,
+                         bm_dataset_name,
+                         group_dataset_name,
+                         receiver_id = NULL,
+                         summary_functions = list(
+                           `Mean` = lp_mean_summary_functions,
+                           `Median` = lp_median_summary_functions
+                         ),
+                         subjid_var = "SUBJID",
+                         cat_var = "PARCAT",
+                         par_var = "PARAM",
+                         visit_vars = c("AVISIT"),
+                         cdisc_visit_vars = character(0),
+                         value_vars = c("AVAL", "PCHG"),
+                         additional_listing_vars = character(0),
+                         ref_line_vars = character(0),
+                         default_centrality_function = NULL,
+                         default_dispersion_function = NULL,
+                         default_cat = NULL,
+                         default_par = NULL,
+                         default_val = NULL,
+                         default_visit_var = NULL,
+                         default_visit_val = NULL,
+                         default_main_group = NULL,
+                         default_sub_group = NULL,
+                         default_transparency = 1.,
+                         default_y_axis_projection = "Linear") {
   mod <- list(
     ui = function(mod_id) {
       lineplot_UI(id = mod_id)
@@ -1686,4 +1686,4 @@ check_mod_lineplot <- function(
   return(res)
 }
 
-mod_lineplot <- C_module(mod_lineplot_, check_mod_lineplot)
+mod_lineplot <- C_module(mod_lineplot, check_mod_lineplot)

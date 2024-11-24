@@ -730,23 +730,23 @@ boxplot_server <- function(id,
 #'
 #' @export
 
-mod_boxplot_ <- function(module_id,
-                         bm_dataset_name,
-                         group_dataset_name,
-                         receiver_id = NULL,
-                         cat_var = "PARCAT",
-                         par_var = "PARAM",
-                         value_vars = c("AVAL", "CHG", "PCHG"),
-                         visit_var = "AVISIT",
-                         subjid_var = "SUBJID",
-                         default_cat = NULL,
-                         default_par = NULL,
-                         default_visit = NULL,
-                         default_value = NULL,
-                         default_main_group = NULL,
-                         default_sub_group = NULL,
-                         default_page_group = NULL,
-                         server_wrapper_func = identity) {
+mod_boxplot <- function(module_id,
+                        bm_dataset_name,
+                        group_dataset_name,
+                        receiver_id = NULL,
+                        cat_var = "PARCAT",
+                        par_var = "PARAM",
+                        value_vars = c("AVAL", "CHG", "PCHG"),
+                        visit_var = "AVISIT",
+                        subjid_var = "SUBJID",
+                        default_cat = NULL,
+                        default_par = NULL,
+                        default_visit = NULL,
+                        default_value = NULL,
+                        default_main_group = NULL,
+                        default_sub_group = NULL,
+                        default_page_group = NULL,
+                        server_wrapper_func = identity) {
   mod <- list(
     ui = boxplot_UI,
     server = function(afmm) {
@@ -850,7 +850,7 @@ check_mod_boxplot <- function(
   return(res)
 }
 
-mod_boxplot <- C_module(mod_boxplot_, check_mod_boxplot)
+mod_boxplot <- C_module(mod_boxplot, check_mod_boxplot)
 
 #' @describeIn mod_boxplot Boxplot wrapper when its output is fed into papo module
 #' @export

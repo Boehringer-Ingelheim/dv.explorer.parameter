@@ -699,25 +699,25 @@ scatterplot_server <- function(id,
 #'
 #' @export
 
-mod_scatterplot_ <- function(module_id,
-                             bm_dataset_name,
-                             group_dataset_name,
-                             cat_var = "PARCAT",
-                             par_var = "PARAM",
-                             value_vars = c("AVAL", "PCHG"),
-                             visit_var = "AVISIT",
-                             subjid_var = "SUBJID",
-                             default_x_cat = NULL,
-                             default_x_par = NULL,
-                             default_x_value = NULL,
-                             default_x_visit = NULL,
-                             default_y_cat = NULL,
-                             default_y_par = NULL,
-                             default_y_value = NULL,
-                             default_y_visit = NULL,
-                             default_group = NULL,
-                             default_color = NULL,
-                             compute_lm_cor_fn = sp_compute_lm_cor_default) {
+mod_scatterplot <- function(module_id,
+                            bm_dataset_name,
+                            group_dataset_name,
+                            cat_var = "PARCAT",
+                            par_var = "PARAM",
+                            value_vars = c("AVAL", "PCHG"),
+                            visit_var = "AVISIT",
+                            subjid_var = "SUBJID",
+                            default_x_cat = NULL,
+                            default_x_par = NULL,
+                            default_x_value = NULL,
+                            default_x_visit = NULL,
+                            default_y_cat = NULL,
+                            default_y_par = NULL,
+                            default_y_value = NULL,
+                            default_y_visit = NULL,
+                            default_group = NULL,
+                            default_color = NULL,
+                            compute_lm_cor_fn = sp_compute_lm_cor_default) {
   mod <- list(
     ui = scatterplot_UI,
     server = function(afmm) {
@@ -822,7 +822,7 @@ check_mod_scatterplot <- function(
   return(res)
 }
 
-mod_scatterplot <- C_module(mod_scatterplot_, check_mod_scatterplot)
+mod_scatterplot <- C_module(mod_scatterplot, check_mod_scatterplot)
 
 # Logic functions ----
 
