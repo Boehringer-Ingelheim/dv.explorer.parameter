@@ -939,24 +939,16 @@ check_mod_corr_hm <- function(
   )
 
   # Checks that API spec does not (yet?) capture
-  if (OK[["bm_dataset_name"]] && OK[["subjid_var"]]) {
+  if (OK[["subjid_var"]]) {
     dataset <- datasets[[bm_dataset_name]]
-    C_assert(err, is.factor(dataset[[subjid_var]]), "Column referenced by `subjid_var` should be a factor.")
+    OK[["subjid_var"]] <- C_assert(err, is.factor(dataset[[subjid_var]]), "Column referenced by `subjid_var` should be a factor.")
   }
 
-  if (OK[["bm_dataset_name"]] && OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] && OK[["visit_var"]]) {
-    dataset <- datasets[[bm_dataset_name]]
-    supposedly_unique <- dataset[c(subjid_var, cat_var, par_var, visit_var)]
-    dups <- duplicated(supposedly_unique)
-
-    C_assert(err, !any(dups), {
-      dups <- capture.output(print(head(supposedly_unique[dups, ], 5))) |> paste(collapse = "\n")
-      paste(
-        "The dataset provided contains repeated rows with identical subject, category, parameter and",
-        "visit values. This module expects them to be unique. Here are the first few duplicates:",
-        paste("<pre>", dups, "</pre>")
-      )
-    })
+  if (OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] && OK[["visit_var"]]) {
+    C_check_unique_sub_cat_par_vis(
+      datasets, "bm_dataset_name", bm_dataset_name,
+      subjid_var, cat_var, par_var, visit_var, warn, err
+    )
   }
 
   res <- list(warnings = warn[["messages"]], errors = err[["messages"]])

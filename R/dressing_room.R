@@ -1978,3 +1978,25 @@ C_check_subjid_col <- function(datasets, ds_name, ds_value, col_name, col_var, w
   )
   return(ok)
 }
+
+C_check_unique_sub_cat_par_vis <- function(datasets, ds_name, ds_value, sub, cat, par, vis, warn, err) {
+  ok <- TRUE
+
+  dataset <- datasets[[ds_value]]
+
+  supposedly_unique <- dataset[c(sub, cat, par, vis)]
+  dups <- duplicated(supposedly_unique)
+
+  ok <- C_assert(err, !any(dups), {
+    first_duplicates <- head(supposedly_unique[dups, ], 5)
+    names(first_duplicates) <- paste(c("Subject:", "Category:", "Parameter:", "Visit:"), names(first_duplicates))
+    dups <- capture.output(print(first_duplicates)) |> paste(collapse = "\n")
+    paste(
+      sprintf("The dataset provided by `%s` (%s) contains repeated rows with identical subject, category, parameter", ds_name, ds_value),
+      "and visit values. This module expects them to be unique. Here are the first few duplicates:",
+      paste("<pre>", dups, "</pre>")
+    )
+  })
+
+  return(ok)
+}
