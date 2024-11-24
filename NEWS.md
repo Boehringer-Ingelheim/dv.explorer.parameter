@@ -1,6 +1,7 @@
 # dv.explorer.parameter 0.1.0
 
-* correlation heatmap, forest plot:
+* correlation heatmap, forest plot, boxplot:
+    * Remove support for data dispatchers.
     * Provide early feedback of module misconfiguration.
 
 # dv.explorer.parameter 0.0.14

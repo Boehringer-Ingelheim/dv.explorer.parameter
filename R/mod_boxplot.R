@@ -92,7 +92,7 @@ NULL
 #' @export
 boxplot_UI <- function(id) { # nolint
   # id assert ---- It goes on its own as id is used to provide context to the other assertions
-  checkmate::assert_string(id, min.chars = 1)
+  checkmate::assert_string(id, min.chars = 1) # Covered by check_mod_boxplot_auto
 
   # argument asserts ----
 
@@ -260,6 +260,7 @@ boxplot_server <- function(id,
                            default_page_group = NULL,
                            on_sbj_click = function(x) {
                            }) {
+  # All these are covered by check_mod_boxplot_auto
   ac <- checkmate::makeAssertCollection()
   # id assert ---- It goes on its own as id is used to provide context to the other assertions
   checkmate::assert_string(id, min.chars = 1, add = ac)
@@ -302,6 +303,7 @@ boxplot_server <- function(id,
 
     v_group_dataset <- shiny::reactive(
       {
+        # Covered by check_mod_boxplot_auto (except for min.rows, which is filter-dependent)
         ac <- checkmate::makeAssertCollection()
         checkmate::assert_data_frame(group_dataset(), min.rows = 1, .var.name = ns("group_dataset"))
         checkmate::assert_names(
@@ -318,6 +320,7 @@ boxplot_server <- function(id,
 
     v_bm_dataset <- shiny::reactive(
       {
+        # Covered by check_mod_boxplot_auto (except for unique_par_names, which is _mostly_ covered by #ahwopu)
         ac <- checkmate::makeAssertCollection()
         checkmate::assert_data_frame(bm_dataset(), min.rows = 1, .var.name = ns("group_dataset"))
         checkmate::assert_names(
@@ -721,45 +724,29 @@ boxplot_server <- function(id,
 #' Shiny ID of the module receiving the selected subject ID in the data listing. This ID must
 #' be present in the app or be NULL.
 #'
+#' @name mod_boxplot
+#'
 #' @keywords main
 #'
 #' @export
 
-mod_boxplot <- function(module_id,
-                        bm_dataset_name,
-                        group_dataset_name,
-                        receiver_id = NULL,
-                        cat_var = "PARCAT",
-                        par_var = "PARAM",
-                        value_vars = c("AVAL", "CHG", "PCHG"),
-                        visit_var = "AVISIT",
-                        subjid_var = "SUBJID",
-                        default_cat = NULL,
-                        default_par = NULL,
-                        default_visit = NULL,
-                        default_value = NULL,
-                        default_main_group = NULL,
-                        default_sub_group = NULL,
-                        default_page_group = NULL,
-                        bm_dataset_disp,
-                        group_dataset_disp,
-                        server_wrapper_func = identity) {
-  if (!missing(bm_dataset_name) && !missing(bm_dataset_disp)) {
-    rlang::abort("`bm_dataset_name` and `bm_dataset_disp` cannot be used at the same time, use one or the other")
-  }
-
-  if (!missing(group_dataset_name) && !missing(group_dataset_disp)) {
-    rlang::abort("`group_dataset_name` and `group_dataset_disp` cannot be used at the same time, use one or the other")
-  }
-
-  if (!missing(bm_dataset_name)) {
-    bm_dataset_disp <- dv.manager::mm_dispatch("filtered_dataset", bm_dataset_name)
-  }
-
-  if (!missing(group_dataset_name)) {
-    group_dataset_disp <- dv.manager::mm_dispatch("filtered_dataset", group_dataset_name)
-  }
-
+mod_boxplot_ <- function(module_id,
+                         bm_dataset_name,
+                         group_dataset_name,
+                         receiver_id = NULL,
+                         cat_var = "PARCAT",
+                         par_var = "PARAM",
+                         value_vars = c("AVAL", "CHG", "PCHG"),
+                         visit_var = "AVISIT",
+                         subjid_var = "SUBJID",
+                         default_cat = NULL,
+                         default_par = NULL,
+                         default_visit = NULL,
+                         default_value = NULL,
+                         default_main_group = NULL,
+                         default_sub_group = NULL,
+                         default_page_group = NULL,
+                         server_wrapper_func = identity) {
   mod <- list(
     ui = boxplot_UI,
     server = function(afmm) {
@@ -774,8 +761,8 @@ mod_boxplot <- function(module_id,
       server_wrapper_func(
         boxplot_server(
           id = module_id,
-          bm_dataset = dv.manager::mm_resolve_dispatcher(bm_dataset_disp, afmm, flatten = TRUE),
-          group_dataset = dv.manager::mm_resolve_dispatcher(group_dataset_disp, afmm, flatten = TRUE),
+          bm_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[bm_dataset_name]]),
+          group_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[group_dataset_name]]),
           dataset_name = afmm[["dataset_name"]],
           on_sbj_click = on_sbj_click_fun,
           cat_var = cat_var, par_var = par_var, value_vars = value_vars, visit_var = visit_var, subjid_var = subjid_var,
@@ -789,6 +776,89 @@ mod_boxplot <- function(module_id,
   )
   mod
 }
+
+# Boxplot module interface description ----
+# TODO: Fill in
+mod_boxplot_API_docs <- list(
+  "Boxplot",
+  module_id = "",
+  bm_dataset_name = "",
+  group_dataset_name = "",
+  receiver_id = "",
+  cat_var = "",
+  par_var = "",
+  value_vars = "",
+  visit_var = "",
+  subjid_var = "",
+  default_cat = "",
+  default_par = "",
+  default_visit = "",
+  default_value = "",
+  default_main_group = "",
+  default_sub_group = "",
+  default_page_group = "",
+  server_wrapper_func = ""
+)
+
+mod_boxplot_API_spec <- T_group(
+  module_id = T_mod_ID(),
+  bm_dataset_name = T_dataset_name(),
+  group_dataset_name = T_dataset_name(),
+  receiver_id = T_character() |> T_flag("optional", "ignore"),
+  cat_var = T_col("bm_dataset_name", T_or(T_character(), T_factor())),
+  par_var = T_col("bm_dataset_name", T_or(T_character(), T_factor())),
+  value_vars = T_col("bm_dataset_name", T_numeric()) |> T_flag("one_or_more"),
+  visit_var = T_col("bm_dataset_name", T_or(T_character(), T_factor(), T_numeric())),
+  subjid_var = T_col("group_dataset_name", T_factor()) |> T_flag("subjid_var"),
+  default_cat = T_choice_from_col_contents("cat_var") |> T_flag("zero_or_more", "optional"),
+  default_par = T_choice_from_col_contents("par_var") |> T_flag("zero_or_more", "optional"),
+  default_visit = T_choice_from_col_contents("visit_var") |> T_flag("zero_or_more", "optional"),
+  default_value = T_choice("value_vars") |> T_flag("optional"), # FIXME(miguel): ? Should be called default_value_var
+  default_main_group = T_col("group_dataset_name", T_or(T_character(), T_factor())) |> T_flag("optional"),
+  default_sub_group = T_col("group_dataset_name", T_or(T_character(), T_factor())) |> T_flag("optional"),
+  default_page_group = T_col("group_dataset_name", T_or(T_character(), T_factor())) |> T_flag("optional"),
+  server_wrapper_func = T_function(arg_count = 1) |> T_flag("optional")
+) |> T_attach_docs(mod_boxplot_API_docs)
+
+
+check_mod_boxplot <- function(
+    afmm, datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id, cat_var, par_var, value_vars,
+    visit_var, subjid_var, default_cat, default_par, default_visit, default_value, default_main_group,
+    default_sub_group, default_page_group, server_wrapper_func) {
+  warn <- C_container()
+  err <- C_container()
+
+  # TODO: Replace this function with a generic one that performs the checks based on mod_boxplot_API_spec.
+  # Something along the lines of OK <- C_check_API(mod_corr_hm_API_spec, args = match.call(), warn, err)
+  OK <- check_mod_boxplot_auto(
+    afmm, datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id, cat_var, par_var, value_vars,
+    visit_var, subjid_var, default_cat, default_par, default_visit, default_value, default_main_group,
+    default_sub_group, default_page_group, server_wrapper_func, warn, err
+  )
+
+  # Checks that API spec does not (yet?) capture
+
+  # #ahwopu
+  if (OK[["bm_dataset_name"]] && OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] && OK[["visit_var"]]) {
+    dataset <- datasets[[bm_dataset_name]]
+    supposedly_unique <- dataset[c(subjid_var, cat_var, par_var, visit_var)]
+    dups <- duplicated(supposedly_unique)
+
+    C_assert(err, !any(dups), {
+      dups <- capture.output(print(head(supposedly_unique[dups, ], 5))) |> paste(collapse = "\n")
+      paste(
+        "The dataset provided contains repeated rows with identical subject, category, parameter and",
+        "visit values. This module expects them to be unique. Here are the first few duplicates:",
+        paste("<pre>", dups, "</pre>")
+      )
+    })
+  }
+
+  res <- list(warnings = warn[["messages"]], errors = err[["messages"]])
+  return(res)
+}
+
+mod_boxplot <- C_module(mod_boxplot_, check_mod_boxplot)
 
 #' @describeIn mod_boxplot Boxplot wrapper when its output is fed into papo module
 #' @export
@@ -862,6 +932,7 @@ bp_subset_data <- function(cat,
     vis = vis, vis_col = vis_col, subj_col = subj_col
   )
 
+  # Covered by #ahwopu
   shiny::validate(
     need_one_row_per_sbj(bm_fragment, CNT$SBJ, CNT$PAR, CNT$VIS, msg = CMN$MSG$VALIDATE$BM_TOO_MANY_ROWS)
   )
