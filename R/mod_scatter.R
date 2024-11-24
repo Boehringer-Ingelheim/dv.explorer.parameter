@@ -699,25 +699,25 @@ scatterplot_server <- function(id,
 #'
 #' @export
 
-mod_scatterplot <- function(module_id,
-                            bm_dataset_name,
-                            group_dataset_name,
-                            cat_var = "PARCAT",
-                            par_var = "PARAM",
-                            value_vars = c("AVAL", "PCHG"),
-                            visit_var = "AVISIT",
-                            subjid_var = "SUBJID",
-                            default_x_cat = NULL,
-                            default_x_par = NULL,
-                            default_x_value = NULL,
-                            default_x_visit = NULL,
-                            default_y_cat = NULL,
-                            default_y_par = NULL,
-                            default_y_value = NULL,
-                            default_y_visit = NULL,
-                            default_group = NULL,
-                            default_color = NULL,
-                            compute_lm_cor_fn = sp_compute_lm_cor_default) {
+mod_scatterplot_ <- function(module_id,
+                             bm_dataset_name,
+                             group_dataset_name,
+                             cat_var = "PARCAT",
+                             par_var = "PARAM",
+                             value_vars = c("AVAL", "PCHG"),
+                             visit_var = "AVISIT",
+                             subjid_var = "SUBJID",
+                             default_x_cat = NULL,
+                             default_x_par = NULL,
+                             default_x_value = NULL,
+                             default_x_visit = NULL,
+                             default_y_cat = NULL,
+                             default_y_par = NULL,
+                             default_y_value = NULL,
+                             default_y_visit = NULL,
+                             default_group = NULL,
+                             default_color = NULL,
+                             compute_lm_cor_fn = sp_compute_lm_cor_default) {
   mod <- list(
     ui = scatterplot_UI,
     server = function(afmm) {
@@ -748,6 +748,81 @@ mod_scatterplot <- function(module_id,
   )
   mod
 }
+
+# Scatterplot module interface description ----
+# TODO: Fill in
+mod_scatterplot_API_docs <- list(
+  "Scatter plot",
+  module_id = "",
+  bm_dataset_name = "",
+  group_dataset_name = "",
+  cat_var = "",
+  par_var = "",
+  value_vars = "",
+  visit_var = "",
+  subjid_var = "",
+  default_x_cat = "",
+  default_x_par = "",
+  default_x_value = "",
+  default_x_visit = "",
+  default_y_cat = "",
+  default_y_par = "",
+  default_y_value = "",
+  default_y_visit = "",
+  default_group = "",
+  default_color = "",
+  compute_lm_cor_fn = ""
+)
+
+mod_scatterplot_API_spec <- T_group(
+  module_id = T_mod_ID(),
+  bm_dataset_name = T_dataset_name(),
+  group_dataset_name = T_dataset_name() |> T_flag("subject_level_dataset_name"),
+  cat_var = T_col("bm_dataset_name", T_or(T_character(), T_factor())),
+  par_var = T_col("bm_dataset_name", T_or(T_character(), T_factor())),
+  value_vars = T_col("bm_dataset_name", T_numeric()) |> T_flag("one_or_more"),
+  visit_var = T_col("bm_dataset_name", T_or(T_character(), T_factor(), T_numeric())),
+  subjid_var = T_col("group_dataset_name", T_factor()) |> T_flag("subjid_var"),
+  default_x_cat = T_choice_from_col_contents("cat_var") |> T_flag("optional"),
+  default_x_par = T_choice_from_col_contents("par_var") |> T_flag("optional"),
+  default_x_value = T_choice("value_vars") |> T_flag("optional"), # FIXME(miguel): ? Should be called default_value_var
+  default_x_visit = T_choice_from_col_contents("visit_var") |> T_flag("optional"),
+  default_y_cat = T_choice_from_col_contents("cat_var") |> T_flag("optional"),
+  default_y_par = T_choice_from_col_contents("par_var") |> T_flag("optional"),
+  default_y_value = T_choice("value_vars") |> T_flag("optional"), # FIXME(miguel): ? Should be called default_value_var
+  default_y_visit = T_choice_from_col_contents("visit_var") |> T_flag("optional"),
+  default_group = T_col("group_dataset_name", T_or(T_character(), T_factor())) |> T_flag("optional"),
+  default_color = T_col("group_dataset_name", T_or(T_character(), T_factor())) |> T_flag("optional"),
+  compute_lm_cor_fn = T_function(arg_count = 1) |> T_flag("optional")
+) |> T_attach_docs(mod_scatterplot_API_docs)
+
+check_mod_scatterplot <- function(
+    afmm, datasets, module_id, bm_dataset_name, group_dataset_name, cat_var, par_var, value_vars, visit_var, subjid_var,
+    default_x_cat, default_x_par, default_x_value, default_x_visit, default_y_cat, default_y_par, default_y_value,
+    default_y_visit, default_group, default_color, compute_lm_cor_fn) {
+  warn <- C_container()
+  err <- C_container()
+
+  # TODO: Replace this function with a generic one that performs the checks based on mod_boxplot_API_spec.
+  # Something along the lines of OK <- C_check_API(mod_corr_hm_API_spec, args = match.call(), warn, err)
+  OK <- check_mod_scatterplot_auto(
+    afmm, datasets, module_id, bm_dataset_name, group_dataset_name, cat_var, par_var, value_vars, visit_var, subjid_var,
+    default_x_cat, default_x_par, default_x_value, default_x_visit, default_y_cat, default_y_par, default_y_value,
+    default_y_visit, default_group, default_color, compute_lm_cor_fn, warn, err
+  )
+
+  # Checks that API spec does not (yet?) capture
+  if (OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] && OK[["visit_var"]]) {
+    C_check_unique_sub_cat_par_vis(
+      datasets, "bm_dataset_name", bm_dataset_name, subjid_var, cat_var, par_var, visit_var, warn, err
+    )
+  }
+
+  res <- list(warnings = warn[["messages"]], errors = err[["messages"]])
+  return(res)
+}
+
+mod_scatterplot <- C_module(mod_scatterplot_, check_mod_scatterplot)
 
 # Logic functions ----
 

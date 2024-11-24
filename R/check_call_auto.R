@@ -311,5 +311,80 @@ check_mod_roc_auto <- function(afmm, datasets, module_id, pred_dataset_name, res
     return(OK)
 }
 
+# dv.explorer.parameter::mod_scatterplot
+check_mod_scatterplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, group_dataset_name,
+    cat_var, par_var, value_vars, visit_var, subjid_var, default_x_cat, default_x_par, default_x_value,
+    default_x_visit, default_y_cat, default_y_par, default_y_value, default_y_visit, default_group, default_color,
+    compute_lm_cor_fn, warn, err) {
+    OK <- logical(0)
+    used_dataset_names <- new.env(parent = emptyenv())
+    OK[["module_id"]] <- C_check_module_id("module_id", module_id, warn, err)
+    OK[["bm_dataset_name"]] <- C_check_dataset_name("bm_dataset_name", bm_dataset_name, datasets, used_dataset_names,
+        warn, err)
+    OK[["group_dataset_name"]] <- C_check_dataset_name("group_dataset_name", group_dataset_name, datasets,
+        used_dataset_names, warn, err)
+    subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
+    flags <- structure(list(), names = character(0))
+    OK[["cat_var"]] <- OK[["bm_dataset_name"]] && C_check_dataset_colum_name("cat_var", cat_var, subkind,
+        flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
+    subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
+    flags <- structure(list(), names = character(0))
+    OK[["par_var"]] <- OK[["bm_dataset_name"]] && C_check_dataset_colum_name("par_var", par_var, subkind,
+        flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
+    subkind <- list(kind = "numeric", min = NA, max = NA)
+    flags <- list(one_or_more = TRUE)
+    OK[["value_vars"]] <- OK[["bm_dataset_name"]] && C_check_dataset_colum_name("value_vars", value_vars,
+        subkind, flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
+    subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor"), list(kind = "numeric",
+        min = NA, max = NA)))
+    flags <- structure(list(), names = character(0))
+    OK[["visit_var"]] <- OK[["bm_dataset_name"]] && C_check_dataset_colum_name("visit_var", visit_var,
+        subkind, flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
+    subkind <- list(kind = "factor")
+    flags <- list(subjid_var = TRUE)
+    OK[["subjid_var"]] <- OK[["group_dataset_name"]] && C_check_dataset_colum_name("subjid_var", subjid_var,
+        subkind, flags, group_dataset_name, datasets[[group_dataset_name]], warn, err)
+    flags <- list(optional = TRUE)
+    OK[["default_x_cat"]] <- OK[["cat_var"]] && C_check_choice_from_col_contents("default_x_cat", default_x_cat,
+        flags, "bm_dataset_name", datasets[[bm_dataset_name]], cat_var, warn, err)
+    flags <- list(optional = TRUE)
+    OK[["default_x_par"]] <- OK[["par_var"]] && C_check_choice_from_col_contents("default_x_par", default_x_par,
+        flags, "bm_dataset_name", datasets[[bm_dataset_name]], par_var, warn, err)
+    flags <- list(optional = TRUE)
+    OK[["default_x_value"]] <- OK[["value_vars"]] && C_check_choice("default_x_value", default_x_value,
+        flags, "value_vars", value_vars, warn, err)
+    flags <- list(optional = TRUE)
+    OK[["default_x_visit"]] <- OK[["visit_var"]] && C_check_choice_from_col_contents("default_x_visit",
+        default_x_visit, flags, "bm_dataset_name", datasets[[bm_dataset_name]], visit_var, warn, err)
+    flags <- list(optional = TRUE)
+    OK[["default_y_cat"]] <- OK[["cat_var"]] && C_check_choice_from_col_contents("default_y_cat", default_y_cat,
+        flags, "bm_dataset_name", datasets[[bm_dataset_name]], cat_var, warn, err)
+    flags <- list(optional = TRUE)
+    OK[["default_y_par"]] <- OK[["par_var"]] && C_check_choice_from_col_contents("default_y_par", default_y_par,
+        flags, "bm_dataset_name", datasets[[bm_dataset_name]], par_var, warn, err)
+    flags <- list(optional = TRUE)
+    OK[["default_y_value"]] <- OK[["value_vars"]] && C_check_choice("default_y_value", default_y_value,
+        flags, "value_vars", value_vars, warn, err)
+    flags <- list(optional = TRUE)
+    OK[["default_y_visit"]] <- OK[["visit_var"]] && C_check_choice_from_col_contents("default_y_visit",
+        default_y_visit, flags, "bm_dataset_name", datasets[[bm_dataset_name]], visit_var, warn, err)
+    subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
+    flags <- list(optional = TRUE)
+    OK[["default_group"]] <- OK[["group_dataset_name"]] && C_check_dataset_colum_name("default_group",
+        default_group, subkind, flags, group_dataset_name, datasets[[group_dataset_name]], warn, err)
+    subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
+    flags <- list(optional = TRUE)
+    OK[["default_color"]] <- OK[["group_dataset_name"]] && C_check_dataset_colum_name("default_color",
+        default_color, subkind, flags, group_dataset_name, datasets[[group_dataset_name]], warn, err)
+    flags <- list(optional = TRUE)
+    OK[["compute_lm_cor_fn"]] <- C_check_function("compute_lm_cor_fn", compute_lm_cor_fn, 1, flags, warn,
+        err)
+    for (ds_name in names(used_dataset_names)) {
+        OK[["subjid_var"]] <- OK[["subjid_var"]] && C_check_subjid_col(datasets, ds_name, get(ds_name),
+            "subjid_var", subjid_var, warn, err)
+    }
+    return(OK)
+}
+
 })
 # styler: on
