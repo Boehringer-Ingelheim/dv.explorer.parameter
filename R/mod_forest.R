@@ -1200,8 +1200,11 @@ fp_subset_data <- function(cat, cat_col, par, par_col, val_col, vis, vis_col, gr
 mod_forest <- function(module_id,
                        bm_dataset_name,
                        group_dataset_name,
-                       numeric_numeric_functions = list(),
-                       numeric_factor_functions = list(),
+                       numeric_numeric_functions = list(
+                         "Pearson Correlation" = dv.explorer.parameter::pearson_correlation,
+                         "Spearman Correlation" = dv.explorer.parameter::spearman_correlation
+                       ),
+                       numeric_factor_functions = list("Odds Ratio" = dv.explorer.parameter::odds_ratio),
                        subjid_var = "SUBJID",
                        cat_var = "PARCAT",
                        par_var = "PARAM",

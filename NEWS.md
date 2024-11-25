@@ -1,6 +1,6 @@
 # dv.explorer.parameter 0.1.0
 
-* boxplot, correlation heatmap, forest plot, roc, scatter plot:
+* boxplot, correlation heatmap, forest plot, roc, scatter plot, scatter plot matrix, waterfall plus heatmap:
     * Remove support for data dispatchers.
     * Provide early feedback of module misconfiguration.
 

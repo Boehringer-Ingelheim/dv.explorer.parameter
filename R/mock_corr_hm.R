@@ -72,7 +72,7 @@ mock_app_correlation_hm_mm <- function() {
   )
 }
 
-mock_app_correlation_hm_mm_safetyData <- function() { # nolint
+mock_app_correlation_hm_mm_safetyData <- function() {
   if (!requireNamespace("dv.manager")) {
     stop("Install dv.manager")
   }
