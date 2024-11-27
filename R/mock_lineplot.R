@@ -70,24 +70,24 @@ mock_app_lineplot_user_fn <- function(in_fluid = TRUE, defaults = list()) {
   }
 
   gmean_function <- list(
-    `function` = geometric_mean,
-    `dispersion` = list(), # `No error bar` implicit
-    `y_prefix` = "gMean "
+    fn = geometric_mean,
+    dispersion = list(), # `No error bar` implicit
+    y_prefix = "gMean "
   )
 
   gmean_fold_change_fn <- list(
-    `function` = function(x) geometric_mean(x / 100 + 1),
-    `dispersion` = list(), # `No error bar` implicit
-    `y_prefix` = "gMean fold change"
+    fn = function(x) geometric_mean(x / 100 + 1),
+    dispersion = list(), # `No error bar` implicit
+    y_prefix = "gMean fold change"
   )
 
   gmean_fold_change_percent_fn <- list(
-    `function` = function(x) {
+    fn = function(x) {
       gm <- geometric_mean(x / 100 + 1)
       (gm - 1) * 100
     },
-    `dispersion` = list(), # `No error bar` implicit
-    `y_prefix` = "(gMean fold change - 1)*100%"
+    dispersion = list(), # `No error bar` implicit
+    y_prefix = "(gMean fold change - 1)*100%"
   )
 
   shiny::shinyApp(

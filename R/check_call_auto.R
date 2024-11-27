@@ -196,8 +196,10 @@ check_mod_forest_auto <- function(afmm, datasets, module_id, bm_dataset_name, gr
 
 # dv.explorer.parameter::mod_lineplot
 check_mod_lineplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id,
-    subjid_var, cat_var, par_var, visit_vars, cdisc_visit_vars, value_vars, additional_listing_vars,
-    ref_line_vars, default_transparency, warn, err) {
+    summary_functions, subjid_var, cat_var, par_var, visit_vars, cdisc_visit_vars, value_vars, additional_listing_vars,
+    ref_line_vars, default_centrality_function, default_dispersion_function, default_cat, default_par,
+    default_val, default_visit_var, default_visit_val, default_main_group, default_sub_group, default_transparency,
+    default_y_axis_projection, warn, err) {
     OK <- logical(0)
     used_dataset_names <- new.env(parent = emptyenv())
     OK[["module_id"]] <- C_check_module_id("module_id", module_id, warn, err)
@@ -206,6 +208,7 @@ check_mod_lineplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, 
     OK[["group_dataset_name"]] <- C_check_dataset_name("group_dataset_name", group_dataset_name, datasets,
         used_dataset_names, warn, err)
     "TODO: receiver_id (character)"
+    "TODO: summary_functions (group)"
     subkind <- list(kind = "factor")
     flags <- list(subjid_var = TRUE)
     OK[["subjid_var"]] <- OK[["group_dataset_name"]] && C_check_dataset_colum_name("subjid_var", subjid_var,
@@ -228,7 +231,7 @@ check_mod_lineplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, 
     OK[["cdisc_visit_vars"]] <- OK[["bm_dataset_name"]] && C_check_dataset_colum_name("cdisc_visit_vars",
         cdisc_visit_vars, subkind, flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
     subkind <- list(kind = "numeric", min = NA, max = NA)
-    flags <- list(zero_or_more = TRUE)
+    flags <- list(one_or_more = TRUE)
     OK[["value_vars"]] <- OK[["bm_dataset_name"]] && C_check_dataset_colum_name("value_vars", value_vars,
         subkind, flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
     subkind <- list(kind = "anything")
@@ -240,7 +243,33 @@ check_mod_lineplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, 
     flags <- list(zero_or_more = TRUE, optional = TRUE)
     OK[["ref_line_vars"]] <- OK[["bm_dataset_name"]] && C_check_dataset_colum_name("ref_line_vars", ref_line_vars,
         subkind, flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
+    "TODO: default_centrality_function (character)"
+    "TODO: default_dispersion_function (character)"
+    flags <- list(zero_or_more = TRUE, optional = TRUE)
+    OK[["default_cat"]] <- OK[["cat_var"]] && C_check_choice_from_col_contents("default_cat", default_cat,
+        flags, "bm_dataset_name", datasets[[bm_dataset_name]], cat_var, warn, err)
+    flags <- list(zero_or_more = TRUE, optional = TRUE)
+    OK[["default_par"]] <- OK[["par_var"]] && C_check_choice_from_col_contents("default_par", default_par,
+        flags, "bm_dataset_name", datasets[[bm_dataset_name]], par_var, warn, err)
+    flags <- list(optional = TRUE)
+    OK[["default_val"]] <- OK[["value_vars"]] && C_check_choice("default_val", default_val, flags, "value_vars",
+        value_vars, warn, err)
+    flags <- list(optional = TRUE)
+    OK[["default_visit_var"]] <- OK[["visit_vars"]] && C_check_choice("default_visit_var", default_visit_var,
+        flags, "visit_vars", visit_vars, warn, err)
+    "TODO: default_visit_val (group)"
+    subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
+    flags <- list(optional = TRUE)
+    OK[["default_main_group"]] <- OK[["group_dataset_name"]] && C_check_dataset_colum_name("default_main_group",
+        default_main_group, subkind, flags, group_dataset_name, datasets[[group_dataset_name]], warn,
+        err)
+    subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
+    flags <- list(optional = TRUE)
+    OK[["default_sub_group"]] <- OK[["group_dataset_name"]] && C_check_dataset_colum_name("default_sub_group",
+        default_sub_group, subkind, flags, group_dataset_name, datasets[[group_dataset_name]], warn,
+        err)
     "TODO: default_transparency (numeric)"
+    "TODO: default_y_axis_projection (character)"
     for (ds_name in names(used_dataset_names)) {
         OK[["subjid_var"]] <- OK[["subjid_var"]] && C_check_subjid_col(datasets, ds_name, get(ds_name),
             "subjid_var", subjid_var, warn, err)

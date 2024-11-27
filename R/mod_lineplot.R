@@ -458,8 +458,8 @@ NULL
 #' @describeIn default_lineplot_functions Default mean functions
 #' @export
 lp_mean_summary_functions <- list(
-  `function` = function(x) base::mean(x, na.rm = TRUE),
-  `dispersion` = list(
+  fn = function(x) base::mean(x, na.rm = TRUE),
+  dispersion = list(
     # `No error bar` implicit
     `Standard deviation` = list(
       top = function(x) base::mean(x, na.rm = TRUE) + stats::sd(x, na.rm = TRUE),
@@ -474,15 +474,15 @@ lp_mean_summary_functions <- list(
       bottom = function(x) base::mean(x, na.rm = TRUE) - lp_ci(x)
     )
   ),
-  `y_prefix` = "Mean "
+  y_prefix = "Mean "
 )
 
 lp_quantile_type <- 2 # From original EBAS # TODO: Figure out if this is a user requirement
 #' @describeIn default_lineplot_functions Default median functions
 #' @export
 lp_median_summary_functions <- list(
-  `function` = function(x) stats::median(x, na.rm = TRUE),
-  `dispersion` = list(
+  fn = function(x) stats::median(x, na.rm = TRUE),
+  dispersion = list(
     # `No error bar` implicit
     `Quartile` = list(
       top = function(x) stats::quantile(x, 0.75, type = lp_quantile_type, na.rm = TRUE),
@@ -493,7 +493,7 @@ lp_median_summary_functions <- list(
       bottom = function(x) stats::median(x, na.rm = TRUE) - stats::mad(x, na.rm = TRUE)
     )
   ),
-  `y_prefix` = "Median "
+  y_prefix = "Median "
 )
 
 
@@ -529,7 +529,7 @@ lp_median_summary_functions <- list(
 #' (e.g. standard deviation) defining ranges around the values returned by the summary function.
 #'
 #' The structure of each element is then a named list with the following elements:
-#' - `function`: Function that takes a numeric vector as its sole parameter and produces a scalar number.
+#' - `fn`: Function that takes a numeric vector as its sole parameter and produces a scalar number.
 #' - `dispersion`: Named list of pairs functions that return the *top* and *bottom* dispersion ranges. They also take
 #'   a numeric vector as input and return a single numeric scalar
 #' - `y_prefix`: Prefix that will be prepended the Y axis label of the generated plot
@@ -577,9 +577,9 @@ lp_median_summary_functions <- list(
 #' Named list of default values associated to specific `visit_var`s, e.g.
 #' `default_visit_val = list(VISIT = c('VISIT1', 'VISIT2'), AVISITN = c(1, 2))`
 #'
-#' @param default_y_axis_projection `[character(1)|NULL]`
+#' @param default_y_axis_projection `["Linear"|"Logarithmic"]`
 #'
-#' Default values for the selectors
+#' Default projection for the Y axis
 #'
 #' @param default_transparency `[numeric(1)]`
 #'
@@ -824,7 +824,7 @@ lineplot_server <- function(id,
       if (r_centrality == LP_CNT$PLOT_TYPE_SUBJECT_LEVEL) {
         NULL
       } else {
-        functions <- list(center = summary_functions[[r_centrality]][["function"]])
+        functions <- list(center = summary_functions[[r_centrality]][["fn"]])
         if (r_dispersion != "None") {
           disp_f <- summary_functions[[r_centrality]][["dispersion"]][[r_dispersion]]
           functions[[LP_ID$MISC$WHISKER_TOP]] <- disp_f[["top"]]
@@ -1062,7 +1062,7 @@ lineplot_server <- function(id,
 
     # Interactive title selector interface ----
     title_ui <- local({
-      drop_menu_helper <- function(id, label, ...) {
+      drop_menu_helper <- function(id, label, ...) { # NOTE: not the drop_menu_helper in R/util-selectors.R
         shiny::tagAppendAttributes(
           shinyWidgets::dropMenu(
             shiny::actionButton(id, label),
@@ -1180,7 +1180,7 @@ lineplot_server <- function(id,
       label_if_valid = shiny::reactive(centrality())
     )
 
-    # Reactivity must be solved inside otherwise the function does not depend on the value
+    # Reactivity must be solved inside otherwise the function does not depend on the value # TODO: Take this into account for the centrality relabelling?
     sv_not_empty <- function(input, ..., msg) {
       function(x) {
         if (test_not_empty(input())) NULL else msg
@@ -1575,7 +1575,16 @@ mod_lineplot_API_docs <- list(
   bm_dataset_name = "",
   group_dataset_name = "",
   receiver_id = "",
-  # summary_functions = T_list(??),
+  summary_functions = list(
+    "",
+    fn = "",
+    dispersion = list(
+      "",
+      top = "",
+      bottom = ""
+    ),
+    y_prefix = ""
+  ),
   subjid_var = "",
   cat_var = "",
   par_var = "",
@@ -1584,17 +1593,19 @@ mod_lineplot_API_docs <- list(
   value_vars = "",
   additional_listing_vars = "",
   ref_line_vars = "",
-  # default_centrality_function = ??, FIXME: T_choice()
-  # default_dispersion_function = ??,
-  # default_cat = ??,                 FIXME: T_choice("cat_var") |> T_flag("zero_or_more")
-  # default_par = ??,
-  # default_val = ??,
-  # default_visit_var = ??,
-  # default_visit_val = ??,
-  # default_main_group = ??,
-  # default_sub_group = ??,
-  default_transparency = ""
-  # default_y_axis_projection = ?? # FIXME: T_enum(c())
+  default_centrality_function = "",
+  default_dispersion_function = "",
+  default_cat = "",
+  default_par = "",
+  default_val = "",
+  default_visit_var = "",
+  default_visit_val = list(
+    ""
+  ),
+  default_main_group = "",
+  default_sub_group = "",
+  default_transparency = "",
+  default_y_axis_projection = ""
 )
 
 # TODO: Complete
@@ -1603,27 +1614,37 @@ mod_lineplot_API_spec <- T_group(
   bm_dataset_name = T_dataset_name(),
   group_dataset_name = T_dataset_name() |> T_flag("subject_level_dataset_name"),
   receiver_id = T_character() |> T_flag("optional", "ignore"),
-  # summary_functions = T_list(??),
+  summary_functions = T_group(
+    fn = T_function(arg_count = 1),
+    dispersion = T_group(
+      top = T_function(arg_count = 1),
+      bottom = T_function(arg_count = 1)
+    ) |> T_flag("zero_or_more", "named"),
+    y_prefix = T_character()
+  ) |> T_flag("optional", "named", "zero_or_more", "ignore"), # NOTE: ignored because we won't provide a function builder
   subjid_var = T_col("group_dataset_name", T_factor()) |> T_flag("subjid_var"),
   cat_var = T_col("bm_dataset_name", T_or(T_character(), T_factor())),
   par_var = T_col("bm_dataset_name", T_or(T_character(), T_factor())),
-  visit_vars = T_col("bm_dataset_name", T_or(T_character(), T_factor(), T_numeric())) |> T_flag("zero_or_more"), # FIXME: one_or_more?
-  cdisc_visit_vars = T_col("bm_dataset_name", T_or(T_numeric())) |> T_flag("zero_or_more"), # FIXME: one_or_more?
+  visit_vars = T_col("bm_dataset_name", T_or(T_character(), T_factor(), T_numeric())) |> T_flag("zero_or_more"),
+  cdisc_visit_vars = T_col("bm_dataset_name", T_or(T_numeric())) |> T_flag("zero_or_more"),
   # FIXME: ? Interaction between visit_vars and cdisc_visit_vars; one needs to be specified
-  value_vars = T_col("bm_dataset_name", T_numeric()) |> T_flag("zero_or_more"), # FIXME: one_or_more?
+  value_vars = T_col("bm_dataset_name", T_numeric()) |> T_flag("one_or_more"),
   additional_listing_vars = T_col("bm_dataset_name", T_anything()) |> T_flag("zero_or_more", "optional"),
   ref_line_vars = T_col("bm_dataset_name", T_anything()) |> T_flag("zero_or_more", "optional"),
-  # default_centrality_function = ??, FIXME: T_choice()
-  # default_dispersion_function = ??,
-  # default_cat = ??,                 FIXME: T_choice("cat_var") |> T_flag("zero_or_more")
-  # default_par = ??,
-  # default_val = ??,
-  # default_visit_var = ??,
-  # default_visit_val = ??,
-  # default_main_group = ??,
-  # default_sub_group = ??,
-  default_transparency = T_numeric(min = 0.05, max = 1.) |> T_flag("optional")
-  # default_y_axis_projection = ?? # FIXME: T_enum(c())
+  default_centrality_function = T_character() |> T_flag("ignore"), # TODO: T_choice ?
+  default_dispersion_function = T_character() |> T_flag("ignore"), # TODO: T_choice ?
+  default_cat = T_choice_from_col_contents("cat_var") |> T_flag("zero_or_more", "optional"),
+  default_par = T_choice_from_col_contents("par_var") |> T_flag("zero_or_more", "optional"),
+  default_val = T_choice("value_vars") |> T_flag("optional"), # FIXME(miguel): Should be called default_value_var
+  # FIXME: should allow selection across both visit_vars and cdisc_visit_vars (T_choice("visit_vars", "cdisc_visit_vars"))
+  # FIXME: for some reason, the contents of the selector don't update when "visit_vars" is modified
+  default_visit_var = T_choice("visit_vars") |> T_flag("optional"),
+  # FIXME: Can't represent this behavior right now
+  default_visit_val = T_group() |> T_flag("named", "optional", "ignore"),
+  default_main_group = T_col("group_dataset_name", T_or(T_character(), T_factor())) |> T_flag("optional"),
+  default_sub_group = T_col("group_dataset_name", T_or(T_character(), T_factor())) |> T_flag("optional"),
+  default_transparency = T_numeric(min = 0.05, max = 1.) |> T_flag("optional"),
+  default_y_axis_projection = T_character() |> T_flag("optional", "ignore") # FIXME: T_enum(c())
 ) |> T_attach_docs(mod_lineplot_API_docs) # TODO: Attach
 
 
@@ -1641,8 +1662,7 @@ check_mod_lineplot <- function(
 
   OK <- check_mod_lineplot_auto(
     afmm, datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id,
-    # summary_functions,
-    subjid_var, cat_var, par_var, visit_vars, cdisc_visit_vars, value_vars, additional_listing_vars,
+    summary_functions, subjid_var, cat_var, par_var, visit_vars, cdisc_visit_vars, value_vars, additional_listing_vars,
     ref_line_vars,
     # default_centrality_function,
     # default_dispersion_function,
@@ -1659,28 +1679,6 @@ check_mod_lineplot <- function(
   )
 
   # TODO: Move specific tests here
-  if (FALSE) {
-    # Checks that API spec does not (yet?) capture
-    if (OK[["bm_dataset_name"]] && OK[["subjid_var"]]) {
-      dataset <- datasets[[bm_dataset_name]]
-      C_assert(err, is.factor(dataset[[subjid_var]]), "Column referenced by `subjid_var` should be a factor.")
-    }
-
-    if (OK[["bm_dataset_name"]] && OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] && OK[["visit_var"]]) {
-      dataset <- datasets[[bm_dataset_name]]
-      supposedly_unique <- dataset[c(subjid_var, cat_var, par_var, visit_var)]
-      dups <- duplicated(supposedly_unique)
-
-      C_assert(err, !any(dups), {
-        dups <- capture.output(print(head(supposedly_unique[dups, ], 5))) |> paste(collapse = "\n")
-        paste(
-          "The dataset provided contains repeated rows with identical subject, category, parameter and",
-          "visit values. This module expects them to be unique. Here are the first few duplicates:",
-          paste("<pre>", dups, "</pre>")
-        )
-      })
-    }
-  }
 
   res <- list(warnings = warn[["messages"]], errors = err[["messages"]])
   return(res)
