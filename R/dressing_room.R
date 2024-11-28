@@ -431,7 +431,24 @@ explorer_ui <- function() {
     )
   }
 
+  fix_dependencies_for_shiny_widgets_pickerInput <- local({
+    # https://github.com/dreamRs/shinyWidgets/issues/147#issuecomment-459004725
+
+    # get bootstrap dependency
+    bsDep <- (shiny::bootstrapLib())()
+    bsDep$name <- "bootstrap2"
+    # get pickerInput dependency
+    pkDep <- htmltools::findDependencies(shinyWidgets:::attachShinyWidgetsDep(tags$div(), widget = "picker"))
+    pkDep[[2]]$name <- "picker2"
+
+    res <- list(
+      htmltools::suppressDependencies("selectPicker"), htmltools::suppressDependencies("bootstrap"), # remove
+      bsDep, pkDep # inject in correct order
+    )
+  })
+
   ui <- shiny::fluidPage(
+    fix_dependencies_for_shiny_widgets_pickerInput,
     fontawesome::fa_html_dependency(),
     shiny::tags$head(shiny::HTML("<title>Davinci's Module Dressing Room</title>")),
 
