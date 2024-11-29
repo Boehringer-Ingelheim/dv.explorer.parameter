@@ -95,6 +95,7 @@ test_communication_with_papo <- function(mod, data, trigger_input_id) {
   datasets <- shiny::reactive(data)
 
   afmm <- list(
+    data = list(DS = data),
     unfiltered_dataset = datasets,
     filtered_dataset = datasets,
     module_output = function() list(),

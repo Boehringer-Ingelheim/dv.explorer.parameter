@@ -200,7 +200,7 @@ boxplot_UI <- function(id) { # nolint
 #' 1 record per subject per parameter per analysis visit.
 #'
 #' It must contain, at least, the columns passed in the parameters, `subjid_var`, `cat_var`, `par_var`,
-#' `visit_var` and `value_var`. The values of these variables are as described
+#' `visit_var` and `value_vars`. The values of these variables are as described
 #' in the CDISC standard for the variables USUBJID, PARCAT, PARAM, AVISIT and AVAL.
 #'
 #' ### group_dataset
@@ -851,7 +851,9 @@ mod_boxplot <- C_module(mod_boxplot, check_mod_boxplot)
 #' @describeIn mod_boxplot Boxplot wrapper when its output is fed into papo module
 #' @export
 mod_boxplot_papo <- function(...) {
-  mod_boxplot(..., server_wrapper_func = function(x) list(subj_id = x))
+  args <- list(...)
+  args[["server_wrapper_func"]] <- function(x) list(subj_id = x)
+  do.call(mod_boxplot, args)
 }
 
 # Data manipulation
