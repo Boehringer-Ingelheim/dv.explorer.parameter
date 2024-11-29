@@ -181,8 +181,8 @@ T_attach_docs <- function(api, docs) {
       ))
     }
 
-    for (name in names(api$elements)) {
-      api$elements[[name]] <- T_attach_docs(api$elements[[name]], docs[[name]])
+    for (i in seq_along(api$elements)) {
+      api$elements[[i]] <- T_attach_docs(api$elements[[i]], docs[[i]])
     }
   }
 
@@ -445,6 +445,7 @@ explorer_ui <- function() {
       htmltools::suppressDependencies("selectPicker"), htmltools::suppressDependencies("bootstrap"), # remove
       bsDep, pkDep # inject in correct order
     )
+    return(res)
   })
 
   ui <- shiny::fluidPage(
@@ -723,7 +724,7 @@ explorer_server_with_datasets <- function(caller_datasets = NULL) {
 
       selected <- as.character(inputs[[id]])
       ui <- T_select_input(
-        inputId = id, label = NULL, choices = as.character(choices), selected = selected, multiple = multiple
+        inputId = id, label = NULL, choices = unlist(choices), selected = selected, multiple = multiple
       )
 
       visible_col_selectors[[id]] <- list(dataset_slot = dataset_slot, columns = selected)
@@ -792,16 +793,23 @@ explorer_server_with_datasets <- function(caller_datasets = NULL) {
           child_name <- names(elem$elements)[[child_param]]
           child_elem <- elem[["elements"]][[child_param]]
 
+          label <- child_name
+          if (is.null(label)) label <- sprintf("[[%d]]", child_param)
+
           child_info <- compute_ui_info_outer(
             child_visible_datasets,
             child_visible_col_selectors,
-            label = child_name,
+            label = label,
             name = paste(c(name, child_name), collapse = "-"),
             child_elem, inputs, datasets, counts
           )
 
           ui[[length(ui) + 1]] <- child_info[["ui"]]
-          input_ids[[child_name]] <- child_info[["input_ids"]]
+          if (is.null(child_name)) {
+            input_ids[[child_param]] <- child_info[["input_ids"]]
+          } else {
+            input_ids[[child_name]] <- child_info[["input_ids"]]
+          }
           deps <- append(deps, child_info[["dependencies"]])
         }
       } else if (elem[["kind"]] == "choice_from_col_contents") {
@@ -1317,22 +1325,6 @@ explorer_server_with_datasets <- function(caller_datasets = NULL) {
 
     error_and_ui_rv <- shiny::reactiveValues(ui = list(), error = NULL)
 
-    # To avoid having multiple instances of the underlying reactive server running, we use
-    # this pattern. It relies on the createMockDomain internal shiny function, but it was
-    # recommended by Winston Chang back in this 2015 still open thread:
-    # https://github.com/rstudio/shiny/issues/825#issue-75758069
-    # https://github.com/rstudio/shiny/issues/825
-    # https://github.com/rstudio/shiny/blame/main/R/reactive-domains.R
-    #
-    # See also #eecohg further down
-    #
-    #  Using this code fails with a
-    # "session must be a ShinySession or session_proxy object."
-    #  around:
-    # > callModule(module, id, session = session)
-    #  so either I'm doing something wrong or createMockDomain is no longer enough to
-    #  fake a shiny session
-    #
     shiny::observe({
       code_to_eval <- NULL
       if (isTRUE(input[["edit_code"]])) {
@@ -1675,7 +1667,12 @@ C_module <- function(module, check_mod_function) {
     return(res)
   }
 
-  return(wrapper)
+  roxygen_wrapper <- function() { # to keep parameters in the reference docs
+    args <- (match.call() |> as.list())[c(-1)]
+    do.call(wrapper, args)
+  }
+  formals(roxygen_wrapper) <- formals(module)
+  return(roxygen_wrapper)
 }
 
 C_container <- function() list2env(x = list(messages = character(0)), parent = emptyenv())
@@ -2017,19 +2014,46 @@ C_check_subjid_col <- function(datasets, ds_name, ds_value, col_name, col_var, w
 C_check_unique_sub_cat_par_vis <- function(datasets, ds_name, ds_value, sub, cat, par, vis, warn, err) {
   ok <- TRUE
 
+  df_to_string <- function(df) {
+    names(df) <- sprintf("[%s] ", names(df))
+    lines <- capture.output(print(as.data.frame(df), right = FALSE, row.names = FALSE, quote = TRUE)) |> trimws()
+    return(paste(lines, collapse = "\n"))
+  }
+
   dataset <- datasets[[ds_value]]
+
+  unique_cat_par_combinations <- unique(dataset[c(cat, par)])
+  dup_params_across_categories <- duplicated(unique_cat_par_combinations[par])
+
+  ok <- C_assert(err, !any(dup_params_across_categories), {
+    prefixes <- c(rep("Category:", length(cat)), rep("Parameter:", length(par)))
+    first_duplicates <- head(unique_cat_par_combinations[dup_params_across_categories, ], 5)
+
+    names(first_duplicates) <- paste(prefixes, names(first_duplicates))
+    dups <- df_to_string(first_duplicates)
+    paste(
+      sprintf("The dataset provided by `%s` (%s) contains parameter names that repeat across categories.", ds_name, ds_value),
+      "This module expects them to be unique. Here are the first few duplicates:",
+      paste0("<pre>", dups, "</pre>")
+    )
+  })
 
   supposedly_unique <- dataset[c(sub, cat, par, vis)]
   dups <- duplicated(supposedly_unique)
 
-  ok <- C_assert(err, !any(dups), {
+  ok <- ok && C_assert(err, !any(dups), {
+    prefixes <- c(
+      rep("Subject:", length(sub)), rep("Category:", length(cat)),
+      rep("Parameter:", length(par)), rep("Visit:", length(vis))
+    )
+
     first_duplicates <- head(supposedly_unique[dups, ], 5)
-    names(first_duplicates) <- paste(c("Subject:", "Category:", "Parameter:", "Visit:"), names(first_duplicates))
-    dups <- capture.output(print(first_duplicates)) |> paste(collapse = "\n")
+    names(first_duplicates) <- paste(prefixes, names(first_duplicates))
+    dups <- df_to_string(first_duplicates)
     paste(
       sprintf("The dataset provided by `%s` (%s) contains repeated rows with identical subject, category, parameter", ds_name, ds_value),
       "and visit values. This module expects them to be unique. Here are the first few duplicates:",
-      paste("<pre>", dups, "</pre>")
+      paste0("<pre>", dups, "</pre>")
     )
   })
 

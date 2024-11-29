@@ -672,6 +672,7 @@ lineplot_server <- function(id,
     v_bm_dataset <- shiny::reactive(
       {
         df <- bm_dataset()
+        # NOTE: None of these checks should never fail because the C_module wrapper should prevent them
         ac <- checkmate::makeAssertCollection()
         checkmate::assert_data_frame(df, min.rows = 1, .var.name = ns("bm_dataset"), add = ac)
         checkmate::assert_names(
@@ -684,7 +685,6 @@ lineplot_server <- function(id,
           add = ac
         )
 
-        # TODO: Move to check_lineplot_call
         unique_par_names <- df |>
           dplyr::distinct(dplyr::across(c(VAR$CAT, VAR$PAR))) |>
           dplyr::group_by(dplyr::across(c(VAR$PAR))) |>
