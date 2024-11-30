@@ -1609,43 +1609,43 @@ mod_lineplot_API_docs <- list(
 )
 
 # TODO: Complete
-mod_lineplot_API_spec <- T_group(
-  module_id = T_mod_ID(),
-  bm_dataset_name = T_dataset_name(),
-  group_dataset_name = T_dataset_name() |> T_flag("subject_level_dataset_name"),
-  receiver_id = T_character() |> T_flag("optional", "ignore"),
-  summary_fns = T_group(
-    fn = T_function(arg_count = 1),
-    dispersion = T_group(
-      top = T_function(arg_count = 1),
-      bottom = T_function(arg_count = 1)
-    ) |> T_flag("zero_or_more", "named"),
-    y_prefix = T_character()
-  ) |> T_flag("optional", "named", "zero_or_more", "ignore"), # NOTE: ignored because we won't provide a function builder
-  subjid_var = T_col("group_dataset_name", T_factor()) |> T_flag("subjid_var"),
-  cat_var = T_col("bm_dataset_name", T_or(T_character(), T_factor())),
-  par_var = T_col("bm_dataset_name", T_or(T_character(), T_factor())),
-  visit_vars = T_col("bm_dataset_name", T_or(T_character(), T_factor(), T_numeric())) |> T_flag("one_or_more"),
-  cdisc_visit_vars = T_col("bm_dataset_name", T_or(T_numeric())) |> T_flag("zero_or_more"),
+mod_lineplot_API_spec <- TC$group(
+  module_id = TC$mod_ID(),
+  bm_dataset_name = TC$dataset_name(),
+  group_dataset_name = TC$dataset_name() |> TC$flag("subject_level_dataset_name"),
+  receiver_id = TC$character() |> TC$flag("optional", "ignore"),
+  summary_fns = TC$group(
+    fn = TC$fn(arg_count = 1),
+    dispersion = TC$group(
+      top = TC$fn(arg_count = 1),
+      bottom = TC$fn(arg_count = 1)
+    ) |> TC$flag("zero_or_more", "named"),
+    y_prefix = TC$character()
+  ) |> TC$flag("optional", "named", "zero_or_more", "ignore"), # NOTE: ignored because we won't provide a function builder
+  subjid_var = TC$col("group_dataset_name", TC$factor()) |> TC$flag("subjid_var"),
+  cat_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())),
+  par_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())),
+  visit_vars = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())) |> TC$flag("one_or_more"),
+  cdisc_visit_vars = TC$col("bm_dataset_name", TC$or(TC$numeric())) |> TC$flag("zero_or_more"),
   # FIXME: ? Interaction between visit_vars and cdisc_visit_vars; one needs to be specified
-  value_vars = T_col("bm_dataset_name", T_numeric()) |> T_flag("one_or_more"),
-  additional_listing_vars = T_col("bm_dataset_name", T_anything()) |> T_flag("zero_or_more", "optional"),
-  ref_line_vars = T_col("bm_dataset_name", T_anything()) |> T_flag("zero_or_more", "optional"),
-  default_centrality_fn = T_character() |> T_flag("ignore"), # TODO: T_choice ?
-  default_dispersion_fn = T_character() |> T_flag("ignore"), # TODO: T_choice ?
-  default_cat = T_choice_from_col_contents("cat_var") |> T_flag("zero_or_more", "optional"),
-  default_par = T_choice_from_col_contents("par_var") |> T_flag("zero_or_more", "optional"),
-  default_val = T_choice("value_vars") |> T_flag("optional"), # FIXME(miguel): Should be called default_value_var
-  # FIXME: should allow selection across both visit_vars and cdisc_visit_vars (T_choice("visit_vars", "cdisc_visit_vars"))
+  value_vars = TC$col("bm_dataset_name", TC$numeric()) |> TC$flag("one_or_more"),
+  additional_listing_vars = TC$col("bm_dataset_name", TC$anything()) |> TC$flag("zero_or_more", "optional"),
+  ref_line_vars = TC$col("bm_dataset_name", TC$anything()) |> TC$flag("zero_or_more", "optional"),
+  default_centrality_fn = TC$character() |> TC$flag("ignore"), # TODO: TC$choice ?
+  default_dispersion_fn = TC$character() |> TC$flag("ignore"), # TODO: TC$choice ?
+  default_cat = TC$choice_from_col_contents("cat_var") |> TC$flag("zero_or_more", "optional"),
+  default_par = TC$choice_from_col_contents("par_var") |> TC$flag("zero_or_more", "optional"),
+  default_val = TC$choice("value_vars") |> TC$flag("optional"), # FIXME(miguel): Should be called default_value_var
+  # FIXME: should allow selection across both visit_vars and cdisc_visit_vars (TC$choice("visit_vars", "cdisc_visit_vars"))
   # FIXME: for some reason, the contents of the selector don't update when "visit_vars" is modified
-  default_visit_var = T_choice("visit_vars") |> T_flag("optional"),
+  default_visit_var = TC$choice("visit_vars") |> TC$flag("optional"),
   # FIXME: Can't represent this behavior right now
-  default_visit_val = T_group() |> T_flag("named", "optional", "ignore"),
-  default_main_group = T_col("group_dataset_name", T_or(T_character(), T_factor())) |> T_flag("optional"),
-  default_sub_group = T_col("group_dataset_name", T_or(T_character(), T_factor())) |> T_flag("optional"),
-  default_transparency = T_numeric(min = 0.05, max = 1.) |> T_flag("optional"),
-  default_y_axis_projection = T_character() |> T_flag("optional", "ignore") # FIXME: something like T_enum(c())
-) |> T_attach_docs(mod_lineplot_API_docs) # TODO: Attach
+  default_visit_val = TC$group() |> TC$flag("named", "optional", "ignore"),
+  default_main_group = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("optional"),
+  default_sub_group = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("optional"),
+  default_transparency = TC$numeric(min = 0.05, max = 1.) |> TC$flag("optional"),
+  default_y_axis_projection = TC$character() |> TC$flag("optional", "ignore") # FIXME: something like TC$enum(c())
+) |> TC$attach_docs(mod_lineplot_API_docs)
 
 check_mod_lineplot <- function(
     afmm, datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id, summary_fns,

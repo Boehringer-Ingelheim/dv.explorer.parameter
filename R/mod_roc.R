@@ -1085,23 +1085,23 @@ mod_roc_API_docs <- list(
   compute_metric_fn = ""
 )
 
-mod_roc_API_spec <- T_group(
-  module_id = T_mod_ID(),
-  pred_dataset_name = T_dataset_name(),
-  resp_dataset_name = T_dataset_name(),
-  group_dataset_name = T_dataset_name() |> T_flag("subject_level_dataset_name"),
-  pred_cat_var = T_col("pred_dataset_name", T_or(T_character(), T_factor())),
-  pred_par_var = T_col("pred_dataset_name", T_or(T_character(), T_factor())),
-  pred_value_vars = T_col("pred_dataset_name", T_numeric()) |> T_flag("one_or_more"),
-  pred_visit_var = T_col("pred_dataset_name", T_or(T_character(), T_factor(), T_numeric())),
-  resp_cat_var = T_col("resp_dataset_name", T_or(T_character(), T_factor())),
-  resp_par_var = T_col("resp_dataset_name", T_or(T_character(), T_factor())),
-  resp_value_vars = T_col("resp_dataset_name", T_or(T_character(), T_factor())) |> T_flag("one_or_more"),
-  resp_visit_var = T_col("resp_dataset_name", T_or(T_character(), T_factor(), T_numeric())),
-  subjid_var = T_col("group_dataset_name", T_factor()) |> T_flag("subjid_var"),
-  compute_roc_fn = T_function(arg_count = 4) |> T_flag("optional"),
-  compute_metric_fn = T_function(arg_count = 2) |> T_flag("optional")
-) |> T_attach_docs(mod_roc_API_docs)
+mod_roc_API_spec <- TC$group(
+  module_id = TC$mod_ID(),
+  pred_dataset_name = TC$dataset_name(),
+  resp_dataset_name = TC$dataset_name(),
+  group_dataset_name = TC$dataset_name() |> TC$flag("subject_level_dataset_name"),
+  pred_cat_var = TC$col("pred_dataset_name", TC$or(TC$character(), TC$factor())),
+  pred_par_var = TC$col("pred_dataset_name", TC$or(TC$character(), TC$factor())),
+  pred_value_vars = TC$col("pred_dataset_name", TC$numeric()) |> TC$flag("one_or_more"),
+  pred_visit_var = TC$col("pred_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())),
+  resp_cat_var = TC$col("resp_dataset_name", TC$or(TC$character(), TC$factor())),
+  resp_par_var = TC$col("resp_dataset_name", TC$or(TC$character(), TC$factor())),
+  resp_value_vars = TC$col("resp_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("one_or_more"),
+  resp_visit_var = TC$col("resp_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())),
+  subjid_var = TC$col("group_dataset_name", TC$factor()) |> TC$flag("subjid_var"),
+  compute_roc_fn = TC$fn(arg_count = 4) |> TC$flag("optional"),
+  compute_metric_fn = TC$fn(arg_count = 2) |> TC$flag("optional")
+) |> TC$attach_docs(mod_roc_API_docs)
 
 check_mod_roc <- function(
     afmm, datasets, module_id, pred_dataset_name, resp_dataset_name, group_dataset_name, pred_cat_var,

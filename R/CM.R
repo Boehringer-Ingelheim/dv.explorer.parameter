@@ -1,4 +1,4 @@
-# YT#VH750f5cfad10078c864c1d56930d6af1f#VH00000000000000000000000000000000#
+# YT#VH444ba79a3be691b19e5a661251f7b76a#VH750f5cfad10078c864c1d56930d6af1f#
 CM <- local({ # _C_hecked _M_odule
   # Wrap the UI and server of a module so that, once parameterized, they go through a check function prior to running.
   module <- function(module, check_mod_fn, dataset_info_fn) {
@@ -92,7 +92,7 @@ CM <- local({ # _C_hecked _M_odule
           # nolint start
           if (FALSE) {
             filtered_mapped_datasets <- shiny::reactive(
-              T_honor_map_to_flag(afmm$filtered_dataset(), mod_lineplot_API, args)
+              TC$honor_map_to_flag(afmm$filtered_dataset(), mod_lineplot_API, args)
             )
 
             bm_dataset <- shiny::reactive({
@@ -154,7 +154,7 @@ CM <- local({ # _C_hecked _M_odule
   generate_check_function <- function(spec) {
     stopifnot(spec$kind == "group")
 
-    # TODO: Check that arguments that depend on arguments T_flagged as `optional` are optional too.
+    # TODO: Check that arguments that depend on arguments TC$flagged as `optional` are optional too.
 
     res <- character(0)
     push <- function(s) res <<- c(res, s)
@@ -310,7 +310,7 @@ CM <- local({ # _C_hecked _M_odule
   }
 
   list_columns_of_kind <- function(dataset, type) {
-    res <- names(dataset)[sapply(seq_len(ncol(dataset)), function(x) T_is_of_kind(dataset[[x]], type))]
+    res <- names(dataset)[sapply(seq_len(ncol(dataset)), function(x) TC$is_of_kind(dataset[[x]], type))]
     return(res)
   }
 

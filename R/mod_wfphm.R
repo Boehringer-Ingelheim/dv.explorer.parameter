@@ -2320,20 +2320,20 @@ mod_wfphm_API_docs <- list(
   show_x_ticks = ""
 )
 
-mod_wfphm_API_spec <- T_group(
-  module_id = T_mod_ID(),
-  bm_dataset_name = T_dataset_name(),
-  group_dataset_name = T_dataset_name() |> T_flag("subject_level_dataset_name"),
-  cat_var = T_col("bm_dataset_name", T_or(T_character(), T_factor())),
-  par_var = T_col("bm_dataset_name", T_or(T_character(), T_factor())),
-  visit_var = T_col("bm_dataset_name", T_or(T_character(), T_factor(), T_numeric())),
-  subjid_var = T_col("group_dataset_name", T_factor()) |> T_flag("subjid_var"),
-  value_vars = T_col("bm_dataset_name", T_numeric()) |> T_flag("one_or_more"),
-  bar_group_palette = T_function(arg_count = 1) |> T_flag("optional", "zero_or_more", "named", "ignore"),
-  cat_palette = T_function(arg_count = 1) |> T_flag("optional", "zero_or_more", "named", "ignore"),
-  tr_mapper = T_function(arg_count = 1) |> T_flag("optional", "zero_or_more", "named", "ignore"),
-  show_x_ticks = T_logical()
-) |> T_attach_docs(mod_wfphm_API_docs)
+mod_wfphm_API_spec <- TC$group(
+  module_id = TC$mod_ID(),
+  bm_dataset_name = TC$dataset_name(),
+  group_dataset_name = TC$dataset_name() |> TC$flag("subject_level_dataset_name"),
+  cat_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())),
+  par_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())),
+  visit_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())),
+  subjid_var = TC$col("group_dataset_name", TC$factor()) |> TC$flag("subjid_var"),
+  value_vars = TC$col("bm_dataset_name", TC$numeric()) |> TC$flag("one_or_more"),
+  bar_group_palette = TC$fn(arg_count = 1) |> TC$flag("optional", "zero_or_more", "named", "ignore"),
+  cat_palette = TC$fn(arg_count = 1) |> TC$flag("optional", "zero_or_more", "named", "ignore"),
+  tr_mapper = TC$fn(arg_count = 1) |> TC$flag("optional", "zero_or_more", "named", "ignore"),
+  show_x_ticks = TC$logical()
+) |> TC$attach_docs(mod_wfphm_API_docs)
 
 
 check_mod_wfphm <- function(

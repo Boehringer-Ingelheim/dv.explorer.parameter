@@ -547,21 +547,21 @@ mod_scatterplotmatrix_API_docs <- list(
   default_main_group = ""
 )
 
-mod_scatterplotmatrix_API_spec <- T_group(
-  module_id = T_mod_ID(),
-  bm_dataset_name = T_dataset_name(),
-  group_dataset_name = T_dataset_name() |> T_flag("subject_level_dataset_name"),
-  cat_var = T_col("bm_dataset_name", T_or(T_character(), T_factor())),
-  par_var = T_col("bm_dataset_name", T_or(T_character(), T_factor())),
-  value_vars = T_col("bm_dataset_name", T_numeric()) |> T_flag("one_or_more"),
-  visit_var = T_col("bm_dataset_name", T_or(T_character(), T_factor(), T_numeric())),
-  subjid_var = T_col("group_dataset_name", T_factor()) |> T_flag("subjid_var"),
-  default_cat = T_choice_from_col_contents("cat_var") |> T_flag("zero_or_more", "optional"),
-  default_par = T_choice_from_col_contents("par_var") |> T_flag("zero_or_more", "optional"),
-  default_visit = T_choice_from_col_contents("visit_var") |> T_flag("optional"),
-  default_value = T_choice("value_vars") |> T_flag("optional"), # FIXME(miguel): ? Should be called default_value_var
-  default_main_group = T_col("group_dataset_name", T_or(T_character(), T_factor())) |> T_flag("optional")
-) |> T_attach_docs(mod_scatterplotmatrix_API_docs)
+mod_scatterplotmatrix_API_spec <- TC$group(
+  module_id = TC$mod_ID(),
+  bm_dataset_name = TC$dataset_name(),
+  group_dataset_name = TC$dataset_name() |> TC$flag("subject_level_dataset_name"),
+  cat_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())),
+  par_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())),
+  value_vars = TC$col("bm_dataset_name", TC$numeric()) |> TC$flag("one_or_more"),
+  visit_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())),
+  subjid_var = TC$col("group_dataset_name", TC$factor()) |> TC$flag("subjid_var"),
+  default_cat = TC$choice_from_col_contents("cat_var") |> TC$flag("zero_or_more", "optional"),
+  default_par = TC$choice_from_col_contents("par_var") |> TC$flag("zero_or_more", "optional"),
+  default_visit = TC$choice_from_col_contents("visit_var") |> TC$flag("optional"),
+  default_value = TC$choice("value_vars") |> TC$flag("optional"), # FIXME(miguel): ? Should be called default_value_var
+  default_main_group = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("optional")
+) |> TC$attach_docs(mod_scatterplotmatrix_API_docs)
 
 check_mod_scatterplotmatrix <- function(
     afmm, datasets, module_id, bm_dataset_name, group_dataset_name, cat_var, par_var, value_vars, visit_var,

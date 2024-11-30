@@ -908,19 +908,19 @@ mod_corr_hm_API_docs <- list(
   default_value = "" # FIXME(miguel): Should be called default_value_var
 )
 
-mod_corr_hm_API_spec <- T_group(
-  module_id = T_mod_ID(),
-  bm_dataset_name = T_dataset_name(),
-  subjid_var = T_col("bm_dataset_name", T_factor()) |> T_flag("subjid_var"),
-  cat_var = T_col("bm_dataset_name", T_or(T_character(), T_factor())),
-  par_var = T_col("bm_dataset_name", T_or(T_character(), T_factor())),
-  visit_var = T_col("bm_dataset_name", T_or(T_character(), T_factor(), T_numeric())),
-  value_vars = T_col("bm_dataset_name", T_numeric()) |> T_flag("one_or_more"),
-  default_cat = T_choice_from_col_contents("cat_var") |> T_flag("zero_or_more", "optional"),
-  default_par = T_choice_from_col_contents("par_var") |> T_flag("zero_or_more", "optional"),
-  default_visit = T_choice_from_col_contents("visit_var") |> T_flag("zero_or_more", "optional"),
-  default_value = T_choice("value_vars") |> T_flag("optional") # FIXME(miguel): Should be called default_value_var
-) |> T_attach_docs(mod_corr_hm_API_docs)
+mod_corr_hm_API_spec <- TC$group(
+  module_id = TC$mod_ID(),
+  bm_dataset_name = TC$dataset_name(),
+  subjid_var = TC$col("bm_dataset_name", TC$factor()) |> TC$flag("subjid_var"),
+  cat_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())),
+  par_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())),
+  visit_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())),
+  value_vars = TC$col("bm_dataset_name", TC$numeric()) |> TC$flag("one_or_more"),
+  default_cat = TC$choice_from_col_contents("cat_var") |> TC$flag("zero_or_more", "optional"),
+  default_par = TC$choice_from_col_contents("par_var") |> TC$flag("zero_or_more", "optional"),
+  default_visit = TC$choice_from_col_contents("visit_var") |> TC$flag("zero_or_more", "optional"),
+  default_value = TC$choice("value_vars") |> TC$flag("optional") # FIXME(miguel): Should be called default_value_var
+) |> TC$attach_docs(mod_corr_hm_API_docs)
 
 
 check_mod_corr_hm <- function(
