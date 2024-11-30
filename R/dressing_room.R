@@ -438,7 +438,7 @@ explorer_ui <- function() {
     bsDep <- (shiny::bootstrapLib())()
     bsDep$name <- "bootstrap2"
     # get pickerInput dependency
-    pkDep <- htmltools::findDependencies(shinyWidgets:::attachShinyWidgetsDep(tags$div(), widget = "picker"))
+    pkDep <- htmltools::findDependencies(shinyWidgets:::attachShinyWidgetsDep(htmltools::tags$div(), widget = "picker"))
     pkDep[[2]]$name <- "picker2"
 
     res <- list(

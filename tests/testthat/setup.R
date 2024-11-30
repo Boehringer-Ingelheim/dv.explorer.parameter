@@ -1,4 +1,3 @@
-# nolint start
 # validation (S)
 vdoc <- local({
   #                      ##########
@@ -14,7 +13,7 @@ specs <- vdoc[["specs"]]
 run_shiny_tests <- !isFALSE(as.logical(Sys.getenv("SKIP_SHINY_TESTS")))
 suspect_check <- any(names(Sys.getenv()) == "_R_CHECK_CRAN_INCOMING_")
 
-skip_if_not_running_shiny_tests <- function() testthat::skip_if_not(run_shiny_tests, message = "Skip tests") # nolint
+skip_if_not_running_shiny_tests <- function() testthat::skip_if_not(run_shiny_tests, message = "Skip tests")
 skip_if_suspect_check <- function() testthat::skip_if(suspect_check, message = "Suspected check")
 
 tns_factory <- function(id) function(...) paste0(c(id, as.character(list(...))), collapse = "-")
@@ -83,9 +82,8 @@ expect_r2d3_svg <- function(app, query_list) {
     expect_length(error_vec, 0)
   })
 }
-# nolint end
 
-# YT#VH879dbe3c8dc1d3f2a8ead3a71a5fb8bc#VH00000000000000000000000000000000#
+# YT#VH19ec235e56cdd18f129215603abf0ca6#VH00000000000000000000000000000000#
 
 #' Test harness for communication with `dv.papo`.
 #'
@@ -125,7 +123,7 @@ test_communication_with_papo <- function(mod, data, trigger_input_id) {
 
   app <- shiny::shinyApp(ui = app_ui, server = app_server)
 
-  test_that("module adheres to send_subject_id_to_papo protocol", {
+  testthat::test_that("module adheres to send_subject_id_to_papo protocol", {
     app <- shinytest2::AppDriver$new(app, name = "test_send_subject_id_to_papo_protocol")
 
     app$wait_for_idle()
