@@ -451,11 +451,11 @@ lp_ci <- function(x) {
 
 #' Default lineplot summary functions
 #'
-#' @name default_lineplot_fns
+#' @name default_lineplot_functions
 #'
 NULL
 
-#' @describeIn default_lineplot_fns Default mean functions
+#' @describeIn default_lineplot_functions Default mean functions
 #' @export
 lp_mean_summary_fns <- list(
   fn = function(x) base::mean(x, na.rm = TRUE),
@@ -478,7 +478,7 @@ lp_mean_summary_fns <- list(
 )
 
 lp_quantile_type <- 2 # From original EBAS # TODO: Figure out if this is a user requirement
-#' @describeIn default_lineplot_fns Default median functions
+#' @describeIn default_lineplot_functions Default median functions
 #' @export
 lp_median_summary_fns <- list(
   fn = function(x) stats::median(x, na.rm = TRUE),
