@@ -451,13 +451,13 @@ lp_ci <- function(x) {
 
 #' Default lineplot summary functions
 #'
-#' @name default_lineplot_functions
+#' @name default_lineplot_fns
 #'
 NULL
 
-#' @describeIn default_lineplot_functions Default mean functions
+#' @describeIn default_lineplot_fns Default mean functions
 #' @export
-lp_mean_summary_functions <- list(
+lp_mean_summary_fns <- list(
   fn = function(x) base::mean(x, na.rm = TRUE),
   dispersion = list(
     # `No error bar` implicit
@@ -478,9 +478,9 @@ lp_mean_summary_functions <- list(
 )
 
 lp_quantile_type <- 2 # From original EBAS # TODO: Figure out if this is a user requirement
-#' @describeIn default_lineplot_functions Default median functions
+#' @describeIn default_lineplot_fns Default median functions
 #' @export
-lp_median_summary_functions <- list(
+lp_median_summary_fns <- list(
   fn = function(x) stats::median(x, na.rm = TRUE),
   dispersion = list(
     # `No error bar` implicit
@@ -523,7 +523,7 @@ lp_median_summary_functions <- list(
 #'
 #' It should contain, at least, the column specified by the parameter `subjid_var`.
 #'
-#' @param summary_functions `[list()]`
+#' @param summary_fns `[list()]`
 #'
 #' Each element of this named list contains a summary function (e.g. a mean) and a collection of dispersion functions
 #' (e.g. standard deviation) defining ranges around the values returned by the summary function.
@@ -534,15 +534,20 @@ lp_median_summary_functions <- list(
 #'   a numeric vector as input and return a single numeric scalar
 #' - `y_prefix`: Prefix that will be prepended the Y axis label of the generated plot
 #'
-#' For an example, see `dv.explorer.parameter::lp_mean_summary_functions`.
+#' For an example, see `dv.explorer.parameter::lp_mean_summary_fns`.
 #'
-#' @param dataset_name `[shiny::reactive(*)]`
+#' @param subjid_var `[character(1)]`
 #'
-#' A reactive that indicates a possible change in the column structure of any of the two datasets
+#' Column corresponding to the subject ID
 #'
 #' @param cat_var,par_var,visit_vars `[character(1)]`
 #'
 #' Columns from `bm_dataset` that correspond to the parameter category, parameter and visit
+#'
+#' @param cdisc_visit_vars `[character(1)]`
+#'
+#' Column from `bm_dataset` that correspond to the parameter visit and is interpreted as a CDISC
+#' Visit Days (skipping day 0; jumping from value -1 to value 1 in the X axis)
 #'
 #' @param value_vars `[character(n)]`
 #'
@@ -551,10 +556,6 @@ lp_median_summary_functions <- list(
 #' @param additional_listing_vars `[character(n)]`
 #'
 #' Columns from `bm_dataset` that will be appended to the single-subject listing
-#'
-#' @param subjid_var `[character(1)]`
-#'
-#' Column corresponding to the subject ID
 #'
 #' @param ref_line_vars `[character(n)]`
 #'
@@ -568,7 +569,7 @@ lp_median_summary_functions <- list(
 #'
 #' Default values for the selectors
 #'
-#' @param default_sub_group,default_val,default_centrality_function,default_dispersion_function `[character(1)|NULL]`
+#' @param default_sub_group,default_val,default_centrality_fn,default_dispersion_fn `[character(1)|NULL]`
 #'
 #' Default values for the selectors
 #'
@@ -577,23 +578,22 @@ lp_median_summary_functions <- list(
 #' Named list of default values associated to specific `visit_var`s, e.g.
 #' `default_visit_val = list(VISIT = c('VISIT1', 'VISIT2'), AVISITN = c(1, 2))`
 #'
-#' @param default_y_axis_projection `["Linear"|"Logarithmic"]`
-#'
-#' Default projection for the Y axis
-#'
 #' @param default_transparency `[numeric(1)]`
 #'
 #' Default values for the selectors
+#'
+#' @param default_y_axis_projection `["Linear"|"Logarithmic"]`
+#'
+#' Default projection for the Y axis
 #'
 #' @export
 #'
 lineplot_server <- function(id,
                             bm_dataset,
                             group_dataset,
-                            dataset_name = shiny::reactive(character(0)),
-                            summary_functions = list(
-                              `Mean` = lp_mean_summary_functions,
-                              `Median` = lp_median_summary_functions
+                            summary_fns = list(
+                              `Mean` = lp_mean_summary_fns,
+                              `Median` = lp_median_summary_fns
                             ),
                             subjid_var = "SUBJID",
                             cat_var = "PARCAT",
@@ -604,8 +604,8 @@ lineplot_server <- function(id,
                             additional_listing_vars = character(0),
                             ref_line_vars = character(0),
                             on_sbj_click = NULL,
-                            default_centrality_function = NULL,
-                            default_dispersion_function = NULL,
+                            default_centrality_fn = NULL,
+                            default_dispersion_fn = NULL,
                             default_cat = NULL,
                             default_par = NULL,
                             default_val = NULL,
@@ -620,8 +620,8 @@ lineplot_server <- function(id,
   checkmate::assert_string(cat_var, min.chars = 1, add = ac)
   checkmate::assert_string(par_var, min.chars = 1, add = ac)
   checkmate::assert_character(additional_listing_vars, min.chars = 1, add = ac)
-  checkmate::assert_string(default_centrality_function, min.chars = 1, add = ac, null.ok = TRUE)
-  checkmate::assert_string(default_dispersion_function, min.chars = 1, add = ac, null.ok = TRUE)
+  checkmate::assert_string(default_centrality_fn, min.chars = 1, add = ac, null.ok = TRUE)
+  checkmate::assert_string(default_dispersion_fn, min.chars = 1, add = ac, null.ok = TRUE)
   checkmate::assert_character(default_cat, min.chars = 1, add = ac, null.ok = TRUE)
   checkmate::assert_character(default_par, min.chars = 1, add = ac, null.ok = TRUE)
   checkmate::assert_string(default_visit_var, min.chars = 1, add = ac, null.ok = TRUE)
@@ -824,9 +824,9 @@ lineplot_server <- function(id,
       if (r_centrality == LP_CNT$PLOT_TYPE_SUBJECT_LEVEL) {
         NULL
       } else {
-        functions <- list(center = summary_functions[[r_centrality]][["fn"]])
+        functions <- list(center = summary_fns[[r_centrality]][["fn"]])
         if (r_dispersion != "None") {
-          disp_f <- summary_functions[[r_centrality]][["dispersion"]][[r_dispersion]]
+          disp_f <- summary_fns[[r_centrality]][["dispersion"]][[r_dispersion]]
           functions[[LP_ID$MISC$WHISKER_TOP]] <- disp_f[["top"]]
           functions[[LP_ID$MISC$WHISKER_BOTTOM]] <- disp_f[["bottom"]]
         }
@@ -845,7 +845,7 @@ lineplot_server <- function(id,
           silent = TRUE
         )
 
-        y_label_prefix <- summary_functions[[r_centrality]][["y_prefix"]]
+        y_label_prefix <- summary_fns[[r_centrality]][["y_prefix"]]
       }
 
       ds <- set_lbl(ds, CNT$VAL, paste0(y_label_prefix, y_label))
@@ -1134,14 +1134,14 @@ lineplot_server <- function(id,
     })
 
     centrality_dispersion <- local({
-      summary_function_df <- local({
+      summary_fn_df <- local({
         res <- data.frame(Centrality = LP_CNT$PLOT_TYPE_SUBJECT_LEVEL, Dispersion = "None")
-        for (i_f in seq_along(summary_functions)) {
-          sum_name <- names(summary_functions)[[i_f]]
-          dispersion_functions <- summary_functions[[i_f]][["dispersion"]]
+        for (i_f in seq_along(summary_fns)) {
+          sum_name <- names(summary_fns)[[i_f]]
+          dispersion_fns <- summary_fns[[i_f]][["dispersion"]]
           res <- rbind(res, c(sum_name, "None")) # None
-          for (j_f in seq_along(dispersion_functions)) {
-            disp_name <- names(dispersion_functions)[[j_f]]
+          for (j_f in seq_along(dispersion_fns)) {
+            disp_name <- names(dispersion_fns)[[j_f]]
             res <- rbind(res, c(sum_name, disp_name))
           }
         }
@@ -1153,15 +1153,15 @@ lineplot_server <- function(id,
 
       parameter_server(
         id = LP_ID$PLOT_CENTRALITY_AND_DISPERSION,
-        data = shiny::reactive(summary_function_df),
+        data = shiny::reactive(summary_fn_df),
         cat_var = "Centrality",
         par_var = "Dispersion",
         cat_label = "Centrality",
         par_label = "Dispersion",
         multi_cat = FALSE,
         multi_par = FALSE,
-        default_cat = default_centrality_function,
-        default_par = default_dispersion_function
+        default_cat = default_centrality_fn,
+        default_par = default_dispersion_fn
       )
     })
     centrality <- centrality_dispersion[["cat"]]
@@ -1503,9 +1503,9 @@ mod_lineplot <- function(module_id,
                          bm_dataset_name,
                          group_dataset_name,
                          receiver_id = NULL,
-                         summary_functions = list(
-                           `Mean` = lp_mean_summary_functions,
-                           `Median` = lp_median_summary_functions
+                         summary_fns = list(
+                           `Mean` = lp_mean_summary_fns,
+                           `Median` = lp_median_summary_fns
                          ),
                          subjid_var = "SUBJID",
                          cat_var = "PARCAT",
@@ -1515,8 +1515,8 @@ mod_lineplot <- function(module_id,
                          value_vars = c("AVAL", "PCHG"),
                          additional_listing_vars = character(0),
                          ref_line_vars = character(0),
-                         default_centrality_function = NULL,
-                         default_dispersion_function = NULL,
+                         default_centrality_fn = NULL,
+                         default_dispersion_fn = NULL,
                          default_cat = NULL,
                          default_par = NULL,
                          default_val = NULL,
@@ -1541,7 +1541,7 @@ mod_lineplot <- function(module_id,
         bm_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[bm_dataset_name]]),
         group_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[group_dataset_name]]),
         on_sbj_click = on_sbj_click_fun,
-        summary_functions = summary_functions,
+        summary_fns = summary_fns,
         subjid_var = subjid_var,
         cat_var = cat_var,
         par_var = par_var,
@@ -1550,8 +1550,8 @@ mod_lineplot <- function(module_id,
         value_vars = value_vars,
         additional_listing_vars = additional_listing_vars,
         ref_line_vars = ref_line_vars,
-        default_centrality_function = default_centrality_function,
-        default_dispersion_function = default_dispersion_function,
+        default_centrality_fn = default_centrality_fn,
+        default_dispersion_fn = default_dispersion_fn,
         default_cat = default_cat,
         default_par = default_par,
         default_val = default_val,
@@ -1575,7 +1575,7 @@ mod_lineplot_API_docs <- list(
   bm_dataset_name = "",
   group_dataset_name = "",
   receiver_id = "",
-  summary_functions = list(
+  summary_fns = list(
     "",
     fn = "",
     dispersion = list(
@@ -1593,8 +1593,8 @@ mod_lineplot_API_docs <- list(
   value_vars = "",
   additional_listing_vars = "",
   ref_line_vars = "",
-  default_centrality_function = "",
-  default_dispersion_function = "",
+  default_centrality_fn = "",
+  default_dispersion_fn = "",
   default_cat = "",
   default_par = "",
   default_val = "",
@@ -1614,7 +1614,7 @@ mod_lineplot_API_spec <- T_group(
   bm_dataset_name = T_dataset_name(),
   group_dataset_name = T_dataset_name() |> T_flag("subject_level_dataset_name"),
   receiver_id = T_character() |> T_flag("optional", "ignore"),
-  summary_functions = T_group(
+  summary_fns = T_group(
     fn = T_function(arg_count = 1),
     dispersion = T_group(
       top = T_function(arg_count = 1),
@@ -1631,8 +1631,8 @@ mod_lineplot_API_spec <- T_group(
   value_vars = T_col("bm_dataset_name", T_numeric()) |> T_flag("one_or_more"),
   additional_listing_vars = T_col("bm_dataset_name", T_anything()) |> T_flag("zero_or_more", "optional"),
   ref_line_vars = T_col("bm_dataset_name", T_anything()) |> T_flag("zero_or_more", "optional"),
-  default_centrality_function = T_character() |> T_flag("ignore"), # TODO: T_choice ?
-  default_dispersion_function = T_character() |> T_flag("ignore"), # TODO: T_choice ?
+  default_centrality_fn = T_character() |> T_flag("ignore"), # TODO: T_choice ?
+  default_dispersion_fn = T_character() |> T_flag("ignore"), # TODO: T_choice ?
   default_cat = T_choice_from_col_contents("cat_var") |> T_flag("zero_or_more", "optional"),
   default_par = T_choice_from_col_contents("par_var") |> T_flag("zero_or_more", "optional"),
   default_val = T_choice("value_vars") |> T_flag("optional"), # FIXME(miguel): Should be called default_value_var
@@ -1648,9 +1648,9 @@ mod_lineplot_API_spec <- T_group(
 ) |> T_attach_docs(mod_lineplot_API_docs) # TODO: Attach
 
 check_mod_lineplot <- function(
-    afmm, datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id, summary_functions,
+    afmm, datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id, summary_fns,
     subjid_var, cat_var, par_var, visit_vars, cdisc_visit_vars, value_vars, additional_listing_vars,
-    ref_line_vars, default_centrality_function, default_dispersion_function, default_cat, default_par,
+    ref_line_vars, default_centrality_fn, default_dispersion_fn, default_cat, default_par,
     default_val, default_visit_var, default_visit_val, default_main_group, default_sub_group,
     default_transparency, default_y_axis_projection) {
   warn <- C_container()
@@ -1661,8 +1661,8 @@ check_mod_lineplot <- function(
 
   OK <- check_mod_lineplot_auto(
     afmm, datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id,
-    summary_functions, subjid_var, cat_var, par_var, visit_vars, cdisc_visit_vars, value_vars, additional_listing_vars,
-    ref_line_vars, default_centrality_function, default_dispersion_function, default_cat, default_par, default_val,
+    summary_fns, subjid_var, cat_var, par_var, visit_vars, cdisc_visit_vars, value_vars, additional_listing_vars,
+    ref_line_vars, default_centrality_fn, default_dispersion_fn, default_cat, default_par, default_val,
     default_visit_var, default_visit_val, default_main_group, default_sub_group, default_transparency,
     default_y_axis_projection, warn, err
   )

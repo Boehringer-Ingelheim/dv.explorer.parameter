@@ -41,7 +41,7 @@ check_mod_boxplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, g
     flags <- list(zero_or_more = TRUE, optional = TRUE)
     OK[["default_par"]] <- OK[["par_var"]] && C_check_choice_from_col_contents("default_par", default_par,
         flags, "bm_dataset_name", datasets[[bm_dataset_name]], par_var, warn, err)
-    flags <- list(zero_or_more = TRUE, optional = TRUE)
+    flags <- list(optional = TRUE)
     OK[["default_visit"]] <- OK[["visit_var"]] && C_check_choice_from_col_contents("default_visit", default_visit,
         flags, "bm_dataset_name", datasets[[bm_dataset_name]], visit_var, warn, err)
     flags <- list(optional = TRUE)
@@ -62,7 +62,7 @@ check_mod_boxplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, g
     OK[["default_page_group"]] <- OK[["group_dataset_name"]] && C_check_dataset_colum_name("default_page_group",
         default_page_group, subkind, flags, group_dataset_name, datasets[[group_dataset_name]], warn,
         err)
-    flags <- list(optional = TRUE)
+    flags <- list(optional = TRUE, ignore = TRUE)
     OK[["server_wrapper_func"]] <- C_check_function("server_wrapper_func", server_wrapper_func, 1, flags,
         warn, err)
     for (ds_name in names(used_dataset_names)) {
@@ -196,9 +196,9 @@ check_mod_forest_auto <- function(afmm, datasets, module_id, bm_dataset_name, gr
 
 # dv.explorer.parameter::mod_lineplot
 check_mod_lineplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id,
-    summary_functions, subjid_var, cat_var, par_var, visit_vars, cdisc_visit_vars, value_vars, additional_listing_vars,
-    ref_line_vars, default_centrality_function, default_dispersion_function, default_cat, default_par,
-    default_val, default_visit_var, default_visit_val, default_main_group, default_sub_group, default_transparency,
+    summary_fns, subjid_var, cat_var, par_var, visit_vars, cdisc_visit_vars, value_vars, additional_listing_vars,
+    ref_line_vars, default_centrality_fn, default_dispersion_fn, default_cat, default_par, default_val,
+    default_visit_var, default_visit_val, default_main_group, default_sub_group, default_transparency,
     default_y_axis_projection, warn, err) {
     OK <- logical(0)
     used_dataset_names <- new.env(parent = emptyenv())
@@ -208,7 +208,7 @@ check_mod_lineplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, 
     OK[["group_dataset_name"]] <- C_check_dataset_name("group_dataset_name", group_dataset_name, datasets,
         used_dataset_names, warn, err)
     "TODO: receiver_id (character)"
-    "TODO: summary_functions (group)"
+    "TODO: summary_fns (group)"
     subkind <- list(kind = "factor")
     flags <- list(subjid_var = TRUE)
     OK[["subjid_var"]] <- OK[["group_dataset_name"]] && C_check_dataset_colum_name("subjid_var", subjid_var,
@@ -223,7 +223,7 @@ check_mod_lineplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, 
         flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
     subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor"), list(kind = "numeric",
         min = NA, max = NA)))
-    flags <- list(zero_or_more = TRUE)
+    flags <- list(one_or_more = TRUE)
     OK[["visit_vars"]] <- OK[["bm_dataset_name"]] && C_check_dataset_colum_name("visit_vars", visit_vars,
         subkind, flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
     subkind <- list(kind = "or", options = list(list(kind = "numeric", min = NA, max = NA)))
@@ -243,8 +243,8 @@ check_mod_lineplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, 
     flags <- list(zero_or_more = TRUE, optional = TRUE)
     OK[["ref_line_vars"]] <- OK[["bm_dataset_name"]] && C_check_dataset_colum_name("ref_line_vars", ref_line_vars,
         subkind, flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
-    "TODO: default_centrality_function (character)"
-    "TODO: default_dispersion_function (character)"
+    "TODO: default_centrality_fn (character)"
+    "TODO: default_dispersion_fn (character)"
     flags <- list(zero_or_more = TRUE, optional = TRUE)
     OK[["default_cat"]] <- OK[["cat_var"]] && C_check_choice_from_col_contents("default_cat", default_cat,
         flags, "bm_dataset_name", datasets[[bm_dataset_name]], cat_var, warn, err)
@@ -503,12 +503,12 @@ check_mod_wfphm_auto <- function(afmm, datasets, module_id, bm_dataset_name, gro
     flags <- list(one_or_more = TRUE)
     OK[["value_vars"]] <- OK[["bm_dataset_name"]] && C_check_dataset_colum_name("value_vars", value_vars,
         subkind, flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
-    flags <- list(optional = TRUE, zero_or_more = TRUE, named = TRUE)
+    flags <- list(optional = TRUE, zero_or_more = TRUE, named = TRUE, ignore = TRUE)
     OK[["bar_group_palette"]] <- C_check_function("bar_group_palette", bar_group_palette, 1, flags, warn,
         err)
-    flags <- list(optional = TRUE, zero_or_more = TRUE, named = TRUE)
+    flags <- list(optional = TRUE, zero_or_more = TRUE, named = TRUE, ignore = TRUE)
     OK[["cat_palette"]] <- C_check_function("cat_palette", cat_palette, 1, flags, warn, err)
-    flags <- list(optional = TRUE, zero_or_more = TRUE, named = TRUE)
+    flags <- list(optional = TRUE, zero_or_more = TRUE, named = TRUE, ignore = TRUE)
     OK[["tr_mapper"]] <- C_check_function("tr_mapper", tr_mapper, 1, flags, warn, err)
     "TODO: show_x_ticks (logical)"
     for (ds_name in names(used_dataset_names)) {

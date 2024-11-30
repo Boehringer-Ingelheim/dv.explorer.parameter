@@ -12,9 +12,7 @@ lineplot_server(
   id,
   bm_dataset,
   group_dataset,
-  dataset_name = shiny::reactive(character(0)),
-  summary_functions = list(Mean = lp_mean_summary_functions, Median =
-    lp_median_summary_functions),
+  summary_fns = list(Mean = lp_mean_summary_fns, Median = lp_median_summary_fns),
   subjid_var = "SUBJID",
   cat_var = "PARCAT",
   par_var = "PARAM",
@@ -24,8 +22,8 @@ lineplot_server(
   additional_listing_vars = character(0),
   ref_line_vars = character(0),
   on_sbj_click = NULL,
-  default_centrality_function = NULL,
-  default_dispersion_function = NULL,
+  default_centrality_fn = NULL,
+  default_dispersion_fn = NULL,
   default_cat = NULL,
   default_par = NULL,
   default_val = NULL,
@@ -42,8 +40,7 @@ mod_lineplot(
   bm_dataset_name,
   group_dataset_name,
   receiver_id = NULL,
-  summary_functions = list(Mean = lp_mean_summary_functions, Median =
-    lp_median_summary_functions),
+  summary_fns = list(Mean = lp_mean_summary_fns, Median = lp_median_summary_fns),
   subjid_var = "SUBJID",
   cat_var = "PARCAT",
   par_var = "PARAM",
@@ -52,8 +49,8 @@ mod_lineplot(
   value_vars = c("AVAL", "PCHG"),
   additional_listing_vars = character(0),
   ref_line_vars = character(0),
-  default_centrality_function = NULL,
-  default_dispersion_function = NULL,
+  default_centrality_fn = NULL,
+  default_dispersion_fn = NULL,
   default_cat = NULL,
   default_par = NULL,
   default_val = NULL,
@@ -90,11 +87,7 @@ with one record per subject.
 
 It should contain, at least, the column specified by the parameter \code{subjid_var}.}
 
-\item{dataset_name}{\verb{[shiny::reactive(*)]}
-
-A reactive that indicates a possible change in the column structure of any of the two datasets}
-
-\item{summary_functions}{\verb{[list()]}
+\item{summary_fns}{\verb{[list()]}
 
 Each element of this named list contains a summary function (e.g. a mean) and a collection of dispersion functions
 (e.g. standard deviation) defining ranges around the values returned by the summary function.
@@ -107,7 +100,7 @@ a numeric vector as input and return a single numeric scalar
 \item \code{y_prefix}: Prefix that will be prepended the Y axis label of the generated plot
 }
 
-For an example, see \code{dv.explorer.parameter::lp_mean_summary_functions}.}
+For an example, see \code{dv.explorer.parameter::lp_mean_summary_fns}.}
 
 \item{subjid_var}{\verb{[character(1)]}
 
@@ -116,6 +109,11 @@ Column corresponding to the subject ID}
 \item{cat_var, par_var, visit_vars}{\verb{[character(1)]}
 
 Columns from \code{bm_dataset} that correspond to the parameter category, parameter and visit}
+
+\item{cdisc_visit_vars}{\verb{[character(1)]}
+
+Column from \code{bm_dataset} that correspond to the parameter visit and is interpreted as a CDISC
+Visit Days (skipping day 0; jumping from value -1 to value 1 in the X axis)}
 
 \item{value_vars}{\verb{[character(n)]}
 
@@ -142,7 +140,7 @@ Default values for the selectors}
 Named list of default values associated to specific \code{visit_var}s, e.g.
 \code{default_visit_val = list(VISIT = c('VISIT1', 'VISIT2'), AVISITN = c(1, 2))}}
 
-\item{default_sub_group, default_val, default_centrality_function, default_dispersion_function}{\verb{[character(1)|NULL]}
+\item{default_sub_group, default_val, default_centrality_fn, default_dispersion_fn}{\verb{[character(1)|NULL]}
 
 Default values for the selectors}
 
