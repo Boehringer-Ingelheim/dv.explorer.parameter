@@ -1305,11 +1305,11 @@ check_mod_forest <- function(
     numeric_factor_functions, subjid_var, cat_var, par_var, visit_var, value_vars,
     default_cat, default_par, default_visit, default_value, default_var, default_group,
     default_categorical_A, default_categorical_B) {
-  warn <- C_container()
-  err <- C_container()
+  warn <- CM$container()
+  err <- CM$container()
 
   # TODO: Replace this function with a generic one that performs the checks based on mod_forest_API_spec.
-  # Something along the lines of OK <- C_check_API(mod_corr_hm_API_spec, args = match.call(), warn, err)
+  # Something along the lines of OK <- CM$check_API(mod_corr_hm_API_spec, args = match.call(), warn, err)
 
   OK <- check_mod_forest_auto(
     afmm, datasets, module_id, bm_dataset_name, group_dataset_name, numeric_numeric_functions,
@@ -1320,7 +1320,7 @@ check_mod_forest <- function(
 
   # Checks that API spec does not (yet?) capture
   if (OK[["numeric_numeric_functions"]] && OK[["numeric_factor_functions"]]) {
-    C_assert(
+    CM$assert(
       err, length(numeric_numeric_functions) + length(numeric_factor_functions) > 0,
       paste(
         "Provide at least one function through `numeric_numeric_functions` or `numeric_numeric_functions`,",
@@ -1335,11 +1335,11 @@ check_mod_forest <- function(
 
 dataset_info_forest <- function(bm_dataset_name, group_dataset_name, ...) {
   # TODO: Replace this function with a generic one that builds the list based on mod_boxplot_API_spec.
-  # Something along the lines of C_dataset_info(mod_forest_API_spec, args = match.call())
+  # Something along the lines of CM$dataset_info(mod_forest_API_spec, args = match.call())
   return(list(all = unique(c(bm_dataset_name, group_dataset_name)), subject_level = group_dataset_name))
 }
 
-mod_forest <- C_module(mod_forest, check_mod_forest, dataset_info_forest)
+mod_forest <- CM$module(mod_forest, check_mod_forest, dataset_info_forest)
 
 # TODO: Move pearson_correlation and spearman_correlation to their own file
 # TODO: Maybe odds_ratio too

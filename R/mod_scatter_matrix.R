@@ -566,11 +566,11 @@ mod_scatterplotmatrix_API_spec <- T_group(
 check_mod_scatterplotmatrix <- function(
     afmm, datasets, module_id, bm_dataset_name, group_dataset_name, cat_var, par_var, value_vars, visit_var,
     subjid_var, default_cat, default_par, default_visit, default_value, default_main_group) {
-  warn <- C_container()
-  err <- C_container()
+  warn <- CM$container()
+  err <- CM$container()
 
   # TODO: Replace this function with a generic one that performs the checks based on mod_boxplot_API_spec.
-  # Something along the lines of OK <- C_check_API(mod_corr_hm_API_spec, args = match.call(), warn, err)
+  # Something along the lines of OK <- CM$check_API(mod_corr_hm_API_spec, args = match.call(), warn, err)
   OK <- check_mod_scatterplotmatrix_auto(
     afmm, datasets, module_id, bm_dataset_name, group_dataset_name, cat_var, par_var, value_vars, visit_var,
     subjid_var, default_cat, default_par, default_visit, default_value, default_main_group, warn, err
@@ -578,7 +578,7 @@ check_mod_scatterplotmatrix <- function(
 
   # Checks that API spec does not (yet?) capture
   if (OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] && OK[["visit_var"]]) {
-    C_check_unique_sub_cat_par_vis(
+    CM$check_unique_sub_cat_par_vis(
       datasets, "bm_dataset_name", bm_dataset_name, subjid_var, cat_var, par_var, visit_var, warn, err
     )
   }
@@ -589,11 +589,11 @@ check_mod_scatterplotmatrix <- function(
 
 dataset_info_scatterplotmatrix <- function(bm_dataset_name, group_dataset_name, ...) {
   # TODO: Replace this function with a generic one that builds the list based on mod_boxplot_API_spec.
-  # Something along the lines of C_dataset_info(mod_scatterplotmatrix_API_spec, args = match.call())
+  # Something along the lines of CM$dataset_info(mod_scatterplotmatrix_API_spec, args = match.call())
   return(list(all = unique(c(bm_dataset_name, group_dataset_name)), subject_level = group_dataset_name))
 }
 
-mod_scatterplotmatrix <- C_module(
+mod_scatterplotmatrix <- CM$module(
   mod_scatterplotmatrix, check_mod_scatterplotmatrix,
   dataset_info_scatterplotmatrix
 )

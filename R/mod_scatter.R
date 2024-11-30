@@ -800,11 +800,11 @@ check_mod_scatterplot <- function(
     afmm, datasets, module_id, bm_dataset_name, group_dataset_name, cat_var, par_var, value_vars, visit_var, subjid_var,
     default_x_cat, default_x_par, default_x_value, default_x_visit, default_y_cat, default_y_par, default_y_value,
     default_y_visit, default_group, default_color, compute_lm_cor_fn) {
-  warn <- C_container()
-  err <- C_container()
+  warn <- CM$container()
+  err <- CM$container()
 
   # TODO: Replace this function with a generic one that performs the checks based on mod_boxplot_API_spec.
-  # Something along the lines of OK <- C_check_API(mod_corr_hm_API_spec, args = match.call(), warn, err)
+  # Something along the lines of OK <- CM$check_API(mod_corr_hm_API_spec, args = match.call(), warn, err)
   OK <- check_mod_scatterplot_auto(
     afmm, datasets, module_id, bm_dataset_name, group_dataset_name, cat_var, par_var, value_vars, visit_var, subjid_var,
     default_x_cat, default_x_par, default_x_value, default_x_visit, default_y_cat, default_y_par, default_y_value,
@@ -813,7 +813,7 @@ check_mod_scatterplot <- function(
 
   # Checks that API spec does not (yet?) capture
   if (OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] && OK[["visit_var"]]) {
-    C_check_unique_sub_cat_par_vis(
+    CM$check_unique_sub_cat_par_vis(
       datasets, "bm_dataset_name", bm_dataset_name, subjid_var, cat_var, par_var, visit_var, warn, err
     )
   }
@@ -824,11 +824,11 @@ check_mod_scatterplot <- function(
 
 dataset_info_scatterplot <- function(bm_dataset_name, group_dataset_name, ...) {
   # TODO: Replace this function with a generic one that builds the list based on mod_boxplot_API_spec.
-  # Something along the lines of C_dataset_info(mod_scatterplot_API_spec, args = match.call())
+  # Something along the lines of CM$dataset_info(mod_scatterplot_API_spec, args = match.call())
   return(list(all = unique(c(bm_dataset_name, group_dataset_name)), subject_level = group_dataset_name))
 }
 
-mod_scatterplot <- C_module(mod_scatterplot, check_mod_scatterplot, dataset_info_scatterplot)
+mod_scatterplot <- CM$module(mod_scatterplot, check_mod_scatterplot, dataset_info_scatterplot)
 
 # Logic functions ----
 

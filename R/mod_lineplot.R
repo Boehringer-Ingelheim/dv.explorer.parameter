@@ -672,7 +672,7 @@ lineplot_server <- function(id,
     v_bm_dataset <- shiny::reactive(
       {
         df <- bm_dataset()
-        # NOTE: None of these checks should never fail because the C_module wrapper should prevent them
+        # NOTE: None of these checks should never fail because the CM$module wrapper should prevent them
         ac <- checkmate::makeAssertCollection()
         checkmate::assert_data_frame(df, min.rows = 1, .var.name = ns("bm_dataset"), add = ac)
         checkmate::assert_names(
@@ -1653,11 +1653,11 @@ check_mod_lineplot <- function(
     ref_line_vars, default_centrality_fn, default_dispersion_fn, default_cat, default_par,
     default_val, default_visit_var, default_visit_val, default_main_group, default_sub_group,
     default_transparency, default_y_axis_projection) {
-  warn <- C_container()
-  err <- C_container()
+  warn <- CM$container()
+  err <- CM$container()
 
   # TODO: Replace this function with a generic one that performs the checks based on mod_corr_hm_API_spec.
-  # Something along the lines of OK <- C_check_API(mod_corr_hm_API_spec, args = match.call(), warn, err)
+  # Something along the lines of OK <- CM$check_API(mod_corr_hm_API_spec, args = match.call(), warn, err)
 
   OK <- check_mod_lineplot_auto(
     afmm, datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id,
@@ -1669,7 +1669,7 @@ check_mod_lineplot <- function(
 
   # Checks that API spec does not (yet?) capture
   if (OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] && OK[["visit_vars"]] && OK[["cdisc_visit_vars"]]) {
-    C_check_unique_sub_cat_par_vis(
+    CM$check_unique_sub_cat_par_vis(
       datasets, "bm_dataset_name", bm_dataset_name,
       subjid_var, cat_var, par_var, c(visit_vars, cdisc_visit_vars), warn, err
     )
@@ -1681,8 +1681,8 @@ check_mod_lineplot <- function(
 
 dataset_info_lineplot <- function(bm_dataset_name, group_dataset_name, ...) {
   # TODO: Replace this function with a generic one that builds the list based on mod_boxplot_API_spec.
-  # Something along the lines of C_dataset_info(mod_lineplot_API_spec, args = match.call())
+  # Something along the lines of CM$dataset_info(mod_lineplot_API_spec, args = match.call())
   return(list(all = unique(c(bm_dataset_name, group_dataset_name)), subject_level = group_dataset_name))
 }
 
-mod_lineplot <- C_module(mod_lineplot, check_mod_lineplot, dataset_info_lineplot)
+mod_lineplot <- CM$module(mod_lineplot, check_mod_lineplot, dataset_info_lineplot)

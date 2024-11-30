@@ -139,9 +139,9 @@ test_that(
     app$get_chromote_session()$Browser$setDownloadBehavior("allow", downloadPath = down_dir)
 
     do.call(app$set_inputs, setNames(list(filename), list(C$FILENAME)))
-    
+
     local({
-      # FIXME(from:miguel, to:luis): 
+      # FIXME(from:miguel, to:luis):
       #  There are four sections to this wfphm stack. They never align horizontally in the tests.
       #  (insert a `browser()` here and do execute `app$view()` to know what I mean).
       #  They midle rows (CAT1 and CONT1) sometimes align with the waterfall and other times align
@@ -156,7 +156,7 @@ test_that(
       #  alread requires interaction with those menus, so users are unlikely to experiment this
       #  non-alignment. That is why I'm adding this HACK here.
     })
-    
+
     app$click(C$SAVE_PNG)
     app$wait_for_idle()
     app$click(C$SAVE_SVG)

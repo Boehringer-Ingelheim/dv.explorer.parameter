@@ -926,11 +926,11 @@ mod_corr_hm_API_spec <- T_group(
 check_mod_corr_hm <- function(
     afmm, datasets, module_id, bm_dataset_name, subjid_var, cat_var, par_var, visit_var,
     value_vars, default_cat, default_par, default_visit, default_value) {
-  warn <- C_container()
-  err <- C_container()
+  warn <- CM$container()
+  err <- CM$container()
 
   # TODO: Replace this function with a generic one that performs the checks based on mod_corr_hm_API_spec.
-  # Something along the lines of OK <- C_check_API(mod_corr_hm_API_spec, args = match.call(), warn, err)
+  # Something along the lines of OK <- CM$check_API(mod_corr_hm_API_spec, args = match.call(), warn, err)
 
   OK <- check_mod_corr_hm_auto(
     afmm, datasets, module_id, bm_dataset_name, subjid_var, cat_var, par_var, visit_var,
@@ -941,11 +941,11 @@ check_mod_corr_hm <- function(
   # Checks that API spec does not (yet?) capture
   if (OK[["subjid_var"]]) {
     dataset <- datasets[[bm_dataset_name]]
-    OK[["subjid_var"]] <- C_assert(err, is.factor(dataset[[subjid_var]]), "Column referenced by `subjid_var` should be a factor.")
+    OK[["subjid_var"]] <- CM$assert(err, is.factor(dataset[[subjid_var]]), "Column referenced by `subjid_var` should be a factor.")
   }
 
   if (OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] && OK[["visit_var"]]) {
-    C_check_unique_sub_cat_par_vis(
+    CM$check_unique_sub_cat_par_vis(
       datasets, "bm_dataset_name", bm_dataset_name,
       subjid_var, cat_var, par_var, visit_var, warn, err
     )
@@ -957,8 +957,8 @@ check_mod_corr_hm <- function(
 
 dataset_info_corr_hm <- function(bm_dataset_name, ...) {
   # TODO: Replace this function with a generic one that builds the list based on mod_boxplot_API_spec.
-  # Something along the lines of C_dataset_info(mod_corr_hm_API_spec, args = match.call())
+  # Something along the lines of CM$dataset_info(mod_corr_hm_API_spec, args = match.call())
   return(list(all = bm_dataset_name, subject_level = character(0)))
 }
 
-mod_corr_hm <- C_module(mod_corr_hm, check_mod_corr_hm, dataset_info_corr_hm)
+mod_corr_hm <- CM$module(mod_corr_hm, check_mod_corr_hm, dataset_info_corr_hm)

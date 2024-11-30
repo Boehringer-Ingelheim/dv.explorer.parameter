@@ -2339,11 +2339,11 @@ mod_wfphm_API_spec <- T_group(
 check_mod_wfphm <- function(
     afmm, datasets, module_id, bm_dataset_name, group_dataset_name, cat_var, par_var, visit_var, subjid_var,
     value_vars, bar_group_palette, cat_palette, tr_mapper, show_x_ticks) {
-  warn <- C_container()
-  err <- C_container()
+  warn <- CM$container()
+  err <- CM$container()
 
   # TODO: Replace this function with a generic one that performs the checks based on mod_boxplot_API_spec.
-  # Something along the lines of OK <- C_check_API(mod_corr_hm_API_spec, args = match.call(), warn, err)
+  # Something along the lines of OK <- CM$check_API(mod_corr_hm_API_spec, args = match.call(), warn, err)
   OK <- check_mod_wfphm_auto(
     afmm, datasets, module_id, bm_dataset_name, group_dataset_name, cat_var, par_var, visit_var, subjid_var,
     value_vars, bar_group_palette, cat_palette, tr_mapper, show_x_ticks, warn, err
@@ -2353,7 +2353,7 @@ check_mod_wfphm <- function(
 
   # #ahwopu
   if (OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] && OK[["visit_var"]]) {
-    C_check_unique_sub_cat_par_vis(
+    CM$check_unique_sub_cat_par_vis(
       datasets, "bm_dataset_name", bm_dataset_name,
       subjid_var, cat_var, par_var, visit_var, warn, err
     )
@@ -2365,8 +2365,8 @@ check_mod_wfphm <- function(
 
 dataset_info_wfphm <- function(bm_dataset_name, group_dataset_name, ...) {
   # TODO: Replace this function with a generic one that builds the list based on mod_boxplot_API_spec.
-  # Something along the lines of C_dataset_info(mod_wfphm_API_spec, args = match.call())
+  # Something along the lines of CM$dataset_info(mod_wfphm_API_spec, args = match.call())
   return(list(all = unique(c(bm_dataset_name, group_dataset_name)), subject_level = group_dataset_name))
 }
 
-mod_wfphm <- C_module(mod_wfphm, check_mod_wfphm, dataset_info_wfphm)
+mod_wfphm <- CM$module(mod_wfphm, check_mod_wfphm, dataset_info_wfphm)

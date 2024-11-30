@@ -85,6 +85,8 @@ expect_r2d3_svg <- function(app, query_list) {
 }
 # nolint end
 
+# YT#VH879dbe3c8dc1d3f2a8ead3a71a5fb8bc#VH00000000000000000000000000000000#
+
 #' Test harness for communication with `dv.papo`.
 #'
 #' @param mod Parameterized instance of the module to test. Should produce valid output and not trigger a `shiny::req`.

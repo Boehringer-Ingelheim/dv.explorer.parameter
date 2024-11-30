@@ -109,9 +109,9 @@ mock_app_lineplot_user_fn <- function(in_fluid = TRUE, defaults = list()) {
         id = "not_ebas",
         bm_dataset = shiny::reactive(bm_dataset),
         group_dataset = shiny::reactive(group_dataset),
-        summary_functions = list(
-          `Mean` = lp_mean_summary_functions,
-          `Median` = lp_median_summary_functions,
+        summary_fns = list(
+          `Mean` = lp_mean_summary_fns,
+          `Median` = lp_median_summary_fns,
           `gMean` = gmean_function,
           `gMean fold change` = gmean_fold_change_fn,
           `(gMean fold change - 1)*100%` = gmean_fold_change_percent_fn
