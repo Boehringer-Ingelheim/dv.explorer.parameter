@@ -1,5 +1,64 @@
-# YT#VH444ba79a3be691b19e5a661251f7b76a#VH750f5cfad10078c864c1d56930d6af1f#
+# YT#VH471af99c9c42d555582282c2f5854aef#VH444ba79a3be691b19e5a661251f7b76a#
 CM <- local({ # _C_hecked _M_odule
+  message_well <- function(title, contents, color = "f5f5f5") { # repeats #iewahg
+    style <- sprintf(r"---(
+      padding: 0.5rem;
+      padding-left: 1rem;
+      margin-bottom: 20px;
+      background-color: %s;
+      border: 1px solid #e3e3e3;
+      border-radius: 4px;
+      -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.05);
+      box-shadow: inset 0 1px 1px rgba(0,0,0,.05);
+    )---", color)
+
+    res <- list(shiny::h3(title))
+    if (length(contents)) res <- append(res, list(shiny::tags[["div"]](contents, style = style)))
+    return(res)
+  }
+
+  app_creator_feedback_ui <- function(id) {
+    id <- paste(c(id, "validator"), collapse = "-")
+    ns <- shiny::NS(id)
+    return(shiny::uiOutput(ns("ui")))
+  }
+
+  app_creator_feedback_server <- function(id, warning_messages, error_messages, ui) {
+    id <- paste(c(id, "validator"), collapse = "-")
+    module <- shiny::moduleServer(
+      id,
+      function(input, output, session) {
+        output[["ui"]] <- shiny::renderUI({
+          res <- list()
+          warn <- warning_messages
+          if (length(warn)) {
+            res[[length(res) + 1]] <-
+              message_well("Module configuration warnings",
+                Map(function(x) htmltools::p(htmltools::HTML(paste("\u2022", x))), warn),
+                color = "#fff7ef"
+              )
+          }
+
+          err <- error_messages
+          if (length(err)) {
+            res[[length(res) + 1]] <-
+              message_well("Module configuration errors",
+                Map(function(x) htmltools::p(htmltools::HTML(paste("\u2022", x))), err),
+                color = "#f4d7d7"
+              )
+          }
+
+          if (length(error_messages) == 0) res <- append(res, list(ui()))
+
+          return(res)
+        })
+        shiny::outputOptions(output, "ui", suspendWhenHidden = FALSE)
+      }
+    )
+
+    return(module)
+  }
+
   # Wrap the UI and server of a module so that, once parameterized, they go through a check function prior to running.
   module <- function(module, check_mod_fn, dataset_info_fn) {
     local({
@@ -531,22 +590,16 @@ CM <- local({ # _C_hecked _M_odule
     module = module,
     container = container,
     assert = assert,
-    is_valid_shiny_id = is_valid_shiny_id,
-    generate_check_function = generate_check_function,
     generate_check_functions = generate_check_functions,
-    test_string = test_string,
     check_module_id = check_module_id,
     check_dataset_name = check_dataset_name,
-    list_columns_of_kind = list_columns_of_kind,
-    optional_and_empty = optional_and_empty,
     check_dataset_colum_name = check_dataset_colum_name,
-    list_values = list_values,
     check_flags = check_flags,
     check_choice_from_col_contents = check_choice_from_col_contents,
     check_choice = check_choice,
-    format_inline_asis = format_inline_asis,
     check_function = check_function,
     check_subjid_col = check_subjid_col,
-    check_unique_sub_cat_par_vis = check_unique_sub_cat_par_vis
+    check_unique_sub_cat_par_vis = check_unique_sub_cat_par_vis,
+    message_well = message_well
   )
 })
