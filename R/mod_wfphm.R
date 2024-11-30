@@ -2329,9 +2329,9 @@ mod_wfphm_API_spec <- T_group(
   visit_var = T_col("bm_dataset_name", T_or(T_character(), T_factor(), T_numeric())),
   subjid_var = T_col("group_dataset_name", T_factor()) |> T_flag("subjid_var"),
   value_vars = T_col("bm_dataset_name", T_numeric()) |> T_flag("one_or_more"),
-  bar_group_palette = T_function(arg_count = 1) |> T_flag("optional", "zero_or_more", "named"),
-  cat_palette = T_function(arg_count = 1) |> T_flag("optional", "zero_or_more", "named"),
-  tr_mapper = T_function(arg_count = 1) |> T_flag("optional", "zero_or_more", "named"),
+  bar_group_palette = T_function(arg_count = 1) |> T_flag("optional", "zero_or_more", "named", "ignore"),
+  cat_palette = T_function(arg_count = 1) |> T_flag("optional", "zero_or_more", "named", "ignore"),
+  tr_mapper = T_function(arg_count = 1) |> T_flag("optional", "zero_or_more", "named", "ignore"),
   show_x_ticks = T_logical()
 ) |> T_attach_docs(mod_wfphm_API_docs)
 
@@ -2363,4 +2363,10 @@ check_mod_wfphm <- function(
   return(res)
 }
 
-mod_wfphm <- C_module(mod_wfphm, check_mod_wfphm)
+dataset_info_wfphm <- function(bm_dataset_name, group_dataset_name, ...) {
+  # TODO: Replace this function with a generic one that builds the list based on mod_boxplot_API_spec.
+  # Something along the lines of C_dataset_info(mod_wfphm_API_spec, args = match.call())
+  return(list(all = unique(c(bm_dataset_name, group_dataset_name)), subject_level = group_dataset_name))
+}
+
+mod_wfphm <- C_module(mod_wfphm, check_mod_wfphm, dataset_info_wfphm)

@@ -38,9 +38,7 @@ mod_wfphm(
   bar_group_palette = list(),
   cat_palette = list(),
   tr_mapper = tr_mapper_def(),
-  show_x_ticks = TRUE,
-  bm_dataset_disp,
-  group_dataset_disp
+  show_x_ticks = TRUE
 )
 }
 \arguments{
@@ -83,7 +81,7 @@ grouping}
 
 \item{cat_palette}{\verb{[list(functions)]}
 
-list of functions that receive the values of the variale and returns a vector with the colors for each of the values.
+list of functions that receive the values of the variable and returns a vector with the colors for each of the values.
 Each palette is applied when the name of the entry in the list matches the name of the selected categorical
 variable}
 
@@ -99,9 +97,6 @@ show x ticks in the parameter heatmap}
 \item{module_id}{Shiny id}
 
 \item{bm_dataset_name, group_dataset_name}{The name of the dataset}
-
-\item{bm_dataset_disp, group_dataset_disp}{Dataset dispatcher. This parameter is incompatible with its \code{bm_dataset_name}/\code{group_dataset_name} counterpart.
-Only for advanced use.}
 }
 \value{
 \subsection{UI}{

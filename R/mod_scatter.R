@@ -822,7 +822,13 @@ check_mod_scatterplot <- function(
   return(res)
 }
 
-mod_scatterplot <- C_module(mod_scatterplot, check_mod_scatterplot)
+dataset_info_scatterplot <- function(bm_dataset_name, group_dataset_name, ...) {
+  # TODO: Replace this function with a generic one that builds the list based on mod_boxplot_API_spec.
+  # Something along the lines of C_dataset_info(mod_scatterplot_API_spec, args = match.call())
+  return(list(all = unique(c(bm_dataset_name, group_dataset_name)), subject_level = group_dataset_name))
+}
+
+mod_scatterplot <- C_module(mod_scatterplot, check_mod_scatterplot, dataset_info_scatterplot)
 
 # Logic functions ----
 

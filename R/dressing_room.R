@@ -1406,7 +1406,7 @@ explorer_server_with_datasets <- function(caller_datasets = NULL) {
           ))
         }
 
-        if (!setequal(c("ui", "server", "module_id"), names(ui_server_id))) {
+        if (length(setdiff(c("ui", "server", "module_id"), names(ui_server_id))) > 0) {
           return(build_error(
             title = "Module Configuration Error",
             condition = base::simpleError("The provided code does not return a {ui, server, module_id} triplet."),
@@ -1541,10 +1541,10 @@ app_creator_feedback_server <- function(id, warning_messages, error_messages, ui
 # Ad-hoc "C_"hecks system ----
 
 # Wrap the UI and server of a module so that, once parameterized, they go through a check function prior to running.
-C_module <- function(module, check_mod_function) {
+C_module <- function(module, check_mod_fn, dataset_info_fn) {
   local({
-    # Make sure that the signature of `check_mod_function` matches that of `module` except for the expected differences
-    check_formals <- names(formals(check_mod_function))
+    # Make sure that the signature of `check_mod_fn` matches that of `module` except for the expected differences
+    check_formals <- names(formals(check_mod_fn))
     if (!identical(head(check_formals, 2), c("afmm", "datasets"))) {
       stop("The first two arguments of check functions passed onto `C_module` should be `afmm` and `datasets`")
     }
@@ -1617,9 +1617,8 @@ C_module <- function(module, check_mod_function) {
             )
 
             # check functions do not have defaults, so we extract them from the formals of the module for consistency
-            missing_args <- setdiff(names(formals(module)), names(matched_args))
-            args <- c(args, formals(module)[missing_args])
-            res <- do.call(check_mod_function, args)
+            missing_args <- setdiff(names(formals(module)), names(args))
+            res <- do.call(check_mod_fn, args)
           }
           return(res)
         })
@@ -1661,7 +1660,15 @@ C_module <- function(module, check_mod_function) {
 
         return(res)
       },
-      module_id = module_id
+      module_id = module_id,
+      meta = list(
+        dataset_info = {
+          # extract defaults from the formals for consistency
+          missing_args <- setdiff(names(formals(module)), names(matched_args))
+          args <- c(args, formals(module)[missing_args])
+          do.call(dataset_info_fn, args)
+        }
+      )
     )
 
     return(res)

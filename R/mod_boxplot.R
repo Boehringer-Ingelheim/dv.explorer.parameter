@@ -808,12 +808,12 @@ mod_boxplot_API_spec <- T_group(
   subjid_var = T_col("group_dataset_name", T_factor()) |> T_flag("subjid_var"),
   default_cat = T_choice_from_col_contents("cat_var") |> T_flag("zero_or_more", "optional"),
   default_par = T_choice_from_col_contents("par_var") |> T_flag("zero_or_more", "optional"),
-  default_visit = T_choice_from_col_contents("visit_var") |> T_flag("zero_or_more", "optional"),
+  default_visit = T_choice_from_col_contents("visit_var") |> T_flag("optional"),
   default_value = T_choice("value_vars") |> T_flag("optional"), # FIXME(miguel): ? Should be called default_value_var
   default_main_group = T_col("group_dataset_name", T_or(T_character(), T_factor())) |> T_flag("optional"),
   default_sub_group = T_col("group_dataset_name", T_or(T_character(), T_factor())) |> T_flag("optional"),
   default_page_group = T_col("group_dataset_name", T_or(T_character(), T_factor())) |> T_flag("optional"),
-  server_wrapper_func = T_function(arg_count = 1) |> T_flag("optional")
+  server_wrapper_func = T_function(arg_count = 1) |> T_flag("optional", "ignore")
 ) |> T_attach_docs(mod_boxplot_API_docs)
 
 
@@ -846,7 +846,13 @@ check_mod_boxplot <- function(
   return(res)
 }
 
-mod_boxplot <- C_module(mod_boxplot, check_mod_boxplot)
+dataset_info_boxplot <- function(bm_dataset_name, group_dataset_name, ...) {
+  # TODO: Replace this function with a generic one that builds the list based on mod_boxplot_API_spec.
+  # Something along the lines of C_dataset_info(mod_boxplot_API_spec, args = match.call())
+  return(list(all = unique(c(bm_dataset_name, group_dataset_name)), subject_level = group_dataset_name))
+}
+
+mod_boxplot <- C_module(mod_boxplot, check_mod_boxplot, dataset_info_boxplot)
 
 #' @describeIn mod_boxplot Boxplot wrapper when its output is fed into papo module
 #' @export

@@ -32,12 +32,11 @@ mod_corr_hm(
   cat_var = "PARCAT",
   par_var = "PARAM",
   visit_var = "AVISIT",
-  value_vars = c("AVAL", "PCHG"),
+  value_vars = "AVAL",
   default_cat = NULL,
   default_par = NULL,
   default_visit = NULL,
-  default_value = NULL,
-  bm_dataset_disp
+  default_value = NULL
 )
 }
 \arguments{
@@ -87,9 +86,6 @@ Module identifier}
 \item{bm_dataset_name}{\verb{[character(1)]}
 
 Biomarker dataset name}
-
-\item{bm_dataset_disp}{\verb{[mm_dispatcher(1)]}
-module manager dispatchers passed as \code{bm_dataset} and \code{group_dataset} to \code{corr_hm_server}}
 }
 \description{
 Display a heatmap of correlation coefficients (Pearson, Spearman) along with confidence intervals

@@ -1679,4 +1679,10 @@ check_mod_lineplot <- function(
   return(res)
 }
 
-mod_lineplot <- C_module(mod_lineplot, check_mod_lineplot)
+dataset_info_lineplot <- function(bm_dataset_name, group_dataset_name, ...) {
+  # TODO: Replace this function with a generic one that builds the list based on mod_boxplot_API_spec.
+  # Something along the lines of C_dataset_info(mod_lineplot_API_spec, args = match.call())
+  return(list(all = unique(c(bm_dataset_name, group_dataset_name)), subject_level = group_dataset_name))
+}
+
+mod_lineplot <- C_module(mod_lineplot, check_mod_lineplot, dataset_info_lineplot)

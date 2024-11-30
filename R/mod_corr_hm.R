@@ -955,4 +955,10 @@ check_mod_corr_hm <- function(
   return(res)
 }
 
-mod_corr_hm <- C_module(mod_corr_hm, check_mod_corr_hm)
+dataset_info_corr_hm <- function(bm_dataset_name, ...) {
+  # TODO: Replace this function with a generic one that builds the list based on mod_boxplot_API_spec.
+  # Something along the lines of C_dataset_info(mod_corr_hm_API_spec, args = match.call())
+  return(list(all = bm_dataset_name, subject_level = character(0)))
+}
+
+mod_corr_hm <- C_module(mod_corr_hm, check_mod_corr_hm, dataset_info_corr_hm)

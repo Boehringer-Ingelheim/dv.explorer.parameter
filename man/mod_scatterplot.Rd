@@ -50,9 +50,7 @@ mod_scatterplot(
   default_y_visit = NULL,
   default_group = NULL,
   default_color = NULL,
-  compute_lm_cor_fn = sp_compute_lm_cor_default,
-  bm_dataset_disp,
-  group_dataset_disp
+  compute_lm_cor_fn = sp_compute_lm_cor_default
 )
 }
 \arguments{
@@ -98,10 +96,6 @@ Module Shiny id}
 \item{bm_dataset_name, group_dataset_name}{\verb{[character(1)]}
 
 Name of the dataset}
-
-\item{bm_dataset_disp, group_dataset_disp}{\verb{[mm_dispatcher(1)]}
-
-Dataset dispatcher. This parameter is incompatible with its *_dataset_name counterpart. Only for advanced use.}
 }
 \description{
 \code{mod_scatterplot} is a Shiny module prepared to display a scatterplot of two biomarkers with different levels of

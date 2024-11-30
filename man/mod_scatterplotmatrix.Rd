@@ -38,9 +38,7 @@ mod_scatterplotmatrix(
   default_par = NULL,
   default_visit = NULL,
   default_value = NULL,
-  default_main_group = NULL,
-  bm_dataset_disp,
-  group_dataset_disp
+  default_main_group = NULL
 )
 }
 \arguments{
@@ -77,10 +75,6 @@ Module Shiny id}
 \item{bm_dataset_name, group_dataset_name}{\verb{[character(1)]}
 
 Name of the dataset}
-
-\item{bm_dataset_disp, group_dataset_disp}{\verb{[mm_dispatcher(1)]}
-
-Dataset dispatcher. This parameter is incompatible with its *_dataset_name counterpart. Only for advanced use.}
 }
 \description{
 \code{mod_scatterplotmatrix} is a Shiny module prepared to display data in a matrix of scatterplots with different levels

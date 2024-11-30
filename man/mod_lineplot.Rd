@@ -101,7 +101,7 @@ Each element of this named list contains a summary function (e.g. a mean) and a 
 
 The structure of each element is then a named list with the following elements:
 \itemize{
-\item \code{function}: Function that takes a numeric vector as its sole parameter and produces a scalar number.
+\item \code{fn}: Function that takes a numeric vector as its sole parameter and produces a scalar number.
 \item \code{dispersion}: Named list of pairs functions that return the \emph{top} and \emph{bottom} dispersion ranges. They also take
 a numeric vector as input and return a single numeric scalar
 \item \code{y_prefix}: Prefix that will be prepended the Y axis label of the generated plot
@@ -150,9 +150,9 @@ Default values for the selectors}
 
 Default values for the selectors}
 
-\item{default_y_axis_projection}{\verb{[character(1)|NULL]}
+\item{default_y_axis_projection}{\verb{["Linear"|"Logarithmic"]}
 
-Default values for the selectors}
+Default projection for the Y axis}
 
 \item{module_id}{Shiny ID \verb{[character(1)]}
 
@@ -164,8 +164,8 @@ Dataset names}
 
 \item{receiver_id}{\verb{[character(1)]}
 
-Name of the module receiving the selected subject ID in the single subject listing. The name must be present in
-the module list or NULL.}
+Shiny ID of the module receiving the selected subject ID in the single subject listing. This ID must
+be present in the app or be NULL.}
 }
 \description{
 Display line plots of raw or summary data over time. Summaries include measures of central tendency

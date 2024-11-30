@@ -1143,7 +1143,16 @@ check_mod_roc <- function(
   return(res)
 }
 
-mod_roc <- C_module(mod_roc, check_mod_roc)
+dataset_info_roc <- function(pred_dataset_name, resp_dataset_name, group_dataset_name, ...) {
+  # TODO: Replace this function with a generic one that builds the list based on mod_boxplot_API_spec.
+  # Something along the lines of C_dataset_info(mod_roc_API_spec, args = match.call())
+  return(list(
+    all = unique(c(pred_dataset_name, resp_dataset_name, group_dataset_name)),
+    subject_level = group_dataset_name
+  ))
+}
+
+mod_roc <- C_module(mod_roc, check_mod_roc, dataset_info_roc)
 
 # Server Logic
 

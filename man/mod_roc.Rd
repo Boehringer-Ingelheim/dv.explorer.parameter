@@ -42,10 +42,7 @@ mod_roc(
   resp_visit_var = "AVISIT",
   subjid_var = "SUBJID",
   compute_roc_fn = compute_roc_data,
-  compute_metric_fn = compute_metric_data,
-  pred_dataset_disp,
-  resp_dataset_disp,
-  group_dataset_disp
+  compute_metric_fn = compute_metric_data
 )
 }
 \arguments{
@@ -80,8 +77,6 @@ Functions used to compute the ROC and metric analysis, please view the correspon
 Module identificator}
 
 \item{pred_dataset_name, resp_dataset_name, group_dataset_name}{Name of the dataset}
-
-\item{pred_dataset_disp, resp_dataset_disp, group_dataset_disp}{Dataset dispatcher. This parameter is incompatible with its *_dataset_name counterpart. Only for advanced use.}
 }
 \description{
 \subsection{Input dataframes:}{

@@ -1333,7 +1333,13 @@ check_mod_forest <- function(
   return(res)
 }
 
-mod_forest <- C_module(mod_forest, check_mod_forest)
+dataset_info_forest <- function(bm_dataset_name, group_dataset_name, ...) {
+  # TODO: Replace this function with a generic one that builds the list based on mod_boxplot_API_spec.
+  # Something along the lines of C_dataset_info(mod_forest_API_spec, args = match.call())
+  return(list(all = unique(c(bm_dataset_name, group_dataset_name)), subject_level = group_dataset_name))
+}
+
+mod_forest <- C_module(mod_forest, check_mod_forest, dataset_info_forest)
 
 # TODO: Move pearson_correlation and spearman_correlation to their own file
 # TODO: Maybe odds_ratio too
