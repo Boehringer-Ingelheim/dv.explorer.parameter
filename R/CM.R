@@ -1,4 +1,4 @@
-# YT#VH471af99c9c42d555582282c2f5854aef#VH444ba79a3be691b19e5a661251f7b76a#
+# YT#VH22c1dbc08734141d74f301a9a70503bb#VH471af99c9c42d555582282c2f5854aef#
 CM <- local({ # _C_hecked _M_odule
   message_well <- function(title, contents, color = "f5f5f5") { # repeats #iewahg
     style <- sprintf(r"---(
@@ -195,7 +195,7 @@ CM <- local({ # _C_hecked _M_odule
 
     roxygen_wrapper <- function() { # to keep parameters in the reference docs
       args <- (match.call() |> as.list())[c(-1)]
-      do.call(wrapper, args)
+      do.call(wrapper, args, env = parent.frame())
     }
     formals(roxygen_wrapper) <- formals(module)
     return(roxygen_wrapper)
