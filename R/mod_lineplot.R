@@ -1675,6 +1675,30 @@ check_mod_lineplot <- function(
     )
   }
 
+  if (OK[["visit_vars"]] && OK[["cdisc_visit_vars"]]) {
+    ds <- datasets[[bm_dataset_name]]
+    for (visit_var in c(visit_vars, cdisc_visit_vars)) {
+      var_data <- ds[[visit_var]]
+      levs <- unique(var_data)
+      CM$assert(
+        container = err,
+        cond = all(nchar(trimws(levs)) > 0),
+        msg = sprintf(
+          paste(
+            "The visit variable `<b>%s</b>` in dataset `<b>%s</b>` contains missing (blank) values.",
+            "The lineplot module does not support those, since they lead to blank options in the visit selector",
+            "and to missing X axis labels on the resulting plot, which may be puzzling to up users.<br>",
+            "You can examine the affected variable with this command: <pre>unique(%s[['%s']])</pre>",
+            "Notice the blank value in the resulting output:",
+            "<pre>%s</pre>"
+          ),
+          visit_var, bm_dataset_name, bm_dataset_name, visit_var,
+          paste(capture.output(unique(ds[["VISIT"]])), collapse = "\n")
+        )
+      )
+    }
+  }
+
   res <- list(warnings = warn[["messages"]], errors = err[["messages"]])
   return(res)
 }
