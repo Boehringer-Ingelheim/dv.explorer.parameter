@@ -94,10 +94,7 @@ NULL
 #' Shiny ID
 #'
 #' @export
-corr_hm_UI <- function(id, default_cat = NULL, default_par = NULL, default_visit = NULL, default_corr_method = NULL) { # nolint
-  # id assert ---- It goes on its own as id is used to provide context to the other assertions
-  checkmate::assert_string(id, min.chars = 1)
-
+corr_hm_UI <- function(id, default_cat = NULL, default_par = NULL, default_visit = NULL, default_corr_method = NULL) {
   # argument asserts ----
 
   # UI ----
@@ -508,26 +505,6 @@ corr_hm_server <- function(id,
                            visit_var = "AVISIT",
                            value_vars = c("AVAL", "PCHG"),
                            default_value = NULL) {
-  if (FALSE) { # TODO: (Miguel)
-    # id assert ---- It goes on its own as id is used to provide context to the other assertions
-    ac <- checkmate::makeAssertCollection() # nolint
-    checkmate::assert_string(id, min.chars = 1, add = ac)
-    # non reactive asserts
-    ###### Check types of reactive variables, pred_dataset, ...
-    checkmate::assert_string(cat_var, min.chars = 1, add = ac)
-    checkmate::assert_string(par_var, min.chars = 1, add = ac)
-    checkmate::assert_character(
-      value_vars,
-      min.chars = 1, any.missing = FALSE,
-      all.missing = FALSE, unique = TRUE, min.len = 1, add = ac
-    )
-    checkmate::assert_string(visit_var, min.chars = 1, add = ac)
-    checkmate::assert_string(subjid_var, min.chars = 1, add = ac)
-    checkmate::assert_string(default_value, min.chars = 1, null.ok = TRUE, add = ac)
-
-    checkmate::reportAssertions(ac)
-  }
-
   # module constants ----
   VAR <- poc( # nolint Parameters from the function that will be considered constant across the function
     CAT = cat_var,
@@ -546,6 +523,7 @@ corr_hm_server <- function(id,
     # dataset validation ----
     v_ch_dataset <- shiny::reactive(
       {
+        # TODO: Remove once dataset checks are in place
         ac <- checkmate::makeAssertCollection()
         checkmate::assert_data_frame(bm_dataset(), min.rows = 1, .var.name = ns("bm_dataset"), add = ac)
         checkmate::assert_names(
@@ -557,22 +535,9 @@ corr_hm_server <- function(id,
           .var.name = ns("bm_dataset"),
           add = ac
         )
-        checkmate::assert_factor(bm_dataset()[[VAR$SBJ]], .var.name = ns("bm_dataset"), add = ac)
-        checkmate::reportAssertions(ac)
+        shiny::req(ac$isEmpty())
 
-        supposedly_unique <- bm_dataset()[c(VAR$SBJ, VAR$CAT, VAR$PAR, VAR$VIS)]
-        dups <- duplicated(supposedly_unique)
-        shiny::validate(
-          shiny::need(
-            !any(dups),
-            paste0(
-              c(
-                CH_MSG$VALIDATE$TOO_MANY_ROWS,
-                capture.output(print(head(supposedly_unique[dups, ], 5)))
-              )
-            )
-          )
-        )
+        checkmate::reportAssertions(ac)
 
         bm_dataset()
       },
@@ -882,7 +847,7 @@ ch_subset_data <- function(sel, cat_col, par_col, val_col, vis_col, bm_ds, subj_
   res
 }
 
-#' Correlation Heatmap DaVinci module
+#' Correlation Heatmap module
 #'
 #' Display a heatmap of correlation coefficients (Pearson, Spearman) along with confidence intervals
 #' and p-values between dataset parameters over a single visit.
@@ -895,9 +860,6 @@ ch_subset_data <- function(sel, cat_col, par_col, val_col, vis_col, bm_ds, subj_
 #'
 #' Biomarker dataset name
 #'
-#' @param bm_dataset_disp `[mm_dispatcher(1)]`
-#' module manager dispatchers passed as `bm_dataset` and `group_dataset` to `corr_hm_server`
-#'
 #' @name mod_corr_hm
 #'
 #' @keywords main
@@ -909,16 +871,9 @@ mod_corr_hm <- function(module_id, bm_dataset_name,
                         cat_var = "PARCAT",
                         par_var = "PARAM",
                         visit_var = "AVISIT",
-                        value_vars = c("AVAL", "PCHG"),
+                        value_vars = "AVAL",
                         default_cat = NULL, default_par = NULL, default_visit = NULL,
-                        default_value = NULL, bm_dataset_disp) {
-  if (!missing(bm_dataset_name) && !missing(bm_dataset_disp)) {
-    rlang::abort("`bm_dataset_name` and `bm_dataset_disp` cannot be used at the same time, use one or the other")
-  }
-  if (!missing(bm_dataset_name)) {
-    bm_dataset_disp <- dv.manager::mm_dispatch("filtered_dataset", bm_dataset_name)
-  }
-
+                        default_value = NULL) {
   mod <- list(
     ui = function(mod_id) {
       corr_hm_UI(id = mod_id, default_cat = default_cat, default_par = default_par, default_visit = default_visit)
@@ -926,7 +881,7 @@ mod_corr_hm <- function(module_id, bm_dataset_name,
     server = function(afmm) {
       corr_hm_server(
         id = module_id,
-        bm_dataset = dv.manager::mm_resolve_dispatcher(bm_dataset_disp, afmm, flatten = TRUE),
+        bm_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[bm_dataset_name]]),
         default_value = default_value, subjid_var = subjid_var, cat_var = cat_var, par_var = par_var,
         visit_var = visit_var, value_vars = value_vars
       )
@@ -935,3 +890,75 @@ mod_corr_hm <- function(module_id, bm_dataset_name,
   )
   return(mod)
 }
+
+# Correlation heatmap module interface description ----
+# TODO: Fill in
+mod_corr_hm_API_docs <- list(
+  "Correlation Heatmap",
+  module_id = "",
+  bm_dataset_name = "",
+  subjid_var = "",
+  cat_var = "",
+  par_var = "",
+  visit_var = "",
+  value_vars = "",
+  default_cat = "",
+  default_par = "",
+  default_visit = "",
+  default_value = "" # FIXME(miguel): Should be called default_value_var
+)
+
+mod_corr_hm_API_spec <- TC$group(
+  module_id = TC$mod_ID(),
+  bm_dataset_name = TC$dataset_name(),
+  subjid_var = TC$col("bm_dataset_name", TC$factor()) |> TC$flag("subjid_var"),
+  cat_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())),
+  par_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())),
+  visit_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())),
+  value_vars = TC$col("bm_dataset_name", TC$numeric()) |> TC$flag("one_or_more"),
+  default_cat = TC$choice_from_col_contents("cat_var") |> TC$flag("zero_or_more", "optional"),
+  default_par = TC$choice_from_col_contents("par_var") |> TC$flag("zero_or_more", "optional"),
+  default_visit = TC$choice_from_col_contents("visit_var") |> TC$flag("zero_or_more", "optional"),
+  default_value = TC$choice("value_vars") |> TC$flag("optional") # FIXME(miguel): Should be called default_value_var
+) |> TC$attach_docs(mod_corr_hm_API_docs)
+
+
+check_mod_corr_hm <- function(
+    afmm, datasets, module_id, bm_dataset_name, subjid_var, cat_var, par_var, visit_var,
+    value_vars, default_cat, default_par, default_visit, default_value) {
+  warn <- CM$container()
+  err <- CM$container()
+
+  # TODO: Replace this function with a generic one that performs the checks based on mod_corr_hm_API_spec.
+  # Something along the lines of OK <- CM$check_API(mod_corr_hm_API_spec, args = match.call(), warn, err)
+
+  OK <- check_mod_corr_hm_auto(
+    afmm, datasets, module_id, bm_dataset_name, subjid_var, cat_var, par_var, visit_var,
+    value_vars, default_cat, default_par, default_visit, default_value,
+    warn, err
+  )
+
+  # Checks that API spec does not (yet?) capture
+  if (OK[["subjid_var"]]) {
+    dataset <- datasets[[bm_dataset_name]]
+    OK[["subjid_var"]] <- CM$assert(err, is.factor(dataset[[subjid_var]]), "Column referenced by `subjid_var` should be a factor.")
+  }
+
+  if (OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] && OK[["visit_var"]]) {
+    CM$check_unique_sub_cat_par_vis(
+      datasets, "bm_dataset_name", bm_dataset_name,
+      subjid_var, cat_var, par_var, visit_var, warn, err
+    )
+  }
+
+  res <- list(warnings = warn[["messages"]], errors = err[["messages"]])
+  return(res)
+}
+
+dataset_info_corr_hm <- function(bm_dataset_name, ...) {
+  # TODO: Replace this function with a generic one that builds the list based on mod_boxplot_API_spec.
+  # Something along the lines of CM$dataset_info(mod_corr_hm_API_spec, args = match.call())
+  return(list(all = bm_dataset_name, subject_level = character(0)))
+}
+
+mod_corr_hm <- CM$module(mod_corr_hm, check_mod_corr_hm, dataset_info_corr_hm)

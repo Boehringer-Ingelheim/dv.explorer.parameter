@@ -60,8 +60,8 @@ mock_app_scatterplotmatrix_mm <- function(in_fluid = TRUE, defaults = list(), up
     module_list = list(
       Scatter = mod_scatterplotmatrix(
         "scatter_plotmatrix",
-        bm_dataset_disp = dv.manager::mm_dispatch("filtered_dataset", "bm"),
-        group_dataset_disp = dv.manager::mm_dispatch("filtered_dataset", "adsl"),
+        bm_dataset_name = "bm",
+        group_dataset_name = "adsl",
         visit_var = "VISIT",
         value_vars = c("VALUE1", "VALUE2"),
         subjid_var = "SUBJID",

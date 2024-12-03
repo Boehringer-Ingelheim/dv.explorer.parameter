@@ -1,4 +1,4 @@
-MPVS <- poc( # nolint
+MPVS <- poc(
   ID = poc(
     VISIBLE_ROW_COUNT = "visible_row_count",
     CAT_PREFIX = "cat_",
@@ -13,7 +13,7 @@ MPVS <- poc( # nolint
 # Static collection of category, parameter and visit selectors
 # with as many rows as dictated by the MAX_ROW_COUNT constant.
 # They are made visible by updating the VISIBLE_ROW_COUNT input.
-multi_param_visit_selector_UI <- function(id, default_cat, default_par, default_visit) { # nolint
+multi_param_visit_selector_UI <- function(id, default_cat, default_par, default_visit) {
   ns <- shiny::NS(id)
 
   cat_ids <- paste0(MPVS$ID$CAT_PREFIX, 1:MPVS$CONST$MAX_ROW_COUNT)
@@ -77,7 +77,7 @@ multi_param_visit_selector_UI <- function(id, default_cat, default_par, default_
   return(res)
 }
 
-multi_param_visit_selector_server <- function(id, data, cat_var, par_var, visit_var) { # nolint
+multi_param_visit_selector_server <- function(id, data, cat_var, par_var, visit_var) {
   cat_ids <- paste0(MPVS$ID$CAT_PREFIX, 1:MPVS$CONST$MAX_ROW_COUNT)
   par_ids <- paste0(MPVS$ID$PAR_PREFIX, 1:MPVS$CONST$MAX_ROW_COUNT)
   vis_ids <- paste0(MPVS$ID$VIS_PREFIX, 1:MPVS$CONST$MAX_ROW_COUNT)
@@ -172,7 +172,7 @@ multi_param_visit_selector_server <- function(id, data, cat_var, par_var, visit_
 
   server_function <- function(input, output, session) {
     # `data` is the only reactive input to this module and we only care about three of its columns,
-    # which we use to populat the 'choices' of the selector matrix.
+    # which we use to populate the 'choices' of the selector matrix.
     # This transformation could be done by the caller and this module would be more general, but until
     # there's a second user for it, who cares
     choices <- shiny::reactive({
@@ -261,6 +261,13 @@ multi_param_visit_selector_server <- function(id, data, cat_var, par_var, visit_
         selected[[i]] <- list(cat = input[[cat_ids[[i]]]], par = input[[par_ids[[i]]]], vis = input[[vis_ids[[i]]]])
       }
       choices <- choices()
+
+      local({ # early out if inputs not available
+        available_inputs <- names(shiny::isolate(shiny::reactiveValuesToList(input)))
+        expected_inputs <- c(cat_ids, par_ids, vis_ids)
+        found_inputs <- intersect(expected_inputs, available_inputs)
+        shiny::req(length(found_inputs) == length(expected_inputs))
+      })
 
       updates <- compute_updates(state, selected = selected, choices = choices)
       apply_updates(session, updates)

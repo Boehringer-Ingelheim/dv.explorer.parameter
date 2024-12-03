@@ -1,4 +1,3 @@
-# nolint start
 # Constants
 
 poc <- pack_of_constants
@@ -8,7 +7,7 @@ poc <- pack_of_constants
 
 # IDs
 
-ROC_ID <- poc( # nolint
+ROC_ID <- poc(
   ROC = poc(
     PRED_PAR = "pred_par",
     PRED_VALUE = "pred_value",
@@ -45,7 +44,7 @@ ROC_ID <- poc( # nolint
 
 # Values
 
-ROC_VAL <- poc( # nolint
+ROC_VAL <- poc(
   RANDOM_SEED = 123,
   NO_GROUP_VAL = "None",
   MAX_ROWS_EXPLORE = 1000,
@@ -55,7 +54,7 @@ ROC_VAL <- poc( # nolint
 
 # Messages and labels
 
-ROC_MSG <- poc( # nolint
+ROC_MSG <- poc(
   ROC = poc(
     LABEL = poc(
       GROUP = "Grouping",
@@ -111,7 +110,7 @@ ROC_MSG <- poc( # nolint
   )
 )
 
-ROC_PLOT_VAL <- poc( # nolint
+ROC_PLOT_VAL <- poc(
   STR_FMT = poc(
     TWO_DEC = ".2f"
   ),
@@ -158,7 +157,7 @@ NULL
 
 #' @describeIn mod_roc UI
 #' @export
-roc_UI <- function(id) { # nolint
+roc_UI <- function(id) {
   # id assert  It goes on its own as id is used to provide context to the other assertions
   checkmate::assert_string(id, min.chars = 1)
 
@@ -459,7 +458,7 @@ roc_server <- function(id,
   checkmate::reportAssertions(ac)
 
   # module constants
-  VAR <- poc( # nolint Parameters from the function that will be considered constant across the function
+  VAR <- poc( # Parameters from the function that will be considered constant across the function
     PRED = poc(
       CAT = pred_cat_var,
       PAR = pred_par_var,
@@ -1021,10 +1020,6 @@ roc_server <- function(id,
 #'
 #' Name of the dataset
 #'
-#' @param pred_dataset_disp,resp_dataset_disp,group_dataset_disp
-#'
-#' Dataset dispatcher. This parameter is incompatible with its *_dataset_name counterpart. Only for advanced use.
-#'
 #' @keywords main
 #'
 #' @export
@@ -1041,40 +1036,15 @@ mod_roc <- function(
     resp_visit_var = "AVISIT",
     subjid_var = "SUBJID",
     compute_roc_fn = compute_roc_data,
-    compute_metric_fn = compute_metric_data,
-    pred_dataset_disp, resp_dataset_disp, group_dataset_disp) {
-  if (!missing(resp_dataset_name) && !missing(resp_dataset_disp)) {
-    rlang::abort("`resp_dataset_name` and `resp_dataset_disp` cannot be used at the same time, use one or the other")
-  }
-
-  if (!missing(pred_dataset_name) && !missing(pred_dataset_disp)) {
-    rlang::abort("`pred_dataset_name` and `pred_dataset_disp` cannot be used at the same time, use one or the other")
-  }
-
-  if (!missing(group_dataset_name) && !missing(group_dataset_disp)) {
-    rlang::abort("`group_dataset_name` and `group_dataset_disp` cannot be used at the same time, use one or the other")
-  }
-
-  if (!missing(pred_dataset_name)) {
-    pred_dataset_disp <- dv.manager::mm_dispatch("filtered_dataset", pred_dataset_name)
-  }
-
-  if (!missing(resp_dataset_name)) {
-    resp_dataset_disp <- dv.manager::mm_dispatch("filtered_dataset", resp_dataset_name)
-  }
-
-  if (!missing(group_dataset_name)) {
-    group_dataset_disp <- dv.manager::mm_dispatch("filtered_dataset", group_dataset_name)
-  }
-
+    compute_metric_fn = compute_metric_data) {
   mod <- list(
     ui = roc_UI,
     server = function(afmm) {
       roc_server(
         id = module_id,
-        pred_dataset = dv.manager::mm_resolve_dispatcher(pred_dataset_disp, afmm, flatten = TRUE),
-        resp_dataset = dv.manager::mm_resolve_dispatcher(resp_dataset_disp, afmm, flatten = TRUE),
-        group_dataset = dv.manager::mm_resolve_dispatcher(group_dataset_disp, afmm, flatten = TRUE),
+        pred_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[pred_dataset_name]]),
+        resp_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[resp_dataset_name]]),
+        group_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[group_dataset_name]]),
         dataset_name = afmm[["dataset_name"]],
         pred_cat_var = pred_cat_var,
         pred_par_var = pred_par_var,
@@ -1094,11 +1064,101 @@ mod_roc <- function(
   mod
 }
 
+# ROC module interface description ----
+# TODO: Fill in
+mod_roc_API_docs <- list(
+  "ROC",
+  module_id = "",
+  pred_dataset_name = "",
+  resp_dataset_name = "",
+  group_dataset_name = "",
+  pred_cat_var = "",
+  pred_par_var = "",
+  pred_value_vars = "",
+  pred_visit_var = "",
+  resp_cat_var = "",
+  resp_par_var = "",
+  resp_value_vars = "",
+  resp_visit_var = "",
+  subjid_var = "",
+  compute_roc_fn = "",
+  compute_metric_fn = ""
+)
+
+mod_roc_API_spec <- TC$group(
+  module_id = TC$mod_ID(),
+  pred_dataset_name = TC$dataset_name(),
+  resp_dataset_name = TC$dataset_name(),
+  group_dataset_name = TC$dataset_name() |> TC$flag("subject_level_dataset_name"),
+  pred_cat_var = TC$col("pred_dataset_name", TC$or(TC$character(), TC$factor())),
+  pred_par_var = TC$col("pred_dataset_name", TC$or(TC$character(), TC$factor())),
+  pred_value_vars = TC$col("pred_dataset_name", TC$numeric()) |> TC$flag("one_or_more"),
+  pred_visit_var = TC$col("pred_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())),
+  resp_cat_var = TC$col("resp_dataset_name", TC$or(TC$character(), TC$factor())),
+  resp_par_var = TC$col("resp_dataset_name", TC$or(TC$character(), TC$factor())),
+  resp_value_vars = TC$col("resp_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("one_or_more"),
+  resp_visit_var = TC$col("resp_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())),
+  subjid_var = TC$col("group_dataset_name", TC$factor()) |> TC$flag("subjid_var"),
+  compute_roc_fn = TC$fn(arg_count = 4) |> TC$flag("optional"),
+  compute_metric_fn = TC$fn(arg_count = 2) |> TC$flag("optional")
+) |> TC$attach_docs(mod_roc_API_docs)
+
+check_mod_roc <- function(
+    afmm, datasets, module_id, pred_dataset_name, resp_dataset_name, group_dataset_name, pred_cat_var,
+    pred_par_var, pred_value_vars, pred_visit_var, resp_cat_var, resp_par_var, resp_value_vars,
+    resp_visit_var, subjid_var, compute_roc_fn, compute_metric_fn) {
+  warn <- CM$container()
+  err <- CM$container()
+
+  # TODO: Replace this function with a generic one that performs the checks based on mod_boxplot_API_spec.
+  # Something along the lines of OK <- CM$check_API(mod_corr_hm_API_spec, args = match.call(), warn, err)
+  OK <- check_mod_roc_auto(
+    afmm, datasets, module_id, pred_dataset_name, resp_dataset_name, group_dataset_name, pred_cat_var,
+    pred_par_var, pred_value_vars, pred_visit_var, resp_cat_var, resp_par_var, resp_value_vars,
+    resp_visit_var, subjid_var, compute_roc_fn, compute_metric_fn, warn, err
+  )
+
+  # Checks that API spec does not (yet?) capture
+
+  # #ouhigo
+  if (OK[["subjid_var"]] && OK[["pred_cat_var"]] && OK[["pred_par_var"]] && OK[["pred_visit_var"]]) {
+    CM$check_unique_sub_cat_par_vis(
+      datasets, "pred_dataset_name", pred_dataset_name,
+      subjid_var, pred_cat_var, pred_par_var, pred_visit_var,
+      warn, err
+    )
+  }
+
+  if (OK[["subjid_var"]] && OK[["resp_cat_var"]] && OK[["resp_par_var"]] && OK[["resp_visit_var"]]) {
+    CM$check_unique_sub_cat_par_vis(
+      datasets, "resp_dataset_name", resp_dataset_name,
+      subjid_var, resp_cat_var, resp_par_var, resp_visit_var,
+      warn, err
+    )
+  }
+
+  # TODO: check resp_value_vars are binary?
+
+  res <- list(warnings = warn[["messages"]], errors = err[["messages"]])
+  return(res)
+}
+
+dataset_info_roc <- function(pred_dataset_name, resp_dataset_name, group_dataset_name, ...) {
+  # TODO: Replace this function with a generic one that builds the list based on mod_boxplot_API_spec.
+  # Something along the lines of CM$dataset_info(mod_roc_API_spec, args = match.call())
+  return(list(
+    all = unique(c(pred_dataset_name, resp_dataset_name, group_dataset_name)),
+    subject_level = group_dataset_name
+  ))
+}
+
+mod_roc <- CM$module(mod_roc, check_mod_roc, dataset_info_roc)
+
 # Server Logic
 
 # Constants
 
-CNT_ROC <- poc( # nolint
+CNT_ROC <- poc(
   SBJ = "subject_id",
   GRP = "group",
   PCAT = "predictor_category",
@@ -1140,13 +1200,13 @@ CNT_ROC <- poc( # nolint
   OC_THR = "optimal_cut_threshold"
 )
 
-CNT_VAL <- poc( # nolint
+CNT_VAL <- poc(
   EMBED_OPTIONS = vegawidget::vega_embed(renderer = "svg", actions = list(editor = FALSE)),
   COLOR_SCHEME = "magma",
-  ASCII_DELIM = "\1"
+  ASCII_DELIM = "\001"
 )
 
-COL_LABELS <- poc( # nolint
+COL_LABELS <- poc(
   PRED_PAR = "Parameter",
   RESP_PAR = "Response"
 )
@@ -1350,10 +1410,10 @@ roc_subset_data <- function(pred_cat,
     dplyr::select(
       dplyr::all_of(
         dc(
-          !!CNT_ROC$SBJ := subj_col, # nolint
-          !!CNT_ROC$PCAT := pred_cat_col, # nolint
-          !!CNT_ROC$PPAR := pred_par_col, # nolint
-          !!CNT_ROC$PVAL := pred_val_col # nolint
+          !!CNT_ROC$SBJ := subj_col,
+          !!CNT_ROC$PCAT := pred_cat_col,
+          !!CNT_ROC$PPAR := pred_par_col,
+          !!CNT_ROC$PVAL := pred_val_col
         )
       )
     )
@@ -1365,7 +1425,7 @@ roc_subset_data <- function(pred_cat,
   if (rename_ppar) {
     pred_data <- dplyr::mutate(
       pred_data,
-      !!CNT_ROC$PPAR := factor(paste(.data[[CNT_ROC$PCAT]], "-", .data[[CNT_ROC$PPAR]])) # nolint
+      !!CNT_ROC$PPAR := factor(paste(.data[[CNT_ROC$PCAT]], "-", .data[[CNT_ROC$PPAR]]))
     )
   }
 
@@ -1385,10 +1445,10 @@ roc_subset_data <- function(pred_cat,
     dplyr::select(
       dplyr::all_of(
         dc(
-          !!CNT_ROC$SBJ := subj_col, # nolint
-          !!CNT_ROC$RCAT := resp_cat_col, # nolint
-          !!CNT_ROC$RPAR := resp_par_col, # nolint
-          !!CNT_ROC$RVAL := resp_val_col # nolint
+          !!CNT_ROC$SBJ := subj_col,
+          !!CNT_ROC$RCAT := resp_cat_col,
+          !!CNT_ROC$RPAR := resp_par_col,
+          !!CNT_ROC$RVAL := resp_val_col
         )
       )
     )
@@ -1400,7 +1460,7 @@ roc_subset_data <- function(pred_cat,
   if (rename_rpar) {
     resp_data <- dplyr::mutate(
       resp_data,
-      !!CNT_ROC$RPAR := paste(.data[[CNT_ROC$RCAT]], "-", .data[[CNT_ROC$RPAR]]) # nolint
+      !!CNT_ROC$RPAR := paste(.data[[CNT_ROC$RCAT]], "-", .data[[CNT_ROC$RPAR]])
     )
   }
 
@@ -1412,7 +1472,7 @@ roc_subset_data <- function(pred_cat,
       dplyr::across(dplyr::where(is.character), as_factor_if_not_factor)
     ) |>
     dplyr::mutate(
-      !!CNT_ROC$RVAL := droplevels(.data[[CNT_ROC$RVAL]]) # nolint
+      !!CNT_ROC$RVAL := droplevels(.data[[CNT_ROC$RVAL]])
     )
 
   # Check no duplicated subjects
@@ -1420,11 +1480,11 @@ roc_subset_data <- function(pred_cat,
 
   shiny::validate(
     shiny::need(
-      test_one_row_per_sbj(pred_data, CNT_ROC$SBJ, CNT_ROC$PPAR),
+      test_one_row_per_sbj(pred_data, CNT_ROC$SBJ, CNT_ROC$PPAR), # Covered by #ouhigo
       ROC_MSG$ROC$VALIDATE$PRED_TOO_MANY_ROWS
     ),
     shiny::need(
-      test_one_row_per_sbj(resp_data, CNT_ROC$SBJ, CNT_ROC$RPAR),
+      test_one_row_per_sbj(resp_data, CNT_ROC$SBJ, CNT_ROC$RPAR), # Covered by #ouhigo
       ROC_MSG$ROC$VALIDATE$RESP_TOO_MANY_ROWS
     )
   )
@@ -1444,8 +1504,8 @@ roc_subset_data <- function(pred_cat,
       dplyr::select(
         dplyr::all_of(
           dc(
-            !!CNT_ROC$SBJ := subj_col, # nolint
-            !!CNT_ROC$GRP := group_col # nolint
+            !!CNT_ROC$SBJ := subj_col,
+            !!CNT_ROC$GRP := group_col
           )
         )
       ) |>
@@ -1487,13 +1547,13 @@ roc_subset_data <- function(pred_cat,
 
   joint_data <- dplyr::mutate(
     joint_data,
-    !!CNT_ROC$PPAR := factor(.data[[CNT_ROC$PPAR]], levels = pred_par_levels) # nolint
+    !!CNT_ROC$PPAR := factor(.data[[CNT_ROC$PPAR]], levels = pred_par_levels)
   ) |>
     dplyr::ungroup()
 
   clean_data <- joint_data |>
     dplyr::filter(.data[[CNT_ROC$RVAL]] != "") |>
-    dplyr::mutate(!!CNT_ROC$RVAL := droplevels(.data[[CNT_ROC$RVAL]])) # nolint
+    dplyr::mutate(!!CNT_ROC$RVAL := droplevels(.data[[CNT_ROC$RVAL]]))
 
   diff_rows <- nrow(joint_data) - nrow(clean_data)
 
@@ -1582,14 +1642,14 @@ get_roc_data <- function(ds, compute_fn, ci_points, do_bootstrap) {
   nest_by_vars <- if (is_grouped) c(CNT_ROC$PPAR, CNT_ROC$RPAR, CNT_ROC$GRP) else c(CNT_ROC$PPAR, CNT_ROC$RPAR)
 
   otherwise_val <- rlang::list2(
-    !!CNT_ROC$ROC_CURVE := tibble::tibble( # nolint
-      !!CNT_ROC$SPEC := NA, # nolint
-      !!CNT_ROC$SENS := NA, # nolint
-      !!CNT_ROC$THR := NA, # nolint
-      !!CNT_ROC$AUC := NA # nolint
+    !!CNT_ROC$ROC_CURVE := tibble::tibble(
+      !!CNT_ROC$SPEC := NA,
+      !!CNT_ROC$SENS := NA,
+      !!CNT_ROC$THR := NA,
+      !!CNT_ROC$AUC := NA
     ),
-    !!CNT_ROC$ROC_CI := NA, # nolint
-    !!CNT_ROC$ROC_OC := NA # nolint
+    !!CNT_ROC$ROC_CI := NA,
+    !!CNT_ROC$ROC_OC := NA
   )
 
   possibly_roc <- purrr::possibly(
@@ -1642,9 +1702,9 @@ get_roc_data <- function(ds, compute_fn, ci_points, do_bootstrap) {
       dplyr::ungroup()
 
     r <- rlang::list2(
-      !!CNT_ROC$ROC_CURVE := roc_curve, # nolint
-      !!CNT_ROC$ROC_CI := ci_rules, # nolint
-      !!CNT_ROC$ROC_OC := optimal_cut # nolint
+      !!CNT_ROC$ROC_CURVE := roc_curve,
+      !!CNT_ROC$ROC_CI := ci_rules,
+      !!CNT_ROC$ROC_OC := optimal_cut
     )
   } else {
     r <- rlang::list2(
@@ -2083,7 +2143,7 @@ get_roc_spec <- function(ds_list, param_as_cols, fig_size) {
       list(
         as = "auc_str_frt",
         calculate = glue::glue(
-          "if(isArray(datum.{CNT_ROC$AUC}), ''+format(datum.{CNT_ROC$AUC}[1], '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+' ('+format(datum.{CNT_ROC$AUC}[0], '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+'-'+format(datum.{CNT_ROC$AUC}[2], '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+')', 0)" # nolint
+          "if(isArray(datum.{CNT_ROC$AUC}), ''+format(datum.{CNT_ROC$AUC}[1], '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+' ('+format(datum.{CNT_ROC$AUC}[0], '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+'-'+format(datum.{CNT_ROC$AUC}[2], '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+')', 0)"
         )
       )
     ),
@@ -2109,12 +2169,12 @@ get_roc_spec <- function(ds_list, param_as_cols, fig_size) {
       list(calculate = glue::glue("'{ROC_PLOT_VAL$ROC$LABELS$TITLE_CI_TOOLTIP}'"), as = "title"),
       list(
         calculate = glue::glue(
-          "'('+format(datum.{CNT_ROC$CI_L_SENS}, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+'-'+format(datum.{CNT_ROC$CI_U_SENS}, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+')'" # nolint
+          "'('+format(datum.{CNT_ROC$CI_L_SENS}, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+'-'+format(datum.{CNT_ROC$CI_U_SENS}, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+')'"
         ),
         as = "ci_se_str"
       ),
       list(calculate = glue::glue(
-        "'('+format(datum.{CNT_ROC$CI_L_SPEC}, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+'-'+format(datum.{CNT_ROC$CI_U_SPEC}, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+')'" # nolint
+        "'('+format(datum.{CNT_ROC$CI_L_SPEC}, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+'-'+format(datum.{CNT_ROC$CI_U_SPEC}, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+')'"
       ), as = "ci_sp_str")
     ),
     mark = list(type = "rect"),
@@ -2183,13 +2243,13 @@ get_roc_spec <- function(ds_list, param_as_cols, fig_size) {
       list(
         as = "oc_str_sp",
         calculate = glue::glue(
-          "''+format(datum.{CNT_ROC$OC_SPEC}, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+' ('+format(datum.{CNT_ROC$OC_L_SPEC}, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+'-'+format(datum.{CNT_ROC$OC_U_SPEC}, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+')'" # nolint
+          "''+format(datum.{CNT_ROC$OC_SPEC}, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+' ('+format(datum.{CNT_ROC$OC_L_SPEC}, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+'-'+format(datum.{CNT_ROC$OC_U_SPEC}, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+')'"
         )
       ),
       list(
         as = "oc_str_se",
         calculate = glue::glue(
-          "''+format(datum.{CNT_ROC$OC_SENS}, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+' ('+format(datum.{CNT_ROC$OC_U_SENS}, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+'-'+format(datum.{CNT_ROC$OC_L_SENS}, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+')'" # nolint
+          "''+format(datum.{CNT_ROC$OC_SENS}, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+' ('+format(datum.{CNT_ROC$OC_U_SENS}, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+'-'+format(datum.{CNT_ROC$OC_L_SENS}, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+')'"
         )
       )
     ),
@@ -2373,7 +2433,7 @@ get_roc_sorted_spec <- function(ds_list, param_as_cols, fig_size) {
       list(
         as = "auc_str_frt",
         calculate = glue::glue(
-          "if(isArray(datum.{CNT_ROC$AUC}), ''+format(datum.{CNT_ROC$AUC}[1], '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+' ('+format(datum.{CNT_ROC$AUC}[0], '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+'-'+format(datum.{CNT_ROC$AUC}[2], '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+')', 0)" # nolint
+          "if(isArray(datum.{CNT_ROC$AUC}), ''+format(datum.{CNT_ROC$AUC}[1], '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+' ('+format(datum.{CNT_ROC$AUC}[0], '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+'-'+format(datum.{CNT_ROC$AUC}[2], '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+')', 0)"
         )
       )
     ),
@@ -2399,13 +2459,13 @@ get_roc_sorted_spec <- function(ds_list, param_as_cols, fig_size) {
       list(calculate = glue::glue("'{ROC_PLOT_VAL$ROC$LABELS$TITLE_CI_TOOLTIP}'"), as = "title"),
       list(
         calculate = glue::glue(
-          "'('+format(datum.{CNT_ROC$CI_L_SENS}, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+'-'+format(datum.{CNT_ROC$CI_U_SENS}, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+')'" # nolint
+          "'('+format(datum.{CNT_ROC$CI_L_SENS}, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+'-'+format(datum.{CNT_ROC$CI_U_SENS}, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+')'"
         ),
         as = "ci_se_str"
       ),
       list(
         calculate = glue::glue(
-          "'('+format(datum.{CNT_ROC$CI_L_SPEC}, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+'-'+format(datum.{CNT_ROC$CI_U_SPEC}, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+')'" # nolint
+          "'('+format(datum.{CNT_ROC$CI_L_SPEC}, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+'-'+format(datum.{CNT_ROC$CI_U_SPEC}, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+')'"
         ),
         as = "ci_sp_str"
       )
@@ -2476,13 +2536,13 @@ get_roc_sorted_spec <- function(ds_list, param_as_cols, fig_size) {
       list(
         as = "oc_str_sp",
         calculate = glue::glue(
-          "''+format(datum.{CNT_ROC$OC_SPEC}, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+' ('+format(datum.{CNT_ROC$OC_L_SPEC}, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+'-'+format(datum.{CNT_ROC$OC_U_SPEC}, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+')'" # nolint
+          "''+format(datum.{CNT_ROC$OC_SPEC}, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+' ('+format(datum.{CNT_ROC$OC_L_SPEC}, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+'-'+format(datum.{CNT_ROC$OC_U_SPEC}, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+')'"
         )
       ),
       list(
         as = "oc_str_se",
         calculate = glue::glue(
-          "''+format(datum.{CNT_ROC$OC_SENS}, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+' ('+format(datum.{CNT_ROC$OC_U_SENS}, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+'-'+format(datum.{CNT_ROC$OC_L_SENS}, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+')'" # nolint
+          "''+format(datum.{CNT_ROC$OC_SENS}, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+' ('+format(datum.{CNT_ROC$OC_U_SENS}, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+'-'+format(datum.{CNT_ROC$OC_L_SENS}, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+')'"
         )
       )
     ),
@@ -2606,7 +2666,7 @@ get_explore_roc_spec <- function(ds, fig_size, sort_alph) {
 
   ds <- dplyr::mutate(
     ds,
-    "_sort" := dplyr::row_number() # nolint
+    "_sort" := dplyr::row_number()
   )
 
   ds <- if (is_grouped) {
@@ -3214,13 +3274,13 @@ get_raincloud_spec <- function(area_ds, quantile_ds, point_ds, param_as_cols, fi
         list(
           as = "q25_75",
           calculate = glue::glue(
-            "'['+format(datum.q25, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+', '+format(datum.q75, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+']'" # nolint
+            "'['+format(datum.q25, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+', '+format(datum.q75, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+']'"
           )
         ),
         list(
           as = "q05_95",
           calculate = glue::glue(
-            "'['+format(datum.q05, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+', '+format(datum.q95, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+']'" # nolint
+            "'['+format(datum.q05, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+', '+format(datum.q95, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+']'"
           )
         )
       ),
@@ -3254,13 +3314,13 @@ get_raincloud_spec <- function(area_ds, quantile_ds, point_ds, param_as_cols, fi
         list(
           as = "q25_75",
           calculate = glue::glue(
-            "'['+format(datum.q25, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+', '+format(datum.q75, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+']'" # nolint
+            "'['+format(datum.q25, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+', '+format(datum.q75, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+']'"
           )
         ),
         list(
           as = "q05_95",
           calculate = glue::glue(
-            "'['+format(datum.q05, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+', '+format(datum.q95, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+']'" # nolint
+            "'['+format(datum.q05, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+', '+format(datum.q95, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+']'"
           )
         )
       ),
@@ -3294,13 +3354,13 @@ get_raincloud_spec <- function(area_ds, quantile_ds, point_ds, param_as_cols, fi
         list(
           as = "q25_75",
           calculate = glue::glue(
-            "'['+format(datum.q25, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+', '+format(datum.q75, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+']'" # nolint
+            "'['+format(datum.q25, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+', '+format(datum.q75, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+']'"
           )
         ),
         list(
           as = "q05_95",
           calculate = glue::glue(
-            "'['+format(datum.q05, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+', '+format(datum.q95, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+']'" # nolint
+            "'['+format(datum.q05, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+', '+format(datum.q95, '{ROC_PLOT_VAL$STR_FMT$TWO_DEC}')+']'"
           )
         )
       ),
@@ -3622,7 +3682,7 @@ get_gt_summary_table <- function(ds, rounder = function(x) round(x, digits = 2),
   if (any(grepl(CNT_VAL$ASCII_DELIM, ds[[CNT_ROC$OC_TITLE]]))) {
     rlang::abort(
       glue::glue(
-        "Optimal cut title contains the ASCII character with code \\{utf8ToInt(CNT_VAL$ASCII_DELIM)}. This character is used as a delimitator. Please remove this character from the optimal cut title." # nolint
+        "Optimal cut title contains the ASCII character with code \\{utf8ToInt(CNT_VAL$ASCII_DELIM)}. This character is used as a delimitator. Please remove this character from the optimal cut title."
       )
     )
   }
@@ -4059,8 +4119,9 @@ compute_roc_data <- function(predictor,
   # It seems that once the direction is correctly set returning two bests is no problem as infinity does not appear
   # In fact the documentation of coords explicitely indicates that several best points may be returned
   # For now the code will be retained until this has run for a while
-  # ahyodae
-  # nolint if (nrow(optimal_cut) == 2) stop("FIX DIRECTION ISSUE!")
+  if (FALSE) { # ahyodae
+    if (nrow(optimal_cut) == 2) stop("FIX DIRECTION ISSUE!")
+  }
 
   r[["roc_optimal_cut"]] <- optimal_cut
 
@@ -4611,8 +4672,8 @@ mock_roc_mm_app <- function(adbm = test_roc_data()[["adbm"]],
         "ROC" = dv.explorer.parameter::mod_roc(
           module_id = "mod_roc",
           pred_dataset_name = "adbm",
-          resp_dataset_disp = dv.manager::mm_dispatch("filtered_dataset", "adbin"),
-          group_dataset_disp = dv.manager::mm_dispatch("filtered_dataset", "adsl")
+          resp_dataset_name = "adbin",
+          group_dataset_name = "adsl"
         )
       ),
       filter_data = "adsl",
@@ -4832,4 +4893,3 @@ test_roc_data <- function() {
     adsl = adsl
   )
 }
-# nolint end

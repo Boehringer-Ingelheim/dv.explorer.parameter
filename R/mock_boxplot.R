@@ -64,8 +64,8 @@ mock_app_boxplot_mm <- function(update_query_string = TRUE) {
     module_list = list(
       Boxplot = mod_boxplot(
         "boxplot",
-        bm_dataset_disp = dv.manager::mm_dispatch("filtered_dataset", "bm"),
-        group_dataset_disp = dv.manager::mm_dispatch("filtered_dataset", "adsl"),
+        bm_dataset_name = "bm",
+        group_dataset_name = "adsl",
         visit_var = "VISIT",
         value_vars = c("VALUE1", "VALUE2"),
         subjid_var = "SUBJID",

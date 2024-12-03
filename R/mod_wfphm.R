@@ -475,6 +475,7 @@ wfphm_wf_server <- function(id,
 
     v_input_subset <- shiny::reactive(
       {
+        shiny::req(!is.null(inputs[["check"]]()))
         valid <- ((!inputs[["check"]]() && par_iv$is_valid()) || (inputs[["check"]]() && cont_iv$is_valid())) &&
           group_iv$is_valid()
 
@@ -586,6 +587,7 @@ wfphm_wf_server <- function(id,
       sorted_x = sorted_x,
       margin = chart_info[["margin"]],
       valid = shiny::reactive({
+        shiny::req(!is.null(inputs[["check"]]()))
         ((!inputs[["check"]]() && par_iv$is_valid()) || (inputs[["check"]]() && cont_iv$is_valid())) &&
           group_iv$is_valid()
       })
@@ -1947,7 +1949,7 @@ wfphm_hmpar_subset <- function(
 #'
 #' @param cat_palette `[list(functions)]`
 #'
-#' list of functions that receive the values of the variale and returns a vector with the colors for each of the values.
+#' list of functions that receive the values of the variable and returns a vector with the colors for each of the values.
 #' Each palette is applied when the name of the entry in the list matches the name of the selected categorical
 #' variable
 #'
@@ -2244,7 +2246,7 @@ tr_mapper_def <- function() {
     "Original" = tr_identity,
     "Scale by (result-mean)/SD of each parameter" = tr_z_score,
     "Scale by result/Gini's Mean Difference of each parameter" = tr_gini,
-    "Scale by parameter with truncation" = tr_trunc_z_score,
+    "Scale by parameter with truncation" = tr_trunc_z_score_3_3,
     "Normalize (result-min)/max" = tr_min_max,
     "Percentize (rank of result/maximal rank)" = tr_percentize
   )
@@ -2256,11 +2258,6 @@ tr_mapper_def <- function() {
 #' @param bm_dataset_name,group_dataset_name
 #'
 #' The name of the dataset
-#'
-#' @param bm_dataset_disp,group_dataset_disp
-#'
-#' Dataset dispatcher. This parameter is incompatible with its `bm_dataset_name`/`group_dataset_name` counterpart.
-#' Only for advanced use.
 #'
 #' @export
 mod_wfphm <- function(
@@ -2282,41 +2279,14 @@ mod_wfphm <- function(
     bar_group_palette = list(),
     cat_palette = list(),
     tr_mapper = tr_mapper_def(),
-    show_x_ticks = TRUE,
-    bm_dataset_disp, group_dataset_disp) {
-  if (!missing(bm_dataset_name) && !missing(bm_dataset_disp)) {
-    rlang::abort("`bm_dataset_name` and `bm_dataset_disp` cannot be used at the same time, use one or the other")
-  }
-
-  if (!missing(group_dataset_name) && !missing(group_dataset_disp)) {
-    rlang::abort("`group_dataset_name` and `group_dataset_disp` cannot be used at the same time, use one or the other")
-  }
-
-  if (!missing(bm_dataset_name)) {
-    bm_dataset_disp <- dv.manager::mm_dispatch("filtered_dataset", bm_dataset_name)
-  }
-
-  if (!missing(group_dataset_name)) {
-    group_dataset_disp <- dv.manager::mm_dispatch("filtered_dataset", group_dataset_name)
-  }
-
+    show_x_ticks = TRUE) {
   mod <- list(
     ui = function(id) wfphm_UI(id, names(tr_mapper)),
     server = function(afmm) {
       wfphm_server(
         id = module_id,
-        bm_dataset = {
-          if (utils::packageVersion("dv.manager") <= "2.0") dv.manager::mm_resolve_dispatcher(bm_dataset_disp, afmm)
-          if (utils::packageVersion("dv.manager") > "2.0") {
-            dv.manager::mm_resolve_dispatcher(bm_dataset_disp, afmm, flatten = TRUE)
-          }
-        },
-        group_dataset = {
-          if (utils::packageVersion("dv.manager") <= "2.0") dv.manager::mm_resolve_dispatcher(group_dataset_disp, afmm)
-          if (utils::packageVersion("dv.manager") > "2.0") {
-            dv.manager::mm_resolve_dispatcher(group_dataset_disp, afmm, flatten = TRUE)
-          }
-        },
+        bm_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[bm_dataset_name]]),
+        group_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[group_dataset_name]]),
         cat_var = cat_var,
         visit_var = visit_var,
         subjid_var = subjid_var,
@@ -2331,3 +2301,72 @@ mod_wfphm <- function(
   )
   mod
 }
+
+# wfphm module interface description ----
+# TODO: Fill in
+mod_wfphm_API_docs <- list(
+  "Waterfall Plus Heatmap",
+  module_id = "",
+  bm_dataset_name = "",
+  group_dataset_name = "",
+  cat_var = "",
+  par_var = "",
+  visit_var = "",
+  subjid_var = "",
+  value_vars = "",
+  bar_group_palette = "",
+  cat_palette = "",
+  tr_mapper = "",
+  show_x_ticks = ""
+)
+
+mod_wfphm_API_spec <- TC$group(
+  module_id = TC$mod_ID(),
+  bm_dataset_name = TC$dataset_name(),
+  group_dataset_name = TC$dataset_name() |> TC$flag("subject_level_dataset_name"),
+  cat_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())),
+  par_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())),
+  visit_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())),
+  subjid_var = TC$col("group_dataset_name", TC$factor()) |> TC$flag("subjid_var"),
+  value_vars = TC$col("bm_dataset_name", TC$numeric()) |> TC$flag("one_or_more"),
+  bar_group_palette = TC$fn(arg_count = 1) |> TC$flag("optional", "zero_or_more", "named", "ignore"),
+  cat_palette = TC$fn(arg_count = 1) |> TC$flag("optional", "zero_or_more", "named", "ignore"),
+  tr_mapper = TC$fn(arg_count = 1) |> TC$flag("optional", "zero_or_more", "named", "ignore"),
+  show_x_ticks = TC$logical()
+) |> TC$attach_docs(mod_wfphm_API_docs)
+
+
+check_mod_wfphm <- function(
+    afmm, datasets, module_id, bm_dataset_name, group_dataset_name, cat_var, par_var, visit_var, subjid_var,
+    value_vars, bar_group_palette, cat_palette, tr_mapper, show_x_ticks) {
+  warn <- CM$container()
+  err <- CM$container()
+
+  # TODO: Replace this function with a generic one that performs the checks based on mod_boxplot_API_spec.
+  # Something along the lines of OK <- CM$check_API(mod_corr_hm_API_spec, args = match.call(), warn, err)
+  OK <- check_mod_wfphm_auto(
+    afmm, datasets, module_id, bm_dataset_name, group_dataset_name, cat_var, par_var, visit_var, subjid_var,
+    value_vars, bar_group_palette, cat_palette, tr_mapper, show_x_ticks, warn, err
+  )
+
+  # Checks that API spec does not (yet?) capture
+
+  # #ahwopu
+  if (OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] && OK[["visit_var"]]) {
+    CM$check_unique_sub_cat_par_vis(
+      datasets, "bm_dataset_name", bm_dataset_name,
+      subjid_var, cat_var, par_var, visit_var, warn, err
+    )
+  }
+
+  res <- list(warnings = warn[["messages"]], errors = err[["messages"]])
+  return(res)
+}
+
+dataset_info_wfphm <- function(bm_dataset_name, group_dataset_name, ...) {
+  # TODO: Replace this function with a generic one that builds the list based on mod_boxplot_API_spec.
+  # Something along the lines of CM$dataset_info(mod_wfphm_API_spec, args = match.call())
+  return(list(all = unique(c(bm_dataset_name, group_dataset_name)), subject_level = group_dataset_name))
+}
+
+mod_wfphm <- CM$module(mod_wfphm, check_mod_wfphm, dataset_info_wfphm)

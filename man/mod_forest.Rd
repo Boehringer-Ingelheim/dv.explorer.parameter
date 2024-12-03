@@ -39,8 +39,10 @@ mod_forest(
   module_id,
   bm_dataset_name,
   group_dataset_name,
-  numeric_numeric_functions = list(),
-  numeric_factor_functions = list(),
+  numeric_numeric_functions = list(`Pearson Correlation` =
+    dv.explorer.parameter::pearson_correlation, `Spearman Correlation` =
+    dv.explorer.parameter::spearman_correlation),
+  numeric_factor_functions = list(`Odds Ratio` = dv.explorer.parameter::odds_ratio),
   subjid_var = "SUBJID",
   cat_var = "PARCAT",
   par_var = "PARAM",
@@ -53,9 +55,7 @@ mod_forest(
   default_var = NULL,
   default_group = NULL,
   default_categorical_A = NULL,
-  default_categorical_B = NULL,
-  bm_dataset_disp,
-  group_dataset_disp
+  default_categorical_B = NULL
 )
 }
 \arguments{
@@ -139,9 +139,6 @@ Module identifier}
 \item{bm_dataset_name, group_dataset_name}{\verb{[character(1)]}
 
 Dataset names}
-
-\item{bm_dataset_disp, group_dataset_disp}{\verb{[mm_dispatcher(1)]}
-module manager dispatchers passed as \code{bm_dataset} and \code{group_dataset} to \code{forest_server}}
 }
 \description{
 Display a hybrid table/forest plot of arbitrary statistics (correlations, odds ratios, ...)

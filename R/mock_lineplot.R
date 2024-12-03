@@ -70,24 +70,24 @@ mock_app_lineplot_user_fn <- function(in_fluid = TRUE, defaults = list()) {
   }
 
   gmean_function <- list(
-    `function` = geometric_mean,
-    `dispersion` = list(), # `No error bar` implicit
-    `y_prefix` = "gMean "
+    fn = geometric_mean,
+    dispersion = list(), # `No error bar` implicit
+    y_prefix = "gMean "
   )
 
   gmean_fold_change_fn <- list(
-    `function` = function(x) geometric_mean(x / 100 + 1),
-    `dispersion` = list(), # `No error bar` implicit
-    `y_prefix` = "gMean fold change"
+    fn = function(x) geometric_mean(x / 100 + 1),
+    dispersion = list(), # `No error bar` implicit
+    y_prefix = "gMean fold change"
   )
 
   gmean_fold_change_percent_fn <- list(
-    `function` = function(x) {
+    fn = function(x) {
       gm <- geometric_mean(x / 100 + 1)
       (gm - 1) * 100
     },
-    `dispersion` = list(), # `No error bar` implicit
-    `y_prefix` = "(gMean fold change - 1)*100%"
+    dispersion = list(), # `No error bar` implicit
+    y_prefix = "(gMean fold change - 1)*100%"
   )
 
   shiny::shinyApp(
@@ -109,9 +109,9 @@ mock_app_lineplot_user_fn <- function(in_fluid = TRUE, defaults = list()) {
         id = "not_ebas",
         bm_dataset = shiny::reactive(bm_dataset),
         group_dataset = shiny::reactive(group_dataset),
-        summary_functions = list(
-          `Mean` = lp_mean_summary_functions,
-          `Median` = lp_median_summary_functions,
+        summary_fns = list(
+          `Mean` = lp_mean_summary_fns,
+          `Median` = lp_median_summary_fns,
           `gMean` = gmean_function,
           `gMean fold change` = gmean_fold_change_fn,
           `(gMean fold change - 1)*100%` = gmean_fold_change_percent_fn
@@ -136,8 +136,8 @@ mock_app_lineplot_mm <- function() {
       module_id = "lineplot",
       bm_dataset_name = "bm",
       group_dataset_name = "sl",
-      visit_var = "VISIT",
-      value_var = c("VALUE1", "VALUE2"),
+      visit_vars = "VISIT",
+      value_vars = c("VALUE1", "VALUE2"),
       subjid_var = "SUBJID",
       cat_var = "PARCAT"
     )
@@ -154,7 +154,7 @@ mock_app_lineplot_mm <- function() {
   )
 }
 
-mock_app_lineplot_mm_safetyData <- function() { # nolint
+mock_app_lineplot_mm_safetyData <- function() {
   if (!requireNamespace("dv.manager")) {
     stop("Install dv.manager")
   }
@@ -165,7 +165,7 @@ mock_app_lineplot_mm_safetyData <- function() { # nolint
       bm_dataset_name = "bm",
       group_dataset_name = "sl",
       visit_vars = c("VISIT", "AVISITN"),
-      value_var = c("AVAL", "CHG"),
+      value_vars = c("AVAL", "CHG"),
       subjid_var = "SUBJID",
       cat_var = "PARCAT1",
       default_centrality_function = "Mean",

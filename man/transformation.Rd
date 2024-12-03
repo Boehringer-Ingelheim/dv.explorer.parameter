@@ -6,6 +6,7 @@
 \alias{tr_z_score}
 \alias{tr_gini}
 \alias{tr_trunc_z_score}
+\alias{tr_trunc_z_score_3_3}
 \alias{tr_min_max}
 \alias{tr_percentize}
 \title{Transformation functions}
@@ -17,6 +18,8 @@ tr_z_score(x)
 tr_gini(x)
 
 tr_trunc_z_score(x, trunc_min = -3, trunc_max = 3)
+
+tr_trunc_z_score_3_3(x)
 
 tr_min_max(x)
 
@@ -36,6 +39,8 @@ a vector/list with the transformed values
 
 a vector/list with the transformed values truncated at the specified cuts
 
+a vector/list with the transformed values truncated at the (-3, 3) cuts
+
 a vector/list with the transformed values
 
 a vector/list with the transformed values
@@ -52,6 +57,8 @@ Transformation functions
 \item \code{tr_gini()}: Gini's mean difference
 
 \item \code{tr_trunc_z_score()}: Truncated Z score transformation
+
+\item \code{tr_trunc_z_score_3_3()}: Truncated Z score transformation in the (-3, 3) range
 
 \item \code{tr_min_max()}: Min Max transformation
 

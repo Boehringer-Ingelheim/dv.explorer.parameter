@@ -38,11 +38,11 @@ test_data <- function(random_bm_values = FALSE) {
 
   bm <- bm |>
     dplyr::mutate(
-      SUBJID = factor(.data[["SUBJID"]]), # nolint
-      PARCAT = factor(.data[["PARCAT"]]), # nolint
-      PARAM = factor(.data[["PARAM"]]), # nolint
-      VISIT = factor(.data[["VISIT"]]), # nolint
-      VISIT2 = factor(.data[["VISIT2"]]) # nolint # TODO(miguel): Remove to make mock process numerical visits
+      SUBJID = factor(.data[["SUBJID"]]),
+      PARCAT = factor(.data[["PARCAT"]]),
+      PARAM = factor(.data[["PARAM"]]),
+      VISIT = factor(.data[["VISIT"]]),
+      VISIT2 = factor(.data[["VISIT2"]]) # NOTE(miguel): Remove to make mock process numerical visits
     )
 
   # Duplicate for the rest of test cases, default with no default, default, bookmark, setup

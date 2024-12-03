@@ -99,11 +99,6 @@ LP_CNT <- poc(
 # NOTE: id documented in lineplot_server
 #' @export
 lineplot_UI <- function(id) {
-  # id assert ---- It goes on its own as id is used to provide context to the other assertions
-  checkmate::assert_string(id, min.chars = 1)
-
-  # argument asserts ----
-
   # UI ----
   ns <- shiny::NS(id)
 
@@ -462,9 +457,9 @@ NULL
 
 #' @describeIn default_lineplot_functions Default mean functions
 #' @export
-lp_mean_summary_functions <- list(
-  `function` = function(x) base::mean(x, na.rm = TRUE),
-  `dispersion` = list(
+lp_mean_summary_fns <- list(
+  fn = function(x) base::mean(x, na.rm = TRUE),
+  dispersion = list(
     # `No error bar` implicit
     `Standard deviation` = list(
       top = function(x) base::mean(x, na.rm = TRUE) + stats::sd(x, na.rm = TRUE),
@@ -479,15 +474,15 @@ lp_mean_summary_functions <- list(
       bottom = function(x) base::mean(x, na.rm = TRUE) - lp_ci(x)
     )
   ),
-  `y_prefix` = "Mean "
+  y_prefix = "Mean "
 )
 
 lp_quantile_type <- 2 # From original EBAS # TODO: Figure out if this is a user requirement
 #' @describeIn default_lineplot_functions Default median functions
 #' @export
-lp_median_summary_functions <- list(
-  `function` = function(x) stats::median(x, na.rm = TRUE),
-  `dispersion` = list(
+lp_median_summary_fns <- list(
+  fn = function(x) stats::median(x, na.rm = TRUE),
+  dispersion = list(
     # `No error bar` implicit
     `Quartile` = list(
       top = function(x) stats::quantile(x, 0.75, type = lp_quantile_type, na.rm = TRUE),
@@ -498,7 +493,7 @@ lp_median_summary_functions <- list(
       bottom = function(x) stats::median(x, na.rm = TRUE) - stats::mad(x, na.rm = TRUE)
     )
   ),
-  `y_prefix` = "Median "
+  y_prefix = "Median "
 )
 
 
@@ -528,26 +523,31 @@ lp_median_summary_functions <- list(
 #'
 #' It should contain, at least, the column specified by the parameter `subjid_var`.
 #'
-#' @param summary_functions `[list()]`
+#' @param summary_fns `[list()]`
 #'
 #' Each element of this named list contains a summary function (e.g. a mean) and a collection of dispersion functions
 #' (e.g. standard deviation) defining ranges around the values returned by the summary function.
 #'
 #' The structure of each element is then a named list with the following elements:
-#' - `function`: Function that takes a numeric vector as its sole parameter and produces a scalar number.
+#' - `fn`: Function that takes a numeric vector as its sole parameter and produces a scalar number.
 #' - `dispersion`: Named list of pairs functions that return the *top* and *bottom* dispersion ranges. They also take
 #'   a numeric vector as input and return a single numeric scalar
 #' - `y_prefix`: Prefix that will be prepended the Y axis label of the generated plot
 #'
-#' For an example, see `dv.explorer.parameter::lp_mean_summary_functions`.
+#' For an example, see `dv.explorer.parameter::lp_mean_summary_fns`.
 #'
-#' @param dataset_name `[shiny::reactive(*)]`
+#' @param subjid_var `[character(1)]`
 #'
-#' A reactive that indicates a possible change in the column structure of any of the two datasets
+#' Column corresponding to the subject ID
 #'
 #' @param cat_var,par_var,visit_vars `[character(1)]`
 #'
 #' Columns from `bm_dataset` that correspond to the parameter category, parameter and visit
+#'
+#' @param cdisc_visit_vars `[character(1)]`
+#'
+#' Column from `bm_dataset` that correspond to the parameter visit and is interpreted as a CDISC
+#' Visit Days (skipping day 0; jumping from value -1 to value 1 in the X axis)
 #'
 #' @param value_vars `[character(n)]`
 #'
@@ -556,10 +556,6 @@ lp_median_summary_functions <- list(
 #' @param additional_listing_vars `[character(n)]`
 #'
 #' Columns from `bm_dataset` that will be appended to the single-subject listing
-#'
-#' @param subjid_var `[character(1)]`
-#'
-#' Column corresponding to the subject ID
 #'
 #' @param ref_line_vars `[character(n)]`
 #'
@@ -573,7 +569,7 @@ lp_median_summary_functions <- list(
 #'
 #' Default values for the selectors
 #'
-#' @param default_sub_group,default_val,default_centrality_function,default_dispersion_function `[character(1)|NULL]`
+#' @param default_sub_group,default_val,default_centrality_fn,default_dispersion_fn `[character(1)|NULL]`
 #'
 #' Default values for the selectors
 #'
@@ -582,23 +578,22 @@ lp_median_summary_functions <- list(
 #' Named list of default values associated to specific `visit_var`s, e.g.
 #' `default_visit_val = list(VISIT = c('VISIT1', 'VISIT2'), AVISITN = c(1, 2))`
 #'
-#' @param default_y_axis_projection `[character(1)|NULL]`
-#'
-#' Default values for the selectors
-#'
 #' @param default_transparency `[numeric(1)]`
 #'
 #' Default values for the selectors
+#'
+#' @param default_y_axis_projection `["Linear"|"Logarithmic"]`
+#'
+#' Default projection for the Y axis
 #'
 #' @export
 #'
 lineplot_server <- function(id,
                             bm_dataset,
                             group_dataset,
-                            dataset_name = shiny::reactive(character(0)),
-                            summary_functions = list(
-                              `Mean` = lp_mean_summary_functions,
-                              `Median` = lp_median_summary_functions
+                            summary_fns = list(
+                              `Mean` = lp_mean_summary_fns,
+                              `Median` = lp_median_summary_fns
                             ),
                             subjid_var = "SUBJID",
                             cat_var = "PARCAT",
@@ -609,8 +604,8 @@ lineplot_server <- function(id,
                             additional_listing_vars = character(0),
                             ref_line_vars = character(0),
                             on_sbj_click = NULL,
-                            default_centrality_function = NULL,
-                            default_dispersion_function = NULL,
+                            default_centrality_fn = NULL,
+                            default_dispersion_fn = NULL,
                             default_cat = NULL,
                             default_par = NULL,
                             default_val = NULL,
@@ -625,8 +620,8 @@ lineplot_server <- function(id,
   checkmate::assert_string(cat_var, min.chars = 1, add = ac)
   checkmate::assert_string(par_var, min.chars = 1, add = ac)
   checkmate::assert_character(additional_listing_vars, min.chars = 1, add = ac)
-  checkmate::assert_string(default_centrality_function, min.chars = 1, add = ac, null.ok = TRUE)
-  checkmate::assert_string(default_dispersion_function, min.chars = 1, add = ac, null.ok = TRUE)
+  checkmate::assert_string(default_centrality_fn, min.chars = 1, add = ac, null.ok = TRUE)
+  checkmate::assert_string(default_dispersion_fn, min.chars = 1, add = ac, null.ok = TRUE)
   checkmate::assert_character(default_cat, min.chars = 1, add = ac, null.ok = TRUE)
   checkmate::assert_character(default_par, min.chars = 1, add = ac, null.ok = TRUE)
   checkmate::assert_string(default_visit_var, min.chars = 1, add = ac, null.ok = TRUE)
@@ -677,6 +672,7 @@ lineplot_server <- function(id,
     v_bm_dataset <- shiny::reactive(
       {
         df <- bm_dataset()
+        # NOTE: None of these checks should never fail because the CM$module wrapper should prevent them
         ac <- checkmate::makeAssertCollection()
         checkmate::assert_data_frame(df, min.rows = 1, .var.name = ns("bm_dataset"), add = ac)
         checkmate::assert_names(
@@ -689,7 +685,6 @@ lineplot_server <- function(id,
           add = ac
         )
 
-        # TODO: Move to check_lineplot_call
         unique_par_names <- df |>
           dplyr::distinct(dplyr::across(c(VAR$CAT, VAR$PAR))) |>
           dplyr::group_by(dplyr::across(c(VAR$PAR))) |>
@@ -829,9 +824,9 @@ lineplot_server <- function(id,
       if (r_centrality == LP_CNT$PLOT_TYPE_SUBJECT_LEVEL) {
         NULL
       } else {
-        functions <- list(center = summary_functions[[r_centrality]][["function"]])
+        functions <- list(center = summary_fns[[r_centrality]][["fn"]])
         if (r_dispersion != "None") {
-          disp_f <- summary_functions[[r_centrality]][["dispersion"]][[r_dispersion]]
+          disp_f <- summary_fns[[r_centrality]][["dispersion"]][[r_dispersion]]
           functions[[LP_ID$MISC$WHISKER_TOP]] <- disp_f[["top"]]
           functions[[LP_ID$MISC$WHISKER_BOTTOM]] <- disp_f[["bottom"]]
         }
@@ -850,7 +845,7 @@ lineplot_server <- function(id,
           silent = TRUE
         )
 
-        y_label_prefix <- summary_functions[[r_centrality]][["y_prefix"]]
+        y_label_prefix <- summary_fns[[r_centrality]][["y_prefix"]]
       }
 
       ds <- set_lbl(ds, CNT$VAL, paste0(y_label_prefix, y_label))
@@ -1067,7 +1062,7 @@ lineplot_server <- function(id,
 
     # Interactive title selector interface ----
     title_ui <- local({
-      drop_menu_helper <- function(id, label, ...) {
+      drop_menu_helper <- function(id, label, ...) { # NOTE: not the drop_menu_helper in R/util-selectors.R
         shiny::tagAppendAttributes(
           shinyWidgets::dropMenu(
             shiny::actionButton(id, label),
@@ -1139,14 +1134,14 @@ lineplot_server <- function(id,
     })
 
     centrality_dispersion <- local({
-      summary_function_df <- local({
+      summary_fn_df <- local({
         res <- data.frame(Centrality = LP_CNT$PLOT_TYPE_SUBJECT_LEVEL, Dispersion = "None")
-        for (i_f in seq_along(summary_functions)) {
-          sum_name <- names(summary_functions)[[i_f]]
-          dispersion_functions <- summary_functions[[i_f]][["dispersion"]]
+        for (i_f in seq_along(summary_fns)) {
+          sum_name <- names(summary_fns)[[i_f]]
+          dispersion_fns <- summary_fns[[i_f]][["dispersion"]]
           res <- rbind(res, c(sum_name, "None")) # None
-          for (j_f in seq_along(dispersion_functions)) {
-            disp_name <- names(dispersion_functions)[[j_f]]
+          for (j_f in seq_along(dispersion_fns)) {
+            disp_name <- names(dispersion_fns)[[j_f]]
             res <- rbind(res, c(sum_name, disp_name))
           }
         }
@@ -1158,15 +1153,15 @@ lineplot_server <- function(id,
 
       parameter_server(
         id = LP_ID$PLOT_CENTRALITY_AND_DISPERSION,
-        data = shiny::reactive(summary_function_df),
+        data = shiny::reactive(summary_fn_df),
         cat_var = "Centrality",
         par_var = "Dispersion",
         cat_label = "Centrality",
         par_label = "Dispersion",
         multi_cat = FALSE,
         multi_par = FALSE,
-        default_cat = default_centrality_function,
-        default_par = default_dispersion_function
+        default_cat = default_centrality_fn,
+        default_par = default_dispersion_fn
       )
     })
     centrality <- centrality_dispersion[["cat"]]
@@ -1185,7 +1180,7 @@ lineplot_server <- function(id,
       label_if_valid = shiny::reactive(centrality())
     )
 
-    # Reactivity must be solved inside otherwise the function does not depend on the value
+    # Reactivity must be solved inside otherwise the function does not depend on the value # TODO: Take this into account for the centrality relabelling?
     sv_not_empty <- function(input, ..., msg) {
       function(x) {
         if (test_not_empty(input())) NULL else msg
@@ -1498,7 +1493,6 @@ lineplot_server <- function(id,
 #' Shiny ID of the module receiving the selected subject ID in the single subject listing. This ID must
 #' be present in the app or be NULL.
 #'
-#'
 #' @name mod_lineplot
 #'
 #' @keywords main
@@ -1509,9 +1503,9 @@ mod_lineplot <- function(module_id,
                          bm_dataset_name,
                          group_dataset_name,
                          receiver_id = NULL,
-                         summary_functions = list(
-                           `Mean` = lp_mean_summary_functions,
-                           `Median` = lp_median_summary_functions
+                         summary_fns = list(
+                           `Mean` = lp_mean_summary_fns,
+                           `Median` = lp_median_summary_fns
                          ),
                          subjid_var = "SUBJID",
                          cat_var = "PARCAT",
@@ -1521,8 +1515,8 @@ mod_lineplot <- function(module_id,
                          value_vars = c("AVAL", "PCHG"),
                          additional_listing_vars = character(0),
                          ref_line_vars = character(0),
-                         default_centrality_function = NULL,
-                         default_dispersion_function = NULL,
+                         default_centrality_fn = NULL,
+                         default_dispersion_fn = NULL,
                          default_cat = NULL,
                          default_par = NULL,
                          default_val = NULL,
@@ -1532,74 +1526,11 @@ mod_lineplot <- function(module_id,
                          default_sub_group = NULL,
                          default_transparency = 1.,
                          default_y_axis_projection = "Linear") {
-  # preserves `missing` behavior through reactives, saves us some typing # TODO(miguel): Check if this works on dv.papo
-  args <- as.list(environment())
-  args <- Filter(f = function(x) !inherits(x, "name"), args)
-  function_call <- as.list(match.call())[1]
-  args <- append(function_call, args)
-
-  # NOTE(miguel): These two lines allow the caller to provide lists whenever `mod_patient_profile_server`
-  #               requires atomic arrays
-  args <- T_honor_as_array_flag(mod_lineplot_API, args)
-  list2env(args[setdiff(seq_along(args), 1)], environment()) # overwrite current arguments with modified `args`
-
   mod <- list(
-    ui = function(module_id) {
-      app_creator_feedback_ui(module_id) # NOTE: original UI gated by app_creator_feedback_server
+    ui = function(mod_id) {
+      lineplot_UI(id = mod_id)
     },
     server = function(afmm) {
-      fb <- shiny::reactive({
-        # NOTE: We check the call here and not inside the module server function because:
-        #       - app creators interact with the davinci module and not with the ui-server combo, so
-        #         errors reported with respect to the module signature will make sense to them.
-        #         The module server function might use a different function signature.
-        #       - Here we also have access to the unfiltered dataset, which allows us to ensure call
-        #         correctness independent of filter state or operation.
-        #         Also, as long as the unfiltered dataset does not change (and to date no davinci app
-        #         changes it dynamically) this check only runs once at the beginning of the application
-        #         and has no further impact on performance.
-        #       - "catch errors early"
-
-        # Overwrite first "argument" (the function call, in fact) with the datasets provided to module manager
-        names(args)[[1]] <- "datasets"
-        args[[1]] <- shiny::isolate(afmm[["unfiltered_dataset"]]())
-
-        # Prepend afmm to args to allow checking receiver_ids
-        args <- append(list(afmm = afmm), args)
-
-        do.call(check_lineplot_call, args)
-      })
-
-      fb_warn <- shiny::reactive(fb()[["warnings"]])
-      fb_err <- shiny::reactive(fb()[["errors"]])
-
-      app_creator_feedback_server(
-        id = module_id,
-        warning_messages = fb_warn,
-        error_messages = fb_err,
-        ui = dv.explorer.parameter::lineplot_UI(id = module_id)
-      )
-
-      filtered_mapped_datasets <- shiny::reactive(
-        T_honor_map_to_flag(afmm$filtered_dataset(), mod_lineplot_API, args)
-      )
-
-      bm_dataset <- shiny::reactive({
-        ds <- filtered_mapped_datasets()[[bm_dataset_name]]
-        shiny::validate(
-          shiny::need(!is.null(ds), paste("Could not find dataset", bm_dataset_name))
-        )
-        return(ds)
-      })
-
-      group_dataset <- shiny::reactive({
-        ds <- filtered_mapped_datasets()[[group_dataset_name]]
-        shiny::validate(
-          shiny::need(!is.null(ds), paste("Could not find dataset", group_dataset_name))
-        )
-        return(ds)
-      })
-
       on_sbj_click_fun <- NULL
       if (!is.null(receiver_id)) {
         on_sbj_click_fun <- function() afmm[["utils"]][["switch2mod"]](receiver_id)
@@ -1607,10 +1538,10 @@ mod_lineplot <- function(module_id,
 
       lineplot_server(
         id = module_id,
-        bm_dataset = bm_dataset,
-        group_dataset = group_dataset,
+        bm_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[bm_dataset_name]]),
+        group_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[group_dataset_name]]),
         on_sbj_click = on_sbj_click_fun,
-        summary_functions = summary_functions,
+        summary_fns = summary_fns,
         subjid_var = subjid_var,
         cat_var = cat_var,
         par_var = par_var,
@@ -1619,8 +1550,8 @@ mod_lineplot <- function(module_id,
         value_vars = value_vars,
         additional_listing_vars = additional_listing_vars,
         ref_line_vars = ref_line_vars,
-        default_centrality_function = default_centrality_function,
-        default_dispersion_function = default_dispersion_function,
+        default_centrality_fn = default_centrality_fn,
+        default_dispersion_fn = default_dispersion_fn,
         default_cat = default_cat,
         default_par = default_par,
         default_val = default_val,
@@ -1636,3 +1567,146 @@ mod_lineplot <- function(module_id,
   )
   return(mod)
 }
+
+# Lineplot module interface description ----
+mod_lineplot_API_docs <- list(
+  "Line Plot",
+  module_id = "",
+  bm_dataset_name = "",
+  group_dataset_name = "",
+  receiver_id = "",
+  summary_fns = list(
+    "",
+    fn = "",
+    dispersion = list(
+      "",
+      top = "",
+      bottom = ""
+    ),
+    y_prefix = ""
+  ),
+  subjid_var = "",
+  cat_var = "",
+  par_var = "",
+  visit_vars = "",
+  cdisc_visit_vars = "",
+  value_vars = "",
+  additional_listing_vars = "",
+  ref_line_vars = "",
+  default_centrality_fn = "",
+  default_dispersion_fn = "",
+  default_cat = "",
+  default_par = "",
+  default_val = "",
+  default_visit_var = "",
+  default_visit_val = list(
+    ""
+  ),
+  default_main_group = "",
+  default_sub_group = "",
+  default_transparency = "",
+  default_y_axis_projection = ""
+)
+
+# TODO: Complete
+mod_lineplot_API_spec <- TC$group(
+  module_id = TC$mod_ID(),
+  bm_dataset_name = TC$dataset_name(),
+  group_dataset_name = TC$dataset_name() |> TC$flag("subject_level_dataset_name"),
+  receiver_id = TC$character() |> TC$flag("optional", "ignore"),
+  summary_fns = TC$group(
+    fn = TC$fn(arg_count = 1),
+    dispersion = TC$group(
+      top = TC$fn(arg_count = 1),
+      bottom = TC$fn(arg_count = 1)
+    ) |> TC$flag("zero_or_more", "named"),
+    y_prefix = TC$character()
+  ) |> TC$flag("optional", "named", "zero_or_more", "ignore"), # NOTE: ignored because we won't provide a function builder
+  subjid_var = TC$col("group_dataset_name", TC$factor()) |> TC$flag("subjid_var"),
+  cat_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())),
+  par_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())),
+  visit_vars = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())) |> TC$flag("one_or_more"),
+  cdisc_visit_vars = TC$col("bm_dataset_name", TC$or(TC$numeric())) |> TC$flag("zero_or_more"),
+  # FIXME: ? Interaction between visit_vars and cdisc_visit_vars; one needs to be specified
+  value_vars = TC$col("bm_dataset_name", TC$numeric()) |> TC$flag("one_or_more"),
+  additional_listing_vars = TC$col("bm_dataset_name", TC$anything()) |> TC$flag("zero_or_more", "optional"),
+  ref_line_vars = TC$col("bm_dataset_name", TC$anything()) |> TC$flag("zero_or_more", "optional"),
+  default_centrality_fn = TC$character() |> TC$flag("ignore"), # TODO: TC$choice ?
+  default_dispersion_fn = TC$character() |> TC$flag("ignore"), # TODO: TC$choice ?
+  default_cat = TC$choice_from_col_contents("cat_var") |> TC$flag("zero_or_more", "optional"),
+  default_par = TC$choice_from_col_contents("par_var") |> TC$flag("zero_or_more", "optional"),
+  default_val = TC$choice("value_vars") |> TC$flag("optional"), # FIXME(miguel): Should be called default_value_var
+  # FIXME: should allow selection across both visit_vars and cdisc_visit_vars (TC$choice("visit_vars", "cdisc_visit_vars"))
+  # FIXME: for some reason, the contents of the selector don't update when "visit_vars" is modified
+  default_visit_var = TC$choice("visit_vars") |> TC$flag("optional"),
+  # FIXME: Can't represent this behavior right now
+  default_visit_val = TC$group() |> TC$flag("named", "optional", "ignore"),
+  default_main_group = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("optional"),
+  default_sub_group = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("optional"),
+  default_transparency = TC$numeric(min = 0.05, max = 1.) |> TC$flag("optional"),
+  default_y_axis_projection = TC$character() |> TC$flag("optional", "ignore") # FIXME: something like TC$enum(c())
+) |> TC$attach_docs(mod_lineplot_API_docs)
+
+check_mod_lineplot <- function(
+    afmm, datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id, summary_fns,
+    subjid_var, cat_var, par_var, visit_vars, cdisc_visit_vars, value_vars, additional_listing_vars,
+    ref_line_vars, default_centrality_fn, default_dispersion_fn, default_cat, default_par,
+    default_val, default_visit_var, default_visit_val, default_main_group, default_sub_group,
+    default_transparency, default_y_axis_projection) {
+  warn <- CM$container()
+  err <- CM$container()
+
+  # TODO: Replace this function with a generic one that performs the checks based on mod_corr_hm_API_spec.
+  # Something along the lines of OK <- CM$check_API(mod_corr_hm_API_spec, args = match.call(), warn, err)
+
+  OK <- check_mod_lineplot_auto(
+    afmm, datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id,
+    summary_fns, subjid_var, cat_var, par_var, visit_vars, cdisc_visit_vars, value_vars, additional_listing_vars,
+    ref_line_vars, default_centrality_fn, default_dispersion_fn, default_cat, default_par, default_val,
+    default_visit_var, default_visit_val, default_main_group, default_sub_group, default_transparency,
+    default_y_axis_projection, warn, err
+  )
+
+  # Checks that API spec does not (yet?) capture
+  if (OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] && OK[["visit_vars"]] && OK[["cdisc_visit_vars"]]) {
+    CM$check_unique_sub_cat_par_vis(
+      datasets, "bm_dataset_name", bm_dataset_name,
+      subjid_var, cat_var, par_var, c(visit_vars, cdisc_visit_vars), warn, err
+    )
+  }
+
+  if (OK[["visit_vars"]] && OK[["cdisc_visit_vars"]]) {
+    ds <- datasets[[bm_dataset_name]]
+    for (visit_var in c(visit_vars, cdisc_visit_vars)) {
+      var_data <- ds[[visit_var]]
+      levs <- unique(var_data)
+      CM$assert(
+        container = err,
+        cond = all(nchar(trimws(levs)) > 0),
+        msg = sprintf(
+          paste(
+            "The visit variable `<b>%s</b>` in dataset `<b>%s</b>` contains missing (blank) values.",
+            "The lineplot module does not support those, since they lead to blank options in the visit selector",
+            "and to missing X axis labels on the resulting plot, which may be puzzling to up users.<br>",
+            "You can examine the affected variable with this command: <pre>unique(%s[['%s']])</pre>",
+            "Notice the blank value in the resulting output:",
+            "<pre>%s</pre>"
+          ),
+          visit_var, bm_dataset_name, bm_dataset_name, visit_var,
+          paste(capture.output(unique(ds[["VISIT"]])), collapse = "\n")
+        )
+      )
+    }
+  }
+
+  res <- list(warnings = warn[["messages"]], errors = err[["messages"]])
+  return(res)
+}
+
+dataset_info_lineplot <- function(bm_dataset_name, group_dataset_name, ...) {
+  # TODO: Replace this function with a generic one that builds the list based on mod_boxplot_API_spec.
+  # Something along the lines of CM$dataset_info(mod_lineplot_API_spec, args = match.call())
+  return(list(all = unique(c(bm_dataset_name, group_dataset_name)), subject_level = group_dataset_name))
+}
+
+mod_lineplot <- CM$module(mod_lineplot, check_mod_lineplot, dataset_info_lineplot)
