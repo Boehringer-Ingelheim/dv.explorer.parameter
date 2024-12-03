@@ -12,7 +12,7 @@ computed on dataset parameters over a single visit."><!-- mathjax --><script src
     
     <a class="navbar-brand me-2" href="../index.html">dv.explorer.parameter</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.14</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -96,8 +96,10 @@ computed on dataset parameters over a single visit.</p>
 <span>  <span class="va">module_id</span>,</span>
 <span>  <span class="va">bm_dataset_name</span>,</span>
 <span>  <span class="va">group_dataset_name</span>,</span>
-<span>  numeric_numeric_functions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  numeric_factor_functions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
+<span>  numeric_numeric_functions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>`Pearson Correlation` <span class="op">=</span></span>
+<span>    <span class="fu">dv.explorer.parameter</span><span class="fu">::</span><span class="va"><a href="fp_stats.html">pearson_correlation</a></span>, `Spearman Correlation` <span class="op">=</span></span>
+<span>    <span class="fu">dv.explorer.parameter</span><span class="fu">::</span><span class="va"><a href="fp_stats.html">spearman_correlation</a></span><span class="op">)</span>,</span>
+<span>  numeric_factor_functions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>`Odds Ratio` <span class="op">=</span> <span class="fu">dv.explorer.parameter</span><span class="fu">::</span><span class="va"><a href="fp_stats.html">odds_ratio</a></span><span class="op">)</span>,</span>
 <span>  subjid_var <span class="op">=</span> <span class="st">"SUBJID"</span>,</span>
 <span>  cat_var <span class="op">=</span> <span class="st">"PARCAT"</span>,</span>
 <span>  par_var <span class="op">=</span> <span class="st">"PARAM"</span>,</span>
@@ -110,9 +112,7 @@ computed on dataset parameters over a single visit.</p>
 <span>  default_var <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  default_group <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  default_categorical_A <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  default_categorical_B <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  <span class="va">bm_dataset_disp</span>,</span>
-<span>  <span class="va">group_dataset_disp</span></span>
+<span>  default_categorical_B <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -203,11 +203,6 @@ and <code>numeric_factor_functions</code> should accept a numeric first paramete
 <dt>bm_dataset_name, group_dataset_name</dt>
 <dd><p><code>[character(1)]</code></p>
 <p>Dataset names</p></dd>
-
-
-<dt>bm_dataset_disp, group_dataset_disp</dt>
-<dd><p><code>[mm_dispatcher(1)]</code>
-module manager dispatchers passed as <code>bm_dataset</code> and <code>group_dataset</code> to <code>forest_server</code></p></dd>
 
 </dl></div>
     <div class="section level2">

@@ -10,7 +10,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">dv.explorer.parameter</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.14</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -68,6 +68,8 @@
 <span></span>
 <span><span class="fu">tr_trunc_z_score</span><span class="op">(</span><span class="va">x</span>, trunc_min <span class="op">=</span> <span class="op">-</span><span class="fl">3</span>, trunc_max <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
 <span></span>
+<span><span class="fu">tr_trunc_z_score_3_3</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
+<span></span>
 <span><span class="fu">tr_min_max</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">tr_percentize</span><span class="op">(</span><span class="va">x</span><span class="op">)</span></span></code></pre></div>
@@ -100,6 +102,9 @@
 <p>a vector/list with the transformed values truncated at the specified cuts</p>
 
 
+<p>a vector/list with the transformed values truncated at the (-3, 3) cuts</p>
+
+
 <p>a vector/list with the transformed values</p>
 
 
@@ -112,6 +117,7 @@
 <li><p><code>tr_z_score()</code>: Z score transformation</p></li>
 <li><p><code>tr_gini()</code>: Gini's mean difference</p></li>
 <li><p><code>tr_trunc_z_score()</code>: Truncated Z score transformation</p></li>
+<li><p><code>tr_trunc_z_score_3_3()</code>: Truncated Z score transformation in the (-3, 3) range</p></li>
 <li><p><code>tr_min_max()</code>: Min Max transformation</p></li>
 <li><p><code>tr_percentize()</code>: Percentize transformation</p></li>
 </ul></div>

@@ -13,7 +13,7 @@ It expects a dataset similar to
 https://www.cdisc.org/kb/examples/adam-basic-data-structure-bds-using-paramcd-80288192 ,
 1 record per subject per parameter per analysis visit.
 It must contain, at least, the columns passed in the parameters, subjid_var, cat_var, par_var,
-visit_var and value_var. The values of these variables are as described
+visit_var and value_vars. The values of these variables are as described
 in the CDISC standard for the variables USUBJID, PARCAT, PARAM, AVISIT and AVAL.
 
 
@@ -43,7 +43,7 @@ It expects a dataset similar to
 https://www.cdisc.org/kb/examples/adam-basic-data-structure-bds-using-paramcd-80288192 ,
 1 record per subject per parameter per analysis visit.
 It must contain, at least, the columns passed in the parameters, subjid_var, cat_var, par_var,
-visit_var and value_var. The values of these variables are as described
+visit_var and value_vars. The values of these variables are as described
 in the CDISC standard for the variables USUBJID, PARCAT, PARAM, AVISIT and AVAL.
 
 
@@ -70,7 +70,7 @@ It must contain, at least, the column passed in the parameter, subjid_var.
     
     <a class="navbar-brand me-2" href="../index.html">dv.explorer.parameter</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.14</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -129,7 +129,7 @@ It also includes a set of listings with information about the population, distri
 https://www.cdisc.org/kb/examples/adam-basic-data-structure-bds-using-paramcd-80288192 ,
 1 record per subject per parameter per analysis visit.</p>
 <p>It must contain, at least, the columns passed in the parameters, <code>subjid_var</code>, <code>cat_var</code>, <code>par_var</code>,
-<code>visit_var</code> and <code>value_var</code>. The values of these variables are as described
+<code>visit_var</code> and <code>value_vars</code>. The values of these variables are as described
 in the CDISC standard for the variables USUBJID, PARCAT, PARAM, AVISIT and AVAL.</p>
 </div>
 
@@ -190,8 +190,6 @@ one record per subject.</p>
 <span>  default_main_group <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  default_sub_group <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  default_page_group <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  <span class="va">bm_dataset_disp</span>,</span>
-<span>  <span class="va">group_dataset_disp</span>,</span>
 <span>  server_wrapper_func <span class="op">=</span> <span class="va">identity</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -250,22 +248,15 @@ one record per subject.</p>
 
 
 <dt>receiver_id</dt>
-<dd><p>Name of the tab containing the receiver module</p></dd>
-
-
-<dt>bm_dataset_disp, group_dataset_disp</dt>
-<dd><p><code>[mm_dispatcher(1)]</code></p>
-<p>Dataset dispatcher. This parameter is incompatible with its *_dataset_name counterpart. Only for advanced use.</p></dd>
+<dd><p><code>[character(1)]</code></p>
+<p>Shiny ID of the module receiving the selected subject ID in the data listing. This ID must
+be present in the app or be NULL.</p></dd>
 
 
 <dt>server_wrapper_func</dt>
 <dd><p><code>[function()]</code></p>
 <p>A function that will be applied to the server returned value.
 Only for advanced use. See the example in mod_box_plot_papo</p></dd>
-
-
-<dt>...</dt>
-<dd><p>Same set of parameters as mod_boxplot</p></dd>
 
 </dl></div>
     <div class="section level2">

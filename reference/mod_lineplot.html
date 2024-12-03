@@ -12,7 +12,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">dv.explorer.parameter</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.14</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -69,9 +69,7 @@
 <span>  <span class="va">id</span>,</span>
 <span>  <span class="va">bm_dataset</span>,</span>
 <span>  <span class="va">group_dataset</span>,</span>
-<span>  dataset_name <span class="op">=</span> <span class="fu">shiny</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/shiny/man/reactive.html" class="external-link">reactive</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span><span class="op">)</span>,</span>
-<span>  summary_functions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Mean <span class="op">=</span> <span class="va">lp_mean_summary_functions</span>, Median <span class="op">=</span></span>
-<span>    <span class="va">lp_median_summary_functions</span><span class="op">)</span>,</span>
+<span>  summary_fns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Mean <span class="op">=</span> <span class="va">lp_mean_summary_fns</span>, Median <span class="op">=</span> <span class="va">lp_median_summary_fns</span><span class="op">)</span>,</span>
 <span>  subjid_var <span class="op">=</span> <span class="st">"SUBJID"</span>,</span>
 <span>  cat_var <span class="op">=</span> <span class="st">"PARCAT"</span>,</span>
 <span>  par_var <span class="op">=</span> <span class="st">"PARAM"</span>,</span>
@@ -81,8 +79,8 @@
 <span>  additional_listing_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span>,</span>
 <span>  ref_line_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span>,</span>
 <span>  on_sbj_click <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  default_centrality_function <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  default_dispersion_function <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  default_centrality_fn <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  default_dispersion_fn <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  default_cat <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  default_par <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  default_val <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -99,8 +97,7 @@
 <span>  <span class="va">bm_dataset_name</span>,</span>
 <span>  <span class="va">group_dataset_name</span>,</span>
 <span>  receiver_id <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  summary_functions <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Mean <span class="op">=</span> <span class="va">lp_mean_summary_functions</span>, Median <span class="op">=</span></span>
-<span>    <span class="va">lp_median_summary_functions</span><span class="op">)</span>,</span>
+<span>  summary_fns <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>Mean <span class="op">=</span> <span class="va">lp_mean_summary_fns</span>, Median <span class="op">=</span> <span class="va">lp_median_summary_fns</span><span class="op">)</span>,</span>
 <span>  subjid_var <span class="op">=</span> <span class="st">"SUBJID"</span>,</span>
 <span>  cat_var <span class="op">=</span> <span class="st">"PARCAT"</span>,</span>
 <span>  par_var <span class="op">=</span> <span class="st">"PARAM"</span>,</span>
@@ -109,8 +106,8 @@
 <span>  value_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"AVAL"</span>, <span class="st">"PCHG"</span><span class="op">)</span>,</span>
 <span>  additional_listing_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span>,</span>
 <span>  ref_line_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a></span><span class="op">(</span><span class="fl">0</span><span class="op">)</span>,</span>
-<span>  default_centrality_function <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  default_dispersion_function <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  default_centrality_fn <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  default_dispersion_fn <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  default_cat <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  default_par <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  default_val <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -150,20 +147,15 @@ with one record per subject.</p>
 <p>It should contain, at least, the column specified by the parameter <code>subjid_var</code>.</p></dd>
 
 
-<dt>dataset_name</dt>
-<dd><p><code>[shiny::reactive(*)]</code></p>
-<p>A reactive that indicates a possible change in the column structure of any of the two datasets</p></dd>
-
-
-<dt>summary_functions</dt>
+<dt>summary_fns</dt>
 <dd><p><code>[list()]</code></p>
 <p>Each element of this named list contains a summary function (e.g. a mean) and a collection of dispersion functions
 (e.g. standard deviation) defining ranges around the values returned by the summary function.</p>
-<p>The structure of each element is then a named list with the following elements:</p><ul><li><p><code>function</code>: Function that takes a numeric vector as its sole parameter and produces a scalar number.</p></li>
+<p>The structure of each element is then a named list with the following elements:</p><ul><li><p><code>fn</code>: Function that takes a numeric vector as its sole parameter and produces a scalar number.</p></li>
 <li><p><code>dispersion</code>: Named list of pairs functions that return the <em>top</em> and <em>bottom</em> dispersion ranges. They also take
 a numeric vector as input and return a single numeric scalar</p></li>
 <li><p><code>y_prefix</code>: Prefix that will be prepended the Y axis label of the generated plot</p></li>
-</ul><p>For an example, see <code><a href="default_lineplot_functions.html">dv.explorer.parameter::lp_mean_summary_functions</a></code>.</p></dd>
+</ul><p>For an example, see <code><a href="default_lineplot_functions.html">dv.explorer.parameter::lp_mean_summary_fns</a></code>.</p></dd>
 
 
 <dt>subjid_var</dt>
@@ -174,6 +166,12 @@ a numeric vector as input and return a single numeric scalar</p></li>
 <dt>cat_var, par_var, visit_vars</dt>
 <dd><p><code>[character(1)]</code></p>
 <p>Columns from <code>bm_dataset</code> that correspond to the parameter category, parameter and visit</p></dd>
+
+
+<dt>cdisc_visit_vars</dt>
+<dd><p><code>[character(1)]</code></p>
+<p>Column from <code>bm_dataset</code> that correspond to the parameter visit and is interpreted as a CDISC
+Visit Days (skipping day 0; jumping from value -1 to value 1 in the X axis)</p></dd>
 
 
 <dt>value_vars</dt>
@@ -207,7 +205,7 @@ a numeric vector as input and return a single numeric scalar</p></li>
 <code>default_visit_val = list(VISIT = c('VISIT1', 'VISIT2'), AVISITN = c(1, 2))</code></p></dd>
 
 
-<dt>default_sub_group, default_val, default_centrality_function, default_dispersion_function</dt>
+<dt>default_sub_group, default_val, default_centrality_fn, default_dispersion_fn</dt>
 <dd><p><code>[character(1)|NULL]</code></p>
 <p>Default values for the selectors</p></dd>
 
@@ -218,8 +216,8 @@ a numeric vector as input and return a single numeric scalar</p></li>
 
 
 <dt>default_y_axis_projection</dt>
-<dd><p><code>[character(1)|NULL]</code></p>
-<p>Default values for the selectors</p></dd>
+<dd><p><code>["Linear"|"Logarithmic"]</code></p>
+<p>Default projection for the Y axis</p></dd>
 
 
 <dt>module_id</dt>
@@ -234,8 +232,8 @@ a numeric vector as input and return a single numeric scalar</p></li>
 
 <dt>receiver_id</dt>
 <dd><p><code>[character(1)]</code></p>
-<p>Name of the module receiving the selected subject ID in the single subject listing. The name must be present in
-the module list or NULL.</p></dd>
+<p>Shiny ID of the module receiving the selected subject ID in the single subject listing. This ID must
+be present in the app or be NULL.</p></dd>
 
 </dl></div>
     <div class="section level2">

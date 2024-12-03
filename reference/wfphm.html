@@ -22,7 +22,7 @@ A heatmap that displays a set of parameters wfphm_hmpar
     
     <a class="navbar-brand me-2" href="../index.html">dv.explorer.parameter</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.14</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -106,9 +106,7 @@ A heatmap that displays a set of parameters wfphm_hmpar
 <span>  bar_group_palette <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  cat_palette <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  tr_mapper <span class="op">=</span> <span class="fu">tr_mapper_def</span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  show_x_ticks <span class="op">=</span> <span class="cn">TRUE</span>,</span>
-<span>  <span class="va">bm_dataset_disp</span>,</span>
-<span>  <span class="va">group_dataset_disp</span></span>
+<span>  show_x_ticks <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -158,7 +156,7 @@ grouping</p></dd>
 
 <dt>cat_palette</dt>
 <dd><p><code>[list(functions)]</code></p>
-<p>list of functions that receive the values of the variale and returns a vector with the colors for each of the values.
+<p>list of functions that receive the values of the variable and returns a vector with the colors for each of the values.
 Each palette is applied when the name of the entry in the list matches the name of the selected categorical
 variable</p></dd>
 
@@ -180,11 +178,6 @@ function to be applied according to details section.</p></dd>
 
 <dt>bm_dataset_name, group_dataset_name</dt>
 <dd><p>The name of the dataset</p></dd>
-
-
-<dt>bm_dataset_disp, group_dataset_disp</dt>
-<dd><p>Dataset dispatcher. This parameter is incompatible with its <code>bm_dataset_name</code>/<code>group_dataset_name</code> counterpart.
-Only for advanced use.</p></dd>
 
 </dl></div>
     <div class="section level2">

@@ -90,7 +90,7 @@ It expects to contain, at least, subjid_var
     
     <a class="navbar-brand me-2" href="../index.html">dv.explorer.parameter</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.14</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -216,10 +216,7 @@ one record per subject</p>
 <span>  resp_visit_var <span class="op">=</span> <span class="st">"AVISIT"</span>,</span>
 <span>  subjid_var <span class="op">=</span> <span class="st">"SUBJID"</span>,</span>
 <span>  compute_roc_fn <span class="op">=</span> <span class="va">compute_roc_data</span>,</span>
-<span>  compute_metric_fn <span class="op">=</span> <span class="va">compute_metric_data</span>,</span>
-<span>  <span class="va">pred_dataset_disp</span>,</span>
-<span>  <span class="va">resp_dataset_disp</span>,</span>
-<span>  <span class="va">group_dataset_disp</span></span>
+<span>  compute_metric_fn <span class="op">=</span> <span class="va">compute_metric_data</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -266,10 +263,6 @@ one record per subject</p>
 
 <dt>pred_dataset_name, resp_dataset_name, group_dataset_name</dt>
 <dd><p>Name of the dataset</p></dd>
-
-
-<dt>pred_dataset_disp, resp_dataset_disp, group_dataset_disp</dt>
-<dd><p>Dataset dispatcher. This parameter is incompatible with its *_dataset_name counterpart. Only for advanced use.</p></dd>
 
 </dl></div>
     <div class="section level2">
