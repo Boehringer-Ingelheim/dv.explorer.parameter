@@ -29,7 +29,7 @@ pal_div_palette <- function(max, neut, min, colors) {
 
 # Helper functions to work with palettes
 
-#' Returns a continous palette to use with heatmap
+#' Returns a continuous palette to use with heatmap
 #'
 #' @param d a vector containing the values to be colored
 #' @param seq_pos_colors,seq_neg_colors,div_colors,zero_color a palette for sequential positive, sequential

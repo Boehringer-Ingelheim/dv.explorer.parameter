@@ -484,10 +484,6 @@ scatterplotmatrix_server <- function(id,
 #'
 #' Name of the dataset
 #'
-#' @param bm_dataset_disp,group_dataset_disp `[mm_dispatcher(1)]`
-#'
-#' Dataset dispatcher. This parameter is incompatible with its *_dataset_name counterpart. Only for advanced use.
-#'
 #'
 #' @keywords main
 #'
@@ -505,32 +501,14 @@ mod_scatterplotmatrix <- function(module_id,
                                   default_par = NULL,
                                   default_visit = NULL,
                                   default_value = NULL,
-                                  default_main_group = NULL,
-                                  bm_dataset_disp,
-                                  group_dataset_disp) {
-  if (!missing(bm_dataset_name) && !missing(bm_dataset_disp)) {
-    rlang::abort("`bm_dataset_name` and `bm_dataset_disp` cannot be used at the same time, use one or the other")
-  }
-
-  if (!missing(group_dataset_name) && !missing(group_dataset_disp)) {
-    rlang::abort("`group_dataset_name` and `group_dataset_disp` cannot be used at the same time, use one or the other")
-  }
-
-  if (!missing(bm_dataset_name)) {
-    bm_dataset_disp <- dv.manager::mm_dispatch("filtered_dataset", bm_dataset_name)
-  }
-
-  if (!missing(group_dataset_name)) {
-    group_dataset_disp <- dv.manager::mm_dispatch("filtered_dataset", group_dataset_name)
-  }
-
+                                  default_main_group = NULL) {
   mod <- list(
     ui = scatterplotmatrix_UI,
     server = function(afmm) {
       scatterplotmatrix_server(
         id = module_id,
-        bm_dataset = dv.manager::mm_resolve_dispatcher(bm_dataset_disp, afmm, flatten = TRUE),
-        group_dataset = dv.manager::mm_resolve_dispatcher(group_dataset_disp, afmm, flatten = TRUE),
+        bm_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[bm_dataset_name]]),
+        group_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[group_dataset_name]]),
         dataset_name = afmm[["dataset_name"]],
         cat_var = cat_var,
         par_var = par_var,
@@ -548,6 +526,77 @@ mod_scatterplotmatrix <- function(module_id,
   )
   mod
 }
+
+
+# scatterplotmatrix module interface description ----
+# TODO: Fill in
+mod_scatterplotmatrix_API_docs <- list(
+  "Scatter plot matrix",
+  module_id = "",
+  bm_dataset_name = "",
+  group_dataset_name = "",
+  cat_var = "",
+  par_var = "",
+  value_vars = "",
+  visit_var = "",
+  subjid_var = "",
+  default_cat = "",
+  default_par = "",
+  default_visit = "",
+  default_value = "",
+  default_main_group = ""
+)
+
+mod_scatterplotmatrix_API_spec <- TC$group(
+  module_id = TC$mod_ID(),
+  bm_dataset_name = TC$dataset_name(),
+  group_dataset_name = TC$dataset_name() |> TC$flag("subject_level_dataset_name"),
+  cat_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())),
+  par_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())),
+  value_vars = TC$col("bm_dataset_name", TC$numeric()) |> TC$flag("one_or_more"),
+  visit_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())),
+  subjid_var = TC$col("group_dataset_name", TC$factor()) |> TC$flag("subjid_var"),
+  default_cat = TC$choice_from_col_contents("cat_var") |> TC$flag("zero_or_more", "optional"),
+  default_par = TC$choice_from_col_contents("par_var") |> TC$flag("zero_or_more", "optional"),
+  default_visit = TC$choice_from_col_contents("visit_var") |> TC$flag("optional"),
+  default_value = TC$choice("value_vars") |> TC$flag("optional"), # FIXME(miguel): ? Should be called default_value_var
+  default_main_group = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("optional")
+) |> TC$attach_docs(mod_scatterplotmatrix_API_docs)
+
+check_mod_scatterplotmatrix <- function(
+    afmm, datasets, module_id, bm_dataset_name, group_dataset_name, cat_var, par_var, value_vars, visit_var,
+    subjid_var, default_cat, default_par, default_visit, default_value, default_main_group) {
+  warn <- CM$container()
+  err <- CM$container()
+
+  # TODO: Replace this function with a generic one that performs the checks based on mod_boxplot_API_spec.
+  # Something along the lines of OK <- CM$check_API(mod_corr_hm_API_spec, args = match.call(), warn, err)
+  OK <- check_mod_scatterplotmatrix_auto(
+    afmm, datasets, module_id, bm_dataset_name, group_dataset_name, cat_var, par_var, value_vars, visit_var,
+    subjid_var, default_cat, default_par, default_visit, default_value, default_main_group, warn, err
+  )
+
+  # Checks that API spec does not (yet?) capture
+  if (OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] && OK[["visit_var"]]) {
+    CM$check_unique_sub_cat_par_vis(
+      datasets, "bm_dataset_name", bm_dataset_name, subjid_var, cat_var, par_var, visit_var, warn, err
+    )
+  }
+
+  res <- list(warnings = warn[["messages"]], errors = err[["messages"]])
+  return(res)
+}
+
+dataset_info_scatterplotmatrix <- function(bm_dataset_name, group_dataset_name, ...) {
+  # TODO: Replace this function with a generic one that builds the list based on mod_boxplot_API_spec.
+  # Something along the lines of CM$dataset_info(mod_scatterplotmatrix_API_spec, args = match.call())
+  return(list(all = unique(c(bm_dataset_name, group_dataset_name)), subject_level = group_dataset_name))
+}
+
+mod_scatterplotmatrix <- CM$module(
+  mod_scatterplotmatrix, check_mod_scatterplotmatrix,
+  dataset_info_scatterplotmatrix
+)
 
 # Logic functions ----
 

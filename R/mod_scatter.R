@@ -694,10 +694,6 @@ scatterplot_server <- function(id,
 #'
 #' Name of the dataset
 #'
-#' @param bm_dataset_disp,group_dataset_disp `[mm_dispatcher(1)]`
-#'
-#' Dataset dispatcher. This parameter is incompatible with its *_dataset_name counterpart. Only for advanced use.
-#'
 #' @keywords main
 #'
 #'
@@ -721,32 +717,14 @@ mod_scatterplot <- function(module_id,
                             default_y_visit = NULL,
                             default_group = NULL,
                             default_color = NULL,
-                            compute_lm_cor_fn = sp_compute_lm_cor_default,
-                            bm_dataset_disp,
-                            group_dataset_disp) {
-  if (!missing(bm_dataset_name) && !missing(bm_dataset_disp)) {
-    rlang::abort("`bm_dataset_name` and `bm_dataset_disp` cannot be used at the same time, use one or the other")
-  }
-
-  if (!missing(group_dataset_name) && !missing(group_dataset_disp)) {
-    rlang::abort("`group_dataset_name` and `group_dataset_disp` cannot be used at the same time, use one or the other")
-  }
-
-  if (!missing(bm_dataset_name)) {
-    bm_dataset_disp <- dv.manager::mm_dispatch("filtered_dataset", bm_dataset_name)
-  }
-
-  if (!missing(group_dataset_name)) {
-    group_dataset_disp <- dv.manager::mm_dispatch("filtered_dataset", group_dataset_name)
-  }
-
+                            compute_lm_cor_fn = sp_compute_lm_cor_default) {
   mod <- list(
     ui = scatterplot_UI,
     server = function(afmm) {
       scatterplot_server(
         id = module_id,
-        bm_dataset = dv.manager::mm_resolve_dispatcher(bm_dataset_disp, afmm, flatten = TRUE),
-        group_dataset = dv.manager::mm_resolve_dispatcher(group_dataset_disp, afmm, flatten = TRUE),
+        bm_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[bm_dataset_name]]),
+        group_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[group_dataset_name]]),
         dataset_name = afmm[["dataset_name"]],
         cat_var = cat_var,
         par_var = par_var,
@@ -770,6 +748,87 @@ mod_scatterplot <- function(module_id,
   )
   mod
 }
+
+# Scatterplot module interface description ----
+# TODO: Fill in
+mod_scatterplot_API_docs <- list(
+  "Scatter plot",
+  module_id = "",
+  bm_dataset_name = "",
+  group_dataset_name = "",
+  cat_var = "",
+  par_var = "",
+  value_vars = "",
+  visit_var = "",
+  subjid_var = "",
+  default_x_cat = "",
+  default_x_par = "",
+  default_x_value = "",
+  default_x_visit = "",
+  default_y_cat = "",
+  default_y_par = "",
+  default_y_value = "",
+  default_y_visit = "",
+  default_group = "",
+  default_color = "",
+  compute_lm_cor_fn = ""
+)
+
+mod_scatterplot_API_spec <- TC$group(
+  module_id = TC$mod_ID(),
+  bm_dataset_name = TC$dataset_name(),
+  group_dataset_name = TC$dataset_name() |> TC$flag("subject_level_dataset_name"),
+  cat_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())),
+  par_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())),
+  value_vars = TC$col("bm_dataset_name", TC$numeric()) |> TC$flag("one_or_more"),
+  visit_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())),
+  subjid_var = TC$col("group_dataset_name", TC$factor()) |> TC$flag("subjid_var"),
+  default_x_cat = TC$choice_from_col_contents("cat_var") |> TC$flag("optional"),
+  default_x_par = TC$choice_from_col_contents("par_var") |> TC$flag("optional"),
+  default_x_value = TC$choice("value_vars") |> TC$flag("optional"), # FIXME(miguel): ? Should be called default_value_var
+  default_x_visit = TC$choice_from_col_contents("visit_var") |> TC$flag("optional"),
+  default_y_cat = TC$choice_from_col_contents("cat_var") |> TC$flag("optional"),
+  default_y_par = TC$choice_from_col_contents("par_var") |> TC$flag("optional"),
+  default_y_value = TC$choice("value_vars") |> TC$flag("optional"), # FIXME(miguel): ? Should be called default_value_var
+  default_y_visit = TC$choice_from_col_contents("visit_var") |> TC$flag("optional"),
+  default_group = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("optional"),
+  default_color = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("optional"),
+  compute_lm_cor_fn = TC$fn(arg_count = 1) |> TC$flag("optional")
+) |> TC$attach_docs(mod_scatterplot_API_docs)
+
+check_mod_scatterplot <- function(
+    afmm, datasets, module_id, bm_dataset_name, group_dataset_name, cat_var, par_var, value_vars, visit_var, subjid_var,
+    default_x_cat, default_x_par, default_x_value, default_x_visit, default_y_cat, default_y_par, default_y_value,
+    default_y_visit, default_group, default_color, compute_lm_cor_fn) {
+  warn <- CM$container()
+  err <- CM$container()
+
+  # TODO: Replace this function with a generic one that performs the checks based on mod_boxplot_API_spec.
+  # Something along the lines of OK <- CM$check_API(mod_corr_hm_API_spec, args = match.call(), warn, err)
+  OK <- check_mod_scatterplot_auto(
+    afmm, datasets, module_id, bm_dataset_name, group_dataset_name, cat_var, par_var, value_vars, visit_var, subjid_var,
+    default_x_cat, default_x_par, default_x_value, default_x_visit, default_y_cat, default_y_par, default_y_value,
+    default_y_visit, default_group, default_color, compute_lm_cor_fn, warn, err
+  )
+
+  # Checks that API spec does not (yet?) capture
+  if (OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] && OK[["visit_var"]]) {
+    CM$check_unique_sub_cat_par_vis(
+      datasets, "bm_dataset_name", bm_dataset_name, subjid_var, cat_var, par_var, visit_var, warn, err
+    )
+  }
+
+  res <- list(warnings = warn[["messages"]], errors = err[["messages"]])
+  return(res)
+}
+
+dataset_info_scatterplot <- function(bm_dataset_name, group_dataset_name, ...) {
+  # TODO: Replace this function with a generic one that builds the list based on mod_boxplot_API_spec.
+  # Something along the lines of CM$dataset_info(mod_scatterplot_API_spec, args = match.call())
+  return(list(all = unique(c(bm_dataset_name, group_dataset_name)), subject_level = group_dataset_name))
+}
+
+mod_scatterplot <- CM$module(mod_scatterplot, check_mod_scatterplot, dataset_info_scatterplot)
 
 # Logic functions ----
 

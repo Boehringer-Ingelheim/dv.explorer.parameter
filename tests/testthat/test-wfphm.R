@@ -139,7 +139,24 @@ test_that(
     app$get_chromote_session()$Browser$setDownloadBehavior("allow", downloadPath = down_dir)
 
     do.call(app$set_inputs, setNames(list(filename), list(C$FILENAME)))
-    app$wait_for_idle()
+
+    local({
+      # FIXME(from:miguel, to:luis):
+      #  There are four sections to this wfphm stack. They never align horizontally in the tests.
+      #  (insert a `browser()` here and do execute `app$view()` to know what I mean).
+      #  They midle rows (CAT1 and CONT1) sometimes align with the waterfall and other times align
+      #  with the VALUE1 heatmap.
+      #  Clicking on one of the drop-down selectors somehow fixes the alignment, which is what I'm
+      #  doing here:
+      app$click(selector = "#not_ebas-wf_menu")
+      app$wait_for_idle()
+      app$click(selector = "#not_ebas-wf_menu")
+      app$wait_for_idle()
+      #  I think this is mostly a non-issue during interactive use, because configuring the plot
+      #  alread requires interaction with those menus, so users are unlikely to experiment this
+      #  non-alignment. That is why I'm adding this HACK here.
+    })
+
     app$click(C$SAVE_PNG)
     app$wait_for_idle()
     app$click(C$SAVE_SVG)

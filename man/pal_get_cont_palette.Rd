@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils-palettes.R
 \name{pal_get_cont_palette}
 \alias{pal_get_cont_palette}
-\title{Returns a continous palette to use with heatmap}
+\title{Returns a continuous palette to use with heatmap}
 \usage{
 pal_get_cont_palette(
   d,
@@ -25,6 +25,6 @@ encoded as #rrggbb or #rrggbbaa (red, green, blue, alpha) and the values are the
 should be mapped to that color.
 }
 \description{
-Returns a continous palette to use with heatmap
+Returns a continuous palette to use with heatmap
 }
 \keyword{internal}

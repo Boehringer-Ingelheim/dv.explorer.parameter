@@ -5000,13 +5000,8 @@
       <environment: namespace:dv.explorer.parameter>
       
       $tr_mapper$`Scale by parameter with truncation`
-      function (x, trunc_min = -3, trunc_max = 3) 
-      {
-          z <- tr_z_score(x)
-          z[z > trunc_max] <- trunc_max
-          z[z < trunc_min] <- trunc_min
-          z
-      }
+      function (x) 
+      tr_trunc_z_score(x, -3, 3)
       <bytecode: RANDOM VALUE - NO SNAPSHOT>
       <environment: namespace:dv.explorer.parameter>
       

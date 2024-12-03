@@ -80,6 +80,13 @@ tr_trunc_z_score <- function(x, trunc_min = -3, trunc_max = 3) {
   z
 }
 
+#' @describeIn transformation Truncated Z score transformation in the (-3, 3) range
+#'
+#' @param x a vector/list
+#' @return a vector/list with the transformed values truncated at the (-3, 3) cuts
+#' @export
+tr_trunc_z_score_3_3 <- function(x) tr_trunc_z_score(x, -3, 3)
+
 #' @describeIn transformation Min Max transformation
 #' @param x a vector/list
 #' @return a vector/list with the transformed values

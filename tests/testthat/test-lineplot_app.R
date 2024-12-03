@@ -238,8 +238,8 @@ test_that("default values are set", {
   skip_if_suspect_check()
 
   srv_defaults <- list(
-    default_centrality_function = "Mean",
-    default_dispersion_function = "Standard deviation",
+    default_centrality_fn = "Mean",
+    default_dispersion_fn = "Standard deviation",
     default_cat = "PARCAT2",
     default_par = c("PARAM22", "PARAM23"),
     default_val = "VALUE2",
@@ -262,8 +262,8 @@ test_that("default values are set", {
   input_values <- app$get_values()[["input"]]
   expect_equal(input_values[[ID$INPUT$CAT]], srv_defaults[["default_cat"]])
   expect_equal(input_values[[ID$INPUT$PAR]], srv_defaults[["default_par"]])
-  expect_equal(input_values[[ID$INPUT$CENT]], srv_defaults[["default_centrality_function"]])
-  expect_equal(input_values[[ID$INPUT$DISP]], srv_defaults[["default_dispersion_function"]])
+  expect_equal(input_values[[ID$INPUT$CENT]], srv_defaults[["default_centrality_fn"]])
+  expect_equal(input_values[[ID$INPUT$DISP]], srv_defaults[["default_dispersion_fn"]])
   expect_equal(input_values[[ID$INPUT$VIS_COL]], srv_defaults[["default_visit_var"]])
   expect_equal(input_values[[ID$INPUT$VIS]], as.character(srv_defaults[["default_visit_val"]][["VISIT2"]]))
   expect_equal(input_values[[ID$INPUT$VAL]], srv_defaults[["default_val"]])

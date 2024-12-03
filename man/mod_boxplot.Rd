@@ -47,8 +47,6 @@ mod_boxplot(
   default_main_group = NULL,
   default_sub_group = NULL,
   default_page_group = NULL,
-  bm_dataset_disp,
-  group_dataset_disp,
   server_wrapper_func = identity
 )
 
@@ -93,18 +91,15 @@ Module Shiny id}
 
 Name of the dataset}
 
-\item{receiver_id}{Name of the tab containing the receiver module}
+\item{receiver_id}{\verb{[character(1)]}
 
-\item{bm_dataset_disp, group_dataset_disp}{\verb{[mm_dispatcher(1)]}
-
-Dataset dispatcher. This parameter is incompatible with its *_dataset_name counterpart. Only for advanced use.}
+Shiny ID of the module receiving the selected subject ID in the data listing. This ID must
+be present in the app or be NULL.}
 
 \item{server_wrapper_func}{\verb{[function()]}
 
 A function that will be applied to the server returned value.
 Only for advanced use. See the example in mod_box_plot_papo}
-
-\item{...}{Same set of parameters as \link{mod_boxplot}}
 }
 \description{
 \code{mod_boxplot} is a Shiny module prepared to display data with boxplot charts with different levels of grouping.
@@ -120,7 +115,7 @@ https://www.cdisc.org/kb/examples/adam-basic-data-structure-bds-using-paramcd-80
 1 record per subject per parameter per analysis visit.
 
 It must contain, at least, the columns passed in the parameters, \code{subjid_var}, \code{cat_var}, \code{par_var},
-\code{visit_var} and \code{value_var}. The values of these variables are as described
+\code{visit_var} and \code{value_vars}. The values of these variables are as described
 in the CDISC standard for the variables USUBJID, PARCAT, PARAM, AVISIT and AVAL.
 }
 
