@@ -1679,23 +1679,42 @@ check_mod_lineplot <- function(
     ds <- datasets[[bm_dataset_name]]
     for (visit_var in c(visit_vars, cdisc_visit_vars)) {
       var_data <- ds[[visit_var]]
-      levs <- unique(var_data)
-      CM$assert(
-        container = err,
-        cond = all(nchar(trimws(levs)) > 0),
-        msg = sprintf(
-          paste(
-            "The visit variable `<b>%s</b>` in dataset `<b>%s</b>` contains missing (blank) values.",
-            "The lineplot module does not support those, since they lead to blank options in the visit selector",
-            "and to missing X axis labels on the resulting plot, which may be puzzling to up users.<br>",
-            "You can examine the affected variable with this command: <pre>unique(%s[['%s']])</pre>",
-            "Notice the blank value in the resulting output:",
-            "<pre>%s</pre>"
-          ),
-          visit_var, bm_dataset_name, bm_dataset_name, visit_var,
-          paste(capture.output(unique(ds[["VISIT"]])), collapse = "\n")
+      vals <- unique(var_data)
+      
+      if (is.character(vals)) {
+        CM$assert(
+          container = err,
+          cond = all(nchar(trimws(vals)) > 0),
+          msg = sprintf(
+            paste(
+              "The visit variable `<b>%s</b>` in dataset `<b>%s</b>` contains missing (blank) values.",
+              "The lineplot module does not support those, since they lead to blank options in the visit selector",
+              "and to missing X axis labels on the resulting plot, which may be puzzling to up users.<br>",
+              "You can examine the affected variable with this command: <pre>unique(%s[['%s']])</pre>",
+              "Notice the blank value in the resulting output:",
+              "<pre>%s</pre>"
+            ),
+            visit_var, bm_dataset_name, bm_dataset_name, visit_var,
+            paste(capture.output(unique(ds[[visit_var]])), collapse = "\n")
+          )
         )
-      )
+      } else if (is.numeric(vals)) {
+        CM$assert(
+          container = err,
+          cond = all(is.finite(vals)),
+          msg = sprintf(
+            paste(
+              "The numeric visit variable `<b>%s</b>` in dataset `<b>%s</b>` contains non-finite (`NA`, `Inf`) values.",
+              "The lineplot module does not support those, since they can't be placed along the X axis.<br>",
+              "You can examine the affected variable with this command: <pre>unique(%s[['%s']])</pre>",
+              "Notice the offending value in the resulting output:",
+              "<pre>%s</pre>"
+            ),
+            visit_var, bm_dataset_name, bm_dataset_name, visit_var,
+            paste(capture.output(unique(ds[[visit_var]])), collapse = "\n")
+          )
+        )
+      }
     }
   }
 
