@@ -273,14 +273,14 @@ local({
   test_that("boxplot_chart produces a boxplot", {
     vdiffr::expect_doppelganger(
       "boxplot",
-      boxplot_chart(df, FALSE, FALSE)
+      boxplot_chart(df, FALSE, FALSE, FALSE)
     )
   })
 
   test_that("boxplot_chart produces a violinplot", {
     vdiffr::expect_doppelganger(
       "violin plot",
-      boxplot_chart(df, TRUE, FALSE)
+      boxplot_chart(df, TRUE, FALSE, FALSE)
     )
   })
 
@@ -288,7 +288,15 @@ local({
     set.seed(1)
     vdiffr::expect_doppelganger(
       "boxplot individual points",
-      boxplot_chart(df, FALSE, TRUE)
+      boxplot_chart(df, FALSE, TRUE, FALSE)
+    )
+  })
+  
+  test_that("boxplot_chart produces a boxplot with a log-projected Y axis", {
+    set.seed(1)
+    vdiffr::expect_doppelganger(
+      "boxplot Y-axis log projection",
+      boxplot_chart(df, FALSE, FALSE, TRUE)
     )
   })
 })
@@ -301,7 +309,7 @@ test_that("boxplot_chart injects a dummy main group when there is none", {
     value = 1:10
   )
 
-  p <- boxplot_chart(df, FALSE, FALSE)
+  p <- boxplot_chart(df, FALSE, FALSE, FALSE)
 
   expect_true(CNT$MAIN_GROUP %in% names(p$data))
 })

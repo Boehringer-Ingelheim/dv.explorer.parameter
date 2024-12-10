@@ -159,3 +159,38 @@ drop_columns_by_name <- function(df, col_names) {
   df[col_names] <- list(NULL)
   return(df)
 }
+
+# Pseudolog projection. Alternative to log projection that handles non-positive values.
+# (see https://win-vector.com/2012/03/01/modeling-trick-the-signed-pseudo-logarithm/amp/)
+#
+# We could use `scales::pseudo_log_trans(base = 10)`, but its default breaks are bad and won't get fixed:
+#  https://github.com/r-lib/scales/issues/219
+# We could also take the object returned by that function and modify its `breaks` field, but the structure of ggtplot2
+# transform objects is not documented and we can't assume it will remain stable.
+# The ggplot2 manual (`?ggplot2::scale_y_continuous`) says transformations must be created through calls to
+# `scales::trans_new` (ggplot2 >= 3.5.0) or `scales::new_transform` (ggplot2 >= 3.5.0).
+pseudo_log <- function(x, base = 10) asinh(x / 2) / log(base)
+inverse_pseudo_log <- function(x, base = 10) 2 * sinh(x * log(base))
+
+pseudo_log_projection <- function(base = 10) {
+  breaks <- function(x) {
+    res <- NULL
+    if (all(x >= 0)) {
+      res <- scales::log_breaks(base)(x)
+    } else if (all(x <= 0)) {
+      res <- -scales::log_breaks(base)(abs(x))
+    } else {
+      max_limit <- max(c(2, abs(x)))
+      breaks <- scales::log_breaks(base)(c(1, max_limit))
+      res <- unique(c(-breaks, 0, breaks))
+    }
+    return(res)
+  }
+
+  scales::trans_new(
+    name = paste0("pseudolog-", format(base)),
+    transform = pseudo_log, inverse = inverse_pseudo_log,
+    breaks = breaks, domain = c(-Inf, Inf)
+  )
+}
+

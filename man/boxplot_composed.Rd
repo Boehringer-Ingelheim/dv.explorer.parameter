@@ -10,7 +10,7 @@
 \alias{bp_get_significance_output}
 \title{Composes data selection and charting for boxplot}
 \usage{
-bp_get_boxplot_output(ds, violin, show_points, title_data)
+bp_get_boxplot_output(ds, violin, show_points, log_project_y, title_data)
 
 bp_get_listings_output(ds, closest_point)
 

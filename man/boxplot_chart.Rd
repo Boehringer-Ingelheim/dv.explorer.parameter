@@ -4,7 +4,7 @@
 \alias{boxplot_chart}
 \title{ggplot for a set of faceted boxplots}
 \usage{
-boxplot_chart(ds, violin, show_points, title_data = NULL)
+boxplot_chart(ds, violin, show_points, log_project_y, title_data = NULL)
 }
 \arguments{
 \item{ds}{\code{data.frame()}
