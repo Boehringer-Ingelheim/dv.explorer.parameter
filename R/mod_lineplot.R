@@ -150,40 +150,6 @@ lp_selected_line_mask <- function(data, selected_points) {
   res
 }
 
-# Pseudolog projection. Alternative to log projection that handles non-positive values.
-# (see https://win-vector.com/2012/03/01/modeling-trick-the-signed-pseudo-logarithm/amp/)
-#
-# We could use `scales::pseudo_log_trans(base = 10)`, but its default breaks are bad and won't get fixed:
-#  https://github.com/r-lib/scales/issues/219
-# We could also take the object returned by that function and modify its `breaks` field, but the structure of ggtplot2
-# transform objects is not documented and we can't assume it will remain stable.
-# The ggplot2 manual (`?ggplot2::scale_y_continuous`) says transformations must be created through calls to
-# `scales::trans_new` (ggplot2 >= 3.5.0) or `scales::new_transform` (ggplot2 >= 3.5.0).
-lp_pseudo_log <- function(x, base = 10) asinh(x / 2) / log(base)
-lp_inverse_pseudo_log <- function(x, base = 10) 2 * sinh(x * log(base))
-
-lp_pseudo_log_projection <- function(base = 10) {
-  breaks <- function(x) {
-    res <- NULL
-    if (all(x >= 0)) {
-      res <- scales::log_breaks(base)(x)
-    } else if (all(x <= 0)) {
-      res <- -scales::log_breaks(base)(abs(x))
-    } else {
-      max_limit <- max(c(2, abs(x)))
-      breaks <- scales::log_breaks(base)(c(1, max_limit))
-      res <- unique(c(-breaks, 0, breaks))
-    }
-    return(res)
-  }
-
-  scales::trans_new(
-    name = paste0("pseudolog-", format(base)),
-    transform = lp_pseudo_log, inverse = lp_inverse_pseudo_log,
-    breaks = breaks, domain = c(-Inf, Inf)
-  )
-}
-
 lineplot_chart <- function(data, title = NULL, ref_line_data = NULL, log_project_y_axis = FALSE, time_var_is_cdisc = FALSE,
                            alpha = 1) {
   trace_grp1 <- CNT$PAR
@@ -348,7 +314,7 @@ lineplot_chart <- function(data, title = NULL, ref_line_data = NULL, log_project
   if (isTRUE(log_project_y_axis)) {
     # we use the deprecated `trans` argument instead of `transform`
     # because the latter is only supported in ggplot2 >= 3.5.0
-    fig <- fig + ggplot2::scale_y_continuous(trans = lp_pseudo_log_projection(base = 10))
+    fig <- fig + ggplot2::scale_y_continuous(trans = pseudo_log_projection(base = 10))
   }
 
   fig
@@ -1025,7 +991,7 @@ lineplot_server <- function(id,
       log_projection_col_name <- character(0)
       if (should_log_project) {
         log_projection_col_name <- "_pseudolog_projection"
-        df[[log_projection_col_name]] <- lp_pseudo_log(df[[y_var]])
+        df[[log_projection_col_name]] <- pseudo_log(df[[y_var]])
         y_var <- log_projection_col_name
       }
 
@@ -1679,23 +1645,42 @@ check_mod_lineplot <- function(
     ds <- datasets[[bm_dataset_name]]
     for (visit_var in c(visit_vars, cdisc_visit_vars)) {
       var_data <- ds[[visit_var]]
-      levs <- unique(var_data)
-      CM$assert(
-        container = err,
-        cond = all(nchar(trimws(levs)) > 0),
-        msg = sprintf(
-          paste(
-            "The visit variable `<b>%s</b>` in dataset `<b>%s</b>` contains missing (blank) values.",
-            "The lineplot module does not support those, since they lead to blank options in the visit selector",
-            "and to missing X axis labels on the resulting plot, which may be puzzling to up users.<br>",
-            "You can examine the affected variable with this command: <pre>unique(%s[['%s']])</pre>",
-            "Notice the blank value in the resulting output:",
-            "<pre>%s</pre>"
-          ),
-          visit_var, bm_dataset_name, bm_dataset_name, visit_var,
-          paste(capture.output(unique(ds[["VISIT"]])), collapse = "\n")
+      vals <- unique(var_data)
+      
+      if (is.character(vals)) {
+        CM$assert(
+          container = err,
+          cond = all(nchar(trimws(vals)) > 0),
+          msg = sprintf(
+            paste(
+              "The visit variable `<b>%s</b>` in dataset `<b>%s</b>` contains missing (blank) values.",
+              "The lineplot module does not support those, since they lead to blank options in the visit selector",
+              "and to missing X axis labels on the resulting plot, which may be puzzling to up users.<br>",
+              "You can examine the affected variable with this command: <pre>unique(%s[['%s']])</pre>",
+              "Notice the blank value in the resulting output:",
+              "<pre>%s</pre>"
+            ),
+            visit_var, bm_dataset_name, bm_dataset_name, visit_var,
+            paste(capture.output(unique(ds[[visit_var]])), collapse = "\n")
+          )
         )
-      )
+      } else if (is.numeric(vals)) {
+        CM$assert(
+          container = err,
+          cond = all(is.finite(vals)),
+          msg = sprintf(
+            paste(
+              "The numeric visit variable `<b>%s</b>` in dataset `<b>%s</b>` contains non-finite (`NA`, `Inf`) values.",
+              "The lineplot module does not support those, since they can't be placed along the X axis.<br>",
+              "You can examine the affected variable with this command: <pre>unique(%s[['%s']])</pre>",
+              "Notice the offending value in the resulting output:",
+              "<pre>%s</pre>"
+            ),
+            visit_var, bm_dataset_name, bm_dataset_name, visit_var,
+            paste(capture.output(unique(ds[[visit_var]])), collapse = "\n")
+          )
+        )
+      }
     }
   }
 

@@ -14,6 +14,7 @@ BP <- poc( # nolint
     OTHER_BUTTON = "other_button",
     VIOLIN_CHECK = "violin_check",
     SHOW_POINTS_CHECK = "show_points_check",
+    Y_PROJECTION_CHECK = "y_projection_check",
     CHART = "chart",
     TAB_TABLES = "tab_tables",
     TABLE_SINGLE_LISTING = "table_single_listing",
@@ -43,6 +44,7 @@ BP <- poc( # nolint
       OTHER_BUTTON = "Other",
       VIOLIN_CHECK = "Violin plot",
       SHOW_POINTS_CHECK = "Show individual points",
+      Y_PROJECTION_CHECK = "Y-axis logarithmic projection",
       TABLE_LISTING = "Data Listing",
       TABLE_SINGLE_LISTING = "Single Listing",
       TABLE_COUNT = "Data Count",
@@ -118,7 +120,8 @@ boxplot_UI <- function(id) { # nolint
   other_menu <- drop_menu_helper(
     ns(BP$ID$OTHER_BUTTON), BP$MSG$LABEL$OTHER_BUTTON,
     shiny::checkboxInput(inputId = ns(BP$ID$VIOLIN_CHECK), BP$MSG$LABEL$VIOLIN_CHECK),
-    shiny::checkboxInput(inputId = ns(BP$ID$SHOW_POINTS_CHECK), BP$MSG$LABEL$SHOW_POINTS_CHECK)
+    shiny::checkboxInput(inputId = ns(BP$ID$SHOW_POINTS_CHECK), BP$MSG$LABEL$SHOW_POINTS_CHECK),
+    shiny::checkboxInput(inputId = ns(BP$ID$Y_PROJECTION_CHECK), BP$MSG$LABEL$Y_PROJECTION_CHECK)
   )
 
   state_menu <- drop_menu_helper(
@@ -400,6 +403,9 @@ boxplot_server <- function(id,
     inputs[[BP$ID$SHOW_POINTS_CHECK]] <- shiny::reactive({
       input[[BP$ID$SHOW_POINTS_CHECK]]
     })
+    inputs[[BP$ID$Y_PROJECTION_CHECK]] <- shiny::reactive({
+      input[[BP$ID$Y_PROJECTION_CHECK]]
+    })
     inputs[[BP$ID$CHART_CLICK]] <- shiny::reactive({
       input[[BP$ID$CHART_CLICK]]
     })
@@ -574,6 +580,7 @@ boxplot_server <- function(id,
         ds = data_subset(),
         violin = inputs[[BP$ID$VIOLIN_CHECK]](),
         show_points = inputs[[BP$ID$SHOW_POINTS_CHECK]](),
+        log_project_y = inputs[[BP$ID$Y_PROJECTION_CHECK]](),
         title_data = bp_title_data()
       )
     )
@@ -1024,7 +1031,7 @@ bp_subset_data <- function(cat,
 #'
 #' @keywords internal
 #'
-boxplot_chart <- function(ds, violin, show_points, title_data = NULL) {
+boxplot_chart <- function(ds, violin, show_points, log_project_y, title_data = NULL) {
   is_main_grouped <- CNT$MAIN_GROUP %in% names(ds)
   is_sub_grouped <- CNT$SUB_GROUP %in% names(ds)
   is_page_grouped <- CNT$PAGE_GROUP %in% names(ds)
@@ -1101,7 +1108,7 @@ boxplot_chart <- function(ds, violin, show_points, title_data = NULL) {
     title_data$main_grp, title_data$sub_grp, title_data$page_grp
   )
 
-  p +
+  p <- p +
     ggplot2::facet_grid(
       rows = rows,
       cols = cols,
@@ -1118,6 +1125,12 @@ boxplot_chart <- function(ds, violin, show_points, title_data = NULL) {
       strip.text.x = ggplot2::element_text(size = STYLE$STRIP_TEXT_SIZE),
       strip.text.y = ggplot2::element_text(size = STYLE$STRIP_TEXT_SIZE)
     )
+  
+  if (isTRUE(log_project_y)) {
+    p <- p + ggplot2::scale_y_continuous(trans = pseudo_log_projection(base = 10))
+  }
+
+  return(p)
 }
 
 #' Subsets a data.frame based on the values of a one-rowed data.frame
@@ -1297,8 +1310,8 @@ NULL
 
 #' @rdname boxplot_composed
 #' @inheritParams boxplot_chart
-bp_get_boxplot_output <- function(ds, violin, show_points, title_data) {
-  boxplot_chart(ds, violin, show_points, title_data)
+bp_get_boxplot_output <- function(ds, violin, show_points, log_project_y, title_data) {
+  boxplot_chart(ds, violin, show_points, log_project_y, title_data)
 }
 
 #' @rdname boxplot_composed
