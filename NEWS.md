@@ -1,3 +1,10 @@
+# dv.explorer.parameter 0.1.1
+
+* boxplot:
+    * Provide a checkbox under the "Other" UI menu to log-project the Y axis.
+* lineplot:
+    * Warn app creators against non-finite values in numeric visits.
+
 # dv.explorer.parameter 0.1.0
 
 * boxplot, correlation heatmap, forest plot, roc, scatter plot, scatter plot matrix, waterfall plus heatmap:
