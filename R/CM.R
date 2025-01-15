@@ -1,4 +1,4 @@
-# YT#VH22c1dbc08734141d74f301a9a70503bb#VH471af99c9c42d555582282c2f5854aef#
+# YT#VHde6a9599edfe700035a3a72b3c9bdf71#VH22c1dbc08734141d74f301a9a70503bb#
 CM <- local({ # _C_hecked _M_odule
   message_well <- function(title, contents, color = "f5f5f5") { # repeats #iewahg
     style <- sprintf(r"---(
@@ -17,13 +17,21 @@ CM <- local({ # _C_hecked _M_odule
     return(res)
   }
 
-  app_creator_feedback_ui <- function(id) {
+  app_creator_feedback_ui <- function(id, ui) {
     id <- paste(c(id, "validator"), collapse = "-")
     ns <- shiny::NS(id)
-    return(shiny::uiOutput(ns("ui")))
+    
+    hide <- function(e) shiny::tags[["div"]](e, style = "display: none")
+    
+    res <- list(
+      shiny::uiOutput(ns("ui")),
+      hide(shiny::checkboxInput(inputId = ns('show_ui'), label = NULL)),
+      shiny::conditionalPanel(condition = "input.show_ui == true", ui, ns=ns)
+    )
+    return(res)
   }
 
-  app_creator_feedback_server <- function(id, warning_messages, error_messages, ui) {
+  app_creator_feedback_server <- function(id, warning_messages, error_messages) {
     id <- paste(c(id, "validator"), collapse = "-")
     module <- shiny::moduleServer(
       id,
@@ -48,11 +56,13 @@ CM <- local({ # _C_hecked _M_odule
               )
           }
 
-          if (length(error_messages) == 0) res <- append(res, list(ui()))
-
           return(res)
         })
         shiny::outputOptions(output, "ui", suspendWhenHidden = FALSE)
+        
+        if (length(error_messages) == 0){
+          shiny::updateCheckboxInput(inputId = 'show_ui', value = TRUE)
+        }
       }
     )
 
@@ -109,7 +119,7 @@ CM <- local({ # _C_hecked _M_odule
       }
 
       res <- list(
-        ui = function(module_id) app_creator_feedback_ui(module_id), # `module` UI gated by app_creator_feedback_server
+        ui = function(module_id) app_creator_feedback_ui(module_id, module_ui(module_id)), # `module` UI gated by app_creator_feedback_server
         server = function(afmm) {
           fb <- local({
             res <- NULL
@@ -143,8 +153,7 @@ CM <- local({ # _C_hecked _M_odule
           })
 
           app_creator_feedback_server(
-            id = module_id, warning_messages = fb[["warnings"]], error_messages = fb[["errors"]],
-            ui = shiny::reactive(module_ui(module_id))
+            id = module_id, warning_messages = fb[["warnings"]], error_messages = fb[["errors"]]
           )
 
           # TODO: Modify afmm to the `map_to` flags in the API. `dv.papo` relies on this
@@ -239,8 +248,9 @@ CM <- local({ # _C_hecked _M_odule
       if (elem$kind == "mod") {
         push(sprintf("OK[['%s']] <- CM$check_module_id('%s', %s, warn, err)\n", elem_name, elem_name, elem_name))
       } else if (elem$kind == "dataset_name") {
+        push(sprintf("flags <- %s\n", deparse(attrs) |> paste(collapse = "")))
         push(sprintf(
-          "OK[['%s']] <- CM$check_dataset_name('%s', %s, datasets, used_dataset_names, warn, err)\n",
+          "OK[['%s']] <- CM$check_dataset_name('%s', %s, flags, datasets, used_dataset_names, warn, err)\n",
           elem_name, elem_name, elem_name
         ))
       } else if (elem$kind == "col") {
@@ -351,20 +361,45 @@ CM <- local({ # _C_hecked _M_odule
       )
   }
 
-  check_dataset_name <- function(name, value, available_datasets, used_dataset_names, warn, err) {
-    ok <- (
-      assert(err, !missing(value), sprintf("`%s` missing", name)) && # TODO: ? Remove this one
-        assert(
+  check_dataset_name <- function(name, value, flags, available_datasets, used_dataset_names, warn, err) {
+    ok <- check_flags(name, value, flags, warn, err)
+
+    if(ok){
+      zero_or_more <- isTRUE(flags[["zero_or_more"]])
+      one_or_more <- isTRUE(flags[["one_or_more"]])
+      zero_or_one_or_more <- zero_or_more || one_or_more
+      if (zero_or_one_or_more) {
+        min_len <- 0
+        if (one_or_more) min_len <- 1
+        ok <- assert(
           err,
-          test_string(value) &&
-            value %in% names(available_datasets),
+          is.character(value) &&
+            all(value %in% names(available_datasets)) &&
+            length(value) >= min_len,
           paste(
-            sprintf("`%s` should be a string referring to one of the available datasets: ", name),
+            sprintf(
+              "`%s` should be a character vector of length greater than %s referring to the following dataset names: ",
+              name, c("zero", "one")[[min_len + 1]]
+            ),
             paste(sprintf('"%s"', names(available_datasets)), collapse = ", "), "."
           )
         )
-    )
-    if (ok) used_dataset_names[[name]] <- value
+      } else {
+        ok <- (
+          assert(err, !missing(value), sprintf("`%s` missing", name)) && # TODO: ? Remove this one
+            assert(
+              err,
+              test_string(value) &&
+                value %in% names(available_datasets),
+              paste(
+                sprintf("`%s` should be a string referring to one of the available dataset names: ", name),
+                paste(sprintf('"%s"', names(available_datasets)), collapse = ", "), "."
+              )
+            )
+        )
+        if (ok) used_dataset_names[[name]] <- value
+      }
+    }
     return(ok)
   }
 
