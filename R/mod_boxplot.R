@@ -1354,7 +1354,7 @@ bp_get_single_listings_output <- function(ds, closest_point, input_id) {
 bp_get_count_output <- function(ds) {  
   labels <- c(get_lbls_robust(ds))
   count_table <- bp_count_table(ds) |>
-    possibly_set_lbls(labels) |>
+    possibly_set_lbls(labels)
   DT::datatable(count_table, colnames = as.character(get_lbls_robust(count_table)))
 }
 
