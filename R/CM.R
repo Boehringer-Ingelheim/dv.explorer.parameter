@@ -1,4 +1,4 @@
-# YT#VHde6a9599edfe700035a3a72b3c9bdf71#VH22c1dbc08734141d74f301a9a70503bb#
+# YT#VHadccc0c551b3269937d087c1e76ae699#VHde6a9599edfe700035a3a72b3c9bdf71#
 CM <- local({ # _C_hecked _M_odule
   message_well <- function(title, contents, color = "f5f5f5") { # repeats #iewahg
     style <- sprintf(r"---(
@@ -25,8 +25,8 @@ CM <- local({ # _C_hecked _M_odule
     
     res <- list(
       shiny::uiOutput(ns("ui")),
-      hide(shiny::checkboxInput(inputId = ns('show_ui'), label = NULL)),
-      shiny::conditionalPanel(condition = "input.show_ui == true", ui, ns=ns)
+      hide(shiny::checkboxInput(inputId = ns("show_ui"), label = NULL)),
+      shiny::conditionalPanel(condition = "input.show_ui == true", ui, ns = ns)
     )
     return(res)
   }
@@ -60,8 +60,8 @@ CM <- local({ # _C_hecked _M_odule
         })
         shiny::outputOptions(output, "ui", suspendWhenHidden = FALSE)
         
-        if (length(error_messages) == 0){
-          shiny::updateCheckboxInput(inputId = 'show_ui', value = TRUE)
+        if (length(error_messages) == 0) {
+          shiny::updateCheckboxInput(inputId = "show_ui", value = TRUE)
         }
       }
     )
@@ -364,7 +364,7 @@ CM <- local({ # _C_hecked _M_odule
   check_dataset_name <- function(name, value, flags, available_datasets, used_dataset_names, warn, err) {
     ok <- check_flags(name, value, flags, warn, err)
 
-    if(ok){
+    if (ok) {
       zero_or_more <- isTRUE(flags[["zero_or_more"]])
       one_or_more <- isTRUE(flags[["one_or_more"]])
       zero_or_one_or_more <- zero_or_more || one_or_more
