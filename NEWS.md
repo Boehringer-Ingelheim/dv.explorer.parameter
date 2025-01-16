@@ -1,3 +1,9 @@
+# dv.explorer.parameter 0.1.1-9000
+
+* boxplot:
+    * `mod_boxplot_papo` is deprecated and `mod_boxplot` can be used in its place.
+    * Data count table headers are now shown correctly.
+
 # dv.explorer.parameter 0.1.1
 
 * boxplot:
