@@ -1172,6 +1172,7 @@ bp_listings_table <- function(ds, f_ds) {
 #' Counts the number of rows grouped by all variables except ``r CNT$SBJ`` and ``r CNT$VAL``
 #'
 #' - Counts the number of rows grouped by all variables except ``r CNT$SBJ`` and ``r CNT$VAL``.
+#' - Throws an error if the Count column is present
 #' - The function returns a data frame with the counts for each group.
 #'
 #' @param ds `data.frame()`
@@ -1185,11 +1186,15 @@ bp_listings_table <- function(ds, f_ds) {
 #'
 bp_count_table <- function(ds) {
   count_by <- setdiff(names(ds), c(CNT$SBJ, CNT$VAL))
-
   # If a variable in the original dataset has the name Count a conflict may appear
   # This should not be a problem as tibble can support that and this ds is displayed and not further processed
-  # If further processed distinguishing the two columns would not be trivial
-  dplyr::count(ds, dplyr::across(dplyr::all_of(count_by)), .drop = FALSE, name = "Count")
+  # Nonetheless a conservative approach is taken and error is raised in that case
+  checkmate::assert_disjunct(names(ds), "Count")    
+  
+  count_table <- dplyr::count(ds, dplyr::across(dplyr::all_of(count_by)), .drop = FALSE, name = "Count")
+  labels <- c(get_lbls_robust(ds), list(Count = "Count"))
+
+  possibly_set_lbls(count_table, labels)
 }
 
 #' Calculates a set of summary statistics grouped by all variables except ``r CNT$SBJ`` and ``r CNT$VAL``
@@ -1349,9 +1354,9 @@ bp_get_single_listings_output <- function(ds, closest_point, input_id) {
 #' @rdname boxplot_composed
 #' @inheritParams bp_count_table
 #'
-bp_get_count_output <- function(ds) {
-  bp_count_table(ds) |>
-    DT::datatable(colnames = as.character(get_lbls_robust(ds)))
+bp_get_count_output <- function(ds) {  
+  count_table <- bp_count_table(ds)
+  DT::datatable(count_table, colnames = as.character(get_lbls_robust(count_table)))
 }
 
 #' @rdname boxplot_composed
