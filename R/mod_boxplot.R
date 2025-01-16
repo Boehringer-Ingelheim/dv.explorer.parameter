@@ -1191,10 +1191,7 @@ bp_count_table <- function(ds) {
   # Nonetheless a conservative approach is taken and error is raised in that case
   checkmate::assert_disjunct(names(ds), "Count")    
   
-  count_table <- dplyr::count(ds, dplyr::across(dplyr::all_of(count_by)), .drop = FALSE, name = "Count")
-  labels <- c(get_lbls_robust(ds), list(Count = "Count"))
-
-  possibly_set_lbls(count_table, labels)
+  dplyr::count(ds, dplyr::across(dplyr::all_of(count_by)), .drop = FALSE, name = "Count") 
 }
 
 #' Calculates a set of summary statistics grouped by all variables except ``r CNT$SBJ`` and ``r CNT$VAL``
@@ -1355,7 +1352,9 @@ bp_get_single_listings_output <- function(ds, closest_point, input_id) {
 #' @inheritParams bp_count_table
 #'
 bp_get_count_output <- function(ds) {  
-  count_table <- bp_count_table(ds)
+  labels <- c(get_lbls_robust(ds))
+  count_table <- bp_count_table(ds) |>
+    possibly_set_lbls(labels) |>
   DT::datatable(count_table, colnames = as.character(get_lbls_robust(count_table)))
 }
 
