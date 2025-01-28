@@ -708,7 +708,7 @@ boxplot_server <- function(id,
 }
 
 #' Invoke boxplot module
-#' 
+#'
 #' @details `mod_boxplot_papo` is a deprecated function that was required to use the jumping feature in combination
 #' with `dv.papo` but is no longer required. The function is still available for compatibility reasons.
 #'
@@ -865,9 +865,9 @@ mod_boxplot <- CM$module(mod_boxplot, check_mod_boxplot, dataset_info_boxplot)
 
 #' @describeIn mod_boxplot Boxplot wrapper when its output is fed into papo module
 #' @export
-mod_boxplot_papo <- function(...) {  
+mod_boxplot_papo <- function(...) {
   .Deprecated("mod_boxplot_papo", msg = "'mod_boxplot_papo' is no longer required and should be replaced by 'mod_boxplot'. It is still available for compatibility purposes") # nolint
-  mod_boxplot(...)  
+  mod_boxplot(...)
 }
 
 # Data manipulation
@@ -1126,7 +1126,7 @@ boxplot_chart <- function(ds, violin, show_points, log_project_y, title_data = N
       strip.text.x = ggplot2::element_text(size = STYLE$STRIP_TEXT_SIZE),
       strip.text.y = ggplot2::element_text(size = STYLE$STRIP_TEXT_SIZE)
     )
-  
+
   if (isTRUE(log_project_y)) {
     p <- p + ggplot2::scale_y_continuous(trans = pseudo_log_projection(base = 10))
   }
@@ -1189,9 +1189,9 @@ bp_count_table <- function(ds) {
   # If a variable in the original dataset has the name Count a conflict may appear
   # This should not be a problem as tibble can support that and this ds is displayed and not further processed
   # Nonetheless a conservative approach is taken and error is raised in that case
-  checkmate::assert_disjunct(names(ds), "Count")    
-  
-  dplyr::count(ds, dplyr::across(dplyr::all_of(count_by)), .drop = FALSE, name = "Count") 
+  checkmate::assert_disjunct(names(ds), "Count")
+
+  dplyr::count(ds, dplyr::across(dplyr::all_of(count_by)), .drop = FALSE, name = "Count")
 }
 
 #' Calculates a set of summary statistics grouped by all variables except ``r CNT$SBJ`` and ``r CNT$VAL``
@@ -1351,7 +1351,7 @@ bp_get_single_listings_output <- function(ds, closest_point, input_id) {
 #' @rdname boxplot_composed
 #' @inheritParams bp_count_table
 #'
-bp_get_count_output <- function(ds) {  
+bp_get_count_output <- function(ds) {
   labels <- c(get_lbls_robust(ds))
   count_table <- bp_count_table(ds) |>
     possibly_set_lbls(labels)

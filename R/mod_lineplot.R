@@ -1646,7 +1646,7 @@ check_mod_lineplot <- function(
     for (visit_var in c(visit_vars, cdisc_visit_vars)) {
       var_data <- ds[[visit_var]]
       vals <- unique(var_data)
-      
+
       if (is.character(vals)) {
         CM$assert(
           container = err,

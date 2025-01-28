@@ -13,9 +13,9 @@ component <- "heatmap_d3"
 # TEST RUN IN INDEPENDENT SESSIONS BUT NOT INDEPENDENT APPS
 
 root_app <- start_app_driver(rlang::quo({
-non_reactive_args <- c()
-both_args <- c()
-reactive_args <- c("data", "x_axis", "y_axis", "z_axis", "margin", "palette", "msg_func", "quiet")
+  non_reactive_args <- c()
+  both_args <- c()
+  reactive_args <- c("data", "x_axis", "y_axis", "z_axis", "margin", "palette", "msg_func", "quiet")
 
   # STOP MODIFYING
 
@@ -71,82 +71,82 @@ reactive_args <- c("data", "x_axis", "y_axis", "z_axis", "margin", "palette", "m
   }
 
   ui <- function(request) {
-  non_reactive_tb <- create_inpt_tb(non_reactive_id, FALSE)
-  reactive_tb <- create_inpt_tb(reactive_id, FALSE)
-  both_tb <- create_inpt_tb(both_id, TRUE)
+    non_reactive_tb <- create_inpt_tb(non_reactive_id, FALSE)
+    reactive_tb <- create_inpt_tb(reactive_id, FALSE)
+    both_tb <- create_inpt_tb(both_id, TRUE)
 
-  shiny::fluidPage(
-    shiny::tagList(
-      shiny::div(
-        shiny::tags[["h3"]]("Bookmark"),
-        shiny::bookmarkButton()
-      ),
-      shiny::div(
-        shiny::tags[["h3"]]("Static"),
-        non_reactive_tb,
-        shiny::tags[["hr"]]()
-      ),
-      shiny::div(
-        shiny::tags[["h3"]]("Reactive"),
-        reactive_tb,
-        shiny::tags[["hr"]]()
-      ),
-      shiny::div(
-        shiny::tags[["h3"]]("Both"),
-        both_tb,
-        shiny::tags[["hr"]]()
-      ),
-      shiny::div(
-        shiny::tags[["h3"]]("Module"),
-        shiny::uiOutput("cont")
+    shiny::fluidPage(
+      shiny::tagList(
+        shiny::div(
+          shiny::tags[["h3"]]("Bookmark"),
+          shiny::bookmarkButton()
+        ),
+        shiny::div(
+          shiny::tags[["h3"]]("Static"),
+          non_reactive_tb,
+          shiny::tags[["hr"]]()
+        ),
+        shiny::div(
+          shiny::tags[["h3"]]("Reactive"),
+          reactive_tb,
+          shiny::tags[["hr"]]()
+        ),
+        shiny::div(
+          shiny::tags[["h3"]]("Both"),
+          both_tb,
+          shiny::tags[["hr"]]()
+        ),
+        shiny::div(
+          shiny::tags[["h3"]]("Module"),
+          shiny::uiOutput("cont")
+        )
       )
     )
-  )
-}
+  }
 
   server <- function(input, output, session) {
-  n_ipt <- purrr::map(non_reactive_id, ~ eval_inpt(.x, input))
-  r_ipt <- purrr::map(reactive_id, ~ eval_inpt(.x, input))
-  b_ipt <- purrr::map(both_id, ~ eval_inpt(.x, input))
+    n_ipt <- purrr::map(non_reactive_id, ~ eval_inpt(.x, input))
+    r_ipt <- purrr::map(reactive_id, ~ eval_inpt(.x, input))
+    b_ipt <- purrr::map(both_id, ~ eval_inpt(.x, input))
 
-  returned_values <- NULL
+    returned_values <- NULL
 
-  output[["cont"]] <- shiny::renderUI({
-    message("Rendering")
-    # MODIFY THIS BODY
+    output[["cont"]] <- shiny::renderUI({
+      message("Rendering")
+      # MODIFY THIS BODY
 
-    # Non reactive input should usually be first checked with shiny::req as there are no internal controls in the
-    # module for "strange" values in them
+      # Non reactive input should usually be first checked with shiny::req as there are no internal controls in the
+      # module for "strange" values in them
 
-    returned_values <<- dv.explorer.parameter:::heatmap_d3_server(
-      "mod",
-      data = solver(r_ipt[["data"]], as_reactive = TRUE),
-      x_axis = solver(r_ipt[["x_axis"]], as_reactive = TRUE),
-      y_axis = solver(r_ipt[["y_axis"]], as_reactive = TRUE),
-      z_axis = solver(r_ipt[["z_axis"]], as_reactive = TRUE),
-      margin = solver(r_ipt[["margin"]], as_reactive = TRUE),
-      palette = solver(r_ipt[["palette"]], as_reactive = TRUE),
-      msg_func = solver(r_ipt[["msg_func"]], as_reactive = TRUE)
-    )
+      returned_values <<- dv.explorer.parameter:::heatmap_d3_server(
+        "mod",
+        data = solver(r_ipt[["data"]], as_reactive = TRUE),
+        x_axis = solver(r_ipt[["x_axis"]], as_reactive = TRUE),
+        y_axis = solver(r_ipt[["y_axis"]], as_reactive = TRUE),
+        z_axis = solver(r_ipt[["z_axis"]], as_reactive = TRUE),
+        margin = solver(r_ipt[["margin"]], as_reactive = TRUE),
+        palette = solver(r_ipt[["palette"]], as_reactive = TRUE),
+        msg_func = solver(r_ipt[["msg_func"]], as_reactive = TRUE)
+      )
 
 
-    output[["out"]] <- shiny::renderPrint({
-      returned_values[["margin"]]()
+      output[["out"]] <- shiny::renderPrint({
+        returned_values[["margin"]]()
+      })
+
+      # UIs must be static
+
+      shiny::tagList(
+        dv.explorer.parameter:::heatmap_d3_UI("mod"),
+        shiny::verbatimTextOutput("out")
+      )
     })
 
-    # UIs must be static
-
-    shiny::tagList(
-      dv.explorer.parameter:::heatmap_d3_UI("mod"),
-      shiny::verbatimTextOutput("out")
+    shiny::exportTestValues(
+      # MODIFY PARAMETERS AS NEEDED
+      returned = returned_values
     )
-  })
-
-  shiny::exportTestValues(
-    # MODIFY PARAMETERS AS NEEDED
-    returned = returned_values
-  )
-}
+  }
 
   shiny::shinyApp(
     ui = ui,
@@ -234,17 +234,17 @@ state_three <- rlang::exprs(
 # helpers ----
 # Returns the center first rectangle
 get_rect_center <- function(app) {
-  ch <- app$get_chromote_session()  
+  ch <- app$get_chromote_session()
 
   node_id <- ch$DOM$querySelector(
-      nodeId = ch$DOM$getDocument()$root$nodeId,
-      selector = "rect"
-    )$nodeId
+    nodeId = ch$DOM$getDocument()$root$nodeId,
+    selector = "rect"
+  )$nodeId
 
   d3_box <- ch$DOM$getBoxModel(node_id)$model$content
   x <- round(d3_box[[1]] + d3_box[[3]]) / 2
   y <- round(d3_box[[2]] + d3_box[[6]]) / 2
-  
+
   return(c(x, y))
 }
 
@@ -467,18 +467,18 @@ test_that(
     app$wait_for_idle()
 
 
-  rect_1 <- get_rect_center(app)
+    rect_1 <- get_rect_center(app)
 
     expect_opacity <- function(opacity_value, visibility_value) {
-          test <- app$get_html(TOOLTIP_SELECTOR) %>%
-            rvest::read_html() %>%
-            rvest::html_element(css = TOOLTIP_SELECTOR) %>%
-            rvest::html_attr(name = "style") %>%
-            (function(x) {
-              stringr::str_detect(x, sprintf("opacity: %s;", opacity_value)) && stringr::str_detect(x, sprintf("visibility: %s;", visibility_value))
-            })                
-        expect_true(test)
-      }
+      test <- app$get_html(TOOLTIP_SELECTOR) %>%
+        rvest::read_html() %>%
+        rvest::html_element(css = TOOLTIP_SELECTOR) %>%
+        rvest::html_attr(name = "style") %>%
+        (function(x) {
+          stringr::str_detect(x, sprintf("opacity: %s;", opacity_value)) && stringr::str_detect(x, sprintf("visibility: %s;", visibility_value))
+        })
+      expect_true(test)
+    }
 
 
     # In the test, I want to move the mouse over an element.
@@ -492,11 +492,11 @@ test_that(
     # Starts hidden
     expect_opacity(0, "hidden")
     # Move in
-    ch$Input$dispatchMouseEvent(type = "mouseMoved", x = rect_1[1], y = rect_1[2], button = "left")            
+    ch$Input$dispatchMouseEvent(type = "mouseMoved", x = rect_1[1], y = rect_1[2], button = "left")
     expect_opacity(1, "visible")
     # Move out
     ch$Input$dispatchMouseEvent(type = "mouseMoved", x = 0, y = 0, button = "left")
-    expect_opacity(0, "hidden")  
+    expect_opacity(0, "hidden")
   }
 )
 
@@ -523,7 +523,7 @@ test_that(
 
     rect_1 <- get_rect_center(app)
 
-        metrics <- ch$Page$getLayoutMetrics()
+    metrics <- ch$Page$getLayoutMetrics()
     ch$Emulation$setDeviceMetricsOverride(width = metrics$contentSize$width, height = metrics$contentSize$height, deviceScaleFactor = 1, mobile = FALSE)
 
     # Move in

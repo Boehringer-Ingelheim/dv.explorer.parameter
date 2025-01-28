@@ -218,17 +218,17 @@ state_two <- rlang::exprs(
 
 # Returns the center first rectangle
 get_rect_center <- function(app) {
-  ch <- app$get_chromote_session()  
+  ch <- app$get_chromote_session()
 
   node_id <- ch$DOM$querySelector(
-      nodeId = ch$DOM$getDocument()$root$nodeId,
-      selector = "rect"
-    )$nodeId
+    nodeId = ch$DOM$getDocument()$root$nodeId,
+    selector = "rect"
+  )$nodeId
 
   d3_box <- ch$DOM$getBoxModel(node_id)$model$content
   x <- round(d3_box[[1]] + d3_box[[3]]) / 2
   y <- round(d3_box[[2]] + d3_box[[6]]) / 2
-  
+
   return(c(x, y))
 }
 
@@ -435,15 +435,15 @@ shiny_test <- {
 
       rect_1 <- get_rect_center(app)
 
-      expect_opacity <- function(opacity_value, visibility_value) {         
-          test <- app$get_html(C$TOOLTIP_SELECTOR) %>%
-            rvest::read_html() %>%
-            rvest::html_element(css = C$TOOLTIP_SELECTOR) %>%
-            rvest::html_attr(name = "style") %>%
-            (function(x) {
-              stringr::str_detect(x, sprintf("opacity: %s;", opacity_value)) && stringr::str_detect(x, sprintf("visibility: %s;", visibility_value))
-            })        
-                
+      expect_opacity <- function(opacity_value, visibility_value) {
+        test <- app$get_html(C$TOOLTIP_SELECTOR) %>%
+          rvest::read_html() %>%
+          rvest::html_element(css = C$TOOLTIP_SELECTOR) %>%
+          rvest::html_attr(name = "style") %>%
+          (function(x) {
+            stringr::str_detect(x, sprintf("opacity: %s;", opacity_value)) && stringr::str_detect(x, sprintf("visibility: %s;", visibility_value))
+          })
+
         expect_true(test)
       }
 
@@ -459,11 +459,11 @@ shiny_test <- {
       # Starts hidden
       expect_opacity(0, "hidden")
       # Move in
-      ch$Input$dispatchMouseEvent(type = "mouseMoved", x = rect_1[1], y = rect_1[2], button = "left")            
+      ch$Input$dispatchMouseEvent(type = "mouseMoved", x = rect_1[1], y = rect_1[2], button = "left")
       expect_opacity(1, "visible")
       # Move out
       ch$Input$dispatchMouseEvent(type = "mouseMoved", x = 0, y = 0, button = "left")
-      expect_opacity(0, "hidden")      
+      expect_opacity(0, "hidden")
     }
   )
 
@@ -499,13 +499,13 @@ shiny_test <- {
       metrics <- ch$Page$getLayoutMetrics()
       ch$Emulation$setDeviceMetricsOverride(width = metrics$contentSize$width, height = metrics$contentSize$height, deviceScaleFactor = 1, mobile = FALSE)
 
-      # Move in      
+      # Move in
       ch$Input$dispatchMouseEvent(type = "mouseMoved", x = rect_1[1], y = rect_1[2], button = "left")
 
       tt_msg <- app$get_html(C$TOOLTIP_SELECTOR) %>%
-          rvest::read_html() %>%
-          rvest::html_element(css = C$TOOLTIP_SELECTOR) %>%
-          rvest::html_text()
+        rvest::read_html() %>%
+        rvest::html_element(css = C$TOOLTIP_SELECTOR) %>%
+        rvest::html_text()
 
       expect_identical(tt_msg, "x_A, 1, z_A")
     }
@@ -605,4 +605,3 @@ shiny_test <- {
 
 # }
 # nolint end
-
