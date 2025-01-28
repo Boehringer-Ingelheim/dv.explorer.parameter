@@ -493,6 +493,7 @@ test_that(
     expect_opacity(0, "hidden")
     # Move in
     ch$Input$dispatchMouseEvent(type = "mouseMoved", x = rect_1[1], y = rect_1[2], button = "left")
+    app$get_screenshot(file = tempfile()) # Required otherwise the expect_opacity_1 fails, reason unknown
     expect_opacity(1, "visible")
     # Move out
     ch$Input$dispatchMouseEvent(type = "mouseMoved", x = 0, y = 0, button = "left")
