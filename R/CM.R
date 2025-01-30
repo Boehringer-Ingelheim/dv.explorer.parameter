@@ -1,4 +1,4 @@
-# YT#VH0ae1b0c3bf862b3b93194fa0f023686d#VHd74cfd54b905c92b95c251b87af2e842#
+# YT#VH1fc85ef8b30209dcb75c0d99e67635da#VH0ae1b0c3bf862b3b93194fa0f023686d#
 CM <- local({ # _C_hecked _M_odule
   message_well <- function(title, contents, color = "f5f5f5") { # repeats #iewahg
     style <- sprintf(r"---(
@@ -514,7 +514,7 @@ CM <- local({ # _C_hecked _M_odule
   check_choice_from_col_contents <- function(name, value, flags, dataset_name, dataset_value, column, warn, err) {
     ok <- check_flags(name, value, flags, warn, err) &&
       assert(
-        err, all(value %in% dataset_value[[column]]),
+        err, is.null(value) || all(value %in% dataset_value[[column]]),
         sprintf(
           "`%s` should contain only values present in column `%s` of dataset `%s`: %s.",
           name, column, dataset_name, list_values(dataset_value[[column]])
