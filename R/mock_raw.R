@@ -13,7 +13,6 @@ test_data <- function(random_bm_values = FALSE) {
   )
 
   bm[["VISIT"]] <- paste0("VISIT", bm[["VISITN"]])
-  # bm[bm[["VISIT"]] == "VISIT1", ][["VISIT"]] <- "" # empty visit to test JK's report # nolint
   bm[["VISIT2"]] <- bm[["VISITN"]] * bm[["VISITN"]]
   bm[["PARCAT"]] <- paste0("PARCAT", bm[["PARCATN"]])
   bm[["PARAM"]] <- paste0("PARAM", bm[["PARCATN"]], bm[["PARAMN"]])
