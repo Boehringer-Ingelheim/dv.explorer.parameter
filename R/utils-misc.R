@@ -204,6 +204,7 @@ pseudo_log_projection <- function(base = 10) {
 #'
 #' @return Modified dataset where the repeated parameter values have been prefixed with their corresponding category values.
 #'
+#' @keywords misc
 #' @export
 prefix_repeat_parameters <- function(dataset, cat_var, par_var) { 
   unique_cat_par_combinations <- unique(dataset[c(cat_var, par_var)])
