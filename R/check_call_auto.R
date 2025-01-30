@@ -15,7 +15,9 @@ check_mod_boxplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, g
     flags <- list(subject_level_dataset_name = TRUE)
     OK[["group_dataset_name"]] <- CM$check_dataset_name("group_dataset_name", group_dataset_name, flags,
         datasets, used_dataset_names, warn, err)
-    "TODO: receiver_id (character)"
+    "NOTE: receiver_id (character) has no associated automated checks"
+    "      The expectation is that it either does not require them or that"
+    "      the caller of this function has written manual checks near the call site."
     subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
     flags <- structure(list(), names = character(0))
     OK[["cat_var"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("cat_var", cat_var, subkind,
@@ -214,8 +216,12 @@ check_mod_lineplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, 
     flags <- list(subject_level_dataset_name = TRUE)
     OK[["group_dataset_name"]] <- CM$check_dataset_name("group_dataset_name", group_dataset_name, flags,
         datasets, used_dataset_names, warn, err)
-    "TODO: receiver_id (character)"
-    "TODO: summary_fns (group)"
+    "NOTE: receiver_id (character) has no associated automated checks"
+    "      The expectation is that it either does not require them or that"
+    "      the caller of this function has written manual checks near the call site."
+    "NOTE: summary_fns (group) has no associated automated checks"
+    "      The expectation is that it either does not require them or that"
+    "      the caller of this function has written manual checks near the call site."
     subkind <- list(kind = "factor")
     flags <- list(subjid_var = TRUE)
     OK[["subjid_var"]] <- OK[["group_dataset_name"]] && CM$check_dataset_colum_name("subjid_var", subjid_var,
@@ -250,8 +256,12 @@ check_mod_lineplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, 
     flags <- list(zero_or_more = TRUE, optional = TRUE)
     OK[["ref_line_vars"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("ref_line_vars",
         ref_line_vars, subkind, flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
-    "TODO: default_centrality_fn (character)"
-    "TODO: default_dispersion_fn (character)"
+    "NOTE: default_centrality_fn (character) has no associated automated checks"
+    "      The expectation is that it either does not require them or that"
+    "      the caller of this function has written manual checks near the call site."
+    "NOTE: default_dispersion_fn (character) has no associated automated checks"
+    "      The expectation is that it either does not require them or that"
+    "      the caller of this function has written manual checks near the call site."
     flags <- list(zero_or_more = TRUE, optional = TRUE)
     OK[["default_cat"]] <- OK[["cat_var"]] && CM$check_choice_from_col_contents("default_cat", default_cat,
         flags, "bm_dataset_name", datasets[[bm_dataset_name]], cat_var, warn, err)
@@ -264,7 +274,9 @@ check_mod_lineplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, 
     flags <- list(optional = TRUE)
     OK[["default_visit_var"]] <- OK[["visit_vars"]] && CM$check_choice("default_visit_var", default_visit_var,
         flags, "visit_vars", visit_vars, warn, err)
-    "TODO: default_visit_val (group)"
+    "NOTE: default_visit_val (group) has no associated automated checks"
+    "      The expectation is that it either does not require them or that"
+    "      the caller of this function has written manual checks near the call site."
     subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
     flags <- list(optional = TRUE)
     OK[["default_main_group"]] <- OK[["group_dataset_name"]] && CM$check_dataset_colum_name("default_main_group",
@@ -275,8 +287,12 @@ check_mod_lineplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, 
     OK[["default_sub_group"]] <- OK[["group_dataset_name"]] && CM$check_dataset_colum_name("default_sub_group",
         default_sub_group, subkind, flags, group_dataset_name, datasets[[group_dataset_name]], warn,
         err)
-    "TODO: default_transparency (numeric)"
-    "TODO: default_y_axis_projection (character)"
+    "NOTE: default_transparency (numeric) has no associated automated checks"
+    "      The expectation is that it either does not require them or that"
+    "      the caller of this function has written manual checks near the call site."
+    "NOTE: default_y_axis_projection (character) has no associated automated checks"
+    "      The expectation is that it either does not require them or that"
+    "      the caller of this function has written manual checks near the call site."
     for (ds_name in names(used_dataset_names)) {
         OK[["subjid_var"]] <- OK[["subjid_var"]] && CM$check_subjid_col(datasets, ds_name, get(ds_name),
             "subjid_var", subjid_var, warn, err)
@@ -526,7 +542,9 @@ check_mod_wfphm_auto <- function(afmm, datasets, module_id, bm_dataset_name, gro
     OK[["cat_palette"]] <- CM$check_function("cat_palette", cat_palette, 1, flags, warn, err)
     flags <- list(optional = TRUE, zero_or_more = TRUE, named = TRUE, ignore = TRUE)
     OK[["tr_mapper"]] <- CM$check_function("tr_mapper", tr_mapper, 1, flags, warn, err)
-    "TODO: show_x_ticks (logical)"
+    "NOTE: show_x_ticks (logical) has no associated automated checks"
+    "      The expectation is that it either does not require them or that"
+    "      the caller of this function has written manual checks near the call site."
     for (ds_name in names(used_dataset_names)) {
         OK[["subjid_var"]] <- OK[["subjid_var"]] && CM$check_subjid_col(datasets, ds_name, get(ds_name),
             "subjid_var", subjid_var, warn, err)
