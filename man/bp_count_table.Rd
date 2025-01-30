@@ -17,6 +17,7 @@ A data frame with the counts for each group.
 \description{
 \itemize{
 \item Counts the number of rows grouped by all variables except \code{subject_id} and \code{value}.
+\item Throws an error if the Count column is present
 \item The function returns a data frame with the counts for each group.
 }
 }

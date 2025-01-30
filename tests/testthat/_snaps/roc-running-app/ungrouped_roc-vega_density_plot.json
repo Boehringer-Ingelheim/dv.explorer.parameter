@@ -4,6 +4,19 @@
       "html": "<div class=\"vegawidget-vl5 html-widget html-widget-output shiny-report-size html-fill-item\" id=\"roc-vega_density_plot-chart\" style=\"width:auto;height:auto;\"><\/div>",
       "deps": [
         {
+          "name": "htmltools-fill",
+          "version": "0.5.8.1",
+          "src": {
+            "href": "htmltools-fill-0.5.8.1"
+          },
+          "meta": null,
+          "script": null,
+          "stylesheet": "fill.css",
+          "head": null,
+          "attachment": null,
+          "all_files": true
+        },
+        {
           "name": "htmlwidgets",
           "version": "1.6.4",
           "src": {
@@ -18,12 +31,12 @@
         },
         {
           "name": "vega",
-          "version": "5.22.0",
+          "version": "5.24.0",
           "src": {
-            "href": "vega-5.22.0"
+            "href": "vega-5.24.0"
           },
           "meta": null,
-          "script": "vega@5.22.0.min.js",
+          "script": "vega@5.24.0.min.js",
           "stylesheet": null,
           "head": null,
           "attachment": null,
@@ -31,12 +44,12 @@
         },
         {
           "name": "vega-lite",
-          "version": "5.5.0",
+          "version": "5.16.3",
           "src": {
-            "href": "vega-lite-5.5.0"
+            "href": "vega-lite-5.16.3"
           },
           "meta": null,
-          "script": "vega-lite@5.5.0.min.js",
+          "script": "vega-lite@5.16.3.min.js",
           "stylesheet": null,
           "head": null,
           "attachment": null,
@@ -44,12 +57,12 @@
         },
         {
           "name": "vega-embed",
-          "version": "6.20.8",
+          "version": "6.22.2",
           "src": {
-            "href": "vega-embed-6.20.8"
+            "href": "vega-embed-6.22.2"
           },
           "meta": null,
-          "script": "vega-embed@6.20.8.min.js",
+          "script": "vega-embed@6.22.2.min.js",
           "stylesheet": "vega-embed.css",
           "head": null,
           "attachment": null,
@@ -57,9 +70,9 @@
         },
         {
           "name": "vegawidget-vl5-binding",
-          "version": "0.4.3",
+          "version": "0.5.0",
           "src": {
-            "href": "vegawidget-vl5-binding-0.4.3"
+            "href": "vegawidget-vl5-binding-0.5.0"
           },
           "meta": null,
           "script": "vegawidget-vl5.js",

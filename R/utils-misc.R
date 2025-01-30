@@ -193,4 +193,3 @@ pseudo_log_projection <- function(base = 10) {
     breaks = breaks, domain = c(-Inf, Inf)
   )
 }
-

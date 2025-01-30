@@ -709,6 +709,9 @@ boxplot_server <- function(id,
 
 #' Invoke boxplot module
 #'
+#' @details `mod_boxplot_papo` is a deprecated function that was required to use the jumping feature in combination
+#' with `dv.papo` but is no longer required. The function is still available for compatibility reasons.
+#'
 #' @param module_id `[character(1)]`
 #'
 #' Module Shiny id
@@ -719,8 +722,7 @@ boxplot_server <- function(id,
 #'
 #' @param server_wrapper_func `[function()]`
 #'
-#' A function that will be applied to the server returned value.
-#' Only for advanced use. See the example in mod_box_plot_papo
+#' A function that will be applied to the server returned value. Its default value will work for the current cases.
 #'
 #' @param receiver_id `[character(1)]`
 #'
@@ -749,7 +751,7 @@ mod_boxplot <- function(module_id,
                         default_main_group = NULL,
                         default_sub_group = NULL,
                         default_page_group = NULL,
-                        server_wrapper_func = identity) {
+                        server_wrapper_func = function(x) list(subj_id = x)) {
   mod <- list(
     ui = boxplot_UI,
     server = function(afmm) {
@@ -864,9 +866,8 @@ mod_boxplot <- CM$module(mod_boxplot, check_mod_boxplot, dataset_info_boxplot)
 #' @describeIn mod_boxplot Boxplot wrapper when its output is fed into papo module
 #' @export
 mod_boxplot_papo <- function(...) {
-  args <- list(...)
-  args[["server_wrapper_func"]] <- function(x) list(subj_id = x)
-  do.call(mod_boxplot, args)
+  .Deprecated("mod_boxplot_papo", msg = "'mod_boxplot_papo' is no longer required and should be replaced by 'mod_boxplot'. It is still available for compatibility purposes") # nolint
+  mod_boxplot(...)
 }
 
 # Data manipulation
@@ -1125,7 +1126,7 @@ boxplot_chart <- function(ds, violin, show_points, log_project_y, title_data = N
       strip.text.x = ggplot2::element_text(size = STYLE$STRIP_TEXT_SIZE),
       strip.text.y = ggplot2::element_text(size = STYLE$STRIP_TEXT_SIZE)
     )
-  
+
   if (isTRUE(log_project_y)) {
     p <- p + ggplot2::scale_y_continuous(trans = pseudo_log_projection(base = 10))
   }
@@ -1171,6 +1172,7 @@ bp_listings_table <- function(ds, f_ds) {
 #' Counts the number of rows grouped by all variables except ``r CNT$SBJ`` and ``r CNT$VAL``
 #'
 #' - Counts the number of rows grouped by all variables except ``r CNT$SBJ`` and ``r CNT$VAL``.
+#' - Throws an error if the Count column is present
 #' - The function returns a data frame with the counts for each group.
 #'
 #' @param ds `data.frame()`
@@ -1184,10 +1186,11 @@ bp_listings_table <- function(ds, f_ds) {
 #'
 bp_count_table <- function(ds) {
   count_by <- setdiff(names(ds), c(CNT$SBJ, CNT$VAL))
-
   # If a variable in the original dataset has the name Count a conflict may appear
   # This should not be a problem as tibble can support that and this ds is displayed and not further processed
-  # If further processed distinguishing the two columns would not be trivial
+  # Nonetheless a conservative approach is taken and error is raised in that case
+  checkmate::assert_disjunct(names(ds), "Count")
+
   dplyr::count(ds, dplyr::across(dplyr::all_of(count_by)), .drop = FALSE, name = "Count")
 }
 
@@ -1349,8 +1352,10 @@ bp_get_single_listings_output <- function(ds, closest_point, input_id) {
 #' @inheritParams bp_count_table
 #'
 bp_get_count_output <- function(ds) {
-  bp_count_table(ds) |>
-    DT::datatable(colnames = as.character(get_lbls_robust(ds)))
+  labels <- c(get_lbls_robust(ds))
+  count_table <- bp_count_table(ds) |>
+    possibly_set_lbls(labels)
+  DT::datatable(count_table, colnames = as.character(get_lbls_robust(count_table)))
 }
 
 #' @rdname boxplot_composed

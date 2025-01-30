@@ -47,7 +47,7 @@ mod_boxplot(
   default_main_group = NULL,
   default_sub_group = NULL,
   default_page_group = NULL,
-  server_wrapper_func = identity
+  server_wrapper_func = function(x) list(subj_id = x)
 )
 
 mod_boxplot_papo(...)
@@ -98,8 +98,7 @@ be present in the app or be NULL.}
 
 \item{server_wrapper_func}{\verb{[function()]}
 
-A function that will be applied to the server returned value.
-Only for advanced use. See the example in mod_box_plot_papo}
+A function that will be applied to the server returned value. Its default value will work for the current cases.}
 }
 \description{
 \code{mod_boxplot} is a Shiny module prepared to display data with boxplot charts with different levels of grouping.
@@ -129,6 +128,10 @@ It must contain, at least, the column passed in the parameter, \code{subjid_var}
 }
 
 }
+}
+\details{
+\code{mod_boxplot_papo} is a deprecated function that was required to use the jumping feature in combination
+with \code{dv.papo} but is no longer required. The function is still available for compatibility reasons.
 }
 \section{Functions}{
 \itemize{
