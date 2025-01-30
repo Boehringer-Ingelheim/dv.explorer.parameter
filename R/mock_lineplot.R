@@ -15,7 +15,7 @@ mock_app_lineplot <- function(dry_run = FALSE,
   group_dataset <- shiny::reactive({
     data[["sl"]]
   })
-
+  
   ui_params <- c(
     list(
       id = "not_ebas"
@@ -31,7 +31,7 @@ mock_app_lineplot <- function(dry_run = FALSE,
       subjid_var = "SUBJID",
       cat_var = "PARCAT",
       par_var = "PARAM",
-      visit_vars = c("VISIT", "VISIT2"),
+      visit_vars = c("VISIT", "VISIT2", "VISITN"),
       value_vars = c("VALUE1", "VALUE2", "VALUE3")
     ),
     srv_defaults
@@ -147,7 +147,7 @@ mock_app_lineplot_mm <- function() {
   group_dataset <- test_data()[["sl"]]
 
   dv.manager::run_app(
-    data = list("DS" = list(bm = bm_dataset, sl = group_dataset)),
+    data = list("DS" = list(bm = bm_dataset, sl = group_dataset), "DS2" = list(bm = bm_dataset, sl = group_dataset)),
     module_list = module_list,
     filter_data = "sl",
     filter_key = "SUBJID"
@@ -168,8 +168,8 @@ mock_app_lineplot_mm_safetyData <- function() {
       value_vars = c("AVAL", "CHG"),
       subjid_var = "SUBJID",
       cat_var = "PARCAT1",
-      default_centrality_function = "Mean",
-      default_dispersion_function = "Standard deviation",
+      default_centrality_fn = "Mean",
+      default_dispersion_fn = "Standard deviation",
       default_cat = "CHEM",
       default_par = "Bilirubin (umol/L)",
       default_main_group = "ARM",
@@ -178,6 +178,7 @@ mock_app_lineplot_mm_safetyData <- function() {
   )
 
   data <- safety_data()
+  data[["bm"]][["AVISITN"]][[1]] <- NA_integer_
 
   dv.manager::run_app(
     data = list("DS" = list(bm = data[["bm"]], sl = data[["sl"]])),
