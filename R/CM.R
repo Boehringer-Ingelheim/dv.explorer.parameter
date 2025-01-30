@@ -1,4 +1,4 @@
-# YT#VH1fc85ef8b30209dcb75c0d99e67635da#VH0ae1b0c3bf862b3b93194fa0f023686d#
+# YT#VH6325178555b72276264dafe895da298c#VHe6086ab355487ea1ed84590b781f20b7#
 CM <- local({ # _C_hecked _M_odule
   message_well <- function(title, contents, color = "f5f5f5") { # repeats #iewahg
     style <- sprintf(r"---(
@@ -538,7 +538,7 @@ CM <- local({ # _C_hecked _M_odule
   }
 
   format_inline_asis <- function(s) {
-    paste("<code style='white-space: pre; color:#333'>", s, "</code>")
+    paste0("<code style='white-space: pre; color:#333'>", s, "</code>")
   }
 
   check_function <- function(name, value, arg_count, flags, warn, err) {
@@ -583,18 +583,48 @@ CM <- local({ # _C_hecked _M_odule
     dataset <- datasets[[ds_value]]
 
     unique_cat_par_combinations <- unique(dataset[c(cat, par)])
-    dup_params_across_categories <- duplicated(unique_cat_par_combinations[par])
+    dup_mask <- duplicated(unique_cat_par_combinations[par])
+    unique_repeat_params <- unique_cat_par_combinations[dup_mask, par]
+    
+    ok <- assert(err, length(unique_repeat_params) == 0, {
+      dups <- df_to_string(
+        data.frame(
+          check.names = FALSE,
+          Parameter = unique_repeat_params,
+          "Inside categories" = sapply(
+            unique_repeat_params, function(param) {
+              dup_mask <- (unique_cat_par_combinations[[par]] == param)
+              return(paste(unique_cat_par_combinations[dup_mask, cat], collapse = ", "))
+            }
+          )
+        )
+      )
+      prefix_repeat_params_command <- 
+        sprintf('%s <- dv.explorer.parameter::prefix_repeat_parameters(%s, cat_var = "%s", par_var = "%s")', 
+                ds_value, ds_value, cat, par)
 
-    ok <- assert(err, !any(dup_params_across_categories), {
-      prefixes <- c(rep("Category:", length(cat)), rep("Parameter:", length(par)))
-      first_duplicates <- head(unique_cat_par_combinations[dup_params_across_categories, ], 5)
+      mask <- unique_cat_par_combinations[["PARAM"]] %in% unique_repeat_params
+      deduplicated_table <- df_to_string({ # FIXME
+        cats <- unique_cat_par_combinations[mask, cat]
+        pars <- unique_cat_par_combinations[mask, par]
+        data.frame(
+          check.names = FALSE,
+          Category = cats, "Old parameter name" = pars, "New parameter name" = paste0(cats, "-", pars)
+        )
+      })
 
-      names(first_duplicates) <- paste(prefixes, names(first_duplicates))
-      dups <- df_to_string(first_duplicates)
-      paste(
-        sprintf("The dataset provided by `%s` (%s) contains parameter names that repeat across categories.", ds_name, ds_value),
-        "This module expects them to be unique. Here are the first few duplicates:",
-        paste0("<pre>", dups, "</pre>")
+      paste0(
+        sprintf('The dataset provided by %s ("%s") contains parameter names that repeat across categories.', 
+                format_inline_asis(ds_name), ds_value),
+        "This module expects them to be unique. This is the list of duplicates:",
+        paste0("<pre>", dups, "</pre>"),
+        "In order to bypass this issue, we suggest you preprocess that dataset with this command:",
+        paste0("<pre>", prefix_repeat_params_command, "</pre>"),
+        sprintf('<small><i>In case the dataset labeled as "%s" has a different name in your application code, ', ds_value),
+        "substitute it with the actual name of the variable holding that dataset.</i></small><br>",
+        "The ", format_inline_asis("dv.explorer.parameter::prefix_repeat_parameters"), " function ",
+        "will rename the repeat parameters by prefixing them with the category they belong to, as shown on this table:",
+        "<pre>", deduplicated_table, "</pre>"
       )
     })
 
