@@ -1,4 +1,4 @@
-# YT#VH6325178555b72276264dafe895da298c#VHe6086ab355487ea1ed84590b781f20b7#
+# YT#VH2dafca7d199f5ea8393d6b6ab99fb2c0#VH6325178555b72276264dafe895da298c#
 CM <- local({ # _C_hecked _M_odule
   message_well <- function(title, contents, color = "f5f5f5") { # repeats #iewahg
     style <- sprintf(r"---(
@@ -584,7 +584,7 @@ CM <- local({ # _C_hecked _M_odule
 
     unique_cat_par_combinations <- unique(dataset[c(cat, par)])
     dup_mask <- duplicated(unique_cat_par_combinations[par])
-    unique_repeat_params <- unique_cat_par_combinations[dup_mask, par]
+    unique_repeat_params <- unique_cat_par_combinations[[par]][dup_mask]
     
     ok <- assert(err, length(unique_repeat_params) == 0, {
       dups <- df_to_string(
