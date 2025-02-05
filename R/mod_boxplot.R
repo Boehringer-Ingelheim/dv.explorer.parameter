@@ -81,8 +81,6 @@ BP <- poc( # nolint
 #' `mod_boxplot` is a Shiny module prepared to display data with boxplot charts with different levels of grouping.
 #' It also includes a set of listings with information about the population, distribution and statistical comparisons.
 #'
-#' ![Caption for the picture.](mod_boxplot.png)
-#'
 #' @name mod_boxplot
 #'
 #' @keywords main
