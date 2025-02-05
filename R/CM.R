@@ -1,4 +1,4 @@
-# YT#VH2dafca7d199f5ea8393d6b6ab99fb2c0#VH6325178555b72276264dafe895da298c#
+# YT#VHa2daae307c5e4f729658fd67108835d5#VH2dafca7d199f5ea8393d6b6ab99fb2c0#
 CM <- local({ # _C_hecked _M_odule
   message_well <- function(title, contents, color = "f5f5f5") { # repeats #iewahg
     style <- sprintf(r"---(
@@ -31,7 +31,7 @@ CM <- local({ # _C_hecked _M_odule
     return(res)
   }
 
-  app_creator_feedback_server <- function(id, warning_messages, error_messages) {
+  app_creator_feedback_server <- function(id, warning_messages, error_messages, preface) {
     id <- paste(c(id, "validator"), collapse = "-")
     module <- shiny::moduleServer(
       id,
@@ -50,10 +50,13 @@ CM <- local({ # _C_hecked _M_odule
           err <- error_messages
           if (length(err)) {
             res[[length(res) + 1]] <-
-              message_well("Module configuration errors",
-                Map(function(x) htmltools::p(htmltools::HTML(paste("\u2022", x))), err),
-                color = "#f4d7d7"
-              )
+              message_well("Module configuration errors", {
+                tmp <- Map(function(x) htmltools::p(htmltools::HTML(paste("\u2022", x))), err)
+                if (!is.null(preface)) {
+                  tmp <- append(list(htmltools::p(htmltools::HTML(preface))), tmp)
+                }
+                tmp
+              }, color = "#f4d7d7")
           }
 
           return(res)
@@ -103,6 +106,7 @@ CM <- local({ # _C_hecked _M_odule
 
       matched_args <- try(as.list(match.call(module)), silent = TRUE)
       error_message <- attr(matched_args, "condition")$message
+      error_message_dataset_index <- NULL
       if (is.null(error_message)) {
         missing_args <- setdiff(mandatory_module_args, names(matched_args))
         if (length(missing_args)) {
@@ -136,24 +140,37 @@ CM <- local({ # _C_hecked _M_odule
               #       - Here we also have access to the original datasets, which allows us to ensure call
               #         correctness independent of filter state or operation in a single pass.
               #       - "catch errors early"
-
-              args <- append(
-                list(
-                  afmm = afmm, # To check receiver_ids, among others
-                  datasets = afmm[["data"]][[1]] # Allows data checks prior to reactive time
-                ),
-                args
+              for (i_dataset in seq_along(afmm[["data"]])) {
+                check_args <- append(
+                  list(
+                    afmm = afmm, # To check receiver_ids, among others
+                    datasets = afmm[["data"]][[i_dataset]] # Allows data checks prior to reactive time
+                  ),
+                  args
+                )
+                res <- do.call(check_mod_fn, check_args)
+                # NOTE: Stop when errors are found on a single dataset to avoid overwhelming users with repeat messages
+                if (length(res[["errors"]])) { # NOTE: Not checking "warnings" because they are going away soon
+                  error_message_dataset_index <- i_dataset
+                  break
+                }
+              }
+            }
+            
+            if (!is.null(error_message_dataset_index) && length(afmm[["data"]]) > 1) {
+              dataset_name <- names(afmm[["data"]])[[error_message_dataset_index]]
+              res[["preface"]] <- paste(
+                "This application has been configured with more than one dataset.",
+                sprintf("The following error messages apply to the dataset named <b>%s</b>.<br>", dataset_name),
+                "No error checking has been performed on datasets specified after it. <hr>"
               )
-
-              # check functions do not have defaults, so we extract them from the formals of the module for consistency
-              missing_args <- setdiff(names(formals(module)), names(args))
-              res <- do.call(check_mod_fn, args)
             }
             return(res)
           })
 
           app_creator_feedback_server(
-            id = module_id, warning_messages = fb[["warnings"]], error_messages = fb[["errors"]]
+            id = module_id, warning_messages = fb[["warnings"]], error_messages = fb[["errors"]], 
+            preface = fb[["preface"]]
           )
 
           # TODO: Modify afmm to the `map_to` flags in the API. `dv.papo` relies on this
@@ -594,7 +611,7 @@ CM <- local({ # _C_hecked _M_odule
           "Inside categories" = sapply(
             unique_repeat_params, function(param) {
               dup_mask <- (unique_cat_par_combinations[[par]] == param)
-              return(paste(unique_cat_par_combinations[dup_mask, cat], collapse = ", "))
+              return(paste(unique_cat_par_combinations[dup_mask, ][[cat]], collapse = ", "))
             }
           )
         )
@@ -604,9 +621,9 @@ CM <- local({ # _C_hecked _M_odule
                 ds_value, ds_value, cat, par)
 
       mask <- unique_cat_par_combinations[["PARAM"]] %in% unique_repeat_params
-      deduplicated_table <- df_to_string({ # FIXME
-        cats <- unique_cat_par_combinations[mask, cat]
-        pars <- unique_cat_par_combinations[mask, par]
+      deduplicated_table <- df_to_string({
+        cats <- unique_cat_par_combinations[mask, ][[cat]]
+        pars <- unique_cat_par_combinations[mask, ][[par]]
         data.frame(
           check.names = FALSE,
           Category = cats, "Old parameter name" = pars, "New parameter name" = paste0(cats, "-", pars)
