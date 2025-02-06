@@ -67,8 +67,6 @@ SPM <- poc( # nolint
 #' `mod_scatterplotmatrix` is a Shiny module prepared to display data in a matrix of scatterplots with different levels
 #'  of grouping. It also includes correlation stats.
 #'
-#' ![Caption for the picture.](mod_scatterplotmatrix.png)
-#'
 #' @name mod_scatterplotmatrix
 #'
 #' @keywords main

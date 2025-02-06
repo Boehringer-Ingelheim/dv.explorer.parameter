@@ -1,4 +1,4 @@
-# YT#VH22c1dbc08734141d74f301a9a70503bb#VH471af99c9c42d555582282c2f5854aef#
+# YT#VHa2daae307c5e4f729658fd67108835d5#VH2dafca7d199f5ea8393d6b6ab99fb2c0#
 CM <- local({ # _C_hecked _M_odule
   message_well <- function(title, contents, color = "f5f5f5") { # repeats #iewahg
     style <- sprintf(r"---(
@@ -17,13 +17,21 @@ CM <- local({ # _C_hecked _M_odule
     return(res)
   }
 
-  app_creator_feedback_ui <- function(id) {
+  app_creator_feedback_ui <- function(id, ui) {
     id <- paste(c(id, "validator"), collapse = "-")
     ns <- shiny::NS(id)
-    return(shiny::uiOutput(ns("ui")))
+    
+    hide <- function(e) shiny::tags[["div"]](e, style = "display: none")
+    
+    res <- list(
+      shiny::uiOutput(ns("ui")),
+      hide(shiny::checkboxInput(inputId = ns("show_ui"), label = NULL)),
+      shiny::conditionalPanel(condition = "input.show_ui == true", ui, ns = ns)
+    )
+    return(res)
   }
 
-  app_creator_feedback_server <- function(id, warning_messages, error_messages, ui) {
+  app_creator_feedback_server <- function(id, warning_messages, error_messages, preface) {
     id <- paste(c(id, "validator"), collapse = "-")
     module <- shiny::moduleServer(
       id,
@@ -42,17 +50,22 @@ CM <- local({ # _C_hecked _M_odule
           err <- error_messages
           if (length(err)) {
             res[[length(res) + 1]] <-
-              message_well("Module configuration errors",
-                Map(function(x) htmltools::p(htmltools::HTML(paste("\u2022", x))), err),
-                color = "#f4d7d7"
-              )
+              message_well("Module configuration errors", {
+                tmp <- Map(function(x) htmltools::p(htmltools::HTML(paste("\u2022", x))), err)
+                if (!is.null(preface)) {
+                  tmp <- append(list(htmltools::p(htmltools::HTML(preface))), tmp)
+                }
+                tmp
+              }, color = "#f4d7d7")
           }
-
-          if (length(error_messages) == 0) res <- append(res, list(ui()))
 
           return(res)
         })
         shiny::outputOptions(output, "ui", suspendWhenHidden = FALSE)
+        
+        if (length(error_messages) == 0) {
+          shiny::updateCheckboxInput(inputId = "show_ui", value = TRUE)
+        }
       }
     )
 
@@ -93,6 +106,7 @@ CM <- local({ # _C_hecked _M_odule
 
       matched_args <- try(as.list(match.call(module)), silent = TRUE)
       error_message <- attr(matched_args, "condition")$message
+      error_message_dataset_index <- NULL
       if (is.null(error_message)) {
         missing_args <- setdiff(mandatory_module_args, names(matched_args))
         if (length(missing_args)) {
@@ -109,7 +123,7 @@ CM <- local({ # _C_hecked _M_odule
       }
 
       res <- list(
-        ui = function(module_id) app_creator_feedback_ui(module_id), # `module` UI gated by app_creator_feedback_server
+        ui = function(module_id) app_creator_feedback_ui(module_id, module_ui(module_id)), # `module` UI gated by app_creator_feedback_server
         server = function(afmm) {
           fb <- local({
             res <- NULL
@@ -126,25 +140,37 @@ CM <- local({ # _C_hecked _M_odule
               #       - Here we also have access to the original datasets, which allows us to ensure call
               #         correctness independent of filter state or operation in a single pass.
               #       - "catch errors early"
-
-              args <- append(
-                list(
-                  afmm = afmm, # To check receiver_ids, among others
-                  datasets = afmm[["data"]][[1]] # Allows data checks prior to reactive time
-                ),
-                args
+              for (i_dataset in seq_along(afmm[["data"]])) {
+                check_args <- append(
+                  list(
+                    afmm = afmm, # To check receiver_ids, among others
+                    datasets = afmm[["data"]][[i_dataset]] # Allows data checks prior to reactive time
+                  ),
+                  args
+                )
+                res <- do.call(check_mod_fn, check_args)
+                # NOTE: Stop when errors are found on a single dataset to avoid overwhelming users with repeat messages
+                if (length(res[["errors"]])) { # NOTE: Not checking "warnings" because they are going away soon
+                  error_message_dataset_index <- i_dataset
+                  break
+                }
+              }
+            }
+            
+            if (!is.null(error_message_dataset_index) && length(afmm[["data"]]) > 1) {
+              dataset_name <- names(afmm[["data"]])[[error_message_dataset_index]]
+              res[["preface"]] <- paste(
+                "This application has been configured with more than one dataset.",
+                sprintf("The following error messages apply to the dataset named <b>%s</b>.<br>", dataset_name),
+                "No error checking has been performed on datasets specified after it. <hr>"
               )
-
-              # check functions do not have defaults, so we extract them from the formals of the module for consistency
-              missing_args <- setdiff(names(formals(module)), names(args))
-              res <- do.call(check_mod_fn, args)
             }
             return(res)
           })
 
           app_creator_feedback_server(
-            id = module_id, warning_messages = fb[["warnings"]], error_messages = fb[["errors"]],
-            ui = shiny::reactive(module_ui(module_id))
+            id = module_id, warning_messages = fb[["warnings"]], error_messages = fb[["errors"]], 
+            preface = fb[["preface"]]
           )
 
           # TODO: Modify afmm to the `map_to` flags in the API. `dv.papo` relies on this
@@ -239,8 +265,9 @@ CM <- local({ # _C_hecked _M_odule
       if (elem$kind == "mod") {
         push(sprintf("OK[['%s']] <- CM$check_module_id('%s', %s, warn, err)\n", elem_name, elem_name, elem_name))
       } else if (elem$kind == "dataset_name") {
+        push(sprintf("flags <- %s\n", deparse(attrs) |> paste(collapse = "")))
         push(sprintf(
-          "OK[['%s']] <- CM$check_dataset_name('%s', %s, datasets, used_dataset_names, warn, err)\n",
+          "OK[['%s']] <- CM$check_dataset_name('%s', %s, flags, datasets, used_dataset_names, warn, err)\n",
           elem_name, elem_name, elem_name
         ))
       } else if (elem$kind == "col") {
@@ -270,7 +297,9 @@ CM <- local({ # _C_hecked _M_odule
           elem_name, elem_name, elem_name, elem$arg_count
         ))
       } else {
-        push(sprintf("'TODO: %s (%s)'\n", elem_name, elem$kind))
+        push(sprintf("'NOTE: %s (%s) has no associated automated checks'\n", elem_name, elem$kind))
+        push(sprintf("'      The expectation is that it either does not require them or that'\n"))
+        push(sprintf("'      the caller of this function has written manual checks near the call site.'\n"))
       }
     }
 
@@ -351,20 +380,45 @@ CM <- local({ # _C_hecked _M_odule
       )
   }
 
-  check_dataset_name <- function(name, value, available_datasets, used_dataset_names, warn, err) {
-    ok <- (
-      assert(err, !missing(value), sprintf("`%s` missing", name)) && # TODO: ? Remove this one
-        assert(
+  check_dataset_name <- function(name, value, flags, available_datasets, used_dataset_names, warn, err) {
+    ok <- check_flags(name, value, flags, warn, err)
+
+    if (ok) {
+      zero_or_more <- isTRUE(flags[["zero_or_more"]])
+      one_or_more <- isTRUE(flags[["one_or_more"]])
+      zero_or_one_or_more <- zero_or_more || one_or_more
+      if (zero_or_one_or_more) {
+        min_len <- 0
+        if (one_or_more) min_len <- 1
+        ok <- assert(
           err,
-          test_string(value) &&
-            value %in% names(available_datasets),
+          is.character(value) &&
+            all(value %in% names(available_datasets)) &&
+            length(value) >= min_len,
           paste(
-            sprintf("`%s` should be a string referring to one of the available datasets: ", name),
+            sprintf(
+              "`%s` should be a character vector of length greater than %s referring to the following dataset names: ",
+              name, c("zero", "one")[[min_len + 1]]
+            ),
             paste(sprintf('"%s"', names(available_datasets)), collapse = ", "), "."
           )
         )
-    )
-    if (ok) used_dataset_names[[name]] <- value
+      } else {
+        ok <- (
+          assert(err, !missing(value), sprintf("`%s` missing", name)) && # TODO: ? Remove this one
+            assert(
+              err,
+              test_string(value) &&
+                value %in% names(available_datasets),
+              paste(
+                sprintf("`%s` should be a string referring to one of the available dataset names: ", name),
+                paste(sprintf('"%s"', names(available_datasets)), collapse = ", "), "."
+              )
+            )
+        )
+        if (ok) used_dataset_names[[name]] <- value
+      }
+    }
     return(ok)
   }
 
@@ -373,7 +427,7 @@ CM <- local({ # _C_hecked _M_odule
     return(res)
   }
 
-  # TODO: Extend to all checker functions
+  # TODO: use check_flags instead and remove
   optional_and_empty <- function(flags, value) {
     return(isTRUE(flags[["optional"]]) && length(value) == 0)
   }
@@ -475,12 +529,9 @@ CM <- local({ # _C_hecked _M_odule
   }
 
   check_choice_from_col_contents <- function(name, value, flags, dataset_name, dataset_value, column, warn, err) {
-    if (optional_and_empty(flags, value)) {
-      return(TRUE)
-    }
     ok <- check_flags(name, value, flags, warn, err) &&
       assert(
-        err, all(value %in% dataset_value[[column]]),
+        err, is.null(value) || all(value %in% dataset_value[[column]]),
         sprintf(
           "`%s` should contain only values present in column `%s` of dataset `%s`: %s.",
           name, column, dataset_name, list_values(dataset_value[[column]])
@@ -504,7 +555,7 @@ CM <- local({ # _C_hecked _M_odule
   }
 
   format_inline_asis <- function(s) {
-    paste("<code style='white-space: pre; color:#333'>", s, "</code>")
+    paste0("<code style='white-space: pre; color:#333'>", s, "</code>")
   }
 
   check_function <- function(name, value, arg_count, flags, warn, err) {
@@ -549,18 +600,48 @@ CM <- local({ # _C_hecked _M_odule
     dataset <- datasets[[ds_value]]
 
     unique_cat_par_combinations <- unique(dataset[c(cat, par)])
-    dup_params_across_categories <- duplicated(unique_cat_par_combinations[par])
+    dup_mask <- duplicated(unique_cat_par_combinations[par])
+    unique_repeat_params <- unique_cat_par_combinations[[par]][dup_mask]
+    
+    ok <- assert(err, length(unique_repeat_params) == 0, {
+      dups <- df_to_string(
+        data.frame(
+          check.names = FALSE,
+          Parameter = unique_repeat_params,
+          "Inside categories" = sapply(
+            unique_repeat_params, function(param) {
+              dup_mask <- (unique_cat_par_combinations[[par]] == param)
+              return(paste(unique_cat_par_combinations[dup_mask, ][[cat]], collapse = ", "))
+            }
+          )
+        )
+      )
+      prefix_repeat_params_command <- 
+        sprintf('%s <- dv.explorer.parameter::prefix_repeat_parameters(%s, cat_var = "%s", par_var = "%s")', 
+                ds_value, ds_value, cat, par)
 
-    ok <- assert(err, !any(dup_params_across_categories), {
-      prefixes <- c(rep("Category:", length(cat)), rep("Parameter:", length(par)))
-      first_duplicates <- head(unique_cat_par_combinations[dup_params_across_categories, ], 5)
+      mask <- unique_cat_par_combinations[["PARAM"]] %in% unique_repeat_params
+      deduplicated_table <- df_to_string({
+        cats <- unique_cat_par_combinations[mask, ][[cat]]
+        pars <- unique_cat_par_combinations[mask, ][[par]]
+        data.frame(
+          check.names = FALSE,
+          Category = cats, "Old parameter name" = pars, "New parameter name" = paste0(cats, "-", pars)
+        )
+      })
 
-      names(first_duplicates) <- paste(prefixes, names(first_duplicates))
-      dups <- df_to_string(first_duplicates)
-      paste(
-        sprintf("The dataset provided by `%s` (%s) contains parameter names that repeat across categories.", ds_name, ds_value),
-        "This module expects them to be unique. Here are the first few duplicates:",
-        paste0("<pre>", dups, "</pre>")
+      paste0(
+        sprintf('The dataset provided by %s ("%s") contains parameter names that repeat across categories.', 
+                format_inline_asis(ds_name), ds_value),
+        "This module expects them to be unique. This is the list of duplicates:",
+        paste0("<pre>", dups, "</pre>"),
+        "In order to bypass this issue, we suggest you preprocess that dataset with this command:",
+        paste0("<pre>", prefix_repeat_params_command, "</pre>"),
+        sprintf('<small><i>In case the dataset labeled as "%s" has a different name in your application code, ', ds_value),
+        "substitute it with the actual name of the variable holding that dataset.</i></small><br>",
+        "The ", format_inline_asis("dv.explorer.parameter::prefix_repeat_parameters"), " function ",
+        "will rename the repeat parameters by prefixing them with the category they belong to, as shown on this table:",
+        "<pre>", deduplicated_table, "</pre>"
       )
     })
 

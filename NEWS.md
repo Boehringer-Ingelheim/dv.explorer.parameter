@@ -1,3 +1,9 @@
+# dv.explorer.parameter 0.1.2-9000
+
+* All modules:
+    * Improved error message when parameter names reoccur across categories and new helper function to address that situation.
+* De-export label helpers to avoid symbol overwritting warning for app creators that load package through `library`.
+
 # dv.explorer.parameter 0.1.1-9000
 
 * boxplot:

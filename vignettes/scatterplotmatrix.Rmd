@@ -14,7 +14,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-![](../man/figures/mod_scatterplotmatrix.png)
+![](images/spm_chart.png)
 
 This guide provides a detailed overview of the `scatterplotmatrix` module and its features. It is meant to provide guidance to
 App Creators on creating Apps in DaVinci using the `scatterplotmatrix` module.

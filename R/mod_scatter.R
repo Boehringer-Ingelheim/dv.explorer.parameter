@@ -86,8 +86,6 @@ SP <- poc( # nolint
 #' It also includes a set of listings with information about the population and the regression and correlation
 #' estimates.
 #'
-#' ![Caption for the picture.](mod_scatterplot.png)
-#'
 #' @name mod_scatterplot
 #'
 #' @keywords main
