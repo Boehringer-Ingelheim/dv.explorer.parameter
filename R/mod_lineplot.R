@@ -272,34 +272,43 @@ lineplot_chart <- function(data, title = NULL, ref_line_data = NULL, log_project
   }
 
   # Reference lines
-  if (!is.null(ref_line_data)) {
-    ref_line_col_names <- names(ref_line_data)[names(ref_line_data) != CNT$PAR]
-    ref_line_count <- length(ref_line_col_names)
+  for (var in names(ref_line_data)){
+    fig <- local({ # local because of NSE symbol capture
+      ref_line_var_data <- ref_line_data[[var]]
+      
+      label_col_name <- paste0(var, "_label")
+      ref_line_var_data[[label_col_name]] <- get_lbl_robust(ref_line_var_data, var)
+      colors <- ref_line_var_data[[CNT$MAIN_GROUP]]
 
-    for (i in seq_len(ref_line_count)) {
-      name <- ref_line_col_names[[i]]
-      ref_line_data[[paste0(name, "_label")]] <- get_lbl_robust(ref_line_data, name)
-    }
-
-    # NOTE: Otherwise ggplot complains about missing groups for the aesthetic
-    if (CNT$MAIN_GROUP %in% names(data)) ref_line_data[[CNT$MAIN_GROUP]] <- ""
-    if (CNT$SUB_GROUP %in% names(data)) ref_line_data[[CNT$SUB_GROUP]] <- ""
-
-    ref_line_data[[CNT$SBJ]] <- ""
-
-    for (i in seq_len(ref_line_count)) {
-      data_col <- ref_line_col_names[[i]]
-      name_col <- paste0(data_col, "_label")
-      # by making linetype depend on the column name and including it into the aesthetic,
-      # we get the legend for free
-      fig <- fig + ggplot2::geom_hline(
-        data = ref_line_data,
+      args <- list(
+        data = ref_line_var_data,
         ggplot2::aes(
-          yintercept = .data[[data_col]],
-          linetype = .data[[name_col]]
+          yintercept = .data[[var]],
+          linetype = .data[[label_col_name]],
+          color = colors
         )
       )
+
+      fig <- fig + do.call(ggplot2::geom_hline, args)
+      return(fig)
+    })
+  }
+  
+  if (length(ref_line_data)) {
+    # Extend default ggplot2 palette to include an extra black level to indicate a reference line common to all groups
+    # Adapted from https://stackoverflow.com/a/8197703
+    gg_color_hue <- function(n) {
+      res <- "#000000" # just black
+      if (n > 1) {
+        # `n` colors + black
+        hues <- seq(15, 375, length = n)
+        res <- c(hcl(h = hues, l = 65, c = 100)[1:n - 1], "#000000")
+      }
+      return(res)
     }
+    
+    ref_line_colors <- gg_color_hue(length(levels(ref_line_data[[1]][[CNT$MAIN_GROUP]])))
+    fig <- fig + ggplot2::scale_colour_manual(values = ref_line_colors)
   }
 
   fig <- fig + ggplot2::ggtitle(title)
@@ -798,7 +807,7 @@ lineplot_server <- function(id,
         }
 
         ds <- dplyr::group_by(ds, dplyr::across(c(CNT$VIS, grp_1, grp_2, CNT$PAR)))
-        ds <- dplyr::summarize(ds, dplyr::across(CNT$VAL, functions, .names = "{.fn}"), na.rm = TRUE)
+        ds <- dplyr::summarize(ds, dplyr::across(CNT$VAL, functions, .names = "{.fn}"))
         if ("center" %in% names(ds)) {
           names(ds)[names(ds) == "center"] <- CNT$VAL
         }
@@ -820,12 +829,54 @@ lineplot_server <- function(id,
     })
 
     ref_line_data <- shiny::reactive({
-      res <- NULL
-      if (length(ref_line_vars)) {
-        res <- unique(bm_dataset()[c(VAR$PAR, ref_line_vars)])
-        params <- v_input_subset()[[LP_ID$PAR]][["par"]]()
-        res <- res[res[[VAR$PAR]] %in% params, ]
-        names(res)[names(res) == VAR$PAR] <- CNT$PAR
+      res <- list() # one data.frame per ref_line_var indicating which ref lines to draw for each parameter
+     
+      ds <- append_extra_vars(
+        data_subset(), bm_dataset(), visit_var = input_lp[[LP_ID$PAR_VISIT_COL]](), extra_vars = ref_line_vars
+      )
+
+      if (CNT$MAIN_GROUP %in% names(ds)) {
+        ds <- unique(ds[c(CNT$PAR, CNT$MAIN_GROUP, ref_line_vars)])
+        for (var in ref_line_vars){
+          var_ds <- unique(ds[c(CNT$PAR, CNT$MAIN_GROUP, var)])
+          # Introduce extra level to customize color of reference lines that would otherwise overlap
+          var_ds[[CNT$MAIN_GROUP]] <- factor(var_ds[[CNT$MAIN_GROUP]], 
+                                             levels = c(levels(var_ds[[CNT$MAIN_GROUP]]), 
+                                                        "Common reference line"))
+          res[[var]] <- var_ds[FALSE, ] # data.frame without rows
+          for (param in unique(ds[[CNT$PAR]])){
+            var_param_ds <- var_ds[var_ds[[CNT$PAR]] == param, ]
+            if (length(unique(var_param_ds[[var]])) == 1) {
+              # All groups share the same ref_line. We take the first one and map it to the artificial "Common" level
+              row <- var_param_ds[1, ]
+              row[1, "main_group"] <- "Common reference line"
+              res[[var]] <- rbind(res[[var]], row)
+            } else {
+              # Collect all main group levels with a single assigned reference range
+              for (group in unique(var_param_ds[[CNT$MAIN_GROUP]])){
+                mask <- (var_param_ds[[CNT$MAIN_GROUP]] == group)
+                if (sum(mask) == 1) {
+                  res[[var]] <- rbind(res[[var]], var_param_ds[mask, ])
+                }
+              }
+            }
+          }
+          if (nrow(res[[var]]) == 0) res[[var]] <- NULL # Drop empty ref_line_vars
+        }
+      } else {
+        # ungrouped
+        ds <- unique(ds[c(CNT$PAR, ref_line_vars)])
+        for (var in ref_line_vars){
+          var_ds <- unique(ds[c(CNT$PAR, var)])
+          res[[var]] <- var_ds[FALSE, ] # data.frame without rows
+          for (param in unique(ds[[CNT$PAR]])) {
+            var_param_ds <- var_ds[var_ds[[CNT$PAR]] == param, ]
+            if (nrow(var_param_ds) == 1) {
+              res[[var]] <- rbind(res[[var]], var_param_ds)
+            }
+          }
+          if (nrow(res[[var]]) == 0) res[[var]] <- NULL # Drop empty ref_line_vars
+        }
       }
       res
     })
@@ -1013,9 +1064,9 @@ lineplot_server <- function(id,
       points
     }
 
-    append_extra_vars_to_listing <- function(df, bm_dataset, visit_var) {
+    append_extra_vars <- function(df, bm_dataset, visit_var, extra_vars) {
       common_vars_orig <- c(VAR$SBJ, VAR$CAT, VAR$PAR, visit_var)
-      bm_dataset <- bm_dataset[, c(common_vars_orig, additional_listing_vars)]
+      bm_dataset <- bm_dataset[, c(common_vars_orig, extra_vars)]
 
       common_vars_internal_names <- c("subject_id", "category", "parameter", "visit")
       rename_list <- stats::setNames(common_vars_internal_names, common_vars_orig)
@@ -1310,7 +1361,7 @@ lineplot_server <- function(id,
           bm_df <- v_bm_dataset()
 
           df <- shiny::maskReactiveContext(
-            append_extra_vars_to_listing(df, bm_df, visit_var)
+            append_extra_vars(df, bm_df, visit_var, additional_listing_vars)
           )
         }
 
