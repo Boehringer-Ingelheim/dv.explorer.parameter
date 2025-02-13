@@ -849,7 +849,7 @@ lineplot_server <- function(id,
           res[[entry_name]] <- var_ds[FALSE, ] # data.frame without rows
           for (param in unique(ds[[CNT$PAR]])){
             var_param_ds <- var_ds[var_ds[[CNT$PAR]] == param, ]
-            if (length(unique(var_param_ds[[var]])) == 1) {
+            if (length(unique(var_param_ds[[CNT$VAL]])) == 1) {
               # All groups share the same ref_line. We take the first one and map it to the artificial "Common" level
               row <- var_param_ds[1, ]
               row[1, "main_group"] <- "Common reference line"
