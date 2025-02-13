@@ -221,7 +221,7 @@ lineplot_chart <- function(data, title = NULL, ref_line_data = NULL, log_project
 
   fig <- ggplot2::ggplot(data = data, mapping = plot_aesthetic) +
     ggplot2::geom_line(
-      size = 1.1, # more readable for stippled lines
+      linewidth = 1.1, # more readable for stippled lines
       position = ggplot2::position_dodge(width = dodge_width)
     ) +
     ggplot2::geom_point(
@@ -272,18 +272,18 @@ lineplot_chart <- function(data, title = NULL, ref_line_data = NULL, log_project
   }
 
   # Reference lines
-  for (var in names(ref_line_data)){
+  for (entry_name in names(ref_line_data)){
     fig <- local({ # local because of NSE symbol capture
-      ref_line_var_data <- ref_line_data[[var]]
+      ref_line_var_data <- ref_line_data[[entry_name]]
       
-      label_col_name <- paste0(var, "_label")
-      ref_line_var_data[[label_col_name]] <- get_lbl_robust(ref_line_var_data, var)
+      label_col_name <- paste0(CNT$VAL, "_label")
+      ref_line_var_data[[label_col_name]] <- entry_name
       colors <- ref_line_var_data[[CNT$MAIN_GROUP]]
 
       args <- list(
         data = ref_line_var_data,
         ggplot2::aes(
-          yintercept = .data[[var]],
+          yintercept = .data[[CNT$VAL]],
           linetype = .data[[label_col_name]],
           color = colors
         )
@@ -838,44 +838,49 @@ lineplot_server <- function(id,
       if (CNT$MAIN_GROUP %in% names(ds)) {
         ds <- unique(ds[c(CNT$PAR, CNT$MAIN_GROUP, ref_line_vars)])
         for (var in ref_line_vars){
+          entry_name <- get_lbl_robust(ds, var)
+          
           var_ds <- unique(ds[c(CNT$PAR, CNT$MAIN_GROUP, var)])
+          names(var_ds)[[3]] <- CNT$VAL
           # Introduce extra level to customize color of reference lines that would otherwise overlap
           var_ds[[CNT$MAIN_GROUP]] <- factor(var_ds[[CNT$MAIN_GROUP]], 
                                              levels = c(levels(var_ds[[CNT$MAIN_GROUP]]), 
                                                         "Common reference line"))
-          res[[var]] <- var_ds[FALSE, ] # data.frame without rows
+          res[[entry_name]] <- var_ds[FALSE, ] # data.frame without rows
           for (param in unique(ds[[CNT$PAR]])){
             var_param_ds <- var_ds[var_ds[[CNT$PAR]] == param, ]
             if (length(unique(var_param_ds[[var]])) == 1) {
               # All groups share the same ref_line. We take the first one and map it to the artificial "Common" level
               row <- var_param_ds[1, ]
               row[1, "main_group"] <- "Common reference line"
-              res[[var]] <- rbind(res[[var]], row)
+              res[[entry_name]] <- rbind(res[[entry_name]], row)
             } else {
               # Collect all main group levels with a single assigned reference range
               for (group in unique(var_param_ds[[CNT$MAIN_GROUP]])){
                 mask <- (var_param_ds[[CNT$MAIN_GROUP]] == group)
                 if (sum(mask) == 1) {
-                  res[[var]] <- rbind(res[[var]], var_param_ds[mask, ])
+                  res[[entry_name]] <- rbind(res[[entry_name]], var_param_ds[mask, ])
                 }
               }
             }
           }
-          if (nrow(res[[var]]) == 0) res[[var]] <- NULL # Drop empty ref_line_vars
+          if (nrow(res[[entry_name]]) == 0) res[[entry_name]] <- NULL # Drop empty ref_line_vars
         }
       } else {
         # ungrouped
         ds <- unique(ds[c(CNT$PAR, ref_line_vars)])
         for (var in ref_line_vars){
+          entry_name <- get_lbl_robust(ds, var)
           var_ds <- unique(ds[c(CNT$PAR, var)])
-          res[[var]] <- var_ds[FALSE, ] # data.frame without rows
+          names(var_ds)[[2]] <- CNT$VAL
+          res[[entry_name]] <- var_ds[FALSE, ] # data.frame without rows
           for (param in unique(ds[[CNT$PAR]])) {
             var_param_ds <- var_ds[var_ds[[CNT$PAR]] == param, ]
             if (nrow(var_param_ds) == 1) {
-              res[[var]] <- rbind(res[[var]], var_param_ds)
+              res[[entry_name]] <- rbind(res[[entry_name]], var_param_ds)
             }
           }
-          if (nrow(res[[var]]) == 0) res[[var]] <- NULL # Drop empty ref_line_vars
+          if (nrow(res[[entry_name]]) == 0) res[[entry_name]] <- NULL # Drop empty ref_line_vars
         }
       }
       res
