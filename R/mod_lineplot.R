@@ -850,14 +850,14 @@ lineplot_server <- function(id,
           # Introduce extra level to customize color of reference lines that would otherwise overlap
           var_ds[[CNT$MAIN_GROUP]] <- factor(var_ds[[CNT$MAIN_GROUP]], 
                                              levels = c(levels(var_ds[[CNT$MAIN_GROUP]]), 
-                                                        "Common reference line"))
+                                                        "Common reference value"))
           res[[entry_name]] <- var_ds[FALSE, ] # data.frame without rows
           for (param in unique(ds[[CNT$PAR]])){
             var_param_ds <- var_ds[var_ds[[CNT$PAR]] == param, ]
             if (length(unique(var_param_ds[[CNT$VAL]])) == 1) {
               # All groups share the same ref_line. We take the first one and map it to the artificial "Common" level
               row <- var_param_ds[1, ]
-              row[1, "main_group"] <- "Common reference line"
+              row[1, "main_group"] <- "Common reference value"
               res[[entry_name]] <- rbind(res[[entry_name]], row)
             } else {
               # Collect all main group levels with a single assigned reference range
@@ -1742,6 +1742,40 @@ check_mod_lineplot <- function(
           )
         )
       }
+    }
+  }
+  
+  if (OK[["subjid_var"]] && OK[["par_var"]] && OK[["ref_line_vars"]]) {
+    ds <- datasets[[bm_dataset_name]]
+    
+    for (ref_line_var in ref_line_vars){
+      combinations <- unique(ds[c(subjid_var, par_var, ref_line_var)])
+      # broad pass (any floating point difference is detected)
+      dups <- duplicated(combinations[c(subjid_var, par_var)])
+      if (any(dups)) {
+        # narrow pass (floating point differences after the sixth decimal are dropped). Saves on float formatting
+        combinations[[ref_line_var]] <- sprintf("%.6f", combinations[[ref_line_var]])
+        combinations <- unique(combinations)
+        dups <- (duplicated(combinations[c(subjid_var, par_var)]) |
+                   duplicated(combinations[c(subjid_var, par_var)], fromLast = TRUE))
+      }
+      dup_df <- combinations[dups, ]
+      
+      
+      CM$assert(
+        container = err,
+        cond = nrow(dup_df) == 0,
+        msg = sprintf(
+          paste(
+            "The reference line variable `<b>%s</b>` in dataset `<b>%s</b>` is not constant for the following",
+            "subjects and parameters:",
+            "<pre>%s</pre>",
+            "You can either remove the `<b>%s</b>` variable from the `ref_line_vars` parameter or preprocess the",
+            "dataset to avoid this issue."
+          ),
+          ref_line_var, bm_dataset_name, paste(capture.output(dup_df), collapse = "\n"), ref_line_var
+        )
+      )
     }
   }
 
