@@ -20,7 +20,7 @@ test_that("lineplot_chart produces a ggplot", {
   expect_true("ggplot" %in% class(p))
 })
 
-test_that("lineplot_chart renders reference lines", {
+test_that("lineplot_chart renders reference lines" |> vdoc[["add_spec"]](c(specs$lineplot_module$reference_values)), {
   df <- data.frame(row.names = seq(1))
 
   df[[CNT$VIS]] <- c("vis_1")
