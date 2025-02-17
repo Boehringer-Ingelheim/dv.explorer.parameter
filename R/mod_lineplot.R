@@ -297,18 +297,23 @@ lineplot_chart <- function(data, title = NULL, ref_line_data = NULL, log_project
   if (length(ref_line_data)) {
     # Extend default ggplot2 palette to include an extra black level to indicate a reference line common to all groups
     # Adapted from https://stackoverflow.com/a/8197703
-    gg_color_hue <- function(n) {
+    gg_color_hue <- function(lev) {
       res <- "#000000" # just black
+      n <- length(lev)
       if (n > 1) {
         # `n` colors + black
         hues <- seq(15, 375, length = n)
         res <- c(hcl(h = hues, l = 65, c = 100)[1:n - 1], "#000000")
       }
+      # https://web.archive.org/web/20250130090454/https://ggplot2.tidyverse.org/reference/scale_manual.html says
+      # "It's recommended to use a named vector"
+      # (miguel) I can confirm that the colors sometimes come out wrong when there is a large level count (255).
+      res <- setNames(res, lev)
       return(res)
     }
     
-    ref_line_colors <- gg_color_hue(length(levels(ref_line_data[[1]][[CNT$MAIN_GROUP]])))
-    fig <- fig + ggplot2::scale_colour_manual(values = ref_line_colors)
+    ref_line_colors <- gg_color_hue(levels(ref_line_data[[1]][[CNT$MAIN_GROUP]]))
+    fig <- fig + ggplot2::scale_color_manual(values = ref_line_colors)
   }
 
   fig <- fig + ggplot2::ggtitle(title)
