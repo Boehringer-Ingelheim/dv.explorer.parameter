@@ -30,6 +30,7 @@ LP_ID <- poc(
   ),
   TWEAK_TRANSPARENCY = "transparency",
   TWEAK_Y_AXIS_PROJECTION = "y_axis_projection",
+  SHOW_ALL_REFERENCE_VALUES = "show_all_reference_values",
   SELECTED_SUBJECT = "selected_subject",
   LINE_HIGHLIGHT_MASK = "line_highlight_mask"
 )
@@ -54,7 +55,8 @@ LP_MSG <- poc(
     COUNT_LISTING = "Data Count",
     SUMMARY_LISTING = "Summary listing",
     TABLE_SIGNIFICANCE = "Data Significance",
-    TWEAK_TRANSPARENCY = "Transparency"
+    TWEAK_TRANSPARENCY = "Transparency",
+    SHOW_ALL_REFERENCE_VALUES = "Show all reference values"
   ),
   VALIDATE = poc(
     NO_CAT_SEL = "Select a category",
@@ -330,6 +332,8 @@ lineplot_chart <- function(data, title = NULL, ref_line_data = NULL, log_project
     # because the latter is only supported in ggplot2 >= 3.5.0
     fig <- fig + ggplot2::scale_y_continuous(trans = pseudo_log_projection(base = 10))
   }
+  # NOTE: Hook to generate documentation screenshots
+  # ggplot2::ggsave("/tmp/ggplot.png", plot = fig, width = 2000, height = 1200, unit = "px") # nolint
 
   fig
 }
@@ -493,7 +497,7 @@ lp_median_summary_fns <- list(
 #' USUBJID, PARCAT, PARAM, AVISIT and AVAL, respectively.
 #'
 #' Optional columns specified by `ref_line_vars` should contain the same numeric value for all
-#' records of the same parameter.
+#' records of the same parameter for any given subject.
 #'
 #' @param group_dataset `[data.frame()]`
 #'
@@ -539,7 +543,8 @@ lp_median_summary_fns <- list(
 #'
 #' @param ref_line_vars `[character(n)]`
 #'
-#' Columns for `bm_dataset` specifying reference values for parameters
+#' Columns for `bm_dataset` specifying reference values for parameters.
+#' See [this article](../articles/lineplot_reference_values.html) for more details
 #'
 #' @param on_sbj_click `[function()]`
 #'
@@ -840,21 +845,37 @@ lineplot_server <- function(id,
         data_subset(), bm_dataset(), visit_var = input_lp[[LP_ID$PAR_VISIT_COL]](), extra_vars = ref_line_vars
       )
 
+      # TODO(miguel): This thing needs thorough testing, refactoring or both      
+      show_all_ref_vals <- isTRUE(input[[LP_ID$SHOW_ALL_REFERENCE_VALUES]])
+      
       if (CNT$MAIN_GROUP %in% names(ds)) {
         ds <- unique(ds[c(CNT$PAR, CNT$MAIN_GROUP, ref_line_vars)])
         for (var in ref_line_vars){
           entry_name <- get_lbl_robust(ds, var)
+          if (show_all_ref_vals) entry_name <- paste(entry_name, "\n(all ref. values)")
           
           var_ds <- unique(ds[c(CNT$PAR, CNT$MAIN_GROUP, var)])
           names(var_ds)[[3]] <- CNT$VAL
-          # Introduce extra level to customize color of reference lines that would otherwise overlap
-          var_ds[[CNT$MAIN_GROUP]] <- factor(var_ds[[CNT$MAIN_GROUP]], 
-                                             levels = c(levels(var_ds[[CNT$MAIN_GROUP]]), 
-                                                        "Common reference value"))
+          if (show_all_ref_vals) {
+            var_ds[[CNT$MAIN_GROUP]] <- factor("Common reference value", 
+                                               levels = c(levels(var_ds[[CNT$MAIN_GROUP]]), 
+                                                          "Common reference value"))
+          } else {
+            # Introduce extra level to customize color of reference lines that would otherwise overlap
+            var_ds[[CNT$MAIN_GROUP]] <- factor(var_ds[[CNT$MAIN_GROUP]], 
+                                               levels = c(levels(var_ds[[CNT$MAIN_GROUP]]), 
+                                                          "Common reference value"))
+          }
+          
           res[[entry_name]] <- var_ds[FALSE, ] # data.frame without rows
           for (param in unique(ds[[CNT$PAR]])){
             var_param_ds <- var_ds[var_ds[[CNT$PAR]] == param, ]
-            if (length(unique(var_param_ds[[CNT$VAL]])) == 1) {
+            if (show_all_ref_vals) {
+              for (group in unique(var_param_ds[[CNT$MAIN_GROUP]])){
+                mask <- (var_param_ds[[CNT$MAIN_GROUP]] == group)
+                res[[entry_name]] <- rbind(res[[entry_name]], var_param_ds[mask, ])
+              }
+            } else if (length(unique(var_param_ds[[CNT$VAL]])) == 1) {
               # All groups share the same ref_line. We take the first one and map it to the artificial "Common" level
               row <- var_param_ds[1, ]
               row[1, "main_group"] <- "Common reference value"
@@ -876,12 +897,13 @@ lineplot_server <- function(id,
         ds <- unique(ds[c(CNT$PAR, ref_line_vars)])
         for (var in ref_line_vars){
           entry_name <- get_lbl_robust(ds, var)
+          if (show_all_ref_vals) entry_name <- paste(entry_name, "\n(all ref. values)")
           var_ds <- unique(ds[c(CNT$PAR, var)])
           names(var_ds)[[2]] <- CNT$VAL
           res[[entry_name]] <- var_ds[FALSE, ] # data.frame without rows
           for (param in unique(ds[[CNT$PAR]])) {
             var_param_ds <- var_ds[var_ds[[CNT$PAR]] == param, ]
-            if (nrow(var_param_ds) == 1) {
+            if (nrow(var_param_ds) == 1 || show_all_ref_vals) {
               res[[entry_name]] <- rbind(res[[entry_name]], var_param_ds)
             }
           }
@@ -1143,6 +1165,11 @@ lineplot_server <- function(id,
           choices = c("Linear", "Logarithmic"),
           selected = default_y_axis_projection,
           inline = TRUE
+        ),
+        shiny::checkboxInput(
+          ns(LP_ID$SHOW_ALL_REFERENCE_VALUES),
+          LP_MSG$LABEL$SHOW_ALL_REFERENCE_VALUES,
+          value = FALSE
         )
       )
 
