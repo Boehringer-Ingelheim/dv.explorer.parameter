@@ -1653,11 +1653,11 @@ mod_lineplot_API_spec <- TC$group(
   cat_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())),
   par_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())),
   visit_vars = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())) |> TC$flag("one_or_more"),
-  cdisc_visit_vars = TC$col("bm_dataset_name", TC$or(TC$numeric())) |> TC$flag("zero_or_more"),
+  cdisc_visit_vars = TC$col("bm_dataset_name", TC$numeric()) |> TC$flag("zero_or_more"),
   # FIXME: ? Interaction between visit_vars and cdisc_visit_vars; one needs to be specified
   value_vars = TC$col("bm_dataset_name", TC$numeric()) |> TC$flag("one_or_more"),
   additional_listing_vars = TC$col("bm_dataset_name", TC$anything()) |> TC$flag("zero_or_more", "optional"),
-  ref_line_vars = TC$col("bm_dataset_name", TC$anything()) |> TC$flag("zero_or_more", "optional"),
+  ref_line_vars = TC$col("bm_dataset_name", TC$numeric()) |> TC$flag("zero_or_more", "optional"),
   default_centrality_fn = TC$character() |> TC$flag("ignore"), # TODO: TC$choice ?
   default_dispersion_fn = TC$character() |> TC$flag("ignore"), # TODO: TC$choice ?
   default_cat = TC$choice_from_col_contents("cat_var") |> TC$flag("zero_or_more", "optional"),
