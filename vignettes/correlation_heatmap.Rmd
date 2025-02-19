@@ -108,7 +108,7 @@ Decimal values on this table are rounded (mathematical, round-to-even) to four d
 
 ```{r, eval=FALSE}
 adbm_dataset <- dplyr::mutate(
-  dv.explorer.parameter::adbm_example,
+  dv.explorer.parameter:::safety_data()[["bm"]],
   USUBJID = factor(USUBJID),
   PARCAT1 = factor(PARCAT1),
   PARAM = factor(PARAM),
@@ -116,7 +116,7 @@ adbm_dataset <- dplyr::mutate(
 )
 
 adsl_dataset <- dplyr::mutate(
-  dv.explorer.parameter::adsl_example,
+  dv.explorer.parameter:::safety_data()[["sl"]],
   USUBJID = factor(USUBJID)
 )
 

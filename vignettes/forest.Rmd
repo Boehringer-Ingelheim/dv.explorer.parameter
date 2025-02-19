@@ -104,7 +104,7 @@ the data. Controls embedded in the table headings allow arbitrary reorderings of
 
 ```{r, eval=FALSE}
 adbm_dataset <- dplyr::mutate(
-  dv.explorer.parameter::adbm_example,
+  dv.explorer.parameter:::safety_data()[["bm"]],
   USUBJID = factor(USUBJID),
   PARCAT1 = factor(PARCAT1),
   PARAM = factor(PARAM),
@@ -112,7 +112,7 @@ adbm_dataset <- dplyr::mutate(
 )
 
 adsl_dataset <- dplyr::mutate(
-  dv.explorer.parameter::adsl_example,
+  dv.explorer.parameter:::safety_data()[["sl"]],
   USUBJID = factor(USUBJID)
 )
 
@@ -134,7 +134,8 @@ dv.manager::run_app(
       numeric_numeric_functions = fp_numeric_numeric_functions,
       numeric_factor_functions = fp_numeric_factor_functions,
       subjid_var = "USUBJID",
-      cat_var = "PARCAT1"
+      cat_var = "PARCAT1",
+      value_vars = "AVAL"
     )
   ),
   filter_data = "adsl",
