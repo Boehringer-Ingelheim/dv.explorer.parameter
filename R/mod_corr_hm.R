@@ -503,7 +503,7 @@ corr_hm_server <- function(id,
                            cat_var = "PARCAT",
                            par_var = "PARAM",
                            visit_var = "AVISIT",
-                           value_vars = c("AVAL", "PCHG"),
+                           value_vars = "AVAL",
                            default_value = NULL) {
   # module constants ----
   VAR <- poc( # nolint Parameters from the function that will be considered constant across the function
