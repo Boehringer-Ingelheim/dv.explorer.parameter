@@ -1,4 +1,4 @@
-# YT#VHa2daae307c5e4f729658fd67108835d5#VH2dafca7d199f5ea8393d6b6ab99fb2c0#
+# YT#VHcdeeee4cd0eadba37e2b7e0c950d1cd1#VH9a9fddb547d03737e47db25dba988fc7#
 CM <- local({ # _C_hecked _M_odule
   message_well <- function(title, contents, color = "f5f5f5") { # repeats #iewahg
     style <- sprintf(r"---(
@@ -437,9 +437,38 @@ CM <- local({ # _C_hecked _M_odule
       return(TRUE)
     }
 
-    ok <- FALSE
-
+    ok <- assert(err, is.character(value), 
+                 paste(sprintf("The value assigned to parameter `%s` should be of type `character`", name),
+                       sprintf("and it's instead of type `%s`.", class(value)[[1]])))
+    
     valid_column_names <- list_columns_of_kind(dataset_value, subkind)
+    invalid_column_names <- value[!value %in% valid_column_names]
+    wrong_subkind_column_names <- invalid_column_names[invalid_column_names %in% names(dataset_value)]
+
+    ok <- ok && assert(
+      err, length(wrong_subkind_column_names) == 0, {
+        cnames <- paste(sprintf('"%s"', wrong_subkind_column_names), collapse = ", ")
+        type_desc <- TC$get_type_as_text(subkind)
+        types_found <- unname(sapply(dataset_value[wrong_subkind_column_names], function(x) class(x)[[1]]))
+        types_found_desc <- paste(sprintf("`%s`", types_found), collapse = ", ")
+        paste(
+          sprintf("Variables assigned to parameter <b>`%s`</b> should refer to columns of dataset <b>`%s`</b>",
+                  name, dataset_name),
+          sprintf("of type `%s`, but some (<b>%s</b>) have other types (%s).", 
+                  type_desc, cnames, types_found_desc)
+        )
+      }
+    )
+    
+    ok <- ok && assert(
+      err, length(invalid_column_names) == 0, {
+        cnames <- paste(sprintf('"%s"', invalid_column_names), collapse = ", ")
+        paste(
+          sprintf("The value of parameter <b>`%s`</b> includes one or more variables (<b>%s</b>)", name, cnames),
+          sprintf("that are not columns of the <b>`%s`</b> dataset.", dataset_name)
+        )
+      }
+    )
 
     zero_or_more <- isTRUE(flags[["zero_or_more"]])
     one_or_more <- isTRUE(flags[["one_or_more"]])
@@ -447,26 +476,24 @@ CM <- local({ # _C_hecked _M_odule
     if (zero_or_one_or_more) {
       min_len <- 0
       if (one_or_more) min_len <- 1
-      ok <- assert(
+      
+      ok <- ok && assert(
         err,
-        is.character(value) &&
-          all(value %in% valid_column_names) &&
-          length(value) >= min_len,
-        paste(
-          sprintf(
-            "`%s` should be a character vector of length greater than %s referring to one of the following columns of dataset `%s`: ",
-            name, c("zero", "one")[[min_len + 1]], dataset_name
-          ),
-          paste(sprintf('"%s"', valid_column_names), collapse = ", "), "."
-        )
+        length(value) >= min_len, {
+          col_names <- paste(sprintf('"%s"', valid_column_names), collapse = ", ")
+          paste0(
+            sprintf("`%s` should be a character vector of length greater than %s ", name, c("zero", "one")[[min_len + 1]]),
+            sprintf("referring to the following columns of dataset `%s`: ", dataset_name),
+            col_names, "."
+          )
+        }
       )
     } else {
-      ok <- assert(
+      ok <- ok && assert(
         err,
-        test_string(value) &&
-          all(value %in% valid_column_names),
+        length(value) == 1,
         paste(
-          sprintf("`%s` should be a string referring to one of the following columns of dataset `%s`: ", name, dataset_name),
+          sprintf("`%s` should be a string referring to a single column of dataset `%s`: ", name, dataset_name),
           paste(sprintf('"%s"', valid_column_names), collapse = ", "), "."
         )
       )
