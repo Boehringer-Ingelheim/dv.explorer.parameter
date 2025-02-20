@@ -480,6 +480,89 @@ lp_median_summary_fns <- list(
   y_prefix = "Median "
 )
 
+append_extra_vars <- function(left, right, right_extra_vars) {
+  common_vars <- c(CNT$SBJ, CNT$CAT, CNT$PAR, CNT$VIS)
+  right <- right[, c(common_vars, right_extra_vars)]
+  res <- dplyr::left_join(left, right, by = common_vars)
+  for (col in common_vars) attr(res[[col]], "label") <- attr(right[[col]], "label") # recover labels dropped by dplyr
+  return(res)
+}
+
+# TODO(miguel): This thing needs thorough testing, refactoring or both      
+generate_ref_line_data <- function(data_subset, bm_dataset, ref_line_vars, show_all_ref_vals) {
+  checkmate::assert_data_frame(data_subset)
+  checkmate::assert_data_frame(bm_dataset)
+  checkmate::assert_character(ref_line_vars)
+  checkmate::assert_logical(show_all_ref_vals, len = 1)
+  
+  res <- list() # one data.frame per ref_line_var indicating which ref lines to draw for each parameter
+
+  ds <- append_extra_vars(data_subset, bm_dataset, ref_line_vars)
+
+  if (CNT$MAIN_GROUP %in% names(ds)) {
+    ds <- unique(ds[c(CNT$PAR, CNT$MAIN_GROUP, ref_line_vars)])
+    for (var in ref_line_vars){
+      entry_name <- get_lbl_robust(ds, var)
+      if (show_all_ref_vals) entry_name <- paste(entry_name, "\n(all ref. values)")
+
+      var_ds <- unique(ds[c(CNT$PAR, CNT$MAIN_GROUP, var)])
+      names(var_ds)[[3]] <- CNT$VAL
+      if (show_all_ref_vals) {
+        var_ds[[CNT$MAIN_GROUP]] <- factor("Common reference value", 
+                                           levels = c(levels(var_ds[[CNT$MAIN_GROUP]]), 
+                                                      "Common reference value"))
+      } else {
+        # Introduce extra level to customize color of reference lines that would otherwise overlap
+        var_ds[[CNT$MAIN_GROUP]] <- 
+          factor(var_ds[[CNT$MAIN_GROUP]],  levels = c(levels(var_ds[[CNT$MAIN_GROUP]]), "Common reference value"))
+      }
+
+      res[[entry_name]] <- var_ds[FALSE, ] # data.frame without rows
+      for (param in unique(ds[[CNT$PAR]])){
+        var_param_ds <- var_ds[var_ds[[CNT$PAR]] == param, ]
+        if (show_all_ref_vals) {
+          for (group in unique(var_param_ds[[CNT$MAIN_GROUP]])){
+            mask <- (var_param_ds[[CNT$MAIN_GROUP]] == group)
+            res[[entry_name]] <- rbind(res[[entry_name]], var_param_ds[mask, ])
+          }
+        } else if (length(unique(var_param_ds[[CNT$VAL]])) == 1) {
+          # All groups share the same ref_line. We take the first one and map it to the artificial "Common" level
+          row <- var_param_ds[1, ]
+          row[1, "main_group"] <- "Common reference value"
+          res[[entry_name]] <- rbind(res[[entry_name]], row)
+        } else {
+          # Collect all main group levels with a single assigned reference range
+          for (group in unique(var_param_ds[[CNT$MAIN_GROUP]])){
+            mask <- (var_param_ds[[CNT$MAIN_GROUP]] == group)
+            if (sum(mask) == 1) {
+              res[[entry_name]] <- rbind(res[[entry_name]], var_param_ds[mask, ])
+            }
+          }
+        }
+      }
+      if (nrow(res[[entry_name]]) == 0) res[[entry_name]] <- NULL # Drop empty ref_line_vars
+    }
+  } else {
+    # ungrouped
+    ds <- unique(ds[c(CNT$PAR, ref_line_vars)])
+    for (var in ref_line_vars){
+      entry_name <- get_lbl_robust(ds, var)
+      if (show_all_ref_vals) entry_name <- paste(entry_name, "\n(all ref. values)")
+      var_ds <- unique(ds[c(CNT$PAR, var)])
+      names(var_ds)[[2]] <- CNT$VAL
+      res[[entry_name]] <- var_ds[FALSE, ] # data.frame without rows
+      for (param in unique(ds[[CNT$PAR]])) {
+        var_param_ds <- var_ds[var_ds[[CNT$PAR]] == param, ]
+        if (nrow(var_param_ds) == 1 || show_all_ref_vals) {
+          res[[entry_name]] <- rbind(res[[entry_name]], var_param_ds)
+        }
+      }
+      if (nrow(res[[entry_name]]) == 0) res[[entry_name]] <- NULL # Drop empty ref_line_vars
+    }
+  }
+  return(res)
+}
+
 
 #' @describeIn mod_lineplot Server
 #'
@@ -837,80 +920,24 @@ lineplot_server <- function(id,
 
       ds
     })
-
+    
     ref_line_data <- shiny::reactive({
-      res <- list() # one data.frame per ref_line_var indicating which ref lines to draw for each parameter
-     
-      ds <- append_extra_vars(
-        data_subset(), bm_dataset(), visit_var = input_lp[[LP_ID$PAR_VISIT_COL]](), extra_vars = ref_line_vars
-      )
+      visit_var <- input_lp[[LP_ID$PAR_VISIT_COL]]()
 
-      # TODO(miguel): This thing needs thorough testing, refactoring or both      
+      rename_list <- stats::setNames(
+        c(CNT$SBJ, CNT$CAT, CNT$PAR, CNT$VIS),
+        c(VAR$SBJ, VAR$CAT, VAR$PAR, visit_var)
+      )
+      bm_dataset_with_internal_names <- rename_with_list(bm_dataset(), rename_list)
+
+      data_subset <- data_subset()
+
       show_all_ref_vals <- isTRUE(input[[LP_ID$SHOW_ALL_REFERENCE_VALUES]])
-      
-      if (CNT$MAIN_GROUP %in% names(ds)) {
-        ds <- unique(ds[c(CNT$PAR, CNT$MAIN_GROUP, ref_line_vars)])
-        for (var in ref_line_vars){
-          entry_name <- get_lbl_robust(ds, var)
-          if (show_all_ref_vals) entry_name <- paste(entry_name, "\n(all ref. values)")
-          
-          var_ds <- unique(ds[c(CNT$PAR, CNT$MAIN_GROUP, var)])
-          names(var_ds)[[3]] <- CNT$VAL
-          if (show_all_ref_vals) {
-            var_ds[[CNT$MAIN_GROUP]] <- factor("Common reference value", 
-                                               levels = c(levels(var_ds[[CNT$MAIN_GROUP]]), 
-                                                          "Common reference value"))
-          } else {
-            # Introduce extra level to customize color of reference lines that would otherwise overlap
-            var_ds[[CNT$MAIN_GROUP]] <- factor(var_ds[[CNT$MAIN_GROUP]], 
-                                               levels = c(levels(var_ds[[CNT$MAIN_GROUP]]), 
-                                                          "Common reference value"))
-          }
-          
-          res[[entry_name]] <- var_ds[FALSE, ] # data.frame without rows
-          for (param in unique(ds[[CNT$PAR]])){
-            var_param_ds <- var_ds[var_ds[[CNT$PAR]] == param, ]
-            if (show_all_ref_vals) {
-              for (group in unique(var_param_ds[[CNT$MAIN_GROUP]])){
-                mask <- (var_param_ds[[CNT$MAIN_GROUP]] == group)
-                res[[entry_name]] <- rbind(res[[entry_name]], var_param_ds[mask, ])
-              }
-            } else if (length(unique(var_param_ds[[CNT$VAL]])) == 1) {
-              # All groups share the same ref_line. We take the first one and map it to the artificial "Common" level
-              row <- var_param_ds[1, ]
-              row[1, "main_group"] <- "Common reference value"
-              res[[entry_name]] <- rbind(res[[entry_name]], row)
-            } else {
-              # Collect all main group levels with a single assigned reference range
-              for (group in unique(var_param_ds[[CNT$MAIN_GROUP]])){
-                mask <- (var_param_ds[[CNT$MAIN_GROUP]] == group)
-                if (sum(mask) == 1) {
-                  res[[entry_name]] <- rbind(res[[entry_name]], var_param_ds[mask, ])
-                }
-              }
-            }
-          }
-          if (nrow(res[[entry_name]]) == 0) res[[entry_name]] <- NULL # Drop empty ref_line_vars
-        }
-      } else {
-        # ungrouped
-        ds <- unique(ds[c(CNT$PAR, ref_line_vars)])
-        for (var in ref_line_vars){
-          entry_name <- get_lbl_robust(ds, var)
-          if (show_all_ref_vals) entry_name <- paste(entry_name, "\n(all ref. values)")
-          var_ds <- unique(ds[c(CNT$PAR, var)])
-          names(var_ds)[[2]] <- CNT$VAL
-          res[[entry_name]] <- var_ds[FALSE, ] # data.frame without rows
-          for (param in unique(ds[[CNT$PAR]])) {
-            var_param_ds <- var_ds[var_ds[[CNT$PAR]] == param, ]
-            if (nrow(var_param_ds) == 1 || show_all_ref_vals) {
-              res[[entry_name]] <- rbind(res[[entry_name]], var_param_ds)
-            }
-          }
-          if (nrow(res[[entry_name]]) == 0) res[[entry_name]] <- NULL # Drop empty ref_line_vars
-        }
-      }
-      res
+
+      res <- shiny::maskReactiveContext({
+        generate_ref_line_data(data_subset, bm_dataset_with_internal_names, ref_line_vars, show_all_ref_vals)
+      })
+      return(res)
     })
 
     plot_height <- shiny::reactive({
@@ -1094,19 +1121,6 @@ lineplot_server <- function(id,
       }
 
       points
-    }
-
-    append_extra_vars <- function(df, bm_dataset, visit_var, extra_vars) {
-      common_vars_orig <- c(VAR$SBJ, VAR$CAT, VAR$PAR, visit_var)
-      bm_dataset <- bm_dataset[, c(common_vars_orig, extra_vars)]
-
-      common_vars_internal_names <- c("subject_id", "category", "parameter", "visit")
-      rename_list <- stats::setNames(common_vars_internal_names, common_vars_orig)
-      bm_dataset <- rename_with_list(bm_dataset, rename_list)
-      res <- dplyr::left_join(df, bm_dataset, by = common_vars_internal_names)
-      # recover labels dropped by dplyr
-      for (col in common_vars_internal_names) attr(res[[col]], "label") <- attr(bm_dataset[[col]], "label")
-      return(res)
     }
 
     # Interactive title selector interface ----
@@ -1395,10 +1409,15 @@ lineplot_server <- function(id,
         if (centrality == LP_CNT$PLOT_TYPE_SUBJECT_LEVEL) {
           # NOTE(miguel): If we decide to generalize this feature to other modules, the natural
           # place for the appending of columns would be lp_subset_data when no grouping is active
-          bm_df <- v_bm_dataset()
+          rename_list <- stats::setNames(
+            c(CNT$SBJ, CNT$CAT, CNT$PAR, CNT$VIS),
+            c(VAR$SBJ, VAR$CAT, VAR$PAR, visit_var)
+          )
+
+          bm_dataset_with_internal_names <- rename_with_list(v_bm_dataset(), rename_list)
 
           df <- shiny::maskReactiveContext(
-            append_extra_vars(df, bm_df, visit_var, additional_listing_vars)
+            append_extra_vars(df, bm_dataset_with_internal_names, additional_listing_vars)
           )
         }
 
