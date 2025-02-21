@@ -489,53 +489,50 @@ append_extra_vars <- function(left, right, right_extra_vars) {
 }
 
 # TODO(miguel): This thing needs thorough testing, refactoring or both      
-generate_ref_line_data <- function(data_subset, bm_dataset, ref_line_vars, show_all_ref_vals) {
-  checkmate::assert_data_frame(data_subset)
-  checkmate::assert_data_frame(bm_dataset)
-  checkmate::assert_character(ref_line_vars)
+generate_ref_line_data <- function(df, show_all_ref_vals) {
+  checkmate::assert_data_frame(df, min.cols = 2)
+  checkmate::assert_subset(CNT$PAR, names(df))
   checkmate::assert_logical(show_all_ref_vals, len = 1)
+  ref_line_vars <- setdiff(names(df), c(CNT$PAR, CNT$MAIN_GROUP))
   
   res <- list() # one data.frame per ref_line_var indicating which ref lines to draw for each parameter
 
-  ds <- append_extra_vars(data_subset, bm_dataset, ref_line_vars)
-
-  if (CNT$MAIN_GROUP %in% names(ds)) {
-    ds <- unique(ds[c(CNT$PAR, CNT$MAIN_GROUP, ref_line_vars)])
+  if (CNT$MAIN_GROUP %in% names(df)) {
     for (var in ref_line_vars){
-      entry_name <- get_lbl_robust(ds, var)
-      if (show_all_ref_vals) entry_name <- paste(entry_name, "\n(all ref. values)")
+      entry_name <- get_lbl_robust(df, var)
+      if (show_all_ref_vals) entry_name <- paste0(entry_name, "\n(all ref. values)")
 
-      var_ds <- unique(ds[c(CNT$PAR, CNT$MAIN_GROUP, var)])
-      names(var_ds)[[3]] <- CNT$VAL
+      var_df <- unique(df[c(CNT$PAR, CNT$MAIN_GROUP, var)])
+      names(var_df)[[3]] <- CNT$VAL
       if (show_all_ref_vals) {
-        var_ds[[CNT$MAIN_GROUP]] <- factor("Common reference value", 
-                                           levels = c(levels(var_ds[[CNT$MAIN_GROUP]]), 
+        var_df[[CNT$MAIN_GROUP]] <- factor("Common reference value", 
+                                           levels = c(levels(var_df[[CNT$MAIN_GROUP]]), 
                                                       "Common reference value"))
       } else {
         # Introduce extra level to customize color of reference lines that would otherwise overlap
-        var_ds[[CNT$MAIN_GROUP]] <- 
-          factor(var_ds[[CNT$MAIN_GROUP]],  levels = c(levels(var_ds[[CNT$MAIN_GROUP]]), "Common reference value"))
+        var_df[[CNT$MAIN_GROUP]] <- 
+          factor(var_df[[CNT$MAIN_GROUP]], levels = c(levels(var_df[[CNT$MAIN_GROUP]]), "Common reference value"))
       }
 
-      res[[entry_name]] <- var_ds[FALSE, ] # data.frame without rows
-      for (param in unique(ds[[CNT$PAR]])){
-        var_param_ds <- var_ds[var_ds[[CNT$PAR]] == param, ]
+      res[[entry_name]] <- var_df[FALSE, ] # data.frame without rows
+      for (param in unique(df[[CNT$PAR]])){
+        var_param_df <- var_df[var_df[[CNT$PAR]] == param, ]
         if (show_all_ref_vals) {
-          for (group in unique(var_param_ds[[CNT$MAIN_GROUP]])){
-            mask <- (var_param_ds[[CNT$MAIN_GROUP]] == group)
-            res[[entry_name]] <- rbind(res[[entry_name]], var_param_ds[mask, ])
+          for (group in unique(var_param_df[[CNT$MAIN_GROUP]])){
+            mask <- (var_param_df[[CNT$MAIN_GROUP]] == group)
+            res[[entry_name]] <- rbind(res[[entry_name]], var_param_df[mask, ])
           }
-        } else if (length(unique(var_param_ds[[CNT$VAL]])) == 1) {
+        } else if (length(unique(var_param_df[[CNT$VAL]])) == 1) {
           # All groups share the same ref_line. We take the first one and map it to the artificial "Common" level
-          row <- var_param_ds[1, ]
+          row <- var_param_df[1, ]
           row[1, "main_group"] <- "Common reference value"
           res[[entry_name]] <- rbind(res[[entry_name]], row)
         } else {
           # Collect all main group levels with a single assigned reference range
-          for (group in unique(var_param_ds[[CNT$MAIN_GROUP]])){
-            mask <- (var_param_ds[[CNT$MAIN_GROUP]] == group)
+          for (group in unique(var_param_df[[CNT$MAIN_GROUP]])){
+            mask <- (var_param_df[[CNT$MAIN_GROUP]] == group)
             if (sum(mask) == 1) {
-              res[[entry_name]] <- rbind(res[[entry_name]], var_param_ds[mask, ])
+              res[[entry_name]] <- rbind(res[[entry_name]], var_param_df[mask, ])
             }
           }
         }
@@ -544,17 +541,16 @@ generate_ref_line_data <- function(data_subset, bm_dataset, ref_line_vars, show_
     }
   } else {
     # ungrouped
-    ds <- unique(ds[c(CNT$PAR, ref_line_vars)])
     for (var in ref_line_vars){
-      entry_name <- get_lbl_robust(ds, var)
-      if (show_all_ref_vals) entry_name <- paste(entry_name, "\n(all ref. values)")
-      var_ds <- unique(ds[c(CNT$PAR, var)])
-      names(var_ds)[[2]] <- CNT$VAL
-      res[[entry_name]] <- var_ds[FALSE, ] # data.frame without rows
-      for (param in unique(ds[[CNT$PAR]])) {
-        var_param_ds <- var_ds[var_ds[[CNT$PAR]] == param, ]
-        if (nrow(var_param_ds) == 1 || show_all_ref_vals) {
-          res[[entry_name]] <- rbind(res[[entry_name]], var_param_ds)
+      entry_name <- get_lbl_robust(df, var)
+      if (show_all_ref_vals) entry_name <- paste0(entry_name, "\n(all ref. values)")
+      var_df <- unique(df[c(CNT$PAR, var)])
+      names(var_df)[[2]] <- CNT$VAL
+      res[[entry_name]] <- var_df[FALSE, ] # data.frame without rows
+      for (param in unique(df[[CNT$PAR]])) {
+        var_param_df <- var_df[var_df[[CNT$PAR]] == param, ]
+        if (nrow(var_param_df) == 1 || show_all_ref_vals) {
+          res[[entry_name]] <- rbind(res[[entry_name]], var_param_df)
         }
       }
       if (nrow(res[[entry_name]]) == 0) res[[entry_name]] <- NULL # Drop empty ref_line_vars
@@ -929,13 +925,14 @@ lineplot_server <- function(id,
         c(VAR$SBJ, VAR$CAT, VAR$PAR, visit_var)
       )
       bm_dataset_with_internal_names <- rename_with_list(bm_dataset(), rename_list)
-
-      data_subset <- data_subset()
-
+      df <- data_subset()
       show_all_ref_vals <- isTRUE(input[[LP_ID$SHOW_ALL_REFERENCE_VALUES]])
 
       res <- shiny::maskReactiveContext({
-        generate_ref_line_data(data_subset, bm_dataset_with_internal_names, ref_line_vars, show_all_ref_vals)
+        df <- append_extra_vars(df, bm_dataset_with_internal_names, ref_line_vars)
+        keep_cols <- intersect(c(CNT$PAR, CNT$MAIN_GROUP, ref_line_vars), names(df))
+        df <- unique(df[keep_cols])
+        generate_ref_line_data(df, show_all_ref_vals)
       })
       return(res)
     })
