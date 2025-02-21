@@ -29,14 +29,14 @@ test_that("generate_ref_line_data groups ref values", {
   
   expected_res <- list(
     "Low reference value\n(all ref. values)" = data.frame(
-      parameter = c("A", "A","B", "B", "C", "C") |> factor(),
-      main_group = c(common, common, common, common, common, common) |> factor(levels = c("F", "M", common)),
-      value = c(1, 1, 1, 2, 1, 2)
+      parameter = c("A", "B", "B", "C", "C") |> factor(),
+      main_group = c(common, common, common, common, common) |> factor(levels = c("F", "M", common)),
+      value = c(1, 1, 2, 1, 2)
     ),
     "A1HI\n(all ref. values)" = data.frame(
-      parameter = c("A", "A", "B", "B", "C", "C") |> factor(),
-      main_group = c(common, common, common, common, common, common) |> factor(levels = c("F", "M", common)),
-      value = c(2, 2, 3, 3, 2, 3)
+      parameter = c("A", "B", "C", "C") |> factor(),
+      main_group = c(common, common, common, common) |> factor(levels = c("F", "M", common)),
+      value = c(2, 3, 2, 3)
     )
   )
   expect_equal(res, expected_res)

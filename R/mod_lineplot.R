@@ -488,74 +488,60 @@ append_extra_vars <- function(left, right, right_extra_vars) {
   return(res)
 }
 
-# TODO(miguel): This thing needs thorough testing, refactoring or both      
 generate_ref_line_data <- function(df, show_all_ref_vals) {
   checkmate::assert_data_frame(df, min.cols = 2)
   checkmate::assert_subset(CNT$PAR, names(df))
   checkmate::assert_logical(show_all_ref_vals, len = 1)
-  ref_line_vars <- setdiff(names(df), c(CNT$PAR, CNT$MAIN_GROUP))
+  
+  originally_grouped <- (CNT$MAIN_GROUP %in% names(df))
+  
+  # Introduce artificial grouping. It is removed from the result before exiting this function
+  if (!originally_grouped) df[[CNT$MAIN_GROUP]] <- as.factor("Common reference value")
+  
+  # Introduce extra level to customize color of reference lines that would otherwise overlap
+  df[[CNT$MAIN_GROUP]] <- factor(df[[CNT$MAIN_GROUP]], 
+                                 levels = union(levels(df[[CNT$MAIN_GROUP]]), "Common reference value"))
+  if (show_all_ref_vals) { # Make all lines apply to all groups
+    df[[CNT$MAIN_GROUP]] <- factor("Common reference value", levels = levels(df[[CNT$MAIN_GROUP]]))
+  }
+  
+  common_vars <- c(CNT$PAR, CNT$MAIN_GROUP)
+  ref_line_vars <- setdiff(names(df), common_vars)
   
   res <- list() # one data.frame per ref_line_var indicating which ref lines to draw for each parameter
 
-  if (CNT$MAIN_GROUP %in% names(df)) {
-    for (var in ref_line_vars){
-      entry_name <- get_lbl_robust(df, var)
-      if (show_all_ref_vals) entry_name <- paste0(entry_name, "\n(all ref. values)")
-
-      var_df <- unique(df[c(CNT$PAR, CNT$MAIN_GROUP, var)])
-      names(var_df)[[3]] <- CNT$VAL
-      if (show_all_ref_vals) {
-        var_df[[CNT$MAIN_GROUP]] <- factor("Common reference value", 
-                                           levels = c(levels(var_df[[CNT$MAIN_GROUP]]), 
-                                                      "Common reference value"))
+  for (var in ref_line_vars){
+    entry_name <- get_lbl_robust(df, var)
+    if (show_all_ref_vals) entry_name <- paste0(entry_name, "\n(all ref. values)")
+    var_df <- unique(df[c(common_vars, var)])
+    names(var_df)[names(var_df) == var] <- CNT$VAL
+    
+    res[[entry_name]] <- var_df[FALSE, ] # data.frame without rows
+    for (param in unique(df[[CNT$PAR]])){
+      var_param_df <- var_df[var_df[[CNT$PAR]] == param, ]
+      
+      if (length(unique(var_param_df[[CNT$VAL]])) == 1) {
+        # All groups share the same reference value so we group them as one
+        row <- var_param_df[1, ]
+        row[1, CNT$MAIN_GROUP] <- "Common reference value"
+        res[[entry_name]] <- rbind(res[[entry_name]], row)
+      } else if (show_all_ref_vals) {
+        res[[entry_name]] <- rbind(res[[entry_name]], var_param_df)
       } else {
-        # Introduce extra level to customize color of reference lines that would otherwise overlap
-        var_df[[CNT$MAIN_GROUP]] <- 
-          factor(var_df[[CNT$MAIN_GROUP]], levels = c(levels(var_df[[CNT$MAIN_GROUP]]), "Common reference value"))
-      }
-
-      res[[entry_name]] <- var_df[FALSE, ] # data.frame without rows
-      for (param in unique(df[[CNT$PAR]])){
-        var_param_df <- var_df[var_df[[CNT$PAR]] == param, ]
-        if (show_all_ref_vals) {
-          for (group in unique(var_param_df[[CNT$MAIN_GROUP]])){
-            mask <- (var_param_df[[CNT$MAIN_GROUP]] == group)
+        # Collect all group levels with a single assigned reference value
+        for (group in unique(var_param_df[[CNT$MAIN_GROUP]])){
+          mask <- (var_param_df[[CNT$MAIN_GROUP]] == group)
+          if (sum(mask) == 1) {
             res[[entry_name]] <- rbind(res[[entry_name]], var_param_df[mask, ])
           }
-        } else if (length(unique(var_param_df[[CNT$VAL]])) == 1) {
-          # All groups share the same ref_line. We take the first one and map it to the artificial "Common" level
-          row <- var_param_df[1, ]
-          row[1, "main_group"] <- "Common reference value"
-          res[[entry_name]] <- rbind(res[[entry_name]], row)
-        } else {
-          # Collect all main group levels with a single assigned reference range
-          for (group in unique(var_param_df[[CNT$MAIN_GROUP]])){
-            mask <- (var_param_df[[CNT$MAIN_GROUP]] == group)
-            if (sum(mask) == 1) {
-              res[[entry_name]] <- rbind(res[[entry_name]], var_param_df[mask, ])
-            }
-          }
         }
       }
-      if (nrow(res[[entry_name]]) == 0) res[[entry_name]] <- NULL # Drop empty ref_line_vars
     }
-  } else {
-    # ungrouped
-    for (var in ref_line_vars){
-      entry_name <- get_lbl_robust(df, var)
-      if (show_all_ref_vals) entry_name <- paste0(entry_name, "\n(all ref. values)")
-      var_df <- unique(df[c(CNT$PAR, var)])
-      names(var_df)[[2]] <- CNT$VAL
-      res[[entry_name]] <- var_df[FALSE, ] # data.frame without rows
-      for (param in unique(df[[CNT$PAR]])) {
-        var_param_df <- var_df[var_df[[CNT$PAR]] == param, ]
-        if (nrow(var_param_df) == 1 || show_all_ref_vals) {
-          res[[entry_name]] <- rbind(res[[entry_name]], var_param_df)
-        }
-      }
-      if (nrow(res[[entry_name]]) == 0) res[[entry_name]] <- NULL # Drop empty ref_line_vars
-    }
+    if (nrow(res[[entry_name]]) == 0) res[[entry_name]] <- NULL # Drop empty ref_line_vars
   }
+  
+  if (!originally_grouped) for (i in seq_along(res)) res[[i]][[CNT$MAIN_GROUP]] <- NULL
+
   return(res)
 }
 
