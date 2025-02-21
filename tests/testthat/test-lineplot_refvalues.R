@@ -1,4 +1,4 @@
-test_that("generate_ref_line_data produces a ggplot", {
+test_that("generate_ref_line_data groups ref values", {
   common <- "Common reference value"
   
   df <- data.frame(
@@ -39,6 +39,36 @@ test_that("generate_ref_line_data produces a ggplot", {
       value = c(2, 2, 3, 3, 2, 3)
     )
   )
+  expect_equal(res, expected_res)
   
+  df[["main_group"]] <- NULL
+  res <- generate_ref_line_data(df, show_all_ref_vals = FALSE)
+  for(i in seq_along(res)) rownames(res[[i]]) <- NULL
+  
+  expected_res <- list(
+    "Low reference value" = data.frame(
+      parameter = c("A") |> factor(levels = c("A", "B", "C")),
+      value = c(1)
+    ),
+    "A1HI" = data.frame(
+      parameter = c("A", "B") |> factor(levels = c("A", "B", "C")),
+      value = c(2, 3)
+    )
+  )
+  expect_equal(res, expected_res)
+  
+  res <- generate_ref_line_data(df, show_all_ref_vals = TRUE)
+  for(i in seq_along(res)) rownames(res[[i]]) <- NULL
+  
+  expected_res <- list(
+    "Low reference value\n(all ref. values)" = data.frame(
+      parameter = c("A", "B", "B", "C", "C") |> factor(levels = c("A", "B", "C")),
+      value = c(1, 1, 2, 1, 2)
+    ),
+    "A1HI\n(all ref. values)" = data.frame(
+      parameter = c("A", "B", "C", "C") |> factor(levels = c("A", "B", "C")),
+      value = c(2, 3, 2, 3)
+    )
+  )
   expect_equal(res, expected_res)
 })
