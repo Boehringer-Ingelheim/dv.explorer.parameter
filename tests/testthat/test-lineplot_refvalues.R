@@ -1,4 +1,4 @@
-test_that("generate_ref_line_data groups ref values", {
+test_that("generate_ref_line_data groups ref values" |> vdoc[["add_spec"]](specs$lineplot_module$reference_values), {
   common <- "Common reference value"
   
   df <- data.frame(
