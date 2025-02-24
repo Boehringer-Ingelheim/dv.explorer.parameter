@@ -489,7 +489,6 @@ append_extra_vars <- function(left, right, right_extra_vars) {
 }
 
 generate_ref_line_data <- function(df, show_all_ref_vals) {
-  checkmate::assert_data_frame(df, min.cols = 2)
   checkmate::assert_subset(CNT$PAR, names(df))
   checkmate::assert_logical(show_all_ref_vals, len = 1)
   
