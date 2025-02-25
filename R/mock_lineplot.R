@@ -154,6 +154,9 @@ mock_app_lineplot_mm <- function() {
   )
 }
 
+#' Mock module manager lineplot app displaying safetyData dataset
+#' @keywords mock
+#' @export
 mock_app_lineplot_mm_safetyData <- function() {
   if (!requireNamespace("dv.manager")) {
     stop("Install dv.manager")
