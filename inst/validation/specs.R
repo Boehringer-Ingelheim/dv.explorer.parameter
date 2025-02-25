@@ -96,6 +96,9 @@ lineplot_module = list(
     ",
     bookmark = "
     The application shall support bookmarking. Clicks and brush are explicitely excluded.
+    ",
+    reference_values = "
+    The chart optionally displays reference values as horizontal lines. Those are provided as separate columns of the visit-dependent dataset.
     "
 ),
 

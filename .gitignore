@@ -4,4 +4,3 @@
 .Rhistory
 *.Rproj
 docs/
-man/*.Rd

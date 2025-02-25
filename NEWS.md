@@ -1,3 +1,10 @@
+# dv.explorer.parameter 0.1.3-9000
+
+* All modules:
+    * Reduce `value_vars` default values to "AVAL".
+* lineplot:
+    * Improved display of simultaneous reference values.
+
 # dv.explorer.parameter 0.1.2-9000
 
 * All modules:

@@ -30,8 +30,10 @@ LP_ID <- poc(
   ),
   TWEAK_TRANSPARENCY = "transparency",
   TWEAK_Y_AXIS_PROJECTION = "y_axis_projection",
+  SHOW_ALL_REFERENCE_VALUES = "show_all_reference_values",
   SELECTED_SUBJECT = "selected_subject",
-  LINE_HIGHLIGHT_MASK = "line_highlight_mask"
+  LINE_HIGHLIGHT_MASK = "line_highlight_mask",
+  OVERLAP_WARNING = "overlap_warning"
 )
 
 LP_MSG <- poc(
@@ -54,7 +56,8 @@ LP_MSG <- poc(
     COUNT_LISTING = "Data Count",
     SUMMARY_LISTING = "Summary listing",
     TABLE_SIGNIFICANCE = "Data Significance",
-    TWEAK_TRANSPARENCY = "Transparency"
+    TWEAK_TRANSPARENCY = "Transparency",
+    SHOW_ALL_REFERENCE_VALUES = "Show all reference values"
   ),
   VALIDATE = poc(
     NO_CAT_SEL = "Select a category",
@@ -95,8 +98,9 @@ LP_CNT <- poc(
 
 # UI and server functions
 
-#' @describeIn mod_lineplot UI
-# NOTE: id documented in lineplot_server
+#' Lineplot UI function
+#' @inheritParams lineplot_server
+#' @keywords developers 
 #' @export
 lineplot_UI <- function(id) {
   # UI ----
@@ -221,7 +225,7 @@ lineplot_chart <- function(data, title = NULL, ref_line_data = NULL, log_project
 
   fig <- ggplot2::ggplot(data = data, mapping = plot_aesthetic) +
     ggplot2::geom_line(
-      size = 1.1, # more readable for stippled lines
+      linewidth = 1.1, # more readable for stippled lines
       position = ggplot2::position_dodge(width = dodge_width)
     ) +
     ggplot2::geom_point(
@@ -272,34 +276,48 @@ lineplot_chart <- function(data, title = NULL, ref_line_data = NULL, log_project
   }
 
   # Reference lines
-  if (!is.null(ref_line_data)) {
-    ref_line_col_names <- names(ref_line_data)[names(ref_line_data) != CNT$PAR]
-    ref_line_count <- length(ref_line_col_names)
+  for (entry_name in names(ref_line_data)){
+    fig <- local({ # local because of NSE symbol capture
+      ref_line_var_data <- ref_line_data[[entry_name]]
+      
+      label_col_name <- paste0(CNT$VAL, "_label")
+      ref_line_var_data[[label_col_name]] <- entry_name
+      colors <- ref_line_var_data[[CNT$MAIN_GROUP]]
 
-    for (i in seq_len(ref_line_count)) {
-      name <- ref_line_col_names[[i]]
-      ref_line_data[[paste0(name, "_label")]] <- get_lbl_robust(ref_line_data, name)
-    }
-
-    # NOTE: Otherwise ggplot complains about missing groups for the aesthetic
-    if (CNT$MAIN_GROUP %in% names(data)) ref_line_data[[CNT$MAIN_GROUP]] <- ""
-    if (CNT$SUB_GROUP %in% names(data)) ref_line_data[[CNT$SUB_GROUP]] <- ""
-
-    ref_line_data[[CNT$SBJ]] <- ""
-
-    for (i in seq_len(ref_line_count)) {
-      data_col <- ref_line_col_names[[i]]
-      name_col <- paste0(data_col, "_label")
-      # by making linetype depend on the column name and including it into the aesthetic,
-      # we get the legend for free
-      fig <- fig + ggplot2::geom_hline(
-        data = ref_line_data,
+      args <- list(
+        data = ref_line_var_data,
         ggplot2::aes(
-          yintercept = .data[[data_col]],
-          linetype = .data[[name_col]]
+          yintercept = .data[[CNT$VAL]],
+          linetype = .data[[label_col_name]],
+          color = colors
         )
       )
+
+      fig <- fig + do.call(ggplot2::geom_hline, args)
+      return(fig)
+    })
+  }
+  
+  if (length(ref_line_data)) {
+    # Extend default ggplot2 palette to include an extra black level to indicate a reference line common to all groups
+    # Adapted from https://stackoverflow.com/a/8197703
+    gg_color_hue <- function(lev) {
+      res <- "#000000" # just black
+      n <- length(lev)
+      if (n > 1) {
+        # `n` colors + black
+        hues <- seq(15, 375, length = n)
+        res <- c(hcl(h = hues, l = 65, c = 100)[1:n - 1], "#000000")
+      }
+      # https://web.archive.org/web/20250130090454/https://ggplot2.tidyverse.org/reference/scale_manual.html says
+      # "It's recommended to use a named vector"
+      # (miguel) I can confirm that the colors sometimes come out wrong when there is a large level count (255).
+      res <- setNames(res, lev)
+      return(res)
     }
+    
+    ref_line_colors <- gg_color_hue(levels(ref_line_data[[1]][[CNT$MAIN_GROUP]]))
+    fig <- fig + ggplot2::scale_color_manual(values = ref_line_colors)
   }
 
   fig <- fig + ggplot2::ggtitle(title)
@@ -316,6 +334,8 @@ lineplot_chart <- function(data, title = NULL, ref_line_data = NULL, log_project
     # because the latter is only supported in ggplot2 >= 3.5.0
     fig <- fig + ggplot2::scale_y_continuous(trans = pseudo_log_projection(base = 10))
   }
+  # NOTE: Hook to generate documentation screenshots
+  # ggplot2::ggsave("/tmp/ggplot.png", plot = fig, width = 2000, height = 1200, unit = "px") # nolint
 
   fig
 }
@@ -462,8 +482,94 @@ lp_median_summary_fns <- list(
   y_prefix = "Median "
 )
 
+append_extra_vars <- function(left, right, right_extra_vars) {
+  common_vars <- c(CNT$SBJ, CNT$CAT, CNT$PAR, CNT$VIS)
+  right <- right[, c(common_vars, right_extra_vars)]
+  res <- dplyr::left_join(left, right, by = common_vars)
+  for (col in common_vars) attr(res[[col]], "label") <- attr(right[[col]], "label") # recover labels dropped by dplyr
+  return(res)
+}
 
-#' @describeIn mod_lineplot Server
+generate_ref_line_data <- function(df, show_all_ref_vals) {
+  checkmate::assert_subset(CNT$PAR, names(df))
+  checkmate::assert_logical(show_all_ref_vals, len = 1)
+  
+  originally_grouped <- (CNT$MAIN_GROUP %in% names(df))
+  
+  # Introduce artificial grouping. It is removed from the result before exiting this function
+  if (!originally_grouped) df[[CNT$MAIN_GROUP]] <- as.factor("Common reference value")
+  
+  # Introduce extra level to customize color of reference lines that would otherwise overlap
+  df[[CNT$MAIN_GROUP]] <- factor(df[[CNT$MAIN_GROUP]], 
+                                 levels = union(levels(df[[CNT$MAIN_GROUP]]), "Common reference value"))
+  if (show_all_ref_vals) { # Make all lines apply to all groups
+    df[[CNT$MAIN_GROUP]] <- factor("Common reference value", levels = levels(df[[CNT$MAIN_GROUP]]))
+  }
+  
+  common_vars <- c(CNT$PAR, CNT$MAIN_GROUP)
+  ref_line_vars <- setdiff(names(df), common_vars)
+  
+  res <- list() # one data.frame per ref_line_var indicating which ref lines to draw for each parameter
+
+  for (var in ref_line_vars){
+    entry_name <- get_lbl_robust(df, var)
+    if (show_all_ref_vals) entry_name <- paste0(entry_name, "\n(all ref. values)")
+    var_df <- unique(df[c(common_vars, var)])
+    names(var_df)[names(var_df) == var] <- CNT$VAL
+    
+    res[[entry_name]] <- var_df[FALSE, ] # data.frame without rows
+    for (param in unique(df[[CNT$PAR]])){
+      var_param_df <- var_df[var_df[[CNT$PAR]] == param, ]
+      
+      if (length(unique(var_param_df[[CNT$VAL]])) == 1) {
+        # All groups share the same reference value so we group them as one
+        row <- var_param_df[1, ]
+        row[1, CNT$MAIN_GROUP] <- "Common reference value"
+        res[[entry_name]] <- rbind(res[[entry_name]], row)
+      } else if (show_all_ref_vals) {
+        res[[entry_name]] <- rbind(res[[entry_name]], var_param_df)
+      } else {
+        # Collect all group levels with a single assigned reference value
+        for (group in unique(var_param_df[[CNT$MAIN_GROUP]])){
+          mask <- (var_param_df[[CNT$MAIN_GROUP]] == group)
+          if (sum(mask) == 1) {
+            res[[entry_name]] <- rbind(res[[entry_name]], var_param_df[mask, ])
+          }
+        }
+      }
+    }
+    if (nrow(res[[entry_name]]) == 0) res[[entry_name]] <- NULL # Drop empty ref_line_vars
+  }
+  
+  if (!originally_grouped) for (i in seq_along(res)) res[[i]][[CNT$MAIN_GROUP]] <- NULL
+
+  return(res)
+}
+
+compute_overlap_of_ref_line_data <- function(ref_line_data) {
+  overlap_info <- list()
+  for (name in names(ref_line_data)){
+    element <- ref_line_data[[name]]
+    if (CNT$MAIN_GROUP %in% names(element)) {
+      
+      repeat_mask <- duplicated(element[c(CNT$PAR, CNT$VAL)])
+      repeat_vals_per_par <- unique(element[c(CNT$PAR, CNT$VAL)][repeat_mask, ])
+      
+      for (i_row in seq_len(nrow(repeat_vals_per_par))){
+        row <- repeat_vals_per_par[i_row, ]
+        mask <- element[[CNT$PAR]] == row[[CNT$PAR]] & element[[CNT$VAL]] == row[[CNT$VAL]]
+        repeat_groups <- element[mask, CNT$MAIN_GROUP]
+        if (length(repeat_groups)) {
+          overlap_info[[length(overlap_info) + 1]] <- list(parameter = row[[CNT$PAR]], value = row[[CNT$VAL]], 
+                                                         groups = repeat_groups)
+        }
+      }
+    }
+  }
+  return(overlap_info)
+}
+
+#' Lineplot server function
 #'
 #' @param id Shiny ID `[character(1)]`
 #'
@@ -479,7 +585,7 @@ lp_median_summary_fns <- list(
 #' USUBJID, PARCAT, PARAM, AVISIT and AVAL, respectively.
 #'
 #' Optional columns specified by `ref_line_vars` should contain the same numeric value for all
-#' records of the same parameter.
+#' records of the same parameter for any given subject.
 #'
 #' @param group_dataset `[data.frame()]`
 #'
@@ -525,7 +631,8 @@ lp_median_summary_fns <- list(
 #'
 #' @param ref_line_vars `[character(n)]`
 #'
-#' Columns for `bm_dataset` specifying reference values for parameters
+#' Columns for `bm_dataset` specifying reference values for parameters.
+#' See [this article](../articles/lineplot_reference_values.html) for more details
 #'
 #' @param on_sbj_click `[function()]`
 #'
@@ -552,6 +659,8 @@ lp_median_summary_fns <- list(
 #'
 #' Default projection for the Y axis
 #'
+#' @keywords developers
+#'
 #' @export
 #'
 lineplot_server <- function(id,
@@ -566,7 +675,7 @@ lineplot_server <- function(id,
                             par_var = "PARAM",
                             visit_vars = c("AVISIT"),
                             cdisc_visit_vars = character(0),
-                            value_vars = c("AVAL", "PCHG"),
+                            value_vars = "AVAL",
                             additional_listing_vars = character(0),
                             ref_line_vars = character(0),
                             on_sbj_click = NULL,
@@ -798,7 +907,7 @@ lineplot_server <- function(id,
         }
 
         ds <- dplyr::group_by(ds, dplyr::across(c(CNT$VIS, grp_1, grp_2, CNT$PAR)))
-        ds <- dplyr::summarize(ds, dplyr::across(CNT$VAL, functions, .names = "{.fn}"), na.rm = TRUE)
+        ds <- dplyr::summarize(ds, dplyr::across(CNT$VAL, functions, .names = "{.fn}"))
         if ("center" %in% names(ds)) {
           names(ds)[names(ds) == "center"] <- CNT$VAL
         }
@@ -818,16 +927,25 @@ lineplot_server <- function(id,
 
       ds
     })
-
+    
     ref_line_data <- shiny::reactive({
-      res <- NULL
-      if (length(ref_line_vars)) {
-        res <- unique(bm_dataset()[c(VAR$PAR, ref_line_vars)])
-        params <- v_input_subset()[[LP_ID$PAR]][["par"]]()
-        res <- res[res[[VAR$PAR]] %in% params, ]
-        names(res)[names(res) == VAR$PAR] <- CNT$PAR
-      }
-      res
+      visit_var <- input_lp[[LP_ID$PAR_VISIT_COL]]()
+
+      rename_list <- stats::setNames(
+        c(CNT$SBJ, CNT$CAT, CNT$PAR, CNT$VIS),
+        c(VAR$SBJ, VAR$CAT, VAR$PAR, visit_var)
+      )
+      bm_dataset_with_internal_names <- rename_with_list(bm_dataset(), rename_list)
+      df <- data_subset()
+      show_all_ref_vals <- isTRUE(input[[LP_ID$SHOW_ALL_REFERENCE_VALUES]])
+
+      res <- shiny::maskReactiveContext({
+        df <- append_extra_vars(df, bm_dataset_with_internal_names, ref_line_vars)
+        keep_cols <- intersect(c(CNT$PAR, CNT$MAIN_GROUP, ref_line_vars), names(df))
+        df <- unique(df[keep_cols])
+        generate_ref_line_data(df, show_all_ref_vals)
+      })
+      return(res)
     })
 
     plot_height <- shiny::reactive({
@@ -898,6 +1016,16 @@ lineplot_server <- function(id,
           alpha = alpha
         )
       )
+       
+      repeat_info <- compute_overlap_of_ref_line_data(ref_line_data)
+      for (i in seq_along(repeat_info)){
+        e <- repeat_info[[i]]
+        msg <- sprintf("Reference lines for parameter %s and groups %s overlap on value %s.", 
+                       e$parameter, paste(e$groups, collapse = ", "), e$value)
+        shiny::showNotification(ui = msg, duration = NULL, closeButton = TRUE, type = "warning",
+                                id = paste0(LP_ID$OVERLAP_WARNING, i))
+      }
+      
       plot
     })
 
@@ -1013,19 +1141,6 @@ lineplot_server <- function(id,
       points
     }
 
-    append_extra_vars_to_listing <- function(df, bm_dataset, visit_var) {
-      common_vars_orig <- c(VAR$SBJ, VAR$CAT, VAR$PAR, visit_var)
-      bm_dataset <- bm_dataset[, c(common_vars_orig, additional_listing_vars)]
-
-      common_vars_internal_names <- c("subject_id", "category", "parameter", "visit")
-      rename_list <- stats::setNames(common_vars_internal_names, common_vars_orig)
-      bm_dataset <- rename_with_list(bm_dataset, rename_list)
-      res <- dplyr::left_join(df, bm_dataset, by = common_vars_internal_names)
-      # recover labels dropped by dplyr
-      for (col in common_vars_internal_names) attr(res[[col]], "label") <- attr(bm_dataset[[col]], "label")
-      return(res)
-    }
-
     # Interactive title selector interface ----
     title_ui <- local({
       drop_menu_helper <- function(id, label, ...) { # NOTE: not the drop_menu_helper in R/util-selectors.R
@@ -1082,6 +1197,11 @@ lineplot_server <- function(id,
           choices = c("Linear", "Logarithmic"),
           selected = default_y_axis_projection,
           inline = TRUE
+        ),
+        shiny::checkboxInput(
+          ns(LP_ID$SHOW_ALL_REFERENCE_VALUES),
+          LP_MSG$LABEL$SHOW_ALL_REFERENCE_VALUES,
+          value = FALSE
         )
       )
 
@@ -1307,10 +1427,15 @@ lineplot_server <- function(id,
         if (centrality == LP_CNT$PLOT_TYPE_SUBJECT_LEVEL) {
           # NOTE(miguel): If we decide to generalize this feature to other modules, the natural
           # place for the appending of columns would be lp_subset_data when no grouping is active
-          bm_df <- v_bm_dataset()
+          rename_list <- stats::setNames(
+            c(CNT$SBJ, CNT$CAT, CNT$PAR, CNT$VIS),
+            c(VAR$SBJ, VAR$CAT, VAR$PAR, visit_var)
+          )
+
+          bm_dataset_with_internal_names <- rename_with_list(v_bm_dataset(), rename_list)
 
           df <- shiny::maskReactiveContext(
-            append_extra_vars_to_listing(df, bm_df, visit_var)
+            append_extra_vars(df, bm_dataset_with_internal_names, additional_listing_vars)
           )
         }
 
@@ -1459,6 +1584,8 @@ lineplot_server <- function(id,
 #' Shiny ID of the module receiving the selected subject ID in the single subject listing. This ID must
 #' be present in the app or be NULL.
 #'
+#' @inheritParams lineplot_server
+#'
 #' @name mod_lineplot
 #'
 #' @keywords main
@@ -1478,7 +1605,7 @@ mod_lineplot <- function(module_id,
                          par_var = "PARAM",
                          visit_vars = c("AVISIT"),
                          cdisc_visit_vars = character(0),
-                         value_vars = c("AVAL", "PCHG"),
+                         value_vars = "AVAL",
                          additional_listing_vars = character(0),
                          ref_line_vars = character(0),
                          default_centrality_fn = NULL,
@@ -1592,11 +1719,11 @@ mod_lineplot_API_spec <- TC$group(
   cat_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())),
   par_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())),
   visit_vars = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())) |> TC$flag("one_or_more"),
-  cdisc_visit_vars = TC$col("bm_dataset_name", TC$or(TC$numeric())) |> TC$flag("zero_or_more"),
+  cdisc_visit_vars = TC$col("bm_dataset_name", TC$numeric()) |> TC$flag("zero_or_more"),
   # FIXME: ? Interaction between visit_vars and cdisc_visit_vars; one needs to be specified
   value_vars = TC$col("bm_dataset_name", TC$numeric()) |> TC$flag("one_or_more"),
   additional_listing_vars = TC$col("bm_dataset_name", TC$anything()) |> TC$flag("zero_or_more", "optional"),
-  ref_line_vars = TC$col("bm_dataset_name", TC$anything()) |> TC$flag("zero_or_more", "optional"),
+  ref_line_vars = TC$col("bm_dataset_name", TC$numeric()) |> TC$flag("zero_or_more", "optional"),
   default_centrality_fn = TC$character() |> TC$flag("ignore"), # TODO: TC$choice ?
   default_dispersion_fn = TC$character() |> TC$flag("ignore"), # TODO: TC$choice ?
   default_cat = TC$choice_from_col_contents("cat_var") |> TC$flag("zero_or_more", "optional"),
@@ -1681,6 +1808,40 @@ check_mod_lineplot <- function(
           )
         )
       }
+    }
+  }
+  
+  if (OK[["subjid_var"]] && OK[["par_var"]] && OK[["ref_line_vars"]]) {
+    ds <- datasets[[bm_dataset_name]]
+    
+    for (ref_line_var in ref_line_vars){
+      combinations <- unique(ds[c(subjid_var, par_var, ref_line_var)])
+      # broad pass (any floating point difference is detected)
+      dups <- duplicated(combinations[c(subjid_var, par_var)])
+      if (any(dups)) {
+        # narrow pass (floating point differences after the sixth decimal are dropped). Saves on float formatting
+        combinations[[ref_line_var]] <- sprintf("%.6f", combinations[[ref_line_var]])
+        combinations <- unique(combinations)
+        dups <- (duplicated(combinations[c(subjid_var, par_var)]) |
+                   duplicated(combinations[c(subjid_var, par_var)], fromLast = TRUE))
+      }
+      dup_df <- combinations[dups, ]
+      
+      
+      CM$assert(
+        container = err,
+        cond = nrow(dup_df) == 0,
+        msg = sprintf(
+          paste(
+            "The reference line variable `<b>%s</b>` in dataset `<b>%s</b>` is not constant for the following",
+            "subjects and parameters:",
+            "<pre>%s</pre>",
+            "You can either remove the `<b>%s</b>` variable from the `ref_line_vars` parameter or preprocess the",
+            "dataset to avoid this issue."
+          ),
+          ref_line_var, bm_dataset_name, paste(capture.output(dup_df), collapse = "\n"), ref_line_var
+        )
+      )
     }
   }
 

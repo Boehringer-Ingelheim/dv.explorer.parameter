@@ -1,4 +1,4 @@
-# YT#VH5cf018ae9cef0cbf83422a7d2b6b6b04#VH00000000000000000000000000000000#
+# YT#VH6fdb3d19d5c72c6488f3bcfe86c03095#VH5cf018ae9cef0cbf83422a7d2b6b6b04#
 TC <- local({ # _T_ype C_hecks
   # basic types
   T_logical <- function() list(kind = "logical")
@@ -362,6 +362,7 @@ TC <- local({ # _T_ype C_hecks
     honor_as_array_flag_inner = T_honor_as_array_flag_inner,
     honor_as_array_flag = T_honor_as_array_flag,
     honor_map_to_flag_inner = T_honor_map_to_flag_inner,
-    honor_map_to_flag = T_honor_map_to_flag
+    honor_map_to_flag = T_honor_map_to_flag,
+    get_type_as_text = T_get_type_as_text
   )
 })

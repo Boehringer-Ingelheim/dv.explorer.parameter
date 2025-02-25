@@ -88,7 +88,7 @@ This visualization consists of a facetted lineplot based on the set of parameter
 
 ![](images/lineplot_01.jpg)
 
-# Tables
+# Listings
 
 ## Subject-level listing
 

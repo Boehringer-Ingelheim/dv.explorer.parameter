@@ -99,15 +99,16 @@ FP_MSG <- poc(
 
 #' Forest plot module
 #'
-#' @param id Shiny ID `[character(1)]`
-#'
 #' @name mod_forest
+#' @inheritParams forest_server
 #'
 #' @keywords main
 #'
 NULL
 
-#' @describeIn mod_forest UI
+#' Forest plot UI function
+#'
+#' @keywords developers
 #'
 #' @param id `[character(1)]`
 #'
@@ -461,7 +462,9 @@ gen_result_table_fun_ <- function(ds, sl, fun, label) {
 gen_result_table_fun <- strict(gen_result_table_fun_)
 
 
-#' @describeIn mod_forest Server
+#' Forest plot server function
+#'
+#' @keywords developers
 #'
 #' @param id `[character(1)]`
 #'
@@ -537,7 +540,7 @@ forest_server <- function(id,
                           cat_var = "PARCAT",
                           par_var = "PARAM",
                           visit_var = "AVISIT",
-                          value_vars = c("AVAL", "PCHG"),
+                          value_vars = "AVAL",
                           default_cat = NULL,
                           default_par = NULL,
                           default_visit = NULL,
@@ -1209,7 +1212,7 @@ mod_forest <- function(module_id,
                        cat_var = "PARCAT",
                        par_var = "PARAM",
                        visit_var = "AVISIT",
-                       value_vars = c("AVAL", "PCHG"),
+                       value_vars = "AVAL",
                        default_cat = NULL,
                        default_par = NULL,
                        default_visit = NULL,

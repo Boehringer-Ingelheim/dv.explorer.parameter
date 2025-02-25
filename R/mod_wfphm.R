@@ -264,7 +264,8 @@ WFPHM_MSG <- pack_of_constants( # nolint
 #'
 NULL
 
-#' @describeIn wfphm_wf UI
+#' Waterfall UI function
+#' @keywords developers
 wfphm_wf_UI <- function(id) { # nolintr
 
   # id assert ---- It goes on its own as id is used to provide context to the other assertions
@@ -311,7 +312,8 @@ wfphm_wf_UI <- function(id) { # nolintr
 }
 
 # nolint start cyclocomp_linter
-#' @describeIn wfphm_wf server
+#' Waterfall server function
+#' @keywords developers
 wfphm_wf_server <- function(id,
                             bm_dataset,
                             group_dataset,
@@ -908,7 +910,8 @@ wfphm_wf_rename_cols <- function(df) {
 #'
 NULL
 
-#' @describeIn wfphm_hmcat UI
+#' Waterfall plus heatmap categorical heatmap UI function
+#' @keywords developers
 wfphm_hmcat_UI <- function(id) { # nolint
 
   # id assert ---- It goes on its own as id is used to provide context to the other assertions
@@ -943,7 +946,8 @@ wfphm_hmcat_UI <- function(id) { # nolint
   )
 }
 
-#' @describeIn wfphm_hmcat server
+#' Waterfall plus heatmap categorical heatmap server function
+#' @keywords developers
 wfphm_hmcat_server <- function(id,
                                dataset,
                                subjid_var,
@@ -1906,9 +1910,7 @@ wfphm_hmpar_subset <- function(
 #'
 #' See the subsections for each of plots particularities
 #'
-#' @param id Shiny ID `[character(1)]`
-#'
-#' @param bm_dataset `[shiny::reactive(data.frame) | shinymeta::metaReactive(data.frame)]`
+#' @param module_id Shiny ID `[character(1)]`
 #'
 #' It expects the following format:
 #'
@@ -1916,8 +1918,6 @@ wfphm_hmpar_subset <- function(
 #' and `subjid_var`
 #'  - `cat_var`, `par_var`, `visit_var` and `subjid_var` columns are factors
 #'  - It contains at least 1 row
-#'
-#' @param group_dataset `[shiny::reactive(data.frame) | shinymeta::metaReactive(data.frame)]`
 #'
 #' It expects the following format:
 #'
@@ -1938,8 +1938,6 @@ wfphm_hmpar_subset <- function(
 #'
 #' named vector containing a set of transformation where the name is the string shown in the selector and the value is
 #' function to be applied according to details section.
-#'
-#' @param tr_choices the names of the entries in tr_mapper
 #'
 #' @param bar_group_palette `[list(palettes)]`
 #'
@@ -1980,8 +1978,12 @@ wfphm_hmpar_subset <- function(
 #'
 NULL
 
-#' @describeIn wfphm UI
+#' Waterfall plus heatmap UI function
 #'
+#' @param id Shiny ID `[character(1)]`
+#' @param tr_choices the names of the entries in tr_mapper
+#'
+#' @keywords developers
 #' @export
 
 wfphm_UI <- function(id, tr_choices = names(tr_mapper_def())) { # nolint
@@ -2066,8 +2068,14 @@ wfphm_UI <- function(id, tr_choices = names(tr_mapper_def())) { # nolint
   wfphm_mainpanel
 }
 
-#' @describeIn wfphm server
+#' Waterfall plus heatmap server function
+#' @keywords developers
+#' @param bm_dataset `[shiny::reactive(data.frame) | shinymeta::metaReactive(data.frame)]`
+#' @param group_dataset `[shiny::reactive(data.frame) | shinymeta::metaReactive(data.frame)]`
 #'
+#' @keywords developers
+#' @inheritParams wfphm_UI
+#' @inheritParams mod_wfphm
 #' @export
 wfphm_server <- function(id,
                          bm_dataset,
@@ -2075,17 +2083,7 @@ wfphm_server <- function(id,
                          cat_var = "PARCAT1", par_var = "PARAM",
                          visit_var = "AVISIT",
                          subjid_var = "SUBJID",
-                         value_vars = c(
-                           "AVAL",
-                           "CHG",
-                           "PCHG",
-                           "log2AVAL",
-                           "log2CHG",
-                           "log2PCHG",
-                           "log10AVAL",
-                           "log10CHG",
-                           "log10PCHG"
-                         ),
+                         value_vars = "AVAL",
                          bar_group_palette = list(),
                          cat_palette = list(),
                          tr_mapper = tr_mapper_def(),
@@ -2254,7 +2252,6 @@ tr_mapper_def <- function() {
 
 #' @describeIn wfphm dv.manager wrapper for the module
 #'
-#' @param module_id Shiny id
 #' @param bm_dataset_name,group_dataset_name
 #'
 #' The name of the dataset
@@ -2265,17 +2262,7 @@ mod_wfphm <- function(
     cat_var = "PARCAT1", par_var = "PARAM",
     visit_var = "AVISIT",
     subjid_var = "SUBJID",
-    value_vars = c(
-      "AVAL",
-      "CHG",
-      "PCHG",
-      "log2AVAL",
-      "log2CHG",
-      "log2PCHG",
-      "log10AVAL",
-      "log10CHG",
-      "log10PCHG"
-    ),
+    value_vars = "AVAL",
     bar_group_palette = list(),
     cat_palette = list(),
     tr_mapper = tr_mapper_def(),

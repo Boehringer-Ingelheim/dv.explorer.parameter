@@ -118,7 +118,7 @@ A table containing a set of statistical tests comparing the means of different g
 # Creating a boxplot application
 
 ```{r, eval=FALSE}
-adbm_dataset <- dv.explorer.parameter::adbm_example %>%
+adbm_dataset <- dv.explorer.parameter:::safety_data()[["bm"]] %>%
   dplyr::mutate(
     USUBJID = factor(USUBJID),
     PARCAT1 = factor(PARCAT1),
@@ -126,7 +126,7 @@ adbm_dataset <- dv.explorer.parameter::adbm_example %>%
     AVISIT = factor(AVISIT)
   )
 
-adsl_dataset <- dv.explorer.parameter::adsl_example %>%
+adsl_dataset <- dv.explorer.parameter:::safety_data()[["sl"]] %>%
   dplyr::mutate(USUBJID = factor(USUBJID))
 
 dv.manager::run_app(
@@ -137,7 +137,8 @@ dv.manager::run_app(
       bm_dataset_name = "adbm",
       group_dataset_name = "adsl",
       subjid_var = "USUBJID",
-      cat_var = "PARCAT1"
+      cat_var = "PARCAT1",
+      value_vars = "AVAL"
     )
   ),
   filter_data = "adsl",

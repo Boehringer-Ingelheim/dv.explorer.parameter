@@ -68,12 +68,14 @@ SPM <- poc( # nolint
 #'  of grouping. It also includes correlation stats.
 #'
 #' @name mod_scatterplotmatrix
+#' @inheritParams scatterplotmatrix_server
 #'
 #' @keywords main
 #'
 NULL
 
-#' @describeIn mod_scatterplotmatrix UI
+#' Scatter plot matrix UI function
+#' @keywords developers
 #' @param id Shiny ID `[character(1)]`
 #' @export
 scatterplotmatrix_UI <- function(id) { # nolint
@@ -134,8 +136,8 @@ scatterplotmatrix_UI <- function(id) { # nolint
   }
 }
 
-#' @describeIn mod_scatterplotmatrix Server
-#'
+#' Scatter plot matrix server function
+#' @keywords developers
 #' @description
 #'
 #' ## Input dataframes:
@@ -190,7 +192,7 @@ scatterplotmatrix_server <- function(id,
                                      dataset_name = shiny::reactive(character(0)),
                                      cat_var = "PARCAT",
                                      par_var = "PARAM",
-                                     value_vars = c("AVAL", "PCHG"),
+                                     value_vars = "AVAL",
                                      visit_var = "AVISIT",
                                      subjid_var = "SUBJID",
                                      default_cat = NULL,
@@ -492,7 +494,7 @@ mod_scatterplotmatrix <- function(module_id,
                                   group_dataset_name,
                                   cat_var = "PARCAT",
                                   par_var = "PARAM",
-                                  value_vars = c("AVAL", "PCHG"),
+                                  value_vars = "AVAL",
                                   visit_var = "AVISIT",
                                   subjid_var = "SUBJID",
                                   default_cat = NULL,

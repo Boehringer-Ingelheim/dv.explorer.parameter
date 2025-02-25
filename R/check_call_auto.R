@@ -252,7 +252,7 @@ check_mod_lineplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, 
     OK[["additional_listing_vars"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("additional_listing_vars",
         additional_listing_vars, subkind, flags, bm_dataset_name, datasets[[bm_dataset_name]], warn,
         err)
-    subkind <- list(kind = "anything")
+    subkind <- list(kind = "numeric", min = NA, max = NA)
     flags <- list(zero_or_more = TRUE, optional = TRUE)
     OK[["ref_line_vars"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("ref_line_vars",
         ref_line_vars, subkind, flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)

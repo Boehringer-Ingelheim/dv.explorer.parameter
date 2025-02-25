@@ -147,7 +147,7 @@ ROC_PLOT_VAL <- poc(
 
 #' ROC module
 #'
-#' @param id Shiny ID `[character(1)]`
+#' @inheritParams roc_server
 #'
 #' @name mod_roc
 #'
@@ -155,7 +155,9 @@ ROC_PLOT_VAL <- poc(
 #'
 NULL
 
-#' @describeIn mod_roc UI
+#' ROC UI function
+#' @keywords developers
+#' @inheritParams roc_server
 #' @export
 roc_UI <- function(id) {
   # id assert  It goes on its own as id is used to provide context to the other assertions
@@ -354,8 +356,8 @@ roc_UI <- function(id) {
   }
 }
 
-#' @describeIn mod_roc Server
-#'
+#' ROC server function
+#' @keywords developers
 #' @description
 #'
 #' ## Input dataframes:
@@ -387,6 +389,7 @@ roc_UI <- function(id) {
 #' one record per subject
 #'
 #' It expects to contain, at least, `subjid_var`
+#' @param id Shiny ID `[character(1)]`
 #'
 #' @param pred_dataset,resp_dataset,group_dataset `[data.frame()]`
 #'
@@ -421,7 +424,7 @@ roc_server <- function(id,
                        dataset_name = shiny::reactive(character(0)),
                        pred_cat_var = "PARCAT",
                        pred_par_var = "PARAM",
-                       pred_value_vars = c("AVAL", "PCHG"),
+                       pred_value_vars = "AVAL",
                        pred_visit_var = "AVISIT",
                        resp_cat_var = "PARCAT",
                        resp_par_var = "PARAM",
@@ -1028,7 +1031,7 @@ mod_roc <- function(
     module_id, pred_dataset_name, resp_dataset_name, group_dataset_name,
     pred_cat_var = "PARCAT",
     pred_par_var = "PARAM",
-    pred_value_vars = c("AVAL", "PCHG"),
+    pred_value_vars = "AVAL",
     pred_visit_var = "AVISIT",
     resp_cat_var = "PARCAT",
     resp_par_var = "PARAM",
