@@ -97,8 +97,9 @@ LP_CNT <- poc(
 
 # UI and server functions
 
-#' @describeIn mod_lineplot UI
-# NOTE: id documented in lineplot_server
+#' Lineplot UI function
+#' @inheritParams lineplot_server
+#' @keywords developers 
 #' @export
 lineplot_UI <- function(id) {
   # UI ----
@@ -545,7 +546,7 @@ generate_ref_line_data <- function(df, show_all_ref_vals) {
 }
 
 
-#' @describeIn mod_lineplot Server
+#' Lineplot server function
 #'
 #' @param id Shiny ID `[character(1)]`
 #'
@@ -634,6 +635,8 @@ generate_ref_line_data <- function(df, show_all_ref_vals) {
 #' @param default_y_axis_projection `["Linear"|"Logarithmic"]`
 #'
 #' Default projection for the Y axis
+#'
+#' @keywords developers
 #'
 #' @export
 #'
@@ -1547,6 +1550,8 @@ lineplot_server <- function(id,
 #'
 #' Shiny ID of the module receiving the selected subject ID in the single subject listing. This ID must
 #' be present in the app or be NULL.
+#'
+#' @inheritParams lineplot_server
 #'
 #' @name mod_lineplot
 #'

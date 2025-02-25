@@ -68,12 +68,14 @@ SPM <- poc( # nolint
 #'  of grouping. It also includes correlation stats.
 #'
 #' @name mod_scatterplotmatrix
+#' @inheritParams scatterplotmatrix_server
 #'
 #' @keywords main
 #'
 NULL
 
-#' @describeIn mod_scatterplotmatrix UI
+#' Scatter plot matrix UI function
+#' @keywords developers
 #' @param id Shiny ID `[character(1)]`
 #' @export
 scatterplotmatrix_UI <- function(id) { # nolint
@@ -134,8 +136,8 @@ scatterplotmatrix_UI <- function(id) { # nolint
   }
 }
 
-#' @describeIn mod_scatterplotmatrix Server
-#'
+#' Scatter plot matrix server function
+#' @keywords developers
 #' @description
 #'
 #' ## Input dataframes:

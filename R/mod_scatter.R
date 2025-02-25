@@ -86,13 +86,16 @@ SP <- poc( # nolint
 #' It also includes a set of listings with information about the population and the regression and correlation
 #' estimates.
 #'
+#' @inheritParams scatterplot_server
+#'
 #' @name mod_scatterplot
 #'
 #' @keywords main
 #'
 NULL
 
-#' @describeIn mod_scatterplot UI
+#' Scatter plot UI function
+#' @keywords developers
 #' @param id Shiny ID `[character(1)]`
 #' @export
 scatterplot_UI <- function(id) { # nolint
@@ -194,7 +197,9 @@ scatterplot_UI <- function(id) { # nolint
   }
 }
 
-#' @describeIn mod_scatterplot Server
+#' Scatter plot server function
+#'
+#' @keywords developers
 #'
 #' @description
 #'

@@ -2,28 +2,9 @@
 % Please edit documentation in R/mod_wfphm.R
 \name{wfphm}
 \alias{wfphm}
-\alias{wfphm_UI}
-\alias{wfphm_server}
 \alias{mod_wfphm}
 \title{Waterfall heatmap shiny module}
 \usage{
-wfphm_UI(id, tr_choices = names(tr_mapper_def()))
-
-wfphm_server(
-  id,
-  bm_dataset,
-  group_dataset,
-  cat_var = "PARCAT1",
-  par_var = "PARAM",
-  visit_var = "AVISIT",
-  subjid_var = "SUBJID",
-  value_vars = "AVAL",
-  bar_group_palette = list(),
-  cat_palette = list(),
-  tr_mapper = tr_mapper_def(),
-  show_x_ticks = TRUE
-)
-
 mod_wfphm(
   module_id,
   bm_dataset_name,
@@ -40,11 +21,7 @@ mod_wfphm(
 )
 }
 \arguments{
-\item{id}{Shiny ID \verb{[character(1)]}}
-
-\item{tr_choices}{the names of the entries in tr_mapper}
-
-\item{bm_dataset}{\verb{[shiny::reactive(data.frame) | shinymeta::metaReactive(data.frame)]}
+\item{module_id}{Shiny ID \verb{[character(1)]}
 
 It expects the following format:
 \itemize{
@@ -52,9 +29,7 @@ It expects the following format:
 and \code{subjid_var}
 \item \code{cat_var}, \code{par_var}, \code{visit_var} and \code{subjid_var} columns are factors
 \item It contains at least 1 row
-}}
-
-\item{group_dataset}{\verb{[shiny::reactive(data.frame) | shinymeta::metaReactive(data.frame)]}
+}
 
 It expects the following format:
 \itemize{
@@ -62,6 +37,8 @@ It expects the following format:
 \item \code{subjid_var} columns is a factors
 \item It contains at least 1 row
 }}
+
+\item{bm_dataset_name, group_dataset_name}{The name of the dataset}
 
 \item{cat_var, par_var, visit_var, subjid_var}{\verb{[character(1)]}
 
@@ -91,10 +68,6 @@ function to be applied according to details section.}
 \item{show_x_ticks}{\verb{[logical(1)]}
 
 show x ticks in the parameter heatmap}
-
-\item{module_id}{Shiny id}
-
-\item{bm_dataset_name, group_dataset_name}{The name of the dataset}
 }
 \value{
 \subsection{UI}{
@@ -132,10 +105,6 @@ plot.
 }
 \section{Functions}{
 \itemize{
-\item \code{wfphm_UI()}: UI
-
-\item \code{wfphm_server()}: server
-
 \item \code{mod_wfphm()}: dv.manager wrapper for the module
 
 }}

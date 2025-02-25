@@ -71,15 +71,11 @@ CH_MSG <- poc( # nolint
 
 #' Correlation Heatmap module
 #'
-#' @param id Shiny ID `[character(1)]`
-#'
 #' @param default_cat Default selected categories
 #'
 #' @param default_par Default selected parameters
 #'
 #' @param default_visit Default selected visits
-#'
-#' @param default_corr_method Name of default correlation method
 #'
 #' @name mod_corr_hm
 #'
@@ -87,7 +83,9 @@ CH_MSG <- poc( # nolint
 #'
 NULL
 
-#' @describeIn mod_corr_hm UI
+#' Correlation heatmap UI function
+#'
+#' @keywords developers
 #'
 #' @param id `[character(1)]`
 #'
@@ -462,7 +460,9 @@ scatter_plot <- function(df, x_var, y_var) {
 }
 
 
-#' @describeIn mod_corr_hm Server
+#' Correlation heatmap server function
+#'
+#' @keywords developers
 #'
 #' @param id `[character(1)]`
 #'
@@ -861,6 +861,8 @@ ch_subset_data <- function(sel, cat_col, par_col, val_col, vis_col, bm_ds, subj_
 #' Biomarker dataset name
 #'
 #' @name mod_corr_hm
+#'
+#' @inheritParams corr_hm_server
 #'
 #' @keywords main
 #'

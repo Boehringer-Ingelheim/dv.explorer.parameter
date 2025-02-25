@@ -2,31 +2,18 @@
 % Please edit documentation in R/mod_wfphm.R
 \name{wfphm_wf}
 \alias{wfphm_wf}
-\alias{wfphm_wf_UI}
-\alias{wfphm_wf_server}
 \title{Waterfall component of WFPHM}
-\usage{
-wfphm_wf_UI(id)
-
-wfphm_wf_server(
-  id,
-  bm_dataset,
-  group_dataset,
-  cat_var,
-  par_var,
-  visit_var,
-  subjid_var,
-  value_vars,
-  .default_group_palette = function(x) {
-     pal_get_cat_palette(x,
-    viridisLite::viridis(length(unique(x))))
- },
-  bar_group_palette = list(),
-  margin
-)
-}
 \arguments{
 \item{id}{Shiny ID \verb{[character(1)]}}
+
+\item{dataset}{\verb{[shiny::reactive(data.frame) | shinymeta::metaReactive(data.frame)]}
+
+It expects the following format:
+\itemize{
+\item it contains, at least, the columns specified in the parameters: \code{cat_var}, \code{par_var}, \code{value_vars}, \code{visit_var}
+and \code{subjid_var}
+\item \code{cat_var}, \code{par_var}, \code{visit_var} and \code{subjid_var} columns are factors
+}}
 
 \item{cat_var, par_var, visit_var, subjid_var}{\verb{[character(1)]}
 
@@ -45,15 +32,6 @@ grouping}
 \item{margin}{\verb{[numeric(4) | shiny::reactive(numeric(4)) | shinymeta::metaReactive(numeric(4))]}
 
 margin to be used on each of the sides. It must contain four entries named \code{top}, \code{bottom}, \code{left} and \code{right}}
-
-\item{dataset}{\verb{[shiny::reactive(data.frame) | shinymeta::metaReactive(data.frame)]}
-
-It expects the following format:
-\itemize{
-\item it contains, at least, the columns specified in the parameters: \code{cat_var}, \code{par_var}, \code{value_vars}, \code{visit_var}
-and \code{subjid_var}
-\item \code{cat_var}, \code{par_var}, \code{visit_var} and \code{subjid_var} columns are factors
-}}
 }
 \value{
 \subsection{UI}{
@@ -174,11 +152,4 @@ Then a call to \link{bar_D3} is done with the following arguments:
 }
 }
 }
-\section{Functions}{
-\itemize{
-\item \code{wfphm_wf_UI()}: UI
-
-\item \code{wfphm_wf_server()}: server
-
-}}
 \keyword{internal}

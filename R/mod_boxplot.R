@@ -82,13 +82,15 @@ BP <- poc( # nolint
 #' It also includes a set of listings with information about the population, distribution and statistical comparisons.
 #'
 #' @name mod_boxplot
+#' @inheritParams boxplot_server
 #'
 #' @keywords main
 #'
 NULL
 
-#' @describeIn mod_boxplot UI
+#' Boxplot UI function
 #' @param id Shiny ID `[character(1)]`
+#' @keywords developers
 #' @export
 boxplot_UI <- function(id) { # nolint
   # id assert ---- It goes on its own as id is used to provide context to the other assertions
@@ -188,7 +190,8 @@ boxplot_UI <- function(id) { # nolint
   }
 }
 
-#' @describeIn mod_boxplot Server
+#' Boxplot server function
+#' @keywords developers
 #'
 #' @description
 #'
@@ -727,6 +730,8 @@ boxplot_server <- function(id,
 #' Shiny ID of the module receiving the selected subject ID in the data listing. This ID must
 #' be present in the app or be NULL.
 #'
+#' inheritParams boxplot_server
+#'
 #' @name mod_boxplot
 #'
 #' @keywords main
@@ -861,7 +866,8 @@ dataset_info_boxplot <- function(bm_dataset_name, group_dataset_name, ...) {
 
 mod_boxplot <- CM$module(mod_boxplot, check_mod_boxplot, dataset_info_boxplot)
 
-#' @describeIn mod_boxplot Boxplot wrapper when its output is fed into papo module
+#' Boxplot wrapper when its output is fed into the papo module
+#' @keywords main
 #' @export
 mod_boxplot_papo <- function(...) {
   .Deprecated("mod_boxplot_papo", msg = "'mod_boxplot_papo' is no longer required and should be replaced by 'mod_boxplot'. It is still available for compatibility purposes") # nolint
