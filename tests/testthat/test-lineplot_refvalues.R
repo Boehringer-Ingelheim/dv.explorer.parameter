@@ -71,4 +71,26 @@ test_that("generate_ref_line_data groups ref values" |> vdoc[["add_spec"]](specs
     )
   )
   expect_equal(res, expected_res)
+  
+  df <- data.frame(
+    parameter =  c("pA", "pA", "pA", "pB", "pB", "pB") |> factor(),
+    main_group = c("gA", "gB", "gC", "gA", "gB", "gC") |> factor(),
+    ref_val =    c( 1,    1,    2,    1,    2,    1 )
+  )
+  ref_line_data <- generate_ref_line_data(df, show_all_ref_vals = FALSE)
+  
+  recursive_factor_to_char <- function(e){
+    if(inherits(e, "list")) for(i in seq_along(e)) e[[i]] <- recursive_factor_to_char(e[[i]])
+    else if(inherits(e, "factor")) e <- as.character(e)
+    return(e)
+  }
+  
+  res <- compute_overlap_of_ref_line_data(ref_line_data)
+  expect_identical(
+    recursive_factor_to_char(res), # drops levels to make comparison easier
+    list(
+      list(parameter = "pA", value = 1, groups = c("gA", "gB")),
+      list(parameter = "pB", value = 1, groups = c("gA", "gC"))
+    )
+  )
 })

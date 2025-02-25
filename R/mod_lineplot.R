@@ -32,7 +32,8 @@ LP_ID <- poc(
   TWEAK_Y_AXIS_PROJECTION = "y_axis_projection",
   SHOW_ALL_REFERENCE_VALUES = "show_all_reference_values",
   SELECTED_SUBJECT = "selected_subject",
-  LINE_HIGHLIGHT_MASK = "line_highlight_mask"
+  LINE_HIGHLIGHT_MASK = "line_highlight_mask",
+  OVERLAP_WARNING = "overlap_warning"
 )
 
 LP_MSG <- poc(
@@ -545,6 +546,28 @@ generate_ref_line_data <- function(df, show_all_ref_vals) {
   return(res)
 }
 
+compute_overlap_of_ref_line_data <- function(ref_line_data) {
+  overlap_info <- list()
+  for (name in names(ref_line_data)){
+    element <- ref_line_data[[name]]
+    if (CNT$MAIN_GROUP %in% names(element)) {
+      
+      repeat_mask <- duplicated(element[c(CNT$PAR, CNT$VAL)])
+      repeat_vals_per_par <- unique(element[c(CNT$PAR, CNT$VAL)][repeat_mask, ])
+      
+      for (i_row in seq_len(nrow(repeat_vals_per_par))){
+        row <- repeat_vals_per_par[i_row, ]
+        mask <- element[[CNT$PAR]] == row[[CNT$PAR]] & element[[CNT$VAL]] == row[[CNT$VAL]]
+        repeat_groups <- element[mask, CNT$MAIN_GROUP]
+        if (length(repeat_groups)) {
+          overlap_info[[length(overlap_info) + 1]] <- list(parameter = row[[CNT$PAR]], value = row[[CNT$VAL]], 
+                                                         groups = repeat_groups)
+        }
+      }
+    }
+  }
+  return(overlap_info)
+}
 
 #' Lineplot server function
 #'
@@ -993,6 +1016,16 @@ lineplot_server <- function(id,
           alpha = alpha
         )
       )
+       
+      repeat_info <- compute_overlap_of_ref_line_data(ref_line_data)
+      for (i in seq_along(repeat_info)){
+        e <- repeat_info[[i]]
+        msg <- sprintf("Reference lines for parameter %s and groups %s overlap on value %s.", 
+                       e$parameter, paste(e$groups, collapse = ", "), e$value)
+        shiny::showNotification(ui = msg, duration = NULL, closeButton = TRUE, type = "warning",
+                                id = paste0(LP_ID$OVERLAP_WARNING, i))
+      }
+      
       plot
     })
 
