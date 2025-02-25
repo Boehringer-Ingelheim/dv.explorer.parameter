@@ -101,7 +101,7 @@ our selected grouping. Since the plot already provides colors for the "female" a
 
 # Which demographic variable dictates distinct reference values?
 
-The original `bm` dataset does not explain which variable leads to subjects having different `A1LO` reference values. One of the two subjects as a `A1LO` of 3.85 and the other one of 4.03. It's likely that `SEX` is the variable that justifies the difference. However, given the totality of the data, `COUNTRY` would work just as well. If we change the main grouping to `COUNTRY`, the plot remains the same except for the grouping legend:
+The original `bm` dataset does not explain which variable leads to subjects having different `A1LO` reference values. One of the two subjects has a `A1LO` value of 3.85 while the other has one of 4.03. It's likely that `SEX` is the variable that justifies the difference. However, given the totality of the data, `COUNTRY` would work just as well. If we change the main grouping to `COUNTRY`, the plot remains the same except for the grouping legend:
 
 ```{r, eval=FALSE}
 dv.explorer.parameter::mod_lineplot(
@@ -122,7 +122,7 @@ dv.explorer.parameter::mod_lineplot(
   ..., ref_line_vars = c("A1LO", "A1HI")
 )
 ```
-In this case, `mod_lineplot` can't plot the `A1LO` reference lines in a way that ties them to each of the two `AVAL` lines, so they are dropped:
+In this case, `mod_lineplot` can't use color to pair the `A1LO` reference lines to the `AVAL` lines, so the reference lines are omitted:
 
 ![](images/lineplot_ref_line_03.png)
 
