@@ -1,3 +1,8 @@
+# dv.explorer.parameter 0.1.4-9000
+
+* All modules:
+    * Accept character() input for subject, category and parameter data.frame columns.
+
 # dv.explorer.parameter 0.1.3-9000
 
 * All modules:
