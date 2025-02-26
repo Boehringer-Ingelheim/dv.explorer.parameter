@@ -1288,9 +1288,9 @@ mod_forest_API_spec <- TC$group(
   group_dataset_name = TC$dataset_name(),
   numeric_numeric_functions = TC$fn(arg_count = 2) |> TC$flag("optional", "zero_or_more", "named"),
   numeric_factor_functions = TC$fn(arg_count = 2) |> TC$flag("optional", "zero_or_more", "named"),
-  subjid_var = TC$col("group_dataset_name", TC$factor()) |> TC$flag("subjid_var"),
-  cat_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())),
-  par_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())),
+  subjid_var = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("subjid_var", "map_character_to_factor"),
+  cat_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("map_character_to_factor"),
+  par_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("map_character_to_factor"),
   visit_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())),
   value_vars = TC$col("bm_dataset_name", TC$numeric()) |> TC$flag("one_or_more"),
   default_cat = TC$choice_from_col_contents("cat_var") |> TC$flag("zero_or_more", "optional"),
@@ -1342,7 +1342,7 @@ dataset_info_forest <- function(bm_dataset_name, group_dataset_name, ...) {
   return(list(all = unique(c(bm_dataset_name, group_dataset_name)), subject_level = group_dataset_name))
 }
 
-mod_forest <- CM$module(mod_forest, check_mod_forest, dataset_info_forest)
+mod_forest <- CM$module(mod_forest, check_mod_forest, dataset_info_forest, map_afmm_mod_forest_auto)
 
 # TODO: Move pearson_correlation and spearman_correlation to their own file
 # TODO: Maybe odds_ratio too

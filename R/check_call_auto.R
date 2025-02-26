@@ -19,11 +19,11 @@ check_mod_boxplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, g
     "      The expectation is that it either does not require them or that"
     "      the caller of this function has written manual checks near the call site."
     subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
-    flags <- structure(list(), names = character(0))
+    flags <- list(map_character_to_factor = TRUE)
     OK[["cat_var"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("cat_var", cat_var, subkind,
         flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
     subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
-    flags <- structure(list(), names = character(0))
+    flags <- list(map_character_to_factor = TRUE)
     OK[["par_var"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("par_var", par_var, subkind,
         flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
     subkind <- list(kind = "numeric", min = NA, max = NA)
@@ -35,8 +35,8 @@ check_mod_boxplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, g
     flags <- structure(list(), names = character(0))
     OK[["visit_var"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("visit_var", visit_var,
         subkind, flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
-    subkind <- list(kind = "factor")
-    flags <- list(subjid_var = TRUE)
+    subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
+    flags <- list(subjid_var = TRUE, map_character_to_factor = TRUE)
     OK[["subjid_var"]] <- OK[["group_dataset_name"]] && CM$check_dataset_colum_name("subjid_var", subjid_var,
         subkind, flags, group_dataset_name, datasets[[group_dataset_name]], warn, err)
     flags <- list(zero_or_more = TRUE, optional = TRUE)
@@ -85,16 +85,16 @@ check_mod_corr_hm_auto <- function(afmm, datasets, module_id, bm_dataset_name, s
     flags <- structure(list(), names = character(0))
     OK[["bm_dataset_name"]] <- CM$check_dataset_name("bm_dataset_name", bm_dataset_name, flags, datasets,
         used_dataset_names, warn, err)
-    subkind <- list(kind = "factor")
-    flags <- list(subjid_var = TRUE)
-    OK[["subjid_var"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("subjid_var", subjid_var,
-        subkind, flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
     subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
-    flags <- structure(list(), names = character(0))
+    flags <- list(subjid_var = TRUE, map_character_to_factor = TRUE)
+    OK[["subjid_var"]] <- OK[["group_dataset_name"]] && CM$check_dataset_colum_name("subjid_var", subjid_var,
+        subkind, flags, group_dataset_name, datasets[[group_dataset_name]], warn, err)
+    subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
+    flags <- list(map_character_to_factor = TRUE)
     OK[["cat_var"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("cat_var", cat_var, subkind,
         flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
     subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
-    flags <- structure(list(), names = character(0))
+    flags <- list(map_character_to_factor = TRUE)
     OK[["par_var"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("par_var", par_var, subkind,
         flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
     subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor"), list(kind = "numeric",
@@ -145,16 +145,16 @@ check_mod_forest_auto <- function(afmm, datasets, module_id, bm_dataset_name, gr
     flags <- list(optional = TRUE, zero_or_more = TRUE, named = TRUE)
     OK[["numeric_factor_functions"]] <- CM$check_function("numeric_factor_functions", numeric_factor_functions,
         2, flags, warn, err)
-    subkind <- list(kind = "factor")
-    flags <- list(subjid_var = TRUE)
+    subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
+    flags <- list(subjid_var = TRUE, map_character_to_factor = TRUE)
     OK[["subjid_var"]] <- OK[["group_dataset_name"]] && CM$check_dataset_colum_name("subjid_var", subjid_var,
         subkind, flags, group_dataset_name, datasets[[group_dataset_name]], warn, err)
     subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
-    flags <- structure(list(), names = character(0))
+    flags <- list(map_character_to_factor = TRUE)
     OK[["cat_var"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("cat_var", cat_var, subkind,
         flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
     subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
-    flags <- structure(list(), names = character(0))
+    flags <- list(map_character_to_factor = TRUE)
     OK[["par_var"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("par_var", par_var, subkind,
         flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
     subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor"), list(kind = "numeric",
@@ -222,16 +222,16 @@ check_mod_lineplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, 
     "NOTE: summary_fns (group) has no associated automated checks"
     "      The expectation is that it either does not require them or that"
     "      the caller of this function has written manual checks near the call site."
-    subkind <- list(kind = "factor")
-    flags <- list(subjid_var = TRUE)
+    subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
+    flags <- list(subjid_var = TRUE, map_character_to_factor = TRUE)
     OK[["subjid_var"]] <- OK[["group_dataset_name"]] && CM$check_dataset_colum_name("subjid_var", subjid_var,
         subkind, flags, group_dataset_name, datasets[[group_dataset_name]], warn, err)
     subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
-    flags <- structure(list(), names = character(0))
+    flags <- list(map_character_to_factor = TRUE)
     OK[["cat_var"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("cat_var", cat_var, subkind,
         flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
     subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
-    flags <- structure(list(), names = character(0))
+    flags <- list(map_character_to_factor = TRUE)
     OK[["par_var"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("par_var", par_var, subkind,
         flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
     subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor"), list(kind = "numeric",
@@ -239,7 +239,7 @@ check_mod_lineplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, 
     flags <- list(one_or_more = TRUE)
     OK[["visit_vars"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("visit_vars", visit_vars,
         subkind, flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
-    subkind <- list(kind = "or", options = list(list(kind = "numeric", min = NA, max = NA)))
+    subkind <- list(kind = "numeric", min = NA, max = NA)
     flags <- list(zero_or_more = TRUE)
     OK[["cdisc_visit_vars"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("cdisc_visit_vars",
         cdisc_visit_vars, subkind, flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
@@ -317,11 +317,11 @@ check_mod_roc_auto <- function(afmm, datasets, module_id, pred_dataset_name, res
     OK[["group_dataset_name"]] <- CM$check_dataset_name("group_dataset_name", group_dataset_name, flags,
         datasets, used_dataset_names, warn, err)
     subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
-    flags <- structure(list(), names = character(0))
+    flags <- list(map_character_to_factor = TRUE)
     OK[["pred_cat_var"]] <- OK[["pred_dataset_name"]] && CM$check_dataset_colum_name("pred_cat_var",
         pred_cat_var, subkind, flags, pred_dataset_name, datasets[[pred_dataset_name]], warn, err)
     subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
-    flags <- structure(list(), names = character(0))
+    flags <- list(map_character_to_factor = TRUE)
     OK[["pred_par_var"]] <- OK[["pred_dataset_name"]] && CM$check_dataset_colum_name("pred_par_var",
         pred_par_var, subkind, flags, pred_dataset_name, datasets[[pred_dataset_name]], warn, err)
     subkind <- list(kind = "numeric", min = NA, max = NA)
@@ -334,11 +334,11 @@ check_mod_roc_auto <- function(afmm, datasets, module_id, pred_dataset_name, res
     OK[["pred_visit_var"]] <- OK[["pred_dataset_name"]] && CM$check_dataset_colum_name("pred_visit_var",
         pred_visit_var, subkind, flags, pred_dataset_name, datasets[[pred_dataset_name]], warn, err)
     subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
-    flags <- structure(list(), names = character(0))
+    flags <- list(map_character_to_factor = TRUE)
     OK[["resp_cat_var"]] <- OK[["resp_dataset_name"]] && CM$check_dataset_colum_name("resp_cat_var",
         resp_cat_var, subkind, flags, resp_dataset_name, datasets[[resp_dataset_name]], warn, err)
     subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
-    flags <- structure(list(), names = character(0))
+    flags <- list(map_character_to_factor = TRUE)
     OK[["resp_par_var"]] <- OK[["resp_dataset_name"]] && CM$check_dataset_colum_name("resp_par_var",
         resp_par_var, subkind, flags, resp_dataset_name, datasets[[resp_dataset_name]], warn, err)
     subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
@@ -350,8 +350,8 @@ check_mod_roc_auto <- function(afmm, datasets, module_id, pred_dataset_name, res
     flags <- structure(list(), names = character(0))
     OK[["resp_visit_var"]] <- OK[["resp_dataset_name"]] && CM$check_dataset_colum_name("resp_visit_var",
         resp_visit_var, subkind, flags, resp_dataset_name, datasets[[resp_dataset_name]], warn, err)
-    subkind <- list(kind = "factor")
-    flags <- list(subjid_var = TRUE)
+    subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
+    flags <- list(subjid_var = TRUE, map_character_to_factor = TRUE)
     OK[["subjid_var"]] <- OK[["group_dataset_name"]] && CM$check_dataset_colum_name("subjid_var", subjid_var,
         subkind, flags, group_dataset_name, datasets[[group_dataset_name]], warn, err)
     flags <- list(optional = TRUE)
@@ -381,11 +381,11 @@ check_mod_scatterplot_auto <- function(afmm, datasets, module_id, bm_dataset_nam
     OK[["group_dataset_name"]] <- CM$check_dataset_name("group_dataset_name", group_dataset_name, flags,
         datasets, used_dataset_names, warn, err)
     subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
-    flags <- structure(list(), names = character(0))
+    flags <- list(map_character_to_factor = TRUE)
     OK[["cat_var"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("cat_var", cat_var, subkind,
         flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
     subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
-    flags <- structure(list(), names = character(0))
+    flags <- list(map_character_to_factor = TRUE)
     OK[["par_var"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("par_var", par_var, subkind,
         flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
     subkind <- list(kind = "numeric", min = NA, max = NA)
@@ -397,8 +397,8 @@ check_mod_scatterplot_auto <- function(afmm, datasets, module_id, bm_dataset_nam
     flags <- structure(list(), names = character(0))
     OK[["visit_var"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("visit_var", visit_var,
         subkind, flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
-    subkind <- list(kind = "factor")
-    flags <- list(subjid_var = TRUE)
+    subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
+    flags <- list(subjid_var = TRUE, map_character_to_factor = TRUE)
     OK[["subjid_var"]] <- OK[["group_dataset_name"]] && CM$check_dataset_colum_name("subjid_var", subjid_var,
         subkind, flags, group_dataset_name, datasets[[group_dataset_name]], warn, err)
     flags <- list(optional = TRUE)
@@ -457,11 +457,11 @@ check_mod_scatterplotmatrix_auto <- function(afmm, datasets, module_id, bm_datas
     OK[["group_dataset_name"]] <- CM$check_dataset_name("group_dataset_name", group_dataset_name, flags,
         datasets, used_dataset_names, warn, err)
     subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
-    flags <- structure(list(), names = character(0))
+    flags <- list(map_character_to_factor = TRUE)
     OK[["cat_var"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("cat_var", cat_var, subkind,
         flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
     subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
-    flags <- structure(list(), names = character(0))
+    flags <- list(map_character_to_factor = TRUE)
     OK[["par_var"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("par_var", par_var, subkind,
         flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
     subkind <- list(kind = "numeric", min = NA, max = NA)
@@ -473,8 +473,8 @@ check_mod_scatterplotmatrix_auto <- function(afmm, datasets, module_id, bm_datas
     flags <- structure(list(), names = character(0))
     OK[["visit_var"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("visit_var", visit_var,
         subkind, flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
-    subkind <- list(kind = "factor")
-    flags <- list(subjid_var = TRUE)
+    subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
+    flags <- list(subjid_var = TRUE, map_character_to_factor = TRUE)
     OK[["subjid_var"]] <- OK[["group_dataset_name"]] && CM$check_dataset_colum_name("subjid_var", subjid_var,
         subkind, flags, group_dataset_name, datasets[[group_dataset_name]], warn, err)
     flags <- list(zero_or_more = TRUE, optional = TRUE)
@@ -515,11 +515,11 @@ check_mod_wfphm_auto <- function(afmm, datasets, module_id, bm_dataset_name, gro
     OK[["group_dataset_name"]] <- CM$check_dataset_name("group_dataset_name", group_dataset_name, flags,
         datasets, used_dataset_names, warn, err)
     subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
-    flags <- structure(list(), names = character(0))
+    flags <- list(map_character_to_factor = TRUE)
     OK[["cat_var"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("cat_var", cat_var, subkind,
         flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
     subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
-    flags <- structure(list(), names = character(0))
+    flags <- list(map_character_to_factor = TRUE)
     OK[["par_var"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("par_var", par_var, subkind,
         flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
     subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor"), list(kind = "numeric",
@@ -527,8 +527,8 @@ check_mod_wfphm_auto <- function(afmm, datasets, module_id, bm_dataset_name, gro
     flags <- structure(list(), names = character(0))
     OK[["visit_var"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("visit_var", visit_var,
         subkind, flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
-    subkind <- list(kind = "factor")
-    flags <- list(subjid_var = TRUE)
+    subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
+    flags <- list(subjid_var = TRUE, map_character_to_factor = TRUE)
     OK[["subjid_var"]] <- OK[["group_dataset_name"]] && CM$check_dataset_colum_name("subjid_var", subjid_var,
         subkind, flags, group_dataset_name, datasets[[group_dataset_name]], warn, err)
     subkind <- list(kind = "numeric", min = NA, max = NA)

@@ -1093,15 +1093,15 @@ mod_roc_API_spec <- TC$group(
   pred_dataset_name = TC$dataset_name(),
   resp_dataset_name = TC$dataset_name(),
   group_dataset_name = TC$dataset_name() |> TC$flag("subject_level_dataset_name"),
-  pred_cat_var = TC$col("pred_dataset_name", TC$or(TC$character(), TC$factor())),
-  pred_par_var = TC$col("pred_dataset_name", TC$or(TC$character(), TC$factor())),
+  pred_cat_var = TC$col("pred_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("map_character_to_factor"),
+  pred_par_var = TC$col("pred_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("map_character_to_factor"),
   pred_value_vars = TC$col("pred_dataset_name", TC$numeric()) |> TC$flag("one_or_more"),
   pred_visit_var = TC$col("pred_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())),
-  resp_cat_var = TC$col("resp_dataset_name", TC$or(TC$character(), TC$factor())),
-  resp_par_var = TC$col("resp_dataset_name", TC$or(TC$character(), TC$factor())),
+  resp_cat_var = TC$col("resp_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("map_character_to_factor"),
+  resp_par_var = TC$col("resp_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("map_character_to_factor"),
   resp_value_vars = TC$col("resp_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("one_or_more"),
   resp_visit_var = TC$col("resp_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())),
-  subjid_var = TC$col("group_dataset_name", TC$factor()) |> TC$flag("subjid_var"),
+  subjid_var = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("subjid_var", "map_character_to_factor"),
   compute_roc_fn = TC$fn(arg_count = 4) |> TC$flag("optional"),
   compute_metric_fn = TC$fn(arg_count = 2) |> TC$flag("optional")
 ) |> TC$attach_docs(mod_roc_API_docs)
@@ -1155,7 +1155,7 @@ dataset_info_roc <- function(pred_dataset_name, resp_dataset_name, group_dataset
   ))
 }
 
-mod_roc <- CM$module(mod_roc, check_mod_roc, dataset_info_roc)
+mod_roc <- CM$module(mod_roc, check_mod_roc, dataset_info_roc, map_afmm_mod_roc_auto)
 
 # Server Logic
 
