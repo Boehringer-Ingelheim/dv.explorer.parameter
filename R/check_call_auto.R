@@ -87,8 +87,8 @@ check_mod_corr_hm_auto <- function(afmm, datasets, module_id, bm_dataset_name, s
         used_dataset_names, warn, err)
     subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
     flags <- list(subjid_var = TRUE, map_character_to_factor = TRUE)
-    OK[["subjid_var"]] <- OK[["group_dataset_name"]] && CM$check_dataset_colum_name("subjid_var", subjid_var,
-        subkind, flags, group_dataset_name, datasets[[group_dataset_name]], warn, err)
+    OK[["subjid_var"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("subjid_var", subjid_var,
+        subkind, flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
     subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
     flags <- list(map_character_to_factor = TRUE)
     OK[["cat_var"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("cat_var", cat_var, subkind,

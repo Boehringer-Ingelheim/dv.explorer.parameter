@@ -29,8 +29,8 @@ map_afmm_mod_corr_hm_auto <- function(afmm, module_id, bm_dataset_name, subjid_v
     res <- afmm
     res[["filtered_dataset"]] <- shiny::reactive({
         res <- afmm[["filtered_dataset"]]()
-        if (is.character(res[[group_dataset_name]][[subjid_var]])) {
-            res[[group_dataset_name]][[subjid_var]] <- as.factor(res[[group_dataset_name]][[subjid_var]])
+        if (is.character(res[[bm_dataset_name]][[subjid_var]])) {
+            res[[bm_dataset_name]][[subjid_var]] <- as.factor(res[[bm_dataset_name]][[subjid_var]])
         }
         if (is.character(res[[bm_dataset_name]][[cat_var]])) {
             res[[bm_dataset_name]][[cat_var]] <- as.factor(res[[bm_dataset_name]][[cat_var]])

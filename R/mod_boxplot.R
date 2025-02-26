@@ -93,15 +93,8 @@ NULL
 #' @keywords developers
 #' @export
 boxplot_UI <- function(id) { # nolint
-  # id assert ---- It goes on its own as id is used to provide context to the other assertions
-  checkmate::assert_string(id, min.chars = 1) # Covered by check_mod_boxplot_auto
-
-  # argument asserts ----
-
   # UI ----
   ns <- shiny::NS(id)
-
-
 
   parameter_menu <- drop_menu_helper(
     ns(BP$ID$PAR_BUTTON), BP$MSG$LABEL$PAR_BUTTON,
