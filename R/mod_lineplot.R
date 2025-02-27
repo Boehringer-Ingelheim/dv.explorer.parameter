@@ -731,11 +731,12 @@ lineplot_server <- function(id,
     v_group_dataset <- shiny::reactive(
       {
         ac <- checkmate::makeAssertCollection()
-        checkmate::assert_data_frame(group_dataset(), min.rows = 1, .var.name = ns("group_dataset"))
+        checkmate::assert_data_frame(group_dataset(), min.rows = 1, .var.name = ns("group_dataset"), add = ac)
         checkmate::assert_names(
           names(group_dataset()),
           type = "unique",
-          must.include = c(VAR$SBJ), .var.name = ns("group_dataset")
+          must.include = c(VAR$SBJ), .var.name = ns("group_dataset"),
+          add = ac
         )
         checkmate::assert_factor(group_dataset()[[VAR$SBJ]], add = ac, .var.name = ns("group_dataset"))
         checkmate::reportAssertions(ac)
@@ -1715,9 +1716,9 @@ mod_lineplot_API_spec <- TC$group(
     ) |> TC$flag("zero_or_more", "named"),
     y_prefix = TC$character()
   ) |> TC$flag("optional", "named", "zero_or_more", "ignore"), # NOTE: ignored because we won't provide a function builder
-  subjid_var = TC$col("group_dataset_name", TC$factor()) |> TC$flag("subjid_var"),
-  cat_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())),
-  par_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())),
+  subjid_var = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("subjid_var", "map_character_to_factor"),
+  cat_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("map_character_to_factor"),
+  par_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("map_character_to_factor"),
   visit_vars = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())) |> TC$flag("one_or_more"),
   cdisc_visit_vars = TC$col("bm_dataset_name", TC$numeric()) |> TC$flag("zero_or_more"),
   # FIXME: ? Interaction between visit_vars and cdisc_visit_vars; one needs to be specified
@@ -1855,4 +1856,4 @@ dataset_info_lineplot <- function(bm_dataset_name, group_dataset_name, ...) {
   return(list(all = unique(c(bm_dataset_name, group_dataset_name)), subject_level = group_dataset_name))
 }
 
-mod_lineplot <- CM$module(mod_lineplot, check_mod_lineplot, dataset_info_lineplot)
+mod_lineplot <- CM$module(mod_lineplot, check_mod_lineplot, dataset_info_lineplot, map_afmm_mod_lineplot_auto)

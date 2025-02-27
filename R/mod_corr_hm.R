@@ -913,9 +913,9 @@ mod_corr_hm_API_docs <- list(
 mod_corr_hm_API_spec <- TC$group(
   module_id = TC$mod_ID(),
   bm_dataset_name = TC$dataset_name(),
-  subjid_var = TC$col("bm_dataset_name", TC$factor()) |> TC$flag("subjid_var"),
-  cat_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())),
-  par_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())),
+  subjid_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("subjid_var", "map_character_to_factor"),
+  cat_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("map_character_to_factor"),
+  par_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("map_character_to_factor"),
   visit_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())),
   value_vars = TC$col("bm_dataset_name", TC$numeric()) |> TC$flag("one_or_more"),
   default_cat = TC$choice_from_col_contents("cat_var") |> TC$flag("zero_or_more", "optional"),
@@ -963,4 +963,4 @@ dataset_info_corr_hm <- function(bm_dataset_name, ...) {
   return(list(all = bm_dataset_name, subject_level = character(0)))
 }
 
-mod_corr_hm <- CM$module(mod_corr_hm, check_mod_corr_hm, dataset_info_corr_hm)
+mod_corr_hm <- CM$module(mod_corr_hm, check_mod_corr_hm, dataset_info_corr_hm, map_afmm_mod_corr_hm_auto)

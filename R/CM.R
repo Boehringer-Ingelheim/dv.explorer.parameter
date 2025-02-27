@@ -1,4 +1,4 @@
-# YT#VHcdeeee4cd0eadba37e2b7e0c950d1cd1#VH9a9fddb547d03737e47db25dba988fc7#
+# YT#VHf6c40bb7738a4549da708e6cffa92411#VHa84423515cdb57d0fffac288f003e279#
 CM <- local({ # _C_hecked _M_odule
   message_well <- function(title, contents, color = "f5f5f5") { # repeats #iewahg
     style <- sprintf(r"---(
@@ -72,8 +72,11 @@ CM <- local({ # _C_hecked _M_odule
     return(module)
   }
 
-  # Wrap the UI and server of a module so that, once parameterized, they go through a check function prior to running.
-  module <- function(module, check_mod_fn, dataset_info_fn) {
+  # Wrap the UI and server of a module so that, once parameterized, they:
+  # - go through a check function prior to running
+  # - provide `dataset_info` to module manager
+  # - transform afmm arbitrarily to allow simplifying the logic of the module (e.g. mapping character columns to factors)
+  module <- function(module, check_mod_fn, dataset_info_fn, map_afmm_fn = NULL) {
     local({
       # Make sure that the signature of `check_mod_fn` matches that of `module` except for the expected differences
       check_formals <- names(formals(check_mod_fn))
@@ -173,33 +176,12 @@ CM <- local({ # _C_hecked _M_odule
             preface = fb[["preface"]]
           )
 
-          # TODO: Modify afmm to the `map_to` flags in the API. `dv.papo` relies on this
-          # nolint start
-          if (FALSE) {
-            filtered_mapped_datasets <- shiny::reactive(
-              TC$honor_map_to_flag(afmm$filtered_dataset(), mod_lineplot_API, args)
-            )
-
-            bm_dataset <- shiny::reactive({
-              shiny::req(bm_dataset_name)
-              ds <- filtered_mapped_datasets()[[bm_dataset_name]]
-              shiny::validate(
-                shiny::need(!is.null(ds), paste("Could not find dataset", bm_dataset_name))
-              )
-              return(ds)
-            })
-
-            # TODO:
-            corr_hm_server(
-              id = module_id,
-              bm_dataset = bm_dataset,
-              default_value = default_value, subjid_var = subjid_var, cat_var = cat_var, par_var = par_var,
-              visit_var = visit_var, value_vars = value_vars
-            )
-          }
-          # nolint end
-
           if (length(fb[["errors"]]) == 0) {
+            if (!is.null(map_afmm_fn)) {
+              afmm_and_args <- append(list(afmm = afmm), args)
+              afmm <- do.call(map_afmm_fn, afmm_and_args)
+            }
+            
             res <- try(module_server(afmm), silent = TRUE)
           }
 
@@ -327,22 +309,23 @@ CM <- local({ # _C_hecked _M_odule
     return(res)
   }
 
+  style_code <- function(code) {
+    s <- paste(code, collapse = "")
+    s <- parse(text = s, keep.source = FALSE)[[1]] |>
+      deparse(width.cutoff = 100) |>
+      trimws("right") |>
+      paste(collapse = "\n")
+    return(s)
+  }
+
   # NOTE: For the moment call by running: devtools::load_all(); CM$generate_check_functions()
   generate_check_functions <- function(specs = module_specifications, output_file = "R/check_call_auto.R") {
+    # TODO: Fuse with generate_map_afmm_functions
     styler_off <- "({\n# styler: off"
     styler_on <- "\n\n})\n# styler: on\n"
 
     res <- c("# Automatically generated module API check functions. Think twice before editing them manually.\n")
     res <- c(res, styler_off)
-
-    style_code <- function(code) {
-      s <- paste(code, collapse = "")
-      s <- parse(text = s, keep.source = FALSE)[[1]] |>
-        deparse(width.cutoff = 100) |>
-        trimws("right") |>
-        paste(collapse = "\n")
-      return(s)
-    }
 
     for (spec_name in names(specs)) {
       if (!grepl("::", spec_name, fixed = TRUE)) stop(paste("Expected API spec name to be namespaced (`::`):", spec_name))
@@ -352,6 +335,114 @@ CM <- local({ # _C_hecked _M_odule
       res <- c(
         res,
         c(check_function_name, "<-", generate_check_function(specs[[spec_name]])) |> style_code()
+      )
+    }
+
+    res <- c(res, styler_on)
+
+    contents <- paste(res, collapse = "")
+    writeChar(contents, output_file, eos = NULL)
+
+    return(NULL)
+  }
+  
+  generate_map_afmm_function <- function(spec, module_name) {
+    stopifnot(spec$kind == "group")
+   
+    # TODO: At the time of writing, this code generator is only used by dv.explorer.parameter and it covers its needs.
+    #       It modifies afmm[["filtered_dataset"]] based on parameters flagged as "map_character_to_factor"
+    #       so that specific columns of target datasets are transformed to factors prior to going into a module.
+    #
+    #       In order to complete this functionality, we would have to map afmm[["unfiltered_dataset"]] as well
+    #       as afmm[["data"]]. Moreover, we would have to look for "map_character_to_factor" flags inside possibly 
+    #       nested column definitions, such as those used in papo.
+    
+    res <- character(0)
+    
+    push <- function(s) res <<- c(res, s)
+    push("function(afmm, ")
+    param_names <- paste(names(spec$elements), collapse = ",")
+    push(param_names)
+    push("){\n")
+    
+    push("res <- afmm\n")
+    
+    elements_that_require_mapping <- character(0)
+    for (elem_name in names(spec$elements))
+      if (isTRUE(attr(spec$elements[[elem_name]], "map_character_to_factor")))
+        elements_that_require_mapping <- c(elements_that_require_mapping, elem_name)
+    
+    if (length(elements_that_require_mapping)) {
+      push("mapping_summary <- character(0)\n")
+      push("for(ds_name in names(afmm[['data']])){\n")
+      push("  ds <- afmm[['data']][[ds_name]]\n")  
+      for (elem_name in elements_that_require_mapping){
+        elem <- spec$elements[[elem_name]]
+        stopifnot(elem$kind == "col")
+        dataset_name <- elem[["dataset_name"]]
+        push(sprintf("if(is.character(ds[[%s]][[%s]])){\n", dataset_name, elem_name))
+        push("mapping_summary <- c(mapping_summary,")
+        push(sprintf("paste0('(', ds_name, ') ', %s, '[[\"', %s, '\"]]')", dataset_name, elem_name))
+        push(")\n")
+        push("}\n")
+      }
+      push("}\n")
+      
+      push("if(length(mapping_summary)){\n")
+     
+      push(
+        paste0(
+          "warning_message <- paste0('[", module_name,
+          "] This module will map the following dataset columns from `character` to `factor`:\\n', ",
+          "paste(mapping_summary, collapse = ', '), '.\\nThe extra memory cost associated to this operation can be ",
+          "avoided by turning those columns into factors during data pre-processing.')\n",
+          "warning(warning_message)\n"
+        )
+      )
+      
+      push("res[['filtered_dataset']] <- shiny::reactive({\n")
+      push("  res <- afmm[['filtered_dataset']]()\n")
+      
+      for (elem_name in elements_that_require_mapping){
+        elem <- spec$elements[[elem_name]]
+        dataset_name <- elem[["dataset_name"]]
+        
+        push(sprintf("if (is.character(res[[%s]][[%s]])) {\n", dataset_name, elem_name))
+        push(sprintf("  res[[%s]][[%s]] <- ", dataset_name, elem_name))
+        push(sprintf("    as.factor(res[[%s]][[%s]])\n", dataset_name, elem_name))
+        push("}\n")
+      }
+      
+      push("  return(res)\n")
+      push("})\n")
+      push("}\n")
+    }
+    
+    push("return(res)\n")
+    push("}\n")
+
+    return(res)
+  }
+
+  # NOTE: For the moment, call by running: devtools::load_all(); CM$generate_map_afmm_functions()
+  generate_map_afmm_functions <- function(specs = module_specifications, output_file = "R/map_afmm_auto.R") {
+    # TODO: Fuse with generate_check_functions
+    styler_off <- "({\n# styler: off"
+    styler_on <- "\n\n})\n# styler: on\n"
+
+    res <- c("# Automatically generated module API afmm mapping functions. Think twice before editing them manually.\n")
+    res <- c(res, styler_off)
+
+    for (spec_name in names(specs)) {
+      if (!grepl("::", spec_name, fixed = TRUE)) stop(paste("Expected API spec name to be namespaced (`::`):", spec_name))
+      denamespaced_spec_name <- strsplit(spec_name, "::")[[1]][[2]]
+      map_afmm_function_name <- paste0("map_afmm_", denamespaced_spec_name, "_auto")
+      res <- c(res, sprintf("\n\n# %s\n", spec_name))
+      
+      res <- c(
+        res,
+        c(map_afmm_function_name, "<-", 
+          generate_map_afmm_function(specs[[spec_name]], module_name = denamespaced_spec_name)) |> style_code()
       )
     }
 
@@ -699,6 +790,7 @@ CM <- local({ # _C_hecked _M_odule
     container = container,
     assert = assert,
     generate_check_functions = generate_check_functions,
+    generate_map_afmm_functions = generate_map_afmm_functions,
     check_module_id = check_module_id,
     check_dataset_name = check_dataset_name,
     check_dataset_colum_name = check_dataset_colum_name,
