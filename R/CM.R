@@ -1,4 +1,4 @@
-# YT#VHa84423515cdb57d0fffac288f003e279#VH7a962bae7d5eae1f28e78e2396cea8b9#
+# YT#VHf6c40bb7738a4549da708e6cffa92411#VHa84423515cdb57d0fffac288f003e279#
 CM <- local({ # _C_hecked _M_odule
   message_well <- function(title, contents, color = "f5f5f5") { # repeats #iewahg
     style <- sprintf(r"---(
@@ -346,7 +346,7 @@ CM <- local({ # _C_hecked _M_odule
     return(NULL)
   }
   
-  generate_map_afmm_function <- function(spec) {
+  generate_map_afmm_function <- function(spec, module_name) {
     stopifnot(spec$kind == "group")
    
     # TODO: At the time of writing, this code generator is only used by dv.explorer.parameter and it covers its needs.
@@ -373,12 +373,38 @@ CM <- local({ # _C_hecked _M_odule
         elements_that_require_mapping <- c(elements_that_require_mapping, elem_name)
     
     if (length(elements_that_require_mapping)) {
+      push("mapping_summary <- character(0)\n")
+      push("for(ds_name in names(afmm[['data']])){\n")
+      push("  ds <- afmm[['data']][[ds_name]]\n")  
+      for (elem_name in elements_that_require_mapping){
+        elem <- spec$elements[[elem_name]]
+        stopifnot(elem$kind == "col")
+        dataset_name <- elem[["dataset_name"]]
+        push(sprintf("if(is.character(ds[[%s]][[%s]])){\n", dataset_name, elem_name))
+        push("mapping_summary <- c(mapping_summary,")
+        push(sprintf("paste0('(', ds_name, ') ', %s, '[[\"', %s, '\"]]')", dataset_name, elem_name))
+        push(")\n")
+        push("}\n")
+      }
+      push("}\n")
+      
+      push("if(length(mapping_summary)){\n")
+     
+      push(
+        paste0(
+          "warning_message <- paste0('[", module_name,
+          "] This module will map the following dataset columns from `character` to `factor`:\\n', ",
+          "paste(mapping_summary, collapse = ', '), '.\\nThe extra memory cost associated to this operation can be ",
+          "avoided by turning those columns into factors during data pre-processing.')\n",
+          "warning(warning_message)\n"
+        )
+      )
+      
       push("res[['filtered_dataset']] <- shiny::reactive({\n")
       push("  res <- afmm[['filtered_dataset']]()\n")
       
       for (elem_name in elements_that_require_mapping){
         elem <- spec$elements[[elem_name]]
-        stopifnot(elem$kind == "col")
         dataset_name <- elem[["dataset_name"]]
         
         push(sprintf("if (is.character(res[[%s]][[%s]])) {\n", dataset_name, elem_name))
@@ -389,6 +415,7 @@ CM <- local({ # _C_hecked _M_odule
       
       push("  return(res)\n")
       push("})\n")
+      push("}\n")
     }
     
     push("return(res)\n")
@@ -411,9 +438,11 @@ CM <- local({ # _C_hecked _M_odule
       denamespaced_spec_name <- strsplit(spec_name, "::")[[1]][[2]]
       map_afmm_function_name <- paste0("map_afmm_", denamespaced_spec_name, "_auto")
       res <- c(res, sprintf("\n\n# %s\n", spec_name))
+      
       res <- c(
         res,
-        c(map_afmm_function_name, "<-", generate_map_afmm_function(specs[[spec_name]])) |> style_code()
+        c(map_afmm_function_name, "<-", 
+          generate_map_afmm_function(specs[[spec_name]], module_name = denamespaced_spec_name)) |> style_code()
       )
     }
 
