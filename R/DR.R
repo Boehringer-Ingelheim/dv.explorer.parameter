@@ -1,4 +1,4 @@
-# YT#VH0eddf137f54ee67423da845c2e102fce#VH2511139c3a21a7e842ec31e495d1d528#
+# YT#VHa43fcf840f77b5e8b4ea30a0be84de5e#VH00000000000000000000000000000000#
 DR <- local({ # _D_ressing _R_oom
   inline_shiny_input <- function(elem, label = NULL, name_selector = NULL, label_elem = NULL) {
     if (is.character(label) && length(label) == 1 && nchar(label) > 0) {
@@ -25,18 +25,20 @@ DR <- local({ # _D_ressing _R_oom
 
     list(
       shiny::singleton(shiny::tags$head(
-        shiny::tags$script(r"--(
-          var color_picker_binding = new Shiny.InputBinding();
-          $.extend(color_picker_binding, {
-            find: function(scope) { return scope.querySelectorAll('.color-picker'); },
-            getValue: function(el) { return el.value; },
-            subscribe: function(el, callback) {
-              $(el).on('change.color_picker_binding', function(e) { callback(); });
-            },
-            unsubscribe: function(el) { $(el).off('.color_picker_binding'); }
-          });
-          Shiny.inputBindings.register(color_picker_binding);
-        )--")
+        shiny::tags$script(
+          paste(
+            "var color_picker_binding = new Shiny.InputBinding();",
+            "$.extend(color_picker_binding, {",
+            "  find: function(scope) { return scope.querySelectorAll('.color-picker'); },",
+            "  getValue: function(el) { return el.value; },",
+            "  subscribe: function(el, callback) {",
+            "    $(el).on('change.color_picker_binding', function(e) { callback(); });",
+            "  },",
+            "  unsubscribe: function(el) { $(el).off('.color_picker_binding'); }",
+            "});",
+            "Shiny.inputBindings.register(color_picker_binding);"
+          )
+        )
       )),
       shiny::tags$input(
         id = inputId, class = "color-picker", type = "color", style = "border:none", value = value
@@ -120,26 +122,28 @@ DR <- local({ # _D_ressing _R_oom
 
       # shamelessly stolen from https://github.com/insightsengineering/teal.modules.bsafe/blob/main/inst/www/bsafe.css
       # and https://github.com/insightsengineering/teal.modules.bsafe/blob/main/R/mod_bsafe.R
-      shiny::tags$head(shiny::tags$style(shiny::HTML(r"--(
-      .toggle-label .chevron:before {
-        font-size: 2rem;
-        display: inline-block;
-        margin-left: 1rem;
-        content:"\203A";
-      }
-
-      .toggle-checkbox:checked + .toggle-label .chevron:before {
-        font-size: 2rem;
-        display: inline-block;
-        content:"\203A";
-        transform: rotate(90deg);
-      }
-
-      .margin_bottom_0px { margin-bottom:0px; } /* Gen-X CSS */
-
-      .inc_dec_button {background-color:#ffffffaa; border-radius:4px; border: 1px solid #000000aa; margin-bottom:14px;}
-      .inc_dec_button:hover {background-color:#eeeeeeaa; border: 1px solid #000000ff}
-      )--"))),
+      shiny::tags$head(shiny::tags$style(shiny::HTML(
+        paste(
+          ".toggle-label .chevron:before {",
+          "  font-size: 2rem;",
+          "  display: inline-block;",
+          "  margin-left: 1rem;",
+          "  content:'\203A';",
+          "}",
+          "",
+          ".toggle-checkbox:checked + .toggle-label .chevron:before {",
+          "  font-size: 2rem;",
+          "  display: inline-block;",
+          "  content:'\203A';",
+          "  transform: rotate(90deg);",
+          "}",
+          "",
+          ".margin_bottom_0px { margin-bottom:0px; } /* Gen-X CSS */",
+          "",
+          ".inc_dec_button {background-color:#ffffffaa; border-radius:4px; border: 1px solid #000000aa; margin-bottom:14px;}",
+          ".inc_dec_button:hover {background-color:#eeeeeeaa; border: 1px solid #000000ff}"
+        )
+      ))),
       shiny::div(style = "height:1.5rem"),
       shiny::sidebarLayout(
         shiny::div(
@@ -281,17 +285,17 @@ DR <- local({ # _D_ressing _R_oom
       })
 
       well <- function(title_ui, contents, expanded, checkbox_id = NULL) {
-        style <- r"---(
-          min-height: 20px;
-          padding: 19px;
-          padding-top: 14px;
-          padding-bottom: 0px;
-          padding-right: 10px;
-          margin-bottom: 20px;
-          background-color: #1155a00c;
-          border: 1px solid #00000020;
-          border-radius: 4px;
-        )---"
+        style <- paste(
+          "min-height: 20px;",
+          "padding: 19px;",
+          "padding-top: 14px;",
+          "padding-bottom: 0px;",
+          "padding-right: 10px;",
+          "margin-bottom: 20px;",
+          "background-color: #1155a00c;",
+          "border: 1px solid #00000020;",
+          "border-radius: 4px;"
+        )
 
         checked <- if (isFALSE(expanded)) NULL else NA # awkward mapping, but HTML is what it is
 

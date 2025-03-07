@@ -1,16 +1,18 @@
-# YT#VHf6c40bb7738a4549da708e6cffa92411#VHa84423515cdb57d0fffac288f003e279#
+# YT#VH37d93679eaf9e0806b4247c0f6e1c91d#VH00000000000000000000000000000000#
 CM <- local({ # _C_hecked _M_odule
-  message_well <- function(title, contents, color = "f5f5f5") { # repeats #iewahg
-    style <- sprintf(r"---(
-      padding: 0.5rem;
-      padding-left: 1rem;
-      margin-bottom: 20px;
-      background-color: %s;
-      border: 1px solid #e3e3e3;
-      border-radius: 4px;
-      -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.05);
-      box-shadow: inset 0 1px 1px rgba(0,0,0,.05);
-    )---", color)
+  message_well <- function(title, contents, color = "f5f5f5") {
+    style <- sprintf(
+      paste(
+        "padding: 0.5rem;",
+        "padding-left: 1rem;",
+        "margin-bottom: 20px;",
+        "background-color: %s;",
+        "border: 1px solid #e3e3e3;",
+        "border-radius: 4px;",
+        "-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.05);",
+        "box-shadow: inset 0 1px 1px rgba(0,0,0,.05);"
+      ), color
+    )
 
     res <- list(shiny::h3(title))
     if (length(contents)) res <- append(res, list(shiny::tags[["div"]](contents, style = style)))
@@ -599,7 +601,7 @@ CM <- local({ # _C_hecked _M_odule
     } else if (is.character(v)) {
       res <- sprintf('"%s"', unique(v))
     } else {
-      browser()
+      stop(sprintf('Unsuported class "%s" as argument to `list_values`', class(v)))
     }
 
     res <- paste(res, collapse = ", ")
@@ -719,9 +721,9 @@ CM <- local({ # _C_hecked _M_odule
 
     unique_cat_par_combinations <- unique(dataset[c(cat, par)])
     dup_mask <- duplicated(unique_cat_par_combinations[par])
-    unique_repeat_params <- unique_cat_par_combinations[[par]][dup_mask]
     
-    ok <- assert(err, length(unique_repeat_params) == 0, {
+    ok <- assert(err, !any(dup_mask), {
+      unique_repeat_params <- unique_cat_par_combinations[[par]][dup_mask]
       dups <- df_to_string(
         data.frame(
           check.names = FALSE,
@@ -764,21 +766,47 @@ CM <- local({ # _C_hecked _M_odule
     })
 
     supposedly_unique <- dataset[c(sub, cat, par, vis)]
-    dups <- duplicated(supposedly_unique)
+    dup_mask <- duplicated(supposedly_unique)
 
-    ok <- ok && assert(err, !any(dups), {
+    ok <- ok && assert(err, !any(dup_mask), {
       prefixes <- c(
         rep("Subject:", length(sub)), rep("Category:", length(cat)),
         rep("Parameter:", length(par)), rep("Visit:", length(vis))
       )
 
-      first_duplicates <- head(supposedly_unique[dups, ], 5)
+      first_duplicates <- head(supposedly_unique[dup_mask, ], 5)
       names(first_duplicates) <- paste(prefixes, names(first_duplicates))
       dups <- df_to_string(first_duplicates)
+      
+      unique_repeats <- unique(supposedly_unique[dup_mask, ])
+      target <- unique_repeats[1, ]
+      target_rows <- which(supposedly_unique[[sub]] == target[[sub]] & supposedly_unique[[cat]] == target[[cat]] &
+                             supposedly_unique[[par]] == target[[par]] & supposedly_unique[[vis]] == target[[vis]])
+      
+      row_a <- dataset[target_rows[[1]], ]
+      row_b <- dataset[target_rows[[2]], ]
+      diff_cols <- character(0)
+      for (col in names(row_a)) if (!identical(row_a[[col]], row_b[[col]])) diff_cols <- c(diff_cols, col)
+     
+      col_diff_report <- "are identical." 
+      if (length(diff_cols)) { 
+        col_diff_report <- paste0(
+          "have indeed identical subject, category, parameter and visit values, but differ in columns: ",
+          paste(diff_cols, collapse = ", "), ".",
+          "<pre>", 
+          df_to_string(dataset[target_rows[1:2], c(sub, cat, par, vis, diff_cols)]),
+          "</pre>"
+        )
+      }
+        
       paste(
         sprintf("The dataset provided by `%s` (%s) contains repeated rows with identical subject, category, parameter", ds_name, ds_value),
-        "and visit values. This module expects them to be unique. Here are the first few duplicates:",
-        paste0("<pre>", dups, "</pre>")
+        sprintf("and visit values. This module expects them to be unique. There are a total of %d duplicates.", sum(dup_mask)),
+        "Here are the first few:",
+        paste0("<pre>", dups, "</pre>"),
+        sprintf("These findings can be partially confirmed by examining that rows <b>%d</b> and <b>%d</b> of that dataset", 
+                target_rows[[1]], target_rows[[2]]),
+        col_diff_report
       )
     })
 
