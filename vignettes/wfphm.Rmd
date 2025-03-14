@@ -74,7 +74,7 @@ rest of the plots follow a particular pattern.
 
 # Mandatory Arguments for the module
 
-[dv.wfphm::mod_wfphm()] module uses several arguments with the following two being mandatory and
+[dv.explorer.parameter::mod_wfphm()] module uses several arguments with the following two being mandatory and
 the rest optional. Some of the optional As part of app creation, the app
 creator should specify the values for these arguments as applicable.
 
@@ -106,11 +106,11 @@ creator should specify the values for these arguments as applicable.
     -   `subjid_var`: "SUBJID"
 
 Refer to
-`dv.wfphm::mod_wfphm()` for the complete list of arguments and their description.
+`dv.explorer.parameter::mod_wfphm()` for the complete list of arguments and their description.
 
 # Input dataset
 
-The `wfphm` module is designed to work with [ADaM Basic Data Structure
+The `mod_wfphm` module is designed to work with [ADaM Basic Data Structure
 (BDS) using
 PARAMCD](https://www.cdisc.org/kb/examples/adam-basic-data-structure-bds-using-paramcd-80288192).
 The default values of arguments for the module matches the naming of
@@ -169,7 +169,7 @@ this app.
 
 ```{r, eval = FALSE}
 module_list <- list(
-  "WFPHM" = dv.wfphm::mod_wfphm(
+  "WFPHM" = dv.explorer.parameter::mod_wfphm(
     module_id = "wfphm",
     bm_dataset_name = "adbm",
     group_dataset_name = "adsl"
@@ -302,7 +302,7 @@ Baseline* or transformation of the value such as logarithms.
 
 By default, the module have a list of common parameter value columns that,
 if present in the dataset, will appear in the menu (e.g.: "AVAL", "CHG"
-or "PCHG". See `dv.wfphm::wfphm_server` for a full list)
+or "PCHG". See `dv.explorer.parameter::wfphm_server` for a full list)
 
 But if a custom column is derived we can modify the call to the module
 so it is included in the menu as seen in the example below.
@@ -313,7 +313,7 @@ example_dataset_custom_aval <- example_dataset
 example_dataset_custom_aval[["adbm"]][["CUSTOM_AVAL"]] <- example_dataset_custom_aval[["adbm"]][["AVAL"]] + 100
 
 module_list_custom_aval <- list(
-  "WFPHM" = dv.wfphm::mod_wfphm(
+  "WFPHM" = dv.explorer.parameter::mod_wfphm(
     module_id = "wfphm",
     value_vars = c("CUSTOM_AVAL"), # We have added this argument
     bm_dataset_name = "adbm",
@@ -338,7 +338,7 @@ columns. If one is specified then all should be specified.
 
 ```{r, eval = FALSE}
 module_list_custom_aval <- list(
-  "WFPHM" = dv.wfphm::mod_wfphm(
+  "WFPHM" = dv.explorer.parameter::mod_wfphm(
     module_id = "wfphm",
     value_vars = c("AVAL", "CUSTOM_AVAL"), # We have added this argument
     bm_dataset_name = "adbm",
@@ -451,7 +451,7 @@ not affect the calculation of the transformations
 ![](images/hmpar_transformation.png){width="25%"}
 
 By default, the module include several transformation (See
-`dv.wfphm::wfphm_server` for a full list) but the user can include
+`dv.explorer.parameter::wfphm_server` for a full list) but the user can include
 custom transformations if needed for their data. The function is applied
 to each row independently, meaning the function receives a vector with
 all the values from a row and it must returned a similar vector with the
@@ -459,10 +459,10 @@ transformed values.
 
 ```{r, eval = FALSE}
 module_list_custom_transformation <- list( # nolint
-  "WFPHM" = dv.wfphm::mod_wfphm(
+  "WFPHM" = dv.explorer.parameter::mod_wfphm(
     module_id = "wfphm",
     tr_mapper = list( # New argument
-      "Original" = dv.wfphm::tr_identity,
+      "Original" = dv.explorer.parameter::tr_identity,
       "Mean Centered" = function(x) {
         x - mean(x)
       }
@@ -516,38 +516,33 @@ notice, the non standard column names are used as the values for
 applicable module arguments.
 
 ```{r, eval = FALSE}
-example_dataset <- list(
-  "adbm" = tibble::tibble(
-    subject = factor(c(1, 1, 2, 2, 3, 3)),
-    safety_category = factor(c("PC1", "PC2", "PC1", "PC2", "PC1", "PC2")),
-    safety_parameter = factor(c("P1", "P2", "P1", "P2", "P1", "P2")),
-    timepoint = factor(c("V1", "V2", "V1", "V2", "V2", "V1")),
-    log_aval = log(c(11, 12, 21, 22, 31, 3))
-  ),
-  "adsl" = tibble::tibble(
-    SUBJID = factor(c(1, 2, 3)),
-    WEIGHT = c(10, 20, 30),
-    SEX = factor(c("M", "F", "U")),
-    COUNTRY = factor(c("DE", "US", "DE"))
+adbm_dataset <- dv.explorer.parameter:::safety_data()[["bm"]] %>%
+  dplyr::mutate(
+    USUBJID = factor(USUBJID),
+    PARCAT1 = factor(PARCAT1),
+    PARAM = factor(PARAM),
+    AVISIT = factor(AVISIT)
   )
-)
+
+adsl_dataset <- dv.explorer.parameter:::safety_data()[["sl"]] %>%
+  dplyr::mutate(USUBJID = factor(USUBJID))
 module_list <- list(
-  "WFPHM" = dv.wfphm::mod_wfphm(
+  "WFPHM" = dv.explorer.parameter::mod_wfphm(
     module_id = "wfphm",
     bm_dataset_name = "adbm",
     group_dataset_name = "adsl",
-    cat_var = "safety_category",
-    par_var = "safety_parameter",
-    subjid_var = "subject",
-    value_vars = c("log_aval"),
-    visit_var = "timepoint"
+    cat_var = "PARCAT1",
+    par_var = "PARAM",
+    visit_var = "AVISIT",
+    subjid_var = "USUBJID",
+    value_vars = "AVAL",
   )
 )
 
 dv.manager::run_app(
-  data = list(DS = example_dataset_non_standard),
+  data = list(dummy = list(adbm = adbm_dataset, adsl = adsl_dataset)),
   module_list = module_list,
   filter_data = "adsl",
-  filter_key = "subject" # We changed this one too, see dv.manager filtering doc for this change
+  filter_key = "USUBJID" # We changed this one too, see dv.manager filtering doc for this change
 )
 ```
