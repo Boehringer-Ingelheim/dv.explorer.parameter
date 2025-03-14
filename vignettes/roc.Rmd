@@ -17,12 +17,12 @@ options(rmarkdown.html_vignette.check_title = FALSE)
 
 ![](images/ROC.png)
 
-This guide provides a detailed overview of the `dv.roc` module and its features. It is meant to provide guidance to
-App Creators on creating Apps in DaVinci using the `dv.roc` module.
+This guide provides a detailed overview of the `mod_roc` module and its features. It is meant to provide guidance to
+App Creators on creating Apps in DaVinci using the `mod_roc` module.
 Walk-throughs for sample app creation using the module are also included
 to demonstrate the various module specific features.
 
-The `dv.roc` module makes it possible to visualize a set of ROC related charts
+The `mod_roc` module makes it possible to visualize a set of ROC related charts
 and compare independent ROC curves for different continuous parameters with respect to
 a single binary endpoint. This allows a user
 to evaluate how predictive is a continuous parameter of binary endpoint.
@@ -34,7 +34,7 @@ to evaluate how predictive is a continuous parameter of binary endpoint.
 
 # Features
 
-`dv.roc` features the following plots:
+`mod_roc` features the following plots:
 
 -   A set of ROC curves
 -   A set of histograms showing the distribution of the continuous parameter values
@@ -48,7 +48,7 @@ to evaluate how predictive is a continuous parameter of binary endpoint.
 
 # Arguments for the module
 
-`dv.roc::mod_roc()`
+`dv.explorer.parameter::mod_roc()`
 module uses several arguments with the following being mandatory and
 the rest optional. As part of app creation, the app
 creator should specify the values for these arguments as applicable.
@@ -80,7 +80,7 @@ creator should specify the values for these arguments as applicable.
     It expects a dataset with an structure similar to https://www.cdisc.org/kb/examples/adam-subject-level-analysis-adsl-dataset-80283806 , one record per subject
     It expects to contain, at least, `subjid_var`.
 
-Refer to `dv.roc::mod_roc()` for the complete list of arguments and their description.
+Refer to `dv.explorer.parameter::mod_roc()` for the complete list of arguments and their description.
 
 # Input menus
 
@@ -96,7 +96,7 @@ A set of menus allows to select which parameters will be used as predictors for 
 
 This visualizations consists of a facetted plot based on parameters and grouping variable. Each
 plot represents a ROC curve with a set of confidence intervals (as defined in **Other** menu)and
-optimal cut points (see `dv.roc::compute_roc()`). Hovering over the figure will show a tooltip providing
+optimal cut points (see `dv.explorer.parameter::compute_roc()`). Hovering over the figure will show a tooltip providing
 additional information for each of the points.
 
 Facetting can be replaced by a Nx4 matrix of plots sorted by AUC.
