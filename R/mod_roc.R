@@ -430,7 +430,7 @@ roc_server <- function(id,
                        resp_par_var = "PARAM",
                        resp_value_vars = c("CHG1", "CHG2"),
                        resp_visit_var = "AVISIT",
-                       subjid_var = "SUBJID",
+                       subjid_var = "USUBJID",
                        compute_roc_fn = compute_roc_data,
                        compute_metric_fn = compute_metric_data) {
   ac <- checkmate::makeAssertCollection()
@@ -1037,7 +1037,7 @@ mod_roc <- function(
     resp_par_var = "PARAM",
     resp_value_vars = c("CHG1", "CHG2"),
     resp_visit_var = "AVISIT",
-    subjid_var = "SUBJID",
+    subjid_var = "USUBJID",
     compute_roc_fn = compute_roc_data,
     compute_metric_fn = compute_metric_data) {
   mod <- list(
@@ -4680,7 +4680,7 @@ mock_roc_mm_app <- function(adbm = test_roc_data()[["adbm"]],
         )
       ),
       filter_data = "adsl",
-      filter_key = "SUBJID",
+      filter_key = "USUBJID",
       enableBookmarking = "url"
     )
   } else {
@@ -4704,80 +4704,6 @@ mock_roc_app <- function() {
       pred_dataset = shiny::reactive(test_roc_data()[["adbm"]]),
       resp_dataset = shiny::reactive(test_roc_data()[["adbin"]]),
       group_dataset = shiny::reactive(test_roc_data()[["adsl"]])
-    )
-    shiny::observe({
-      shiny::reactiveValuesToList(input)
-      session$doBookmark()
-    })
-    # Update the query string
-    shiny::onBookmarked(shiny::updateQueryString)
-  }
-
-  shiny::shinyApp(
-    ui = ui,
-    server = server,
-    enableBookmarking = "url"
-  )
-}
-
-mock_roc_app_file_upload <- function() {
-  options(shiny.maxRequestSize = 30 * 1024^2)
-
-  ui <- function(request) {
-    shiny::fluidPage(
-      shiny::fileInput("adsl", "Choose adsl File",
-        multiple = FALSE,
-        accept = c(".rda")
-      ),
-      shiny::fileInput("adbm", "Choose Predictor dataset",
-        multiple = FALSE,
-        accept = c(".rda")
-      ),
-      shiny::fileInput("adbin", "Choose Response dataset",
-        multiple = FALSE,
-        accept = c(".rda")
-      ),
-      dv.explorer.parameter::roc_UI("roc")
-    )
-  }
-
-
-
-  server <- function(input, output, session) {
-    adbm <- shiny::reactive({
-      shiny::req(input[["adbm"]])
-      input[["adbm"]]
-      load(input[["adbm"]]$datapath)
-      adbm
-    })
-    adbin <- shiny::reactive({
-      shiny::req(input[["adbin"]])
-      input[["adbin"]]
-      load(input[["adbin"]]$datapath)
-      adbin
-    })
-    adsl <- shiny::reactive({
-      shiny::req(input[["adsl"]])
-      input[["adsl"]]
-      load(input[["adsl"]]$datapath)
-      adsl
-    })
-
-    proceed <- shiny::reactiveVal(0)
-
-    shiny::observe({
-      message("advance1")
-      shiny::req(adbm(), adbin(), adsl())
-      message("advance")
-      proceed(shiny::isolate(proceed() + 1))
-    })
-
-    dv.explorer.parameter::roc_server(
-      id = "roc",
-      dataset_name = shiny::reactive(proceed()),
-      pred_dataset = adbm,
-      resp_dataset = adbin,
-      group_dataset = adsl
     )
     shiny::observe({
       shiny::reactiveValuesToList(input)
@@ -4833,7 +4759,7 @@ test_roc_data <- function() {
   visit_list <- c("V1", "V2", "V3")
 
   adsl <- tibble::tibble(
-    SUBJID = factor(1:n_subj)
+    USUBJID = factor(1:n_subj)
   ) |>
     dplyr::mutate(
       AGE = sample(50:100, size = n_subj, replace = TRUE),
@@ -4843,7 +4769,7 @@ test_roc_data <- function() {
     )
 
   adbm <- expand.grid(
-    SUBJID = factor(1:n_subj),
+    USUBJID = factor(1:n_subj),
     PARCAT = factor(c("A", "B")),
     PARAM = factor(c("1", "2", "3")),
     AVISIT = visit_list

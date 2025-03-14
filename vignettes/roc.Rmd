@@ -157,5 +157,45 @@ that have the same arguments and returns a similar data structure, see the docum
 Two helper functions `assert_compute_roc_data()` and `assert_compute_metric_data()` can be used to check that
 the output of the user-defined function is correct (this checking is not exhaustive and is only prepared to catch common errors).
 
+# Creating a ROC application
+
+```{r, eval=FALSE}
+
+adbm_dataset <- test_roc_data()[["adbm"]]
+adbin_dataset <- test_roc_data()[["adbin"]]
+adsl_dataset <- test_roc_data()[["adsl"]]
+
+module_list <- list(
+        "ROC" = dv.explorer.parameter::mod_roc(
+          module_id = "mod_roc",
+          pred_dataset_name = "adbm",
+          resp_dataset_name = "adbin",
+          group_dataset_name = "adsl",
+          pred_cat_var = "PARCAT",
+          pred_par_var = "PARAM",
+          pred_value_vars = "AVAL",
+          pred_visit_var = "AVISIT",
+          resp_cat_var = "PARCAT",
+          resp_par_var = "PARAM",
+          resp_value_vars = c("CHG1", "CHG2"),
+          resp_visit_var = "AVISIT",
+          subjid_var = "USUBJID"
+        )
+      )
+
+    dv.manager::run_app(
+      data = list(
+        "Sample Data" = list(
+          adbm = adbm_dataset,
+          adbin = adbin_dataset,
+          adsl = adsl_dataset
+        )
+      ),
+      module_list = module_list,
+      filter_data = "adsl",
+      filter_key = "USUBJID",
+      enableBookmarking = "url"
+    )
+```
 
 
