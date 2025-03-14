@@ -499,7 +499,7 @@ scatter_plot <- function(df, x_var, y_var) {
 #'
 corr_hm_server <- function(id,
                            bm_dataset,
-                           subjid_var = "SUBJID",
+                           subjid_var = "USUBJID",
                            cat_var = "PARCAT",
                            par_var = "PARAM",
                            visit_var = "AVISIT",
@@ -869,7 +869,7 @@ ch_subset_data <- function(sel, cat_col, par_col, val_col, vis_col, bm_ds, subj_
 #' @export
 #'
 mod_corr_hm <- function(module_id, bm_dataset_name,
-                        subjid_var = "SUBJID",
+                        subjid_var = "USUBJID",
                         cat_var = "PARCAT",
                         par_var = "PARAM",
                         visit_var = "AVISIT",
