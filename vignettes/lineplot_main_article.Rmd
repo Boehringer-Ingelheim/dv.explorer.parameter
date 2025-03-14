@@ -115,25 +115,37 @@ A table that provides the count of samples per group and time point for the whol
 # Creating a lineplot application
 
 ```{r, eval=FALSE}
+
+adbm_dataset <- dplyr::mutate(
+  dv.explorer.parameter:::safety_data()[["bm"]],
+  USUBJID = factor(USUBJID),
+  PARCAT1 = factor(PARCAT1),
+  PARAM = factor(PARAM),
+  AVISIT = factor(AVISIT)
+)
+
+adsl_dataset <- dplyr::mutate(
+  dv.explorer.parameter:::safety_data()[["sl"]],
+  USUBJID = factor(USUBJID)
+)
+
 module_list <- list(
   "lineplot" = dv.explorer.parameter::mod_lineplot(
     module_id = "lineplot",
-    bm_dataset_name = "bm",
-    group_dataset_name = "sl",
-    visit_vars = "VISIT",
-    value_vars = c("VALUE1", "VALUE2"),
-    subjid_var = "SUBJID",
-    cat_var = "PARCAT"
+    bm_dataset_name = "adbm",
+    group_dataset_name = "adsl",
+    subjid_var = "USUBJID",
+    cat_var = "PARCAT1",
+    par_var = "PARAM",
+    visit_vars = "AVISIT",
+    value_vars = c("AVAL", "CHG"),
   )
 )
 
-bm_dataset <- test_data()[["bm"]]
-group_dataset <- test_data()[["sl"]]
-
 dv.manager::run_app(
-  data = list("DS" = list(bm = bm_dataset, sl = group_dataset)),
+  data = list("DS" = list(adbm = adbm_dataset, adsl = adsl_dataset)),
   module_list = module_list,
-  filter_data = "sl",
+  filter_data = "adsl",
   filter_key = "SUBJID"
 )
 ```
