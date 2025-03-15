@@ -1,18 +1,16 @@
-# YT#VH37d93679eaf9e0806b4247c0f6e1c91d#VH00000000000000000000000000000000#
+# YT#VHa53bd254d6ac8e6a19dfa057febb06b5#VH00000000000000000000000000000000#
 CM <- local({ # _C_hecked _M_odule
   message_well <- function(title, contents, color = "f5f5f5") {
-    style <- sprintf(
-      paste(
-        "padding: 0.5rem;",
-        "padding-left: 1rem;",
-        "margin-bottom: 20px;",
-        "background-color: %s;",
-        "border: 1px solid #e3e3e3;",
-        "border-radius: 4px;",
-        "-webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.05);",
-        "box-shadow: inset 0 1px 1px rgba(0,0,0,.05);"
-      ), color
-    )
+    style <- sprintf("
+      padding: 0.5rem;
+      padding-left: 1rem;
+      margin-bottom: 20px;
+      background-color: %s;
+      border: 1px solid #e3e3e3;
+      border-radius: 4px;
+      -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.05);
+      box-shadow: inset 0 1px 1px rgba(0,0,0,.05);
+    ", color)
 
     res <- list(shiny::h3(title))
     if (length(contents)) res <- append(res, list(shiny::tags[["div"]](contents, style = style)))
