@@ -14,5 +14,5 @@ mod <- mod_boxplot(
 data <- test_data()
 trigger_input_id <- "mod-BOTON"
 test_communication_with_papo(mod, data, trigger_input_id,
-                             'specs$boxplot_module$jumping_feature',
+                             "boxplot_module$jumping_feature",
                              specs$boxplot_module$jumping_feature)

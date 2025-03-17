@@ -14,5 +14,5 @@ mod <- mod_lineplot(
 data <- test_data()
 trigger_input_id <- "mod-selected_subject"
 test_communication_with_papo(mod, data, trigger_input_id, 
-                             'specs$lineplot_module$jumping_feature',
+                             "lineplot_module$jumping_feature",
                              specs$lineplot_module$jumping_feature)
