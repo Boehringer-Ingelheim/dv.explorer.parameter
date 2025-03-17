@@ -83,7 +83,7 @@ expect_r2d3_svg <- function(app, query_list) {
   })
 }
 
-# YT#VH19ec235e56cdd18f129215603abf0ca6#VH00000000000000000000000000000000#
+# YT#VHef8421f23bae3b171c0b213512cc9d06#VH00000000000000000000000000000000#
 
 #' Test harness for communication with `dv.papo`.
 #'

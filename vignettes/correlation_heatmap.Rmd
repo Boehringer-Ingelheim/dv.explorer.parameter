@@ -124,7 +124,7 @@ dv.manager::run_app(
   data = list("DS" = list(adbm = adbm_dataset, adsl = adsl_dataset)),
   module_list = list(
     "Correlation Heatmap" = dv.explorer.parameter::mod_corr_hm(
-      "forestplot",
+      "corr_hm",
       bm_dataset_name = "adbm",
       subjid_var = "USUBJID",
       cat_var = "PARCAT1",
