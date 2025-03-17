@@ -34,6 +34,7 @@ mock_app_forest <- function(dry_run = FALSE, update_query_string = TRUE, srv_def
       group_dataset = group_dataset,
       numeric_numeric_functions = numeric_numeric_functions,
       numeric_factor_functions = numeric_factor_functions,
+      subjid_var = "SUBJID",
       cat_var = "PARCAT",
       par_var = "PARAM",
       visit_var = "VISIT",

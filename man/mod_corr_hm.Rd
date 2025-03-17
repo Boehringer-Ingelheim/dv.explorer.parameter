@@ -7,7 +7,7 @@
 mod_corr_hm(
   module_id,
   bm_dataset_name,
-  subjid_var = "SUBJID",
+  subjid_var = "USUBJID",
   cat_var = "PARCAT",
   par_var = "PARAM",
   visit_var = "AVISIT",

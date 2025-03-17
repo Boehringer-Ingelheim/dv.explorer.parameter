@@ -127,7 +127,10 @@ dv.manager::run_app(
       "corr_hm",
       bm_dataset_name = "adbm",
       subjid_var = "USUBJID",
-      cat_var = "PARCAT1"
+      cat_var = "PARCAT1",
+      par_var = "PARAM",
+      visit_var = "AVISIT",
+      value_vars = c("AVAL", "CHG", "PCHG")
     )
   ),
   filter_data = "adsl",

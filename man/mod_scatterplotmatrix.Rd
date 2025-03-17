@@ -12,7 +12,7 @@ mod_scatterplotmatrix(
   par_var = "PARAM",
   value_vars = "AVAL",
   visit_var = "AVISIT",
-  subjid_var = "SUBJID",
+  subjid_var = "USUBJID",
   default_cat = NULL,
   default_par = NULL,
   default_visit = NULL,

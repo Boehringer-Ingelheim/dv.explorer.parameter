@@ -12,7 +12,7 @@ mod_wfphm(
   cat_var = "PARCAT1",
   par_var = "PARAM",
   visit_var = "AVISIT",
-  subjid_var = "SUBJID",
+  subjid_var = "USUBJID",
   value_vars = "AVAL",
   bar_group_palette = list(),
   cat_palette = list(),

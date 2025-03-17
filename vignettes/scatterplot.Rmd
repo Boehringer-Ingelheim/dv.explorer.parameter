@@ -117,9 +117,11 @@ dv.manager::run_app(
       "scatterplot",
       bm_dataset_name = "adbm",
       group_dataset_name = "adsl",
-      subjid_var = "USUBJID",
       cat_var = "PARCAT1",
-      value_vars = "AVAL"
+      par_var = "PARAM",
+      value_vars = "AVAL",
+      visit_var = "AVISIT",
+      subjid_var = "USUBJID"
     )
   ),
   filter_data = "adsl",

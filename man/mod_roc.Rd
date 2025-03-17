@@ -17,7 +17,7 @@ mod_roc(
   resp_par_var = "PARAM",
   resp_value_vars = c("CHG1", "CHG2"),
   resp_visit_var = "AVISIT",
-  subjid_var = "SUBJID",
+  subjid_var = "USUBJID",
   compute_roc_fn = compute_roc_data,
   compute_metric_fn = compute_metric_data
 )
