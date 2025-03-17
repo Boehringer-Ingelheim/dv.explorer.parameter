@@ -25,7 +25,7 @@ As a starting point, let's imagine we want to inspect the following toy subject-
 ```{r, echo = FALSE}
 # Inspired in safetyData:adam_adsl
 sl <- data.frame(
-  SUBJID = c("1015", "1028") |> as.factor(),
+  USUBJID = c("1015", "1028") |> as.factor(),
   SEX = c("F", "M") |> as.factor(),
   RACE = c("WHITE", "WHITE") |> as.factor(),
   COUNTRY = c("Italy", "Spain") |> as.factor()
@@ -38,7 +38,7 @@ knitr::kable(sl, format = "markdown")
 ```{r, echo = FALSE}
 # Inspired in safetyData:adam_lbc
 lb <- data.frame(
-  SUBJID = c("1015", "1015", "1015", "1028", "1028", "1028") |> as.factor(),
+  USUBJID = c("1015", "1015", "1015", "1028", "1028", "1028") |> as.factor(),
   PARCAT1 = rep("CHEM", 6) |> as.factor(),
   PARAM = rep("Imaginariol (mmol/L)", 6) |> as.factor(),
   AVISITN = c(0, 2, 4, 0, 2, 4),
@@ -55,7 +55,7 @@ knitr::kable(lb, format = "markdown")
 module_list <- list(
   lineplot = dv.explorer.parameter::mod_lineplot(
     module_id = "lineplot", bm_dataset_name = "lb", group_dataset_name = "sl",
-    subjid_var = "SUBJID", cat_var = "PARCAT1", par_var = "PARAM", value_vars = "AVAL",
+    subjid_var = "USUBJID", cat_var = "PARCAT1", par_var = "PARAM", value_vars = "AVAL",
     visit_vars = "AVISITN", default_cat = "CHEM", default_par = "Imaginariol (mmol/L)",
     #default_main_group = "SEX", # nolint
     ref_line_vars = c("A1LO", "A1HI")
@@ -66,7 +66,7 @@ dv.manager::run_app(
   data = list("DS" = list(lb = lb, sl = sl)),
   module_list = module_list,
   filter_data = "sl",
-  filter_key = "SUBJID"
+  filter_key = "USUBJID"
 )
 ```
 
@@ -75,7 +75,7 @@ We can do so by configuring `mod_lineplot` thus:
 ```{r, eval=FALSE}
 dv.explorer.parameter::mod_lineplot(
   module_id = "lineplot", bm_dataset_name = "lb", group_dataset_name = "sl",
-  subjid_var = "SUBJID", cat_var = "PARCAT1", par_var = "PARAM", 
+  subjid_var = "USUBJID", cat_var = "PARCAT1", par_var = "PARAM", 
   value_vars = "AVAL", visit_vars = "AVISITN", default_cat = "CHEM", 
   default_par = "Imaginariol (mmol/L)", default_main_group = "SEX"
 )

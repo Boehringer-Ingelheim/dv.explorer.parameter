@@ -2,7 +2,7 @@ mod <- mod_lineplot(
   module_id = "mod",
   bm_dataset_name = "bm",
   group_dataset_name = "sl",
-  subjid_var = "SUBJID",
+  subjid_var = "USUBJID",
   cat_var = "PARCAT",
   par_var = "PARAM",
   visit_vars = c("VISIT"),

@@ -74,7 +74,7 @@ mock_app_forest_mm <- function() {
       numeric_factor_functions = numeric_factor_functions,
       visit_var = "VISIT",
       value_vars = c("VALUE1", "VALUE2"),
-      subjid_var = "SUBJID",
+      subjid_var = "USUBJID",
       cat_var = "PARCAT"
     )
   )
@@ -86,6 +86,6 @@ mock_app_forest_mm <- function() {
     data = list("DS" = list(bm = bm_dataset, sl = group_dataset)),
     module_list = module_list,
     filter_data = "sl",
-    filter_key = "SUBJID"
+    filter_key = "USUBJID"
   )
 }

@@ -49,7 +49,7 @@ creator should specify the values for these arguments as applicable.
 -   `module_id` : A unique identifier of type character for the module
     in the app.
 
--   `subjid_var`: A common column across all datasets that uniquely identify subjects. By default: "SUBJID"
+-   `subjid_var`: A common column across all datasets that uniquely identify subjects. By default: "USUBJID"
 
 -   `bm_dataset_name`: The dataset that contains the continuous parameters. It expects a dataset similar to
      https://www.cdisc.org/kb/examples/adam-basic-data-structure-bds-using-paramcd-80288192 ,
