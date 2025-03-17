@@ -58,7 +58,7 @@ creator should specify the values for these arguments as applicable.
 -   `module_id` : A unique identifier of type character for the module
     in the app.
 
--   `subjid_var`: A common column across all datasets that uniquely identify subjects. By default: "USUBJID"
+-   `subjid_var`: A common column across all datasets that uniquely identify subjects. By default: "SUBJID"
 
 -   `pred_dataset_name`: The name of the dataset that contains the continuous parameters to be
     used as predictors in the ROC analysis. It expects a dataset similar to

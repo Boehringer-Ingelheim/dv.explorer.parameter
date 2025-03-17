@@ -6,7 +6,7 @@ test_data <- function(random_bm_values = FALSE) {
   n_param_per_cat <- 5
 
   bm <- expand.grid(
-    USUBJID = 1:n_participants,
+    SUBJID = 1:n_participants,
     VISITN = 1:3,
     PARCATN = 1:n_categories,
     PARAMN = 1:n_param_per_cat
@@ -27,7 +27,7 @@ test_data <- function(random_bm_values = FALSE) {
   }
 
   sl <- data.frame(
-    USUBJID = 1:n_participants
+    SUBJID = 1:n_participants
   )
   sl[["CAT1"]] <- sample(c("Y", "N"), size = nrow(sl), replace = TRUE)
   sl[["CAT2"]] <- sample(c("A", "B", "C", "D"), size = nrow(sl), replace = TRUE)
@@ -38,7 +38,7 @@ test_data <- function(random_bm_values = FALSE) {
 
   bm <- bm |>
     dplyr::mutate(
-      USUBJID = factor(.data[["USUBJID"]]),
+      SUBJID = factor(.data[["SUBJID"]]),
       PARCAT = factor(.data[["PARCAT"]]),
       PARAM = factor(.data[["PARAM"]]),
       VISIT = factor(.data[["VISIT"]]),
@@ -48,7 +48,7 @@ test_data <- function(random_bm_values = FALSE) {
   # Duplicate for the rest of test cases, default with no default, default, bookmark, setup
   sl <- dplyr::mutate(
     sl,
-    USUBJID = factor(.data[["USUBJID"]]) # nolint
+    SUBJID = factor(.data[["SUBJID"]]) # nolint
   )
 
   for (col in names(bm)) {

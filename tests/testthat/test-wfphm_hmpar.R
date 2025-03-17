@@ -3,7 +3,7 @@
 
 local({
   data <- expand.grid(
-    USUBJID = factor(1:3),
+    SUBJID = factor(1:3),
     CAT = factor(1:2),
     PAR = factor(1:2),
     VISIT = factor(sprintf("VISIT%s", 1:2))
@@ -12,7 +12,7 @@ local({
   data[["CAT"]] <- factor(sprintf("C%s", data[["CAT"]]))
   data[["PAR"]] <- factor(sprintf("%sP%s", data[["CAT"]], data[["PAR"]]))
   data[["VALUE"]] <- seq_len(nrow(data))
-  levels(data[["USUBJID"]]) <- 1:4 # Add subject with no parameter values
+  levels(data[["SUBJID"]]) <- 1:4 # Add subject with no parameter values
   data
 
   sorted_x <- c("3", "4", "2", "1")
@@ -25,7 +25,7 @@ local({
     visit_selection = "VISIT1",
     visit_var = "VISIT",
     value_var = "VALUE",
-    subjid_var = "USUBJID",
+    subjid_var = "SUBJID",
     sorted_x = sorted_x,
     out_criteria = list(C1P1 = list(ll = 1.1, ul = 2.9)),
     scale = get_tr_apply(tr_identity)
@@ -87,14 +87,14 @@ local({
       )
     ), {
     data <- data.frame(
-      USUBJID = factor(1),
+      SUBJID = factor(1),
       CAT = factor("C1"),
       PAR = factor("P1"),
       VISIT = factor("VISIT1"),
       VALUE = 1
     )
 
-    sorted_x <- levels(data[["USUBJID"]])
+    sorted_x <- levels(data[["SUBJID"]])
     r <- wfphm_hmpar_subset(
       data = data,
       cat_selection = c("C1"),
@@ -104,7 +104,7 @@ local({
       visit_selection = "VISIT1",
       visit_var = "VISIT",
       value_var = "VALUE",
-      subjid_var = "USUBJID",
+      subjid_var = "SUBJID",
       sorted_x = sorted_x,
       out_criteria = NULL,
       scale = get_tr_apply(function(x) {
@@ -124,7 +124,7 @@ local({
       )
     ), {
     data <- expand.grid(
-      USUBJID = factor(c(1, 1:3)),
+      SUBJID = factor(c(1, 1:3)),
       CAT = factor(1:2),
       PAR = factor(1:2),
       VISIT = factor(sprintf("VISIT%s", 1:2))
@@ -147,7 +147,7 @@ local({
         visit_selection = "VISIT1",
         visit_var = "VISIT",
         value_var = "VALUE",
-        subjid_var = "USUBJID",
+        subjid_var = "SUBJID",
         sorted_x = sorted_x,
         out_criteria = list(C1P1 = list(ll = 1.1, ul = 2.9)),
         scale = get_tr_apply(tr_identity)
@@ -162,7 +162,7 @@ local({
 
 root_app <- start_app_driver(rlang::quo({
   data <- expand.grid(
-    USUBJID = factor(1:3),
+    SUBJID = factor(1:3),
     CAT = factor(1:2),
     PAR = factor(1:2),
     VISIT = factor(sprintf("VISIT%s", 1:2))
@@ -172,7 +172,7 @@ root_app <- start_app_driver(rlang::quo({
   data[["PAR"]] <- factor(sprintf("%sP%s", data[["CAT"]], data[["PAR"]]))
   data[["VALUE1"]] <- seq_len(nrow(data))
   data[["VALUE2"]] <- seq_len(nrow(data)) + 10
-  levels(data[["USUBJID"]]) <- 1:4 # Add subject with no parameter values
+  levels(data[["SUBJID"]]) <- 1:4 # Add subject with no parameter values
   data
 
   sorted_x <- c("3", "4", "2", "1")
@@ -187,7 +187,7 @@ root_app <- start_app_driver(rlang::quo({
     cat_var = "CAT",
     par_var = "PAR",
     visit_var = "VISIT",
-    subjid_var = "USUBJID",
+    subjid_var = "SUBJID",
     value_vars = c("VALUE1", "VALUE2"),
     sorted_x = shiny::reactive(sorted_x),
     tr_mapper = tr_mapper_def(),

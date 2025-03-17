@@ -14,7 +14,7 @@ test_that(
       val_col = "VALUE1",
       vis_col = "VISIT",
       bm_ds = d,
-      subj_col = "USUBJID"
+      subj_col = "SUBJID"
     )
     checkmate::expect_set_equal(levels(res[[CNT$PAR]]), paste0(sel[[CNT$PAR]], " - ", sel[[CNT$VIS]]))
     checkmate::expect_factor(res[[CNT$PAR]])

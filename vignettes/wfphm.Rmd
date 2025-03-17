@@ -61,7 +61,7 @@ variable in the waterfall plot. The variable on the X-Axis is based on
 the value specified for the "`subjid_var"` argument for the module.
 Typically it is expected to be "Subject ID" and hence the naming
 convention for the argument reflects this and the default value for the
-argument is set to "USUBJID". However please note that the module will
+argument is set to "SUBJID". However please note that the module will
 support other suitable variables on the X-Axis as well if it is
 specified as the argument value.
 
@@ -97,13 +97,13 @@ creator should specify the values for these arguments as applicable.
         "PCHG" or "log2AVAL" or "log2CHG" or "log2PCHG" or "log10AVAL"
         or "log10CHG", "log10PCHG"
     -   `visit_var`: "AVISIT"
-    -   `subjid_var`: "USUBJID"
+    -   `subjid_var`: "SUBJID"
 
 -   `group_dataset_name` : The name of dataset used to define groups in the waterfall plot and the variables
     to be displayed in the continuous and categorical heatmaps.
 
     The dataset should at least have the columns with names:
-    -   `subjid_var`: "USUBJID"
+    -   `subjid_var`: "SUBJID"
 
 Refer to
 `dv.explorer.parameter::mod_wfphm()` for the complete list of arguments and their description.
@@ -138,14 +138,14 @@ standard dataset mentioned above.
 ```{r}
 example_dataset <- list(
   "adbm" = tibble::tibble(
-    USUBJID = factor(c(1, 1, 2, 2, 3, 3)),
+    SUBJID = factor(c(1, 1, 2, 2, 3, 3)),
     PARCAT1 = factor(c("PC1", "PC2", "PC1", "PC2", "PC1", "PC2")),
     PARAM = factor(c("P1", "P2", "P1", "P2", "P1", "P2")),
     AVISIT = factor(c("V1", "V2", "V1", "V2", "V2", "V1")),
     AVAL = c(11, 12, 21, 22, 31, 3)
   ),
   "adsl" = tibble::tibble(
-    USUBJID = factor(c(1, 2, 3)),
+    SUBJID = factor(c(1, 2, 3)),
     WEIGHT = c(10, 20, 30),
     SEX = factor(c("M", "F", "U")),
     COUNTRY = factor(c("DE", "US", "DE"))
@@ -180,7 +180,7 @@ dv.manager::run_app(
   data = list(DS = example_dataset),
   module_list = module_list,
   filter_data = "adsl",
-  filter_key = "USUBJID"
+  filter_key = "SUBJID"
 )
 ```
 
@@ -324,7 +324,7 @@ dv.manager::run_app(
   data = list(DS = example_dataset_custom_aval),
   module_list = module_list_custom_aval,
   filter_data = "adbm",
-  filter_key = "USUBJID"
+  filter_key = "SUBJID"
 )
 ```
 
@@ -350,7 +350,7 @@ dv.manager::run_app(
   data = list(DS = example_dataset_custom_aval),
   module_list = module_list_custom_aval,
   filter_data = "adbm",
-  filter_key = "USUBJID"
+  filter_key = "SUBJID"
 )
 ```
 
@@ -476,7 +476,7 @@ dv.manager::run_app(
   data = list(DS = example_dataset),
   module_list = module_list_custom_transformation,
   filter_data = "adbm",
-  filter_key = "USUBJID"
+  filter_key = "SUBJID"
 )
 ```
 
@@ -490,7 +490,7 @@ the entries by setting a label attribute for the columns.
 ```{r, eval = FALSE}
 # Assign some labels to the dataset
 example_dataset_labelled <- example_dataset
-attr(example_dataset_labelled[["adbm"]][["USUBJID"]], "label") <- "Subject ID"
+attr(example_dataset_labelled[["adbm"]][["SUBJID"]], "label") <- "Subject ID"
 attr(example_dataset_labelled[["adbm"]][["SEX"]], "label") <- "Subject Sex"
 attr(example_dataset_labelled[["adbm"]][["PARCAT1"]], "label") <- "Parameter Category"
 
@@ -498,7 +498,7 @@ dv.manager::run_app(
   data = list(DS = example_dataset_labelled),
   module_list = module_list,
   filter_data = "adbm",
-  filter_key = "USUBJID"
+  filter_key = "SUBJID"
 )
 ```
 

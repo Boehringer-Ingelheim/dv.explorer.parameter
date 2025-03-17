@@ -20,7 +20,7 @@ mock_app_corr_hm <- function(dry_run = FALSE, update_query_string = TRUE, srv_de
     list(
       id = "not_ebas",
       bm_dataset = bm_dataset,
-      subjid_var = "USUBJID",
+      subjid_var = "SUBJID",
       cat_var = "PARCAT",
       par_var = "PARAM",
       visit_var = "VISIT",
@@ -57,7 +57,7 @@ mock_app_correlation_hm_mm <- function() {
       bm_dataset_name = "bm",
       visit_var = "VISIT",
       value_vars = c("VALUE1", "VALUE2"),
-      subjid_var = "USUBJID",
+      subjid_var = "SUBJID",
       cat_var = "PARCAT"
     )
   )
@@ -68,7 +68,7 @@ mock_app_correlation_hm_mm <- function() {
     data = list("DS" = list(bm = bm_dataset, sl = bm_dataset)),
     module_list = module_list,
     filter_data = "sl",
-    filter_key = "USUBJID"
+    filter_key = "SUBJID"
   )
 }
 
@@ -83,7 +83,7 @@ mock_app_correlation_hm_mm_safetyData <- function() {
       bm_dataset_name = "bm",
       visit_var = "VISIT",
       value_vars = c("AVAL", "CHG"),
-      subjid_var = "USUBJID",
+      subjid_var = "SUBJID",
       cat_var = "PARCAT1"
     )
   )
@@ -94,6 +94,6 @@ mock_app_correlation_hm_mm_safetyData <- function() {
     data = list("DS" = list(bm = data[["bm"]], sl = data[["sl"]])),
     module_list = module_list,
     filter_data = "sl",
-    filter_key = "USUBJID"
+    filter_key = "SUBJID"
   )
 }

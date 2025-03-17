@@ -27,7 +27,7 @@ mock_app_scatterplot <- function(dry_run = FALSE,
       id = "not_ebas",
       bm_dataset = bm_dataset,
       group_dataset = group_dataset,
-      subjid_var = "USUBJID",
+      subjid_var = "SUBJID",
       cat_var = "PARCAT",
       par_var = "PARAM",
       visit_var = "VISIT",
@@ -64,12 +64,12 @@ mock_app_scatterplot_mm <- function(in_fluid = TRUE, defaults = list(), update_q
         group_dataset_name = "adsl",
         visit_var = "VISIT",
         value_vars = c("VALUE1", "VALUE2"),
-        subjid_var = "USUBJID",
+        subjid_var = "SUBJID",
         cat_var = "PARCAT"
       )
     ),
     filter_data = "adsl",
-    filter_key = "USUBJID",
+    filter_key = "SUBJID",
     enableBookmarking = "url"
   )
 }

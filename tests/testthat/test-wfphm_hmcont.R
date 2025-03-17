@@ -3,7 +3,7 @@
 
 local({
   data <- data.frame(
-    USUBJID = factor(1:3),
+    SUBJID = factor(1:3),
     NUM1 = 11:13,
     NUM2 = 21:23,
     NUM3 = 31:33
@@ -15,7 +15,7 @@ local({
   r <- wfphm_hmcont_subset(
     data,
     selected_col,
-    subjid_var = "USUBJID",
+    subjid_var = "SUBJID",
     sorted_x = sorted_x
   )
 
@@ -59,7 +59,7 @@ local({
       )
     ), {
     data <- data.frame(
-      USUBJID = factor(c(1, 1, 3)),
+      SUBJID = factor(c(1, 1, 3)),
       NUM1 = 11:13,
       NUM2 = 21:23,
       NUM3 = 31:33
@@ -69,7 +69,7 @@ local({
       wfphm_hmcont_subset(
         data,
         selected_col,
-        subjid_var = "USUBJID",
+        subjid_var = "SUBJID",
         sorted_x = sorted_x
       ),
       class = "validation"
@@ -82,7 +82,7 @@ local({
 
 root_app <- start_app_driver(rlang::quo({
   data <- data.frame(
-    USUBJID = factor(1:3),
+    SUBJID = factor(1:3),
     NUM1 = 11:13,
     NUM2 = 21:23,
     NUM3 = 31:33
@@ -90,7 +90,7 @@ root_app <- start_app_driver(rlang::quo({
 
   srv_args <- list(
     dataset = shiny::reactive(data),
-    subjid_var = "USUBJID",
+    subjid_var = "SUBJID",
     sorted_x = shiny::reactive(c("3", "1", "2")),
     margin = shiny::reactive(c(top = 100, bottom = 101, left = 102, right = 103))
   )
