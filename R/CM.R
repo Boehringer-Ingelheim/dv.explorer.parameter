@@ -1,6 +1,6 @@
 # YT#VHa53bd254d6ac8e6a19dfa057febb06b5#VH00000000000000000000000000000000#
 CM <- local({ # _C_hecked _M_odule
-  # 2025-03-21: Report errors for all loaded datasets
+  # 2025-03-21: [feature] report errors for all loaded datasets and [fix] dehardcode "PARAM" string and use `par` argument
 
   message_well <- function(title, contents, color = "f5f5f5") {
     style <- sprintf("
@@ -780,7 +780,7 @@ CM <- local({ # _C_hecked _M_odule
         sprintf('%s <- dv.explorer.parameter::prefix_repeat_parameters(%s, cat_var = "%s", par_var = "%s")', 
                 ds_value, ds_value, cat, par)
 
-      mask <- unique_cat_par_combinations[["PARAM"]] %in% unique_repeat_params
+      mask <- unique_cat_par_combinations[[par]] %in% unique_repeat_params
       deduplicated_table <- df_to_string({
         cats <- unique_cat_par_combinations[mask, ][[cat]]
         pars <- unique_cat_par_combinations[mask, ][[par]]
