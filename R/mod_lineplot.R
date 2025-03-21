@@ -1719,7 +1719,7 @@ mod_lineplot_API_spec <- TC$group(
   subjid_var = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("subjid_var", "map_character_to_factor"),
   cat_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("map_character_to_factor"),
   par_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("map_character_to_factor"),
-  visit_vars = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())) |> TC$flag("one_or_more"),
+  visit_vars = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())) |> TC$flag("one_or_more", "map_character_to_factor"),
   cdisc_visit_vars = TC$col("bm_dataset_name", TC$numeric()) |> TC$flag("zero_or_more"),
   # FIXME: ? Interaction between visit_vars and cdisc_visit_vars; one needs to be specified
   value_vars = TC$col("bm_dataset_name", TC$numeric()) |> TC$flag("one_or_more"),
