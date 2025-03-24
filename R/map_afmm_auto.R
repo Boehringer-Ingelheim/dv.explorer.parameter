@@ -18,6 +18,10 @@ map_afmm_mod_boxplot_auto <- function(afmm, module_id, bm_dataset_name, group_da
             mapping_summary <- c(mapping_summary, paste0("(", ds_name, ") ", bm_dataset_name, "[[\"",
                 par_var, "\"]]"))
         }
+        if (is.character(ds[[bm_dataset_name]][[visit_var]])) {
+            mapping_summary <- c(mapping_summary, paste0("(", ds_name, ") ", bm_dataset_name, "[[\"",
+                visit_var, "\"]]"))
+        }
         if (is.character(ds[[group_dataset_name]][[subjid_var]])) {
             mapping_summary <- c(mapping_summary, paste0("(", ds_name, ") ", group_dataset_name, "[[\"",
                 subjid_var, "\"]]"))
@@ -34,6 +38,9 @@ map_afmm_mod_boxplot_auto <- function(afmm, module_id, bm_dataset_name, group_da
             }
             if (is.character(res[[bm_dataset_name]][[par_var]])) {
                 res[[bm_dataset_name]][[par_var]] <- as.factor(res[[bm_dataset_name]][[par_var]])
+            }
+            if (is.character(res[[bm_dataset_name]][[visit_var]])) {
+                res[[bm_dataset_name]][[visit_var]] <- as.factor(res[[bm_dataset_name]][[visit_var]])
             }
             if (is.character(res[[group_dataset_name]][[subjid_var]])) {
                 res[[group_dataset_name]][[subjid_var]] <- as.factor(res[[group_dataset_name]][[subjid_var]])
@@ -63,6 +70,10 @@ map_afmm_mod_corr_hm_auto <- function(afmm, module_id, bm_dataset_name, subjid_v
             mapping_summary <- c(mapping_summary, paste0("(", ds_name, ") ", bm_dataset_name, "[[\"",
                 par_var, "\"]]"))
         }
+        if (is.character(ds[[bm_dataset_name]][[visit_var]])) {
+            mapping_summary <- c(mapping_summary, paste0("(", ds_name, ") ", bm_dataset_name, "[[\"",
+                visit_var, "\"]]"))
+        }
     }
     if (length(mapping_summary)) {
         warning_message <- paste0("[mod_corr_hm] This module will map the following dataset columns from `character` to `factor`:\n",
@@ -78,6 +89,9 @@ map_afmm_mod_corr_hm_auto <- function(afmm, module_id, bm_dataset_name, subjid_v
             }
             if (is.character(res[[bm_dataset_name]][[par_var]])) {
                 res[[bm_dataset_name]][[par_var]] <- as.factor(res[[bm_dataset_name]][[par_var]])
+            }
+            if (is.character(res[[bm_dataset_name]][[visit_var]])) {
+                res[[bm_dataset_name]][[visit_var]] <- as.factor(res[[bm_dataset_name]][[visit_var]])
             }
             return(res)
         })
@@ -105,6 +119,10 @@ map_afmm_mod_forest_auto <- function(afmm, module_id, bm_dataset_name, group_dat
             mapping_summary <- c(mapping_summary, paste0("(", ds_name, ") ", bm_dataset_name, "[[\"",
                 par_var, "\"]]"))
         }
+        if (is.character(ds[[bm_dataset_name]][[visit_var]])) {
+            mapping_summary <- c(mapping_summary, paste0("(", ds_name, ") ", bm_dataset_name, "[[\"",
+                visit_var, "\"]]"))
+        }
     }
     if (length(mapping_summary)) {
         warning_message <- paste0("[mod_forest] This module will map the following dataset columns from `character` to `factor`:\n",
@@ -120,6 +138,9 @@ map_afmm_mod_forest_auto <- function(afmm, module_id, bm_dataset_name, group_dat
             }
             if (is.character(res[[bm_dataset_name]][[par_var]])) {
                 res[[bm_dataset_name]][[par_var]] <- as.factor(res[[bm_dataset_name]][[par_var]])
+            }
+            if (is.character(res[[bm_dataset_name]][[visit_var]])) {
+                res[[bm_dataset_name]][[visit_var]] <- as.factor(res[[bm_dataset_name]][[visit_var]])
             }
             return(res)
         })
@@ -149,6 +170,10 @@ map_afmm_mod_lineplot_auto <- function(afmm, module_id, bm_dataset_name, group_d
             mapping_summary <- c(mapping_summary, paste0("(", ds_name, ") ", bm_dataset_name, "[[\"",
                 par_var, "\"]]"))
         }
+        if (is.character(ds[[bm_dataset_name]][[visit_vars]])) {
+            mapping_summary <- c(mapping_summary, paste0("(", ds_name, ") ", bm_dataset_name, "[[\"",
+                visit_vars, "\"]]"))
+        }
     }
     if (length(mapping_summary)) {
         warning_message <- paste0("[mod_lineplot] This module will map the following dataset columns from `character` to `factor`:\n",
@@ -164,6 +189,9 @@ map_afmm_mod_lineplot_auto <- function(afmm, module_id, bm_dataset_name, group_d
             }
             if (is.character(res[[bm_dataset_name]][[par_var]])) {
                 res[[bm_dataset_name]][[par_var]] <- as.factor(res[[bm_dataset_name]][[par_var]])
+            }
+            if (is.character(res[[bm_dataset_name]][[visit_vars]])) {
+                res[[bm_dataset_name]][[visit_vars]] <- as.factor(res[[bm_dataset_name]][[visit_vars]])
             }
             return(res)
         })
@@ -243,6 +271,10 @@ map_afmm_mod_scatterplot_auto <- function(afmm, module_id, bm_dataset_name, grou
             mapping_summary <- c(mapping_summary, paste0("(", ds_name, ") ", bm_dataset_name, "[[\"",
                 par_var, "\"]]"))
         }
+        if (is.character(ds[[bm_dataset_name]][[visit_var]])) {
+            mapping_summary <- c(mapping_summary, paste0("(", ds_name, ") ", bm_dataset_name, "[[\"",
+                visit_var, "\"]]"))
+        }
         if (is.character(ds[[group_dataset_name]][[subjid_var]])) {
             mapping_summary <- c(mapping_summary, paste0("(", ds_name, ") ", group_dataset_name, "[[\"",
                 subjid_var, "\"]]"))
@@ -259,6 +291,9 @@ map_afmm_mod_scatterplot_auto <- function(afmm, module_id, bm_dataset_name, grou
             }
             if (is.character(res[[bm_dataset_name]][[par_var]])) {
                 res[[bm_dataset_name]][[par_var]] <- as.factor(res[[bm_dataset_name]][[par_var]])
+            }
+            if (is.character(res[[bm_dataset_name]][[visit_var]])) {
+                res[[bm_dataset_name]][[visit_var]] <- as.factor(res[[bm_dataset_name]][[visit_var]])
             }
             if (is.character(res[[group_dataset_name]][[subjid_var]])) {
                 res[[group_dataset_name]][[subjid_var]] <- as.factor(res[[group_dataset_name]][[subjid_var]])
@@ -285,6 +320,10 @@ map_afmm_mod_scatterplotmatrix_auto <- function(afmm, module_id, bm_dataset_name
             mapping_summary <- c(mapping_summary, paste0("(", ds_name, ") ", bm_dataset_name, "[[\"",
                 par_var, "\"]]"))
         }
+        if (is.character(ds[[bm_dataset_name]][[visit_var]])) {
+            mapping_summary <- c(mapping_summary, paste0("(", ds_name, ") ", bm_dataset_name, "[[\"",
+                visit_var, "\"]]"))
+        }
         if (is.character(ds[[group_dataset_name]][[subjid_var]])) {
             mapping_summary <- c(mapping_summary, paste0("(", ds_name, ") ", group_dataset_name, "[[\"",
                 subjid_var, "\"]]"))
@@ -301,6 +340,9 @@ map_afmm_mod_scatterplotmatrix_auto <- function(afmm, module_id, bm_dataset_name
             }
             if (is.character(res[[bm_dataset_name]][[par_var]])) {
                 res[[bm_dataset_name]][[par_var]] <- as.factor(res[[bm_dataset_name]][[par_var]])
+            }
+            if (is.character(res[[bm_dataset_name]][[visit_var]])) {
+                res[[bm_dataset_name]][[visit_var]] <- as.factor(res[[bm_dataset_name]][[visit_var]])
             }
             if (is.character(res[[group_dataset_name]][[subjid_var]])) {
                 res[[group_dataset_name]][[subjid_var]] <- as.factor(res[[group_dataset_name]][[subjid_var]])
@@ -326,6 +368,10 @@ map_afmm_mod_wfphm_auto <- function(afmm, module_id, bm_dataset_name, group_data
             mapping_summary <- c(mapping_summary, paste0("(", ds_name, ") ", bm_dataset_name, "[[\"",
                 par_var, "\"]]"))
         }
+        if (is.character(ds[[bm_dataset_name]][[visit_var]])) {
+            mapping_summary <- c(mapping_summary, paste0("(", ds_name, ") ", bm_dataset_name, "[[\"",
+                visit_var, "\"]]"))
+        }
         if (is.character(ds[[group_dataset_name]][[subjid_var]])) {
             mapping_summary <- c(mapping_summary, paste0("(", ds_name, ") ", group_dataset_name, "[[\"",
                 subjid_var, "\"]]"))
@@ -342,6 +388,9 @@ map_afmm_mod_wfphm_auto <- function(afmm, module_id, bm_dataset_name, group_data
             }
             if (is.character(res[[bm_dataset_name]][[par_var]])) {
                 res[[bm_dataset_name]][[par_var]] <- as.factor(res[[bm_dataset_name]][[par_var]])
+            }
+            if (is.character(res[[bm_dataset_name]][[visit_var]])) {
+                res[[bm_dataset_name]][[visit_var]] <- as.factor(res[[bm_dataset_name]][[visit_var]])
             }
             if (is.character(res[[group_dataset_name]][[subjid_var]])) {
                 res[[group_dataset_name]][[subjid_var]] <- as.factor(res[[group_dataset_name]][[subjid_var]])

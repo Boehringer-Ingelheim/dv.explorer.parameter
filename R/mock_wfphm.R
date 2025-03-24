@@ -16,6 +16,7 @@ mock_wfphm_mm_app <- function() {
       ),
       module_list = list(
         "Waterfall" = mod_wfphm(
+          subjid_var = "SUBJID",
           bm_dataset_name = "adbm",
           group_dataset_name = "group",
           cat_palette = list(SEX = function(x) {
