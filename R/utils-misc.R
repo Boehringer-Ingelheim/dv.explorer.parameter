@@ -207,10 +207,9 @@ pseudo_log_projection <- function(base = 10) {
 #' @keywords misc
 #' @export
 prefix_repeat_parameters <- function(dataset, cat_var, par_var) {
-  # `drop = TRUE` because of incompatible `data.frame` and `tibble` defaults
   unique_cat_par_combinations <- unique(dataset[c(cat_var, par_var)])
   dup_mask <- duplicated(unique_cat_par_combinations[par_var])
-  unique_repeat_params <- unique_cat_par_combinations[dup_mask, par_var, drop = TRUE]
+  unique_repeat_params <- unique_cat_par_combinations[[par_var]][dup_mask]
   mask <- (dataset[[par_var]] %in% unique_repeat_params)
  
   if (is.factor(dataset[[par_var]])) {
@@ -219,6 +218,6 @@ prefix_repeat_parameters <- function(dataset, cat_var, par_var) {
     extra_levels <- paste0(repeat_par_rows[[cat_var]], "-", repeat_par_rows[[par_var]])
     levels(dataset[[par_var]]) <- c(levels(dataset[[par_var]]), extra_levels)
   }
-  dataset[mask, par_var] <- paste0(dataset[mask, cat_var, drop = TRUE], "-", dataset[mask, par_var, drop = TRUE])
+  dataset[mask, par_var] <- paste0(dataset[[cat_var]][mask], "-", dataset[[par_var]][mask])
   return(dataset)
 }
