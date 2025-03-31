@@ -1,7 +1,11 @@
-# dv.explorer.parameter 0.1.4-9001
+# dv.explorer.parameter 0.1.5-9000
 
 * All modules:
     * Accept character() input for subject, category and parameter data.frame columns.
+
+* wfphm:
+    * Waterfall group menu does no longer include `character` variables.
+
 
 # dv.explorer.parameter 0.1.3-9000
 
