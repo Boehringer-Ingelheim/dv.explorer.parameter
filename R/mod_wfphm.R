@@ -378,7 +378,7 @@ wfphm_wf_server <- function(id,
       id = WFPHM_ID$WF$GROUP,
       data = group_dataset,
       include_func = function(x) {
-        is.factor(x) || is.character(x)
+        is.factor(x)
       },
       label = WFPHM_MSG$WF$GROUP,
       include_none = FALSE
