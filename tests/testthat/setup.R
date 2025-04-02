@@ -20,7 +20,7 @@ tns_factory <- function(id) function(...) paste0(c(id, as.character(list(...))),
 
 # `expr` must be a quosure or a regular call, in both cases they must be self-contained as they will be deparsed
 # and run in another process
-start_app_driver <- function(expr) {
+start_app_driver <- function(expr, defer = TRUE) {
   root_app <- if (run_shiny_tests && !suspect_check) {
     app_dir <- if (testthat::is_testing()) {
       "app/app.R"
@@ -45,6 +45,7 @@ start_app_driver <- function(expr) {
           )
         )
         app$wait_for_idle()
+        if (defer) withr::defer_parent(app$stop())
         app
       },
       condition = function(e) {
