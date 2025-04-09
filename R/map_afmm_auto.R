@@ -170,9 +170,13 @@ map_afmm_mod_lineplot_auto <- function(afmm, module_id, bm_dataset_name, group_d
             mapping_summary <- c(mapping_summary, paste0("(", ds_name, ") ", bm_dataset_name, "[[\"",
                 par_var, "\"]]"))
         }
-        if (is.character(ds[[bm_dataset_name]][[visit_vars]])) {
+
+        for (visit_var in visit_vars) {
+            if (is.character(ds[[bm_dataset_name]][[visit_var]])) {
             mapping_summary <- c(mapping_summary, paste0("(", ds_name, ") ", bm_dataset_name, "[[\"",
-                visit_vars, "\"]]"))
+                visit_var, "\"]]"))
+            }
+
         }
     }
     if (length(mapping_summary)) {
@@ -190,9 +194,13 @@ map_afmm_mod_lineplot_auto <- function(afmm, module_id, bm_dataset_name, group_d
             if (is.character(res[[bm_dataset_name]][[par_var]])) {
                 res[[bm_dataset_name]][[par_var]] <- as.factor(res[[bm_dataset_name]][[par_var]])
             }
-            if (is.character(res[[bm_dataset_name]][[visit_vars]])) {
-                res[[bm_dataset_name]][[visit_vars]] <- as.factor(res[[bm_dataset_name]][[visit_vars]])
+
+            for (visit_var in visit_vars) {
+            if (is.character(ds[[bm_dataset_name]][[visit_var]])) {
+                res[[bm_dataset_name]][[visit_var]] <- as.factor(res[[bm_dataset_name]][[visit_var]])
             }
+
+        }
             return(res)
         })
     }
