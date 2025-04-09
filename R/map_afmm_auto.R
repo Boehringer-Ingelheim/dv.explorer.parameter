@@ -170,16 +170,12 @@ map_afmm_mod_lineplot_auto <- function(afmm, module_id, bm_dataset_name, group_d
             mapping_summary <- c(mapping_summary, paste0("(", ds_name, ") ", bm_dataset_name, "[[\"",
                 par_var, "\"]]"))
         }
-
-        # MANUAL PATCH (S)
-        for (visit_var in visit_vars) {
-            if (is.character(ds[[bm_dataset_name]][[visit_var]])) {
-            mapping_summary <- c(mapping_summary, paste0("(", ds_name, ") ", bm_dataset_name, "[[\"",
-                visit_var, "\"]]"))
+        for (.elem in visit_vars) {
+            if (is.character(ds[[bm_dataset_name]][[.elem]])) {
+                mapping_summary <- c(mapping_summary, paste0("(", ds_name, ") ", bm_dataset_name, "[[\"",
+                  .elem, "\"]]"))
             }
-
         }
-        # MANUAL PATCH (F)
     }
     if (length(mapping_summary)) {
         warning_message <- paste0("[mod_lineplot] This module will map the following dataset columns from `character` to `factor`:\n",
@@ -196,15 +192,11 @@ map_afmm_mod_lineplot_auto <- function(afmm, module_id, bm_dataset_name, group_d
             if (is.character(res[[bm_dataset_name]][[par_var]])) {
                 res[[bm_dataset_name]][[par_var]] <- as.factor(res[[bm_dataset_name]][[par_var]])
             }
-            
-            # MANUAL PATCH (S)
-            for (visit_var in visit_vars) {
-            if (is.character(ds[[bm_dataset_name]][[visit_var]])) {
-                res[[bm_dataset_name]][[visit_var]] <- as.factor(res[[bm_dataset_name]][[visit_var]])
+            for (.elem in visit_vars) {
+                if (is.character(res[[bm_dataset_name]][[.elem]])) {
+                  res[[bm_dataset_name]][[.elem]] <- as.factor(res[[bm_dataset_name]][[.elem]])
+                }
             }
-            # MANUAL PATCH (F)
-
-        }
             return(res)
         })
     }
