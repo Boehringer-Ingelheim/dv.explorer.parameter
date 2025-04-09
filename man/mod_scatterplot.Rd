@@ -2,44 +2,17 @@
 % Please edit documentation in R/mod_scatter.R
 \name{mod_scatterplot}
 \alias{mod_scatterplot}
-\alias{scatterplot_UI}
-\alias{scatterplot_server}
 \title{Scatterplot module}
 \usage{
-scatterplot_UI(id)
-
-scatterplot_server(
-  id,
-  bm_dataset,
-  group_dataset,
-  dataset_name = shiny::reactive(character(0)),
-  cat_var = "PARCAT",
-  par_var = "PARAM",
-  value_vars = c("AVAL", "PCHG"),
-  visit_var = "AVISIT",
-  subjid_var = "SUBJID",
-  default_x_cat = NULL,
-  default_x_par = NULL,
-  default_x_value = NULL,
-  default_x_visit = NULL,
-  default_y_cat = NULL,
-  default_y_par = NULL,
-  default_y_value = NULL,
-  default_y_visit = NULL,
-  default_group = NULL,
-  default_color = NULL,
-  compute_lm_cor_fn = sp_compute_lm_cor_default
-)
-
 mod_scatterplot(
   module_id,
   bm_dataset_name,
   group_dataset_name,
   cat_var = "PARCAT",
   par_var = "PARAM",
-  value_vars = c("AVAL", "PCHG"),
+  value_vars = "AVAL",
   visit_var = "AVISIT",
-  subjid_var = "SUBJID",
+  subjid_var = "USUBJID",
   default_x_cat = NULL,
   default_x_par = NULL,
   default_x_value = NULL,
@@ -54,15 +27,13 @@ mod_scatterplot(
 )
 }
 \arguments{
-\item{id}{Shiny ID \verb{[character(1)]}}
+\item{module_id}{\verb{[character(1)]}
 
-\item{bm_dataset, group_dataset}{\verb{[data.frame()]}
+Module Shiny id}
 
-Dataframes as described in the \verb{Input dataframes} section}
+\item{bm_dataset_name, group_dataset_name}{\verb{[character(1)]}
 
-\item{dataset_name}{\verb{[shiny::reactive(*)]}
-
-a reactive indicating when the dataset has possibly changed its columns}
+Name of the dataset}
 
 \item{cat_var, par_var, visit_var}{\verb{[character(1)]}
 
@@ -88,51 +59,11 @@ Default values for the selectors}
 
 Function used to compute the linear regression model and correlation statistics,
 please view the corresponding vignette for more details.}
-
-\item{module_id}{\verb{[character(1)]}
-
-Module Shiny id}
-
-\item{bm_dataset_name, group_dataset_name}{\verb{[character(1)]}
-
-Name of the dataset}
 }
 \description{
 \code{mod_scatterplot} is a Shiny module prepared to display a scatterplot of two biomarkers with different levels of
 grouping.
 It also includes a set of listings with information about the population and the regression and correlation
 estimates.
-
-\figure{mod_scatterplot.png}
-
-\subsection{Input dataframes:}{
-\subsection{bm_dataset}{
-
-It expects a dataset similar to
-https://www.cdisc.org/kb/examples/adam-basic-data-structure-bds-using-paramcd-80288192 ,
-1 record per subject per parameter per analysis visit
-
-It expects, at least, the columns passed in the parameters, \code{subjid_var}, \code{cat_var}, \code{par_var},
-\code{visit_var} and \code{value_var}. The values of these variables are as described
-in the CDISC standard for the variables USUBJID, PARCAT, PARAM, AVISIT and AVAL.
 }
-
-\subsection{group_dataset}{
-
-It expects a dataset with an structure similar to
-https://www.cdisc.org/kb/examples/adam-subject-level-analysis-adsl-dataset-80283806 ,
-one record per subject
-
-It expects to contain, at least, \code{subjid_var}
-}
-
-}
-}
-\section{Functions}{
-\itemize{
-\item \code{scatterplot_UI()}: UI
-
-\item \code{scatterplot_server()}: Server
-
-}}
 \keyword{main}

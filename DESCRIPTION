@@ -1,7 +1,7 @@
 Package: dv.explorer.parameter
 Type: Package
 Title: Parameter exploration modules
-Version: 0.1.1
+Version: 0.1.6
 Authors@R: c(
         person("Boehringer-Ingelheim Pharma GmbH & Co.KG", role = c("cph", "fnd")),
         person(given = "Luis", family = "Moris Fernandez", role = c("aut", "cre"), email = "luis.moris.fernandez@gmail.com"),
@@ -29,4 +29,4 @@ Date: Tue May 31 12:12:27 2022
 Branch: dev
 ParentCommit: 9edd5ae0b32a3c7afbcf7215187748f310087a8a
 VignetteBuilder: knitr
-Remotes: boehringer-ingelheim/dv.manager@v2.1.4
+Remotes: boehringer-ingelheim/dv.manager@v2.1.5

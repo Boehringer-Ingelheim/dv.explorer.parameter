@@ -71,15 +71,11 @@ CH_MSG <- poc( # nolint
 
 #' Correlation Heatmap module
 #'
-#' @param id Shiny ID `[character(1)]`
-#'
 #' @param default_cat Default selected categories
 #'
 #' @param default_par Default selected parameters
 #'
 #' @param default_visit Default selected visits
-#'
-#' @param default_corr_method Name of default correlation method
 #'
 #' @name mod_corr_hm
 #'
@@ -87,7 +83,9 @@ CH_MSG <- poc( # nolint
 #'
 NULL
 
-#' @describeIn mod_corr_hm UI
+#' Correlation heatmap UI function
+#'
+#' @keywords developers
 #'
 #' @param id `[character(1)]`
 #'
@@ -462,7 +460,9 @@ scatter_plot <- function(df, x_var, y_var) {
 }
 
 
-#' @describeIn mod_corr_hm Server
+#' Correlation heatmap server function
+#'
+#' @keywords developers
 #'
 #' @param id `[character(1)]`
 #'
@@ -499,11 +499,11 @@ scatter_plot <- function(df, x_var, y_var) {
 #'
 corr_hm_server <- function(id,
                            bm_dataset,
-                           subjid_var = "SUBJID",
+                           subjid_var = "USUBJID",
                            cat_var = "PARCAT",
                            par_var = "PARAM",
                            visit_var = "AVISIT",
-                           value_vars = c("AVAL", "PCHG"),
+                           value_vars = "AVAL",
                            default_value = NULL) {
   # module constants ----
   VAR <- poc( # nolint Parameters from the function that will be considered constant across the function
@@ -862,12 +862,14 @@ ch_subset_data <- function(sel, cat_col, par_col, val_col, vis_col, bm_ds, subj_
 #'
 #' @name mod_corr_hm
 #'
+#' @inheritParams corr_hm_server
+#'
 #' @keywords main
 #'
 #' @export
 #'
 mod_corr_hm <- function(module_id, bm_dataset_name,
-                        subjid_var = "SUBJID",
+                        subjid_var = "USUBJID",
                         cat_var = "PARCAT",
                         par_var = "PARAM",
                         visit_var = "AVISIT",
@@ -911,10 +913,10 @@ mod_corr_hm_API_docs <- list(
 mod_corr_hm_API_spec <- TC$group(
   module_id = TC$mod_ID(),
   bm_dataset_name = TC$dataset_name(),
-  subjid_var = TC$col("bm_dataset_name", TC$factor()) |> TC$flag("subjid_var"),
-  cat_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())),
-  par_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())),
-  visit_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())),
+  subjid_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("subjid_var", "map_character_to_factor"),
+  cat_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("map_character_to_factor"),
+  par_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("map_character_to_factor"),
+  visit_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())) |> TC$flag("map_character_to_factor"),
   value_vars = TC$col("bm_dataset_name", TC$numeric()) |> TC$flag("one_or_more"),
   default_cat = TC$choice_from_col_contents("cat_var") |> TC$flag("zero_or_more", "optional"),
   default_par = TC$choice_from_col_contents("par_var") |> TC$flag("zero_or_more", "optional"),
@@ -961,4 +963,4 @@ dataset_info_corr_hm <- function(bm_dataset_name, ...) {
   return(list(all = bm_dataset_name, subject_level = character(0)))
 }
 
-mod_corr_hm <- CM$module(mod_corr_hm, check_mod_corr_hm, dataset_info_corr_hm)
+mod_corr_hm <- CM$module(mod_corr_hm, check_mod_corr_hm, dataset_info_corr_hm, map_afmm_mod_corr_hm_auto)

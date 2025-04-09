@@ -2,34 +2,8 @@
 % Please edit documentation in R/mod_boxplot.R
 \name{mod_boxplot}
 \alias{mod_boxplot}
-\alias{boxplot_UI}
-\alias{boxplot_server}
-\alias{mod_boxplot_papo}
 \title{Boxplot module}
 \usage{
-boxplot_UI(id)
-
-boxplot_server(
-  id,
-  bm_dataset,
-  group_dataset,
-  dataset_name = shiny::reactive(character(0)),
-  cat_var = "PARCAT",
-  par_var = "PARAM",
-  value_vars = c("AVAL", "CHG", "PCHG"),
-  visit_var = "AVISIT",
-  subjid_var = "SUBJID",
-  default_cat = NULL,
-  default_par = NULL,
-  default_visit = NULL,
-  default_value = NULL,
-  default_main_group = NULL,
-  default_sub_group = NULL,
-  default_page_group = NULL,
-  on_sbj_click = function(x) {
- }
-)
-
 mod_boxplot(
   module_id,
   bm_dataset_name,
@@ -37,7 +11,7 @@ mod_boxplot(
   receiver_id = NULL,
   cat_var = "PARCAT",
   par_var = "PARAM",
-  value_vars = c("AVAL", "CHG", "PCHG"),
+  value_vars = "AVAL",
   visit_var = "AVISIT",
   subjid_var = "SUBJID",
   default_cat = NULL,
@@ -47,23 +21,26 @@ mod_boxplot(
   default_main_group = NULL,
   default_sub_group = NULL,
   default_page_group = NULL,
-  server_wrapper_func = identity
+  server_wrapper_func = function(x) list(subj_id = x)
 )
-
-mod_boxplot_papo(...)
 }
 \arguments{
-\item{id}{Shiny ID \verb{[character(1)]}}
+\item{module_id}{\verb{[character(1)]}
 
-\item{bm_dataset, group_dataset}{\verb{[data.frame()]}
+Module Shiny id}
 
-Dataframes as described in the \verb{Input dataframes} section}
+\item{bm_dataset_name, group_dataset_name}{\verb{[character(1)]}
 
-\item{dataset_name}{\verb{[shiny::reactive(*)]}
+Name of the dataset}
 
-a reactive indicating when the dataset has possibly changed its columns}
+\item{receiver_id}{\verb{[character(1)]}
 
-\item{cat_var, par_var, visit_var, }{\verb{[character(1)]}
+Shiny ID of the module receiving the selected subject ID in the data listing. This ID must
+be present in the app or be NULL.
+
+inheritParams boxplot_server}
+
+\item{cat_var, par_var, visit_var}{\verb{[character(1)]}
 
 Columns from \code{bm_dataset} that correspond to the parameter category, parameter and visit}
 
@@ -79,64 +56,16 @@ Column corresponding to subject ID}
 
 Default values for the selectors}
 
-\item{on_sbj_click}{\verb{[function()]}
-
-Function to invoke when a subject is clicked in the single subject listing}
-
-\item{module_id}{\verb{[character(1)]}
-
-Module Shiny id}
-
-\item{bm_dataset_name, group_dataset_name}{\verb{[character(1)]}
-
-Name of the dataset}
-
-\item{receiver_id}{\verb{[character(1)]}
-
-Shiny ID of the module receiving the selected subject ID in the data listing. This ID must
-be present in the app or be NULL.}
-
 \item{server_wrapper_func}{\verb{[function()]}
 
-A function that will be applied to the server returned value.
-Only for advanced use. See the example in mod_box_plot_papo}
+A function that will be applied to the server returned value. Its default value will work for the current cases.}
 }
 \description{
 \code{mod_boxplot} is a Shiny module prepared to display data with boxplot charts with different levels of grouping.
 It also includes a set of listings with information about the population, distribution and statistical comparisons.
-
-\figure{mod_boxplot.png}
-
-\subsection{Input dataframes:}{
-\subsection{bm_dataset}{
-
-It expects a dataset similar to
-https://www.cdisc.org/kb/examples/adam-basic-data-structure-bds-using-paramcd-80288192 ,
-1 record per subject per parameter per analysis visit.
-
-It must contain, at least, the columns passed in the parameters, \code{subjid_var}, \code{cat_var}, \code{par_var},
-\code{visit_var} and \code{value_vars}. The values of these variables are as described
-in the CDISC standard for the variables USUBJID, PARCAT, PARAM, AVISIT and AVAL.
 }
-
-\subsection{group_dataset}{
-
-It expects a dataset with an structure similar to
-https://www.cdisc.org/kb/examples/adam-subject-level-analysis-adsl-dataset-80283806 ,
-one record per subject.
-
-It must contain, at least, the column passed in the parameter, \code{subjid_var}.
+\details{
+\code{mod_boxplot_papo} is a deprecated function that was required to use the jumping feature in combination
+with \code{dv.papo} but is no longer required. The function is still available for compatibility reasons.
 }
-
-}
-}
-\section{Functions}{
-\itemize{
-\item \code{boxplot_UI()}: UI
-
-\item \code{boxplot_server()}: Server
-
-\item \code{mod_boxplot_papo()}: Boxplot wrapper when its output is fed into papo module
-
-}}
 \keyword{main}

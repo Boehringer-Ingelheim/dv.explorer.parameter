@@ -19,4 +19,4 @@ the dataframe with the replaced label
 \description{
 Set the label attribute of a column in a data frame
 }
-\keyword{misc}
+\keyword{internal}

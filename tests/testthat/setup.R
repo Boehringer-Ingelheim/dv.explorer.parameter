@@ -84,7 +84,7 @@ expect_r2d3_svg <- function(app, query_list) {
   })
 }
 
-# YT#VH19ec235e56cdd18f129215603abf0ca6#VH00000000000000000000000000000000#
+# YT#VH0bf15c0db690dfd3fac713f3c9b61f66#VH00000000000000000000000000000000#
 
 #' Test harness for communication with `dv.papo`.
 #'
@@ -92,7 +92,7 @@ expect_r2d3_svg <- function(app, query_list) {
 #' @param data Data matching the previous parameterization.
 #' @param trigger_input_id Fully namespaced input ID that, when set to a subject ID value,
 #'                         should make the module send `dv.papo` a message.
-test_communication_with_papo <- function(mod, data, trigger_input_id) {
+test_communication_with_papo <- function(mod, data, trigger_input_id, papo_spec_id, papo_spec_text) {
   datasets <- shiny::reactive(data)
 
   afmm <- list(
@@ -124,7 +124,8 @@ test_communication_with_papo <- function(mod, data, trigger_input_id) {
 
   app <- shiny::shinyApp(ui = app_ui, server = app_server)
 
-  testthat::test_that("module adheres to send_subject_id_to_papo protocol", {
+  testthat::test_that("module adheres to send_subject_id_to_papo protocol" |>
+    vdoc[["add_spec"]](papo_spec_text, papo_spec_id), { 
     app <- shinytest2::AppDriver$new(app, name = "test_send_subject_id_to_papo_protocol")
 
     app$wait_for_idle()

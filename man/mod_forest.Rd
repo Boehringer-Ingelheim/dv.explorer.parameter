@@ -2,39 +2,8 @@
 % Please edit documentation in R/mod_forest.R
 \name{mod_forest}
 \alias{mod_forest}
-\alias{forest_UI}
-\alias{forest_server}
 \title{Forest plot module}
 \usage{
-forest_UI(
-  id,
-  numeric_numeric_function_names = character(0),
-  numeric_factor_function_names = character(0),
-  default_function = NULL
-)
-
-forest_server(
-  id,
-  bm_dataset,
-  group_dataset,
-  dataset_name = shiny::reactive(character(0)),
-  numeric_numeric_functions = list(),
-  numeric_factor_functions = list(),
-  subjid_var = "SUBJID",
-  cat_var = "PARCAT",
-  par_var = "PARAM",
-  visit_var = "AVISIT",
-  value_vars = c("AVAL", "PCHG"),
-  default_cat = NULL,
-  default_par = NULL,
-  default_visit = NULL,
-  default_value = NULL,
-  default_var = NULL,
-  default_group = NULL,
-  default_categorical_A = NULL,
-  default_categorical_B = NULL
-)
-
 mod_forest(
   module_id,
   bm_dataset_name,
@@ -43,11 +12,11 @@ mod_forest(
     dv.explorer.parameter::pearson_correlation, `Spearman Correlation` =
     dv.explorer.parameter::spearman_correlation),
   numeric_factor_functions = list(`Odds Ratio` = dv.explorer.parameter::odds_ratio),
-  subjid_var = "SUBJID",
+  subjid_var = "USUBJID",
   cat_var = "PARCAT",
   par_var = "PARAM",
   visit_var = "AVISIT",
-  value_vars = c("AVAL", "PCHG"),
+  value_vars = "AVAL",
   default_cat = NULL,
   default_par = NULL,
   default_visit = NULL,
@@ -59,41 +28,13 @@ mod_forest(
 )
 }
 \arguments{
-\item{id}{\verb{[character(1)]}
+\item{module_id}{Shiny ID \verb{[character(1)]}
 
-Shiny ID}
+Module identifier}
 
-\item{numeric_numeric_function_names, numeric_factor_function_names}{\verb{[character(1)]}
+\item{bm_dataset_name, group_dataset_name}{\verb{[character(1)]}
 
-Vectors of names of functions passed as \code{numeric_numeric_functions} and \code{numeric_factor_functions}
-to \code{forest_server}}
-
-\item{default_function}{\verb{[character(1)]}
-
-Default function}
-
-\item{bm_dataset}{\verb{[data.frame()]}
-
-An ADBM-like dataset similar in structure to the one in
-\href{https://www.cdisc.org/kb/examples/adam-basic-data-structure-bds-using-paramcd-80288192}{this example},
-with one record per subject per parameter per analysis visit.
-
-It should have, at least, the columns specified by the parameters \code{subjid_var}, \code{cat_var},
-\code{par_var}, \code{visit_var} and \code{value_vars}.
-The semantics of these columns are as described in the CDISC standard for variables
-USUBJID, PARCAT, PARAM, AVISIT and AVAL, respectively.}
-
-\item{group_dataset}{\verb{[data.frame()]}
-
-An ADSL-like dataset similar in structure to the one in
-\href{https://www.cdisc.org/kb/examples/adam-subject-level-analysis-adsl-dataset-80283806}{this example},
-with one record per subject.
-
-It should contain, at least, the column specified by the parameter \code{subjid_var}.}
-
-\item{dataset_name}{\verb{[shiny::reactive(*)]}
-
-A reactive that indicates a possible change in the column structure of any of the two datasets}
+Dataset names}
 
 \item{numeric_numeric_functions, numeric_factor_functions}{\verb{[function(n)]}
 
@@ -131,24 +72,9 @@ Default values for the selectors}
 \item{default_var, default_group, default_categorical_A, default_categorical_B}{\verb{[character(1)|NULL]}
 
 Default values for the selectors}
-
-\item{module_id}{Shiny ID \verb{[character(1)]}
-
-Module identifier}
-
-\item{bm_dataset_name, group_dataset_name}{\verb{[character(1)]}
-
-Dataset names}
 }
 \description{
 Display a hybrid table/forest plot of arbitrary statistics (correlations, odds ratios, ...)
 computed on dataset parameters over a single visit.
 }
-\section{Functions}{
-\itemize{
-\item \code{forest_UI()}: UI
-
-\item \code{forest_server()}: Server
-
-}}
 \keyword{main}

@@ -216,23 +216,19 @@ state_two <- rlang::exprs(
 
 # ---- helper
 
-# Returns the center of the nth bar
-get_rect_center <- function(n, app) {
+# Returns the center first rectangle
+get_rect_center <- function(app) {
   ch <- app$get_chromote_session()
-  rect_attr <- rvest::read_html(app$get_js(C$SVG_JS_QUERY)) %>%
-    rvest::html_elements(css = C$D3_BAR_GROUP) %>%
-    rvest::html_elements(css = "rect") %>%
-    rvest::html_attrs() %>%
-    `[[`(n)
-  d3_box <- ch$DOM$getBoxModel(
-    ch$DOM$querySelector(
-      nodeId = ch$DOM$getDocument()$root$nodeId,
-      selector = C$D3_CONTAINER_SELECTOR
-    )$nodeId
-  )$model$content
 
-  x <- round(d3_box[[1]] + as.numeric(rect_attr[["x"]]) + as.numeric(rect_attr[["width"]]) / 2)
-  y <- round(d3_box[[2]] + as.numeric(rect_attr[["y"]]) + as.numeric(rect_attr[["height"]]) / 2)
+  node_id <- ch$DOM$querySelector(
+    nodeId = ch$DOM$getDocument()$root$nodeId,
+    selector = "rect"
+  )$nodeId
+
+  d3_box <- ch$DOM$getBoxModel(node_id)$model$content
+  x <- round(d3_box[[1]] + d3_box[[3]]) / 2
+  y <- round(d3_box[[2]] + d3_box[[6]]) / 2
+
   return(c(x, y))
 }
 
@@ -437,39 +433,37 @@ shiny_test <- {
       do.call(app$set_inputs, purrr::map(state_one, ~ deparse1(.x, collapse = "\n")))
       app$wait_for_idle()
 
-      rect_1 <- get_rect_center(1, app)
+      rect_1 <- get_rect_center(app)
+
+      expect_opacity <- function(opacity_value, visibility_value) {
+        test <- app$get_html(C$TOOLTIP_SELECTOR) %>%
+          rvest::read_html() %>%
+          rvest::html_element(css = C$TOOLTIP_SELECTOR) %>%
+          rvest::html_attr(name = "style") %>%
+          (function(x) {
+            stringr::str_detect(x, sprintf("opacity: %s;", opacity_value)) && stringr::str_detect(x, sprintf("visibility: %s;", visibility_value))
+          })
+
+        expect_true(test)
+      }
+
+
+      # In the test, I want to move the mouse over an element.
+      # For the mouse to move over an element, the element must be in the viewport.
+      # To ensure this, I set the viewport to be as large as the page. (Advantage of using an emulated browser)
+      # Now, I can move the mouse anywhere on the page.
+
+      metrics <- ch$Page$getLayoutMetrics()
+      ch$Emulation$setDeviceMetricsOverride(width = metrics$contentSize$width, height = metrics$contentSize$height, deviceScaleFactor = 1, mobile = FALSE)
 
       # Starts hidden
-      app$get_html(C$TOOLTIP_SELECTOR) %>%
-        rvest::read_html() %>%
-        rvest::html_element(css = C$TOOLTIP_SELECTOR) %>%
-        rvest::html_attr(name = "style") %>%
-        (function(x) {
-          stringr::str_detect(x, "opacity: 0;") && stringr::str_detect(x, "visibility: hidden;")
-        }) %>%
-        expect_true()
-
+      expect_opacity(0, "hidden")
       # Move in
       ch$Input$dispatchMouseEvent(type = "mouseMoved", x = rect_1[1], y = rect_1[2], button = "left")
-      app$get_html(C$TOOLTIP_SELECTOR) %>%
-        rvest::read_html() %>%
-        rvest::html_element(css = C$TOOLTIP_SELECTOR) %>%
-        rvest::html_attr(name = "style") %>%
-        (function(x) {
-          stringr::str_detect(x, "opacity: 1;") && stringr::str_detect(x, "visibility: visible;")
-        }) %>%
-        expect_true()
-
+      expect_opacity(1, "visible")
       # Move out
       ch$Input$dispatchMouseEvent(type = "mouseMoved", x = 0, y = 0, button = "left")
-      app$get_html(C$TOOLTIP_SELECTOR) %>%
-        rvest::read_html() %>%
-        rvest::html_element(css = C$TOOLTIP_SELECTOR) %>%
-        rvest::html_attr(name = "style") %>%
-        (function(x) {
-          stringr::str_detect(x, "opacity: 0;") && stringr::str_detect(x, "visibility: hidden;")
-        }) %>%
-        expect_true()
+      expect_opacity(0, "hidden")
     }
   )
 
@@ -494,15 +488,26 @@ shiny_test <- {
       do.call(app$set_inputs, purrr::map(state, ~ deparse1(.x, collapse = "\n")))
       app$wait_for_idle()
 
-      rect_1 <- get_rect_center(1, app)
+      rect_1 <- get_rect_center(app)
+
+
+      # In the test, I want to move the mouse over an element.
+      # For the mouse to move over an element, the element must be in the viewport.
+      # To ensure this, I set the viewport to be as large as the page. (Advantage of using an emulated browser)
+      # Now, I can move the mouse anywhere on the page.
+
+      metrics <- ch$Page$getLayoutMetrics()
+      ch$Emulation$setDeviceMetricsOverride(width = metrics$contentSize$width, height = metrics$contentSize$height, deviceScaleFactor = 1, mobile = FALSE)
 
       # Move in
       ch$Input$dispatchMouseEvent(type = "mouseMoved", x = rect_1[1], y = rect_1[2], button = "left")
-      app$get_html(C$TOOLTIP_SELECTOR) %>%
+
+      tt_msg <- app$get_html(C$TOOLTIP_SELECTOR) %>%
         rvest::read_html() %>%
         rvest::html_element(css = C$TOOLTIP_SELECTOR) %>%
-        rvest::html_text() %>%
-        expect_identical("x_A, 1, z_A")
+        rvest::html_text()
+
+      expect_identical(tt_msg, "x_A, 1, z_A")
     }
   )
 

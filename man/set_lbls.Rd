@@ -18,4 +18,4 @@ A dataframe with the set labels
 \description{
 Set several labels in a dataframe
 }
-\keyword{misc}
+\keyword{internal}

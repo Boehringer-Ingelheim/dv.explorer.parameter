@@ -154,6 +154,9 @@ mock_app_lineplot_mm <- function() {
   )
 }
 
+#' Mock module manager lineplot app displaying safetyData dataset
+#' @keywords mock
+#' @export
 mock_app_lineplot_mm_safetyData <- function() {
   if (!requireNamespace("dv.manager")) {
     stop("Install dv.manager")
@@ -168,8 +171,8 @@ mock_app_lineplot_mm_safetyData <- function() {
       value_vars = c("AVAL", "CHG"),
       subjid_var = "SUBJID",
       cat_var = "PARCAT1",
-      default_centrality_function = "Mean",
-      default_dispersion_function = "Standard deviation",
+      default_centrality_fn = "Mean",
+      default_dispersion_fn = "Standard deviation",
       default_cat = "CHEM",
       default_par = "Bilirubin (umol/L)",
       default_main_group = "ARM",

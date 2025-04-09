@@ -17,4 +17,4 @@ A string with the label name
 \description{
 It will try to read the label attribute from one columns.
 }
-\keyword{misc}
+\keyword{internal}

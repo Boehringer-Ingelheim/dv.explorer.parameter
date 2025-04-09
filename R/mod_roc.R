@@ -147,7 +147,7 @@ ROC_PLOT_VAL <- poc(
 
 #' ROC module
 #'
-#' @param id Shiny ID `[character(1)]`
+#' @inheritParams roc_server
 #'
 #' @name mod_roc
 #'
@@ -155,7 +155,9 @@ ROC_PLOT_VAL <- poc(
 #'
 NULL
 
-#' @describeIn mod_roc UI
+#' ROC UI function
+#' @keywords developers
+#' @inheritParams roc_server
 #' @export
 roc_UI <- function(id) {
   # id assert  It goes on its own as id is used to provide context to the other assertions
@@ -354,8 +356,8 @@ roc_UI <- function(id) {
   }
 }
 
-#' @describeIn mod_roc Server
-#'
+#' ROC server function
+#' @keywords developers
 #' @description
 #'
 #' ## Input dataframes:
@@ -387,6 +389,7 @@ roc_UI <- function(id) {
 #' one record per subject
 #'
 #' It expects to contain, at least, `subjid_var`
+#' @param id Shiny ID `[character(1)]`
 #'
 #' @param pred_dataset,resp_dataset,group_dataset `[data.frame()]`
 #'
@@ -421,13 +424,13 @@ roc_server <- function(id,
                        dataset_name = shiny::reactive(character(0)),
                        pred_cat_var = "PARCAT",
                        pred_par_var = "PARAM",
-                       pred_value_vars = c("AVAL", "PCHG"),
+                       pred_value_vars = "AVAL",
                        pred_visit_var = "AVISIT",
                        resp_cat_var = "PARCAT",
                        resp_par_var = "PARAM",
                        resp_value_vars = c("CHG1", "CHG2"),
                        resp_visit_var = "AVISIT",
-                       subjid_var = "SUBJID",
+                       subjid_var = "USUBJID",
                        compute_roc_fn = compute_roc_data,
                        compute_metric_fn = compute_metric_data) {
   ac <- checkmate::makeAssertCollection()
@@ -1028,13 +1031,13 @@ mod_roc <- function(
     module_id, pred_dataset_name, resp_dataset_name, group_dataset_name,
     pred_cat_var = "PARCAT",
     pred_par_var = "PARAM",
-    pred_value_vars = c("AVAL", "PCHG"),
+    pred_value_vars = "AVAL",
     pred_visit_var = "AVISIT",
     resp_cat_var = "PARCAT",
     resp_par_var = "PARAM",
     resp_value_vars = c("CHG1", "CHG2"),
     resp_visit_var = "AVISIT",
-    subjid_var = "SUBJID",
+    subjid_var = "USUBJID",
     compute_roc_fn = compute_roc_data,
     compute_metric_fn = compute_metric_data) {
   mod <- list(
@@ -1090,15 +1093,15 @@ mod_roc_API_spec <- TC$group(
   pred_dataset_name = TC$dataset_name(),
   resp_dataset_name = TC$dataset_name(),
   group_dataset_name = TC$dataset_name() |> TC$flag("subject_level_dataset_name"),
-  pred_cat_var = TC$col("pred_dataset_name", TC$or(TC$character(), TC$factor())),
-  pred_par_var = TC$col("pred_dataset_name", TC$or(TC$character(), TC$factor())),
+  pred_cat_var = TC$col("pred_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("map_character_to_factor"),
+  pred_par_var = TC$col("pred_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("map_character_to_factor"),
   pred_value_vars = TC$col("pred_dataset_name", TC$numeric()) |> TC$flag("one_or_more"),
   pred_visit_var = TC$col("pred_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())),
-  resp_cat_var = TC$col("resp_dataset_name", TC$or(TC$character(), TC$factor())),
-  resp_par_var = TC$col("resp_dataset_name", TC$or(TC$character(), TC$factor())),
+  resp_cat_var = TC$col("resp_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("map_character_to_factor"),
+  resp_par_var = TC$col("resp_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("map_character_to_factor"),
   resp_value_vars = TC$col("resp_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("one_or_more"),
   resp_visit_var = TC$col("resp_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())),
-  subjid_var = TC$col("group_dataset_name", TC$factor()) |> TC$flag("subjid_var"),
+  subjid_var = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("subjid_var", "map_character_to_factor"),
   compute_roc_fn = TC$fn(arg_count = 4) |> TC$flag("optional"),
   compute_metric_fn = TC$fn(arg_count = 2) |> TC$flag("optional")
 ) |> TC$attach_docs(mod_roc_API_docs)
@@ -1152,7 +1155,7 @@ dataset_info_roc <- function(pred_dataset_name, resp_dataset_name, group_dataset
   ))
 }
 
-mod_roc <- CM$module(mod_roc, check_mod_roc, dataset_info_roc)
+mod_roc <- CM$module(mod_roc, check_mod_roc, dataset_info_roc, map_afmm_mod_roc_auto)
 
 # Server Logic
 
@@ -4677,7 +4680,7 @@ mock_roc_mm_app <- function(adbm = test_roc_data()[["adbm"]],
         )
       ),
       filter_data = "adsl",
-      filter_key = "SUBJID",
+      filter_key = "USUBJID",
       enableBookmarking = "url"
     )
   } else {
@@ -4701,80 +4704,6 @@ mock_roc_app <- function() {
       pred_dataset = shiny::reactive(test_roc_data()[["adbm"]]),
       resp_dataset = shiny::reactive(test_roc_data()[["adbin"]]),
       group_dataset = shiny::reactive(test_roc_data()[["adsl"]])
-    )
-    shiny::observe({
-      shiny::reactiveValuesToList(input)
-      session$doBookmark()
-    })
-    # Update the query string
-    shiny::onBookmarked(shiny::updateQueryString)
-  }
-
-  shiny::shinyApp(
-    ui = ui,
-    server = server,
-    enableBookmarking = "url"
-  )
-}
-
-mock_roc_app_file_upload <- function() {
-  options(shiny.maxRequestSize = 30 * 1024^2)
-
-  ui <- function(request) {
-    shiny::fluidPage(
-      shiny::fileInput("adsl", "Choose adsl File",
-        multiple = FALSE,
-        accept = c(".rda")
-      ),
-      shiny::fileInput("adbm", "Choose Predictor dataset",
-        multiple = FALSE,
-        accept = c(".rda")
-      ),
-      shiny::fileInput("adbin", "Choose Response dataset",
-        multiple = FALSE,
-        accept = c(".rda")
-      ),
-      dv.explorer.parameter::roc_UI("roc")
-    )
-  }
-
-
-
-  server <- function(input, output, session) {
-    adbm <- shiny::reactive({
-      shiny::req(input[["adbm"]])
-      input[["adbm"]]
-      load(input[["adbm"]]$datapath)
-      adbm
-    })
-    adbin <- shiny::reactive({
-      shiny::req(input[["adbin"]])
-      input[["adbin"]]
-      load(input[["adbin"]]$datapath)
-      adbin
-    })
-    adsl <- shiny::reactive({
-      shiny::req(input[["adsl"]])
-      input[["adsl"]]
-      load(input[["adsl"]]$datapath)
-      adsl
-    })
-
-    proceed <- shiny::reactiveVal(0)
-
-    shiny::observe({
-      message("advance1")
-      shiny::req(adbm(), adbin(), adsl())
-      message("advance")
-      proceed(shiny::isolate(proceed() + 1))
-    })
-
-    dv.explorer.parameter::roc_server(
-      id = "roc",
-      dataset_name = shiny::reactive(proceed()),
-      pred_dataset = adbm,
-      resp_dataset = adbin,
-      group_dataset = adsl
     )
     shiny::observe({
       shiny::reactiveValuesToList(input)
@@ -4830,7 +4759,7 @@ test_roc_data <- function() {
   visit_list <- c("V1", "V2", "V3")
 
   adsl <- tibble::tibble(
-    SUBJID = factor(1:n_subj)
+    USUBJID = factor(1:n_subj)
   ) |>
     dplyr::mutate(
       AGE = sample(50:100, size = n_subj, replace = TRUE),
@@ -4840,7 +4769,7 @@ test_roc_data <- function() {
     )
 
   adbm <- expand.grid(
-    SUBJID = factor(1:n_subj),
+    USUBJID = factor(1:n_subj),
     PARCAT = factor(c("A", "B")),
     PARAM = factor(c("1", "2", "3")),
     AVISIT = visit_list

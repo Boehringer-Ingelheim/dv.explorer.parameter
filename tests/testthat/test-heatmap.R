@@ -1,8 +1,6 @@
 # nolint start
 component <- "heatmap_d3"
 
-testthat::skip_on_ci()
-
 # Steps
 # 1. Start an app with AppDriver. We will not navigate using this driver but connect to it with other drivers.
 #   - We do this to avoid creating the app in the background manually, but just delegate it to AppDriver.
@@ -14,17 +12,152 @@ testthat::skip_on_ci()
 #
 # TEST RUN IN INDEPENDENT SESSIONS BUT NOT INDEPENDENT APPS
 
-if (run_shiny_tests) {
-  # Create an app in the background
-  bg_app <- shinytest2::AppDriver$new(app_dir = "./apps/heatmap/regular", name = "heatmap")
-  # bg_app <- shinytest2::AppDriver$new(app_dir = "./tests/testthat/apps/heatmap/regular", name = "heatmap")
+root_app <- start_app_driver(rlang::quo({
+  non_reactive_args <- c()
+  both_args <- c()
+  reactive_args <- c("data", "x_axis", "y_axis", "z_axis", "margin", "palette", "msg_func", "quiet")
 
-  bg_app_url <- bg_app$get_url()
-  on.exit(bg_app$stop(), add = TRUE, after = FALSE)
-}
+  # STOP MODIFYING
+
+  non_reactive_id <- stats::setNames(non_reactive_args, non_reactive_args)
+  both_id <- stats::setNames(both_args, both_args)
+  reactive_id <- stats::setNames(reactive_args, reactive_args)
+
+  # HELPERS
+
+  eval_inpt <- function(x, input) {
+    val <- shiny::reactive({
+      v <- tryCatch(
+        {
+          eval(parse(text = input[[x]]))
+        },
+        error = function(e) {
+          NULL
+        }
+      )
+    })
+
+    list(
+      val = val,
+      as_reactive = shiny::reactive(input[[paste0(x, "_as_reactive")]])
+    )
+  }
+
+  solver <- function(x, as_reactive) {
+    if (is.null(as_reactive)) {
+      as_reactive <- x[["as_reactive"]]()
+    }
+
+    if (isTRUE(as_reactive)) {
+      x[["val"]]
+    } else {
+      x[["val"]]()
+    }
+  }
+
+  create_inpt_tb <- function(x, include_check) {
+    shiny::tags[["table"]](
+      purrr::map(
+        x,
+        ~ {
+          shiny::tags[["tr"]](
+            shiny::tags[["td"]](.x),
+            shiny::tags[["td"]](shiny::textAreaInput(.x, NULL)),
+            shiny::tags[["td"]](if (include_check) shiny::checkboxInput(paste0(.x, "_as_reactive"), "As reactive?")),
+          )
+        }
+      )
+    )
+  }
+
+  ui <- function(request) {
+    non_reactive_tb <- create_inpt_tb(non_reactive_id, FALSE)
+    reactive_tb <- create_inpt_tb(reactive_id, FALSE)
+    both_tb <- create_inpt_tb(both_id, TRUE)
+
+    shiny::fluidPage(
+      shiny::tagList(
+        shiny::div(
+          shiny::tags[["h3"]]("Bookmark"),
+          shiny::bookmarkButton()
+        ),
+        shiny::div(
+          shiny::tags[["h3"]]("Static"),
+          non_reactive_tb,
+          shiny::tags[["hr"]]()
+        ),
+        shiny::div(
+          shiny::tags[["h3"]]("Reactive"),
+          reactive_tb,
+          shiny::tags[["hr"]]()
+        ),
+        shiny::div(
+          shiny::tags[["h3"]]("Both"),
+          both_tb,
+          shiny::tags[["hr"]]()
+        ),
+        shiny::div(
+          shiny::tags[["h3"]]("Module"),
+          shiny::uiOutput("cont")
+        )
+      )
+    )
+  }
+
+  server <- function(input, output, session) {
+    n_ipt <- purrr::map(non_reactive_id, ~ eval_inpt(.x, input))
+    r_ipt <- purrr::map(reactive_id, ~ eval_inpt(.x, input))
+    b_ipt <- purrr::map(both_id, ~ eval_inpt(.x, input))
+
+    returned_values <- NULL
+
+    output[["cont"]] <- shiny::renderUI({
+      message("Rendering")
+      # MODIFY THIS BODY
+
+      # Non reactive input should usually be first checked with shiny::req as there are no internal controls in the
+      # module for "strange" values in them
+
+      returned_values <<- dv.explorer.parameter:::heatmap_d3_server(
+        "mod",
+        data = solver(r_ipt[["data"]], as_reactive = TRUE),
+        x_axis = solver(r_ipt[["x_axis"]], as_reactive = TRUE),
+        y_axis = solver(r_ipt[["y_axis"]], as_reactive = TRUE),
+        z_axis = solver(r_ipt[["z_axis"]], as_reactive = TRUE),
+        margin = solver(r_ipt[["margin"]], as_reactive = TRUE),
+        palette = solver(r_ipt[["palette"]], as_reactive = TRUE),
+        msg_func = solver(r_ipt[["msg_func"]], as_reactive = TRUE)
+      )
+
+
+      output[["out"]] <- shiny::renderPrint({
+        returned_values[["margin"]]()
+      })
+
+      # UIs must be static
+
+      shiny::tagList(
+        dv.explorer.parameter:::heatmap_d3_UI("mod"),
+        shiny::verbatimTextOutput("out")
+      )
+    })
+
+    shiny::exportTestValues(
+      # MODIFY PARAMETERS AS NEEDED
+      returned = returned_values
+    )
+  }
+
+  shiny::shinyApp(
+    ui = ui,
+    server = server,
+    enableBookmarking = "url"
+  )
+}))
+on.exit(if ("stop" %in% names(root_app)) root_app$stop())
 
 fail_if_app_not_started <- function() {
-  if (is.null(bg_app)) rlang::abort("App could not be started")
+  if (is.null(root_app)) rlang::abort("App could not be started")
 }
 
 EXPORTED_MARGIN <- "mod-margin"
@@ -99,23 +232,19 @@ state_three <- rlang::exprs(
 )
 
 # helpers ----
-# Returns the center of the nth bar
-get_rect_center <- function(n, app) {
+# Returns the center first rectangle
+get_rect_center <- function(app) {
   ch <- app$get_chromote_session()
-  rect_attr <- rvest::read_html(app$get_js(SVG_JS_QUERY)) %>%
-    rvest::html_elements(css = D3_TILE_GROUP) %>%
-    rvest::html_elements(css = "rect") %>%
-    rvest::html_attrs() %>%
-    `[[`(n)
-  d3_box <- ch$DOM$getBoxModel(
-    ch$DOM$querySelector(
-      nodeId = ch$DOM$getDocument()$root$nodeId,
-      selector = D3_CONTAINER_SELECTOR
-    )$nodeId
-  )$model$content
 
-  x <- round(d3_box[[1]] + as.numeric(rect_attr[["x"]]) + as.numeric(rect_attr[["width"]]) / 2)
-  y <- round(d3_box[[2]] + as.numeric(rect_attr[["y"]]) + as.numeric(rect_attr[["height"]]) / 2)
+  node_id <- ch$DOM$querySelector(
+    nodeId = ch$DOM$getDocument()$root$nodeId,
+    selector = "rect"
+  )$nodeId
+
+  d3_box <- ch$DOM$getBoxModel(node_id)$model$content
+  x <- round(d3_box[[1]] + d3_box[[3]]) / 2
+  y <- round(d3_box[[2]] + d3_box[[6]]) / 2
+
   return(c(x, y))
 }
 
@@ -125,7 +254,7 @@ test_that(
     testthat::skip_if_not(run_shiny_tests)
     fail_if_app_not_started()
     skip_if_suspect_check()
-    app <- shinytest2::AppDriver$new(bg_app_url)
+    app <- shinytest2::AppDriver$new(root_app$get_url())
     do.call(app$set_inputs, purrr::map(state_one, ~ deparse1(.x, collapse = "\n")))
     app$wait_for_idle()
     expect_snapshot(cran = TRUE, app$get_js(SVG_JS_QUERY))
@@ -141,7 +270,7 @@ test_that(
     testthat::skip_if_not(run_shiny_tests)
     fail_if_app_not_started()
     skip_if_suspect_check()
-    app <- shinytest2::AppDriver$new(bg_app_url)
+    app <- shinytest2::AppDriver$new(root_app$get_url())
     do.call(app$set_inputs, purrr::map(state_three, ~ deparse1(.x, collapse = "\n")))
     app$wait_for_idle()
     expect_snapshot(cran = TRUE, app$get_js(SVG_JS_QUERY))
@@ -159,7 +288,7 @@ test_that(
     # elements appear when the svg is redrawn. If any duplicated element appear there would be differences between
     # first and second pass
 
-    app <- shinytest2::AppDriver$new(bg_app_url)
+    app <- shinytest2::AppDriver$new(root_app$get_url())
     do.call(app$set_inputs, purrr::map(state_one, ~ deparse1(.x, collapse = "\n")))
     app$wait_for_idle()
     svg_st_one_1pass <- app$get_js(SVG_JS_QUERY)
@@ -184,7 +313,7 @@ test_that(
     testthat::skip_if_not(run_shiny_tests)
     fail_if_app_not_started()
     skip_if_suspect_check()
-    app <- shinytest2::AppDriver$new(bg_app_url)
+    app <- shinytest2::AppDriver$new(root_app$get_url())
     do.call(app$set_inputs, purrr::map(state_one, ~ deparse1(.x, collapse = "\n")))
     app$wait_for_idle()
 
@@ -192,6 +321,7 @@ test_that(
     rvest::read_html(app$get_js(SVG_JS_QUERY)) %>%
       rvest::html_elements(X_TITLE_SELECTOR) %>%
       expect_length(1)
+
     rvest::read_html(app$get_js(SVG_JS_QUERY)) %>%
       rvest::html_elements(Y_TITLE_SELECTOR) %>%
       expect_length(1)
@@ -228,7 +358,7 @@ test_that(
     testthat::skip_if_not(run_shiny_tests)
     fail_if_app_not_started()
     skip_if_suspect_check()
-    app <- shinytest2::AppDriver$new(bg_app_url)
+    app <- shinytest2::AppDriver$new(root_app$get_url())
     do.call(app$set_inputs, purrr::map(state_one, ~ deparse1(.x, collapse = "\n")))
     app$wait_for_idle()
 
@@ -299,7 +429,7 @@ test_that(
     testthat::skip_if_not(run_shiny_tests)
     fail_if_app_not_started()
     skip_if_suspect_check()
-    app <- shinytest2::AppDriver$new(bg_app_url)
+    app <- shinytest2::AppDriver$new(root_app$get_url())
 
     do.call(app$set_inputs, purrr::map(state_one, ~ deparse1(.x, collapse = "\n")))
     app$wait_for_idle()
@@ -331,45 +461,43 @@ test_that(
     skip_if_suspect_check()
 
 
-    app <- shinytest2::AppDriver$new(bg_app_url)
+    app <- shinytest2::AppDriver$new(root_app$get_url())
     ch <- app$get_chromote_session()
     do.call(app$set_inputs, purrr::map(state_one, ~ deparse1(.x, collapse = "\n")))
     app$wait_for_idle()
 
 
-    rect_1 <- get_rect_center(1, app)
+    rect_1 <- get_rect_center(app)
+
+    expect_opacity <- function(opacity_value, visibility_value) {
+      test <- app$get_html(TOOLTIP_SELECTOR) %>%
+        rvest::read_html() %>%
+        rvest::html_element(css = TOOLTIP_SELECTOR) %>%
+        rvest::html_attr(name = "style") %>%
+        (function(x) {
+          stringr::str_detect(x, sprintf("opacity: %s;", opacity_value)) && stringr::str_detect(x, sprintf("visibility: %s;", visibility_value))
+        })
+      expect_true(test)
+    }
+
+
+    # In the test, I want to move the mouse over an element.
+    # For the mouse to move over an element, the element must be in the viewport.
+    # To ensure this, I set the viewport to be as large as the page. (Advantage of using an emulated browser)
+    # Now, I can move the mouse anywhere on the page.
+
+    metrics <- ch$Page$getLayoutMetrics()
+    ch$Emulation$setDeviceMetricsOverride(width = metrics$contentSize$width, height = metrics$contentSize$height, deviceScaleFactor = 1, mobile = FALSE)
 
     # Starts hidden
-    app$get_html(TOOLTIP_SELECTOR) %>%
-      rvest::read_html() %>%
-      rvest::html_element(css = TOOLTIP_SELECTOR) %>%
-      rvest::html_attr(name = "style") %>%
-      (function(x) {
-        stringr::str_detect(x, "opacity: 0;") && stringr::str_detect(x, "visibility: hidden;")
-      }) %>%
-      expect_true()
-
+    expect_opacity(0, "hidden")
     # Move in
     ch$Input$dispatchMouseEvent(type = "mouseMoved", x = rect_1[1], y = rect_1[2], button = "left")
-    app$get_html(TOOLTIP_SELECTOR) %>%
-      rvest::read_html() %>%
-      rvest::html_element(css = TOOLTIP_SELECTOR) %>%
-      rvest::html_attr(name = "style") %>%
-      (function(x) {
-        stringr::str_detect(x, "opacity: 1;") && stringr::str_detect(x, "visibility: visible;")
-      }) %>%
-      expect_true()
-
+    app$get_screenshot(file = tempfile()) # Required otherwise the expect_opacity_1 fails, reason unknown
+    expect_opacity(1, "visible")
     # Move out
     ch$Input$dispatchMouseEvent(type = "mouseMoved", x = 0, y = 0, button = "left")
-    app$get_html(TOOLTIP_SELECTOR) %>%
-      rvest::read_html() %>%
-      rvest::html_element(css = TOOLTIP_SELECTOR) %>%
-      rvest::html_attr(name = "style") %>%
-      (function(x) {
-        stringr::str_detect(x, "opacity: 0;") && stringr::str_detect(x, "visibility: hidden;")
-      }) %>%
-      expect_true()
+    expect_opacity(0, "hidden")
   }
 )
 
@@ -382,7 +510,7 @@ test_that(
     testthat::skip_if_not(run_shiny_tests)
     fail_if_app_not_started()
     skip_if_suspect_check()
-    app <- shinytest2::AppDriver$new(bg_app_url)
+    app <- shinytest2::AppDriver$new(root_app$get_url())
     ch <- app$get_chromote_session()
     do.call(app$set_inputs, purrr::map(state_one, ~ deparse1(.x, collapse = "\n")))
     app$wait_for_idle()
@@ -394,7 +522,10 @@ test_that(
     do.call(app$set_inputs, purrr::map(state, ~ deparse1(.x, collapse = "\n")))
     app$wait_for_idle()
 
-    rect_1 <- get_rect_center(1, app)
+    rect_1 <- get_rect_center(app)
+
+    metrics <- ch$Page$getLayoutMetrics()
+    ch$Emulation$setDeviceMetricsOverride(width = metrics$contentSize$width, height = metrics$contentSize$height, deviceScaleFactor = 1, mobile = FALSE)
 
     # Move in
     ch$Input$dispatchMouseEvent(type = "mouseMoved", x = rect_1[1], y = rect_1[2], button = "left")
@@ -412,7 +543,7 @@ test_that(
     testthat::skip_if_not(run_shiny_tests)
     fail_if_app_not_started()
     skip_if_suspect_check()
-    app <- shinytest2::AppDriver$new(bg_app_url)
+    app <- shinytest2::AppDriver$new(root_app$get_url())
     do.call(app$set_inputs, purrr::map(state_one, ~ deparse1(.x, collapse = "\n")))
     app$wait_for_idle()
 
@@ -470,7 +601,7 @@ test_that(
     testthat::skip_if_not(run_shiny_tests)
     fail_if_app_not_started()
     skip_if_suspect_check()
-    app <- shinytest2::AppDriver$new(bg_app_url)
+    app <- shinytest2::AppDriver$new(root_app$get_url())
     do.call(app$set_inputs, purrr::map(state, ~ deparse1(.x, collapse = "\n")))
     app$wait_for_idle()
     expect_snapshot(cran = TRUE, app$get_js(SVG_JS_QUERY))

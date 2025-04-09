@@ -1,3 +1,21 @@
+# dv.explorer.parameter 0.1.6
+
+* All modules:
+    * Accept character() input for subject, category and parameter data.frame columns.
+    * Reduce `value_vars` default values to "AVAL".
+    * Improved error message when parameter names reoccur across categories and new helper function to address that situation.
+    * De-export label helpers to avoid symbol overwritting warning for app creators that load package through `library`.
+
+* wfphm:
+    * Waterfall group menu does no longer include `character` variables.
+
+* lineplot:
+    * Improved display of simultaneous reference values.
+
+* boxplot:
+    * `mod_boxplot_papo` is deprecated and `mod_boxplot` can be used in its place.
+    * Data count table headers are now shown correctly.
+
 # dv.explorer.parameter 0.1.1
 
 * boxplot:

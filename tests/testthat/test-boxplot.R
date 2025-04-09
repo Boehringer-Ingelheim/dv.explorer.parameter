@@ -291,7 +291,7 @@ local({
       boxplot_chart(df, FALSE, TRUE, FALSE)
     )
   })
-  
+
   test_that("boxplot_chart produces a boxplot with a log-projected Y axis", {
     set.seed(1)
     vdiffr::expect_doppelganger(

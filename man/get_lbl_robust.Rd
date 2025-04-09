@@ -17,4 +17,4 @@ The label attribute or the name of the column if the label attribute is NULL.
 \description{
 It returns the label of the column of a dataframe if it is not NULL. Otherwise it returns the name of the column.
 }
-\keyword{misc}
+\keyword{internal}

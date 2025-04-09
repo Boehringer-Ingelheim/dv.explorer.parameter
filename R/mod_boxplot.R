@@ -81,27 +81,20 @@ BP <- poc( # nolint
 #' `mod_boxplot` is a Shiny module prepared to display data with boxplot charts with different levels of grouping.
 #' It also includes a set of listings with information about the population, distribution and statistical comparisons.
 #'
-#' ![Caption for the picture.](mod_boxplot.png)
-#'
 #' @name mod_boxplot
+#' @inheritParams boxplot_server
 #'
 #' @keywords main
 #'
 NULL
 
-#' @describeIn mod_boxplot UI
+#' Boxplot UI function
 #' @param id Shiny ID `[character(1)]`
+#' @keywords developers
 #' @export
 boxplot_UI <- function(id) { # nolint
-  # id assert ---- It goes on its own as id is used to provide context to the other assertions
-  checkmate::assert_string(id, min.chars = 1) # Covered by check_mod_boxplot_auto
-
-  # argument asserts ----
-
   # UI ----
   ns <- shiny::NS(id)
-
-
 
   parameter_menu <- drop_menu_helper(
     ns(BP$ID$PAR_BUTTON), BP$MSG$LABEL$PAR_BUTTON,
@@ -190,7 +183,8 @@ boxplot_UI <- function(id) { # nolint
   }
 }
 
-#' @describeIn mod_boxplot Server
+#' Boxplot server function
+#' @keywords developers
 #'
 #' @description
 #'
@@ -251,9 +245,9 @@ boxplot_server <- function(id,
                            dataset_name = shiny::reactive(character(0)),
                            cat_var = "PARCAT",
                            par_var = "PARAM",
-                           value_vars = c("AVAL", "CHG", "PCHG"),
+                           value_vars = "AVAL",
                            visit_var = "AVISIT",
-                           subjid_var = "SUBJID",
+                           subjid_var = "USUBJID",
                            default_cat = NULL,
                            default_par = NULL,
                            default_visit = NULL,
@@ -709,6 +703,9 @@ boxplot_server <- function(id,
 
 #' Invoke boxplot module
 #'
+#' @details `mod_boxplot_papo` is a deprecated function that was required to use the jumping feature in combination
+#' with `dv.papo` but is no longer required. The function is still available for compatibility reasons.
+#'
 #' @param module_id `[character(1)]`
 #'
 #' Module Shiny id
@@ -719,13 +716,14 @@ boxplot_server <- function(id,
 #'
 #' @param server_wrapper_func `[function()]`
 #'
-#' A function that will be applied to the server returned value.
-#' Only for advanced use. See the example in mod_box_plot_papo
+#' A function that will be applied to the server returned value. Its default value will work for the current cases.
 #'
 #' @param receiver_id `[character(1)]`
 #'
 #' Shiny ID of the module receiving the selected subject ID in the data listing. This ID must
 #' be present in the app or be NULL.
+#'
+#' inheritParams boxplot_server
 #'
 #' @name mod_boxplot
 #'
@@ -739,7 +737,7 @@ mod_boxplot <- function(module_id,
                         receiver_id = NULL,
                         cat_var = "PARCAT",
                         par_var = "PARAM",
-                        value_vars = c("AVAL", "CHG", "PCHG"),
+                        value_vars = "AVAL",
                         visit_var = "AVISIT",
                         subjid_var = "SUBJID",
                         default_cat = NULL,
@@ -749,7 +747,7 @@ mod_boxplot <- function(module_id,
                         default_main_group = NULL,
                         default_sub_group = NULL,
                         default_page_group = NULL,
-                        server_wrapper_func = identity) {
+                        server_wrapper_func = function(x) list(subj_id = x)) {
   mod <- list(
     ui = boxplot_UI,
     server = function(afmm) {
@@ -808,11 +806,11 @@ mod_boxplot_API_spec <- TC$group(
   bm_dataset_name = TC$dataset_name(),
   group_dataset_name = TC$dataset_name() |> TC$flag("subject_level_dataset_name"),
   receiver_id = TC$character() |> TC$flag("optional", "ignore"),
-  cat_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())),
-  par_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())),
+  cat_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("map_character_to_factor"),
+  par_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("map_character_to_factor"),
   value_vars = TC$col("bm_dataset_name", TC$numeric()) |> TC$flag("one_or_more"),
-  visit_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())),
-  subjid_var = TC$col("group_dataset_name", TC$factor()) |> TC$flag("subjid_var"),
+  visit_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())) |> TC$flag("map_character_to_factor"),
+  subjid_var = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("subjid_var", "map_character_to_factor"),
   default_cat = TC$choice_from_col_contents("cat_var") |> TC$flag("zero_or_more", "optional"),
   default_par = TC$choice_from_col_contents("par_var") |> TC$flag("zero_or_more", "optional"),
   default_visit = TC$choice_from_col_contents("visit_var") |> TC$flag("optional"),
@@ -859,14 +857,14 @@ dataset_info_boxplot <- function(bm_dataset_name, group_dataset_name, ...) {
   return(list(all = unique(c(bm_dataset_name, group_dataset_name)), subject_level = group_dataset_name))
 }
 
-mod_boxplot <- CM$module(mod_boxplot, check_mod_boxplot, dataset_info_boxplot)
+mod_boxplot <- CM$module(mod_boxplot, check_mod_boxplot, dataset_info_boxplot, map_afmm_mod_boxplot_auto)
 
-#' @describeIn mod_boxplot Boxplot wrapper when its output is fed into papo module
+#' Boxplot wrapper when its output is fed into the papo module
+#' @keywords main
 #' @export
 mod_boxplot_papo <- function(...) {
-  args <- list(...)
-  args[["server_wrapper_func"]] <- function(x) list(subj_id = x)
-  do.call(mod_boxplot, args)
+  .Deprecated("mod_boxplot_papo", msg = "'mod_boxplot_papo' is no longer required and should be replaced by 'mod_boxplot'. It is still available for compatibility purposes") # nolint
+  mod_boxplot(...)
 }
 
 # Data manipulation
@@ -1125,7 +1123,7 @@ boxplot_chart <- function(ds, violin, show_points, log_project_y, title_data = N
       strip.text.x = ggplot2::element_text(size = STYLE$STRIP_TEXT_SIZE),
       strip.text.y = ggplot2::element_text(size = STYLE$STRIP_TEXT_SIZE)
     )
-  
+
   if (isTRUE(log_project_y)) {
     p <- p + ggplot2::scale_y_continuous(trans = pseudo_log_projection(base = 10))
   }
@@ -1171,6 +1169,7 @@ bp_listings_table <- function(ds, f_ds) {
 #' Counts the number of rows grouped by all variables except ``r CNT$SBJ`` and ``r CNT$VAL``
 #'
 #' - Counts the number of rows grouped by all variables except ``r CNT$SBJ`` and ``r CNT$VAL``.
+#' - Throws an error if the Count column is present
 #' - The function returns a data frame with the counts for each group.
 #'
 #' @param ds `data.frame()`
@@ -1184,10 +1183,11 @@ bp_listings_table <- function(ds, f_ds) {
 #'
 bp_count_table <- function(ds) {
   count_by <- setdiff(names(ds), c(CNT$SBJ, CNT$VAL))
-
   # If a variable in the original dataset has the name Count a conflict may appear
   # This should not be a problem as tibble can support that and this ds is displayed and not further processed
-  # If further processed distinguishing the two columns would not be trivial
+  # Nonetheless a conservative approach is taken and error is raised in that case
+  checkmate::assert_disjunct(names(ds), "Count")
+
   dplyr::count(ds, dplyr::across(dplyr::all_of(count_by)), .drop = FALSE, name = "Count")
 }
 
@@ -1349,8 +1349,10 @@ bp_get_single_listings_output <- function(ds, closest_point, input_id) {
 #' @inheritParams bp_count_table
 #'
 bp_get_count_output <- function(ds) {
-  bp_count_table(ds) |>
-    DT::datatable(colnames = as.character(get_lbls_robust(ds)))
+  labels <- c(get_lbls_robust(ds))
+  count_table <- bp_count_table(ds) |>
+    possibly_set_lbls(labels)
+  DT::datatable(count_table, colnames = as.character(get_lbls_robust(count_table)))
 }
 
 #' @rdname boxplot_composed

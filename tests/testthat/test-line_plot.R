@@ -20,7 +20,7 @@ test_that("lineplot_chart produces a ggplot", {
   expect_true("ggplot" %in% class(p))
 })
 
-test_that("lineplot_chart renders reference lines", {
+test_that("lineplot_chart renders reference lines" |> vdoc[["add_spec"]](c(specs$lineplot_module$reference_values)), {
   df <- data.frame(row.names = seq(1))
 
   df[[CNT$VIS]] <- c("vis_1")
@@ -29,19 +29,28 @@ test_that("lineplot_chart renders reference lines", {
   df[[CNT$VAL]] <- c(1)
   df[[LP_ID$MISC$WHISKER_BOTTOM]] <- c(0)
   df[[LP_ID$MISC$WHISKER_TOP]] <- c(2)
-
-  refline_df <- data.frame(row.names = seq(1))
-  refline_df[["ref line foo"]] <- c(.5)
-  refline_df[["ref line bar"]] <- c(.75)
-  refline_df[["ref line baz"]] <- c(.87)
-
-  p <- lineplot_chart(data = df, ref_line_data = refline_df)
-
+  
+  ref_line_df <- data.frame(
+    as.factor(c("par_1", "par_1", "par_1")),
+    as.factor(c("A", "A", "A")),
+    c(0.50, 0.75, 0.87)
+  ) |> setNames(c(CNT$PAR, CNT$MAIN_GROUP, CNT$VAL))
+ 
+  ref_line_df1 <- ref_line_df[1,] 
+  ref_line_df2 <- ref_line_df[2,] 
+  ref_line_df3 <- ref_line_df[3,] 
+  
+  ref_line_data <- list(
+    foo = ref_line_df1, bar = ref_line_df2, baz = ref_line_df3
+  )
+  
+  p <- lineplot_chart(data = df, ref_line_data = ref_line_data)
+  
   refline_count <- 0
   for (layer in p[["layers"]]) {
     refline_count <- refline_count + "GeomHline" %in% class(layer[["geom"]])
   }
-  expect_equal(refline_count, ncol(refline_df))
+  expect_equal(refline_count, nrow(ref_line_df))
 })
 
 # listings table

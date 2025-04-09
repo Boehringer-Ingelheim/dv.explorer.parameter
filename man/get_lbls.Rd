@@ -24,4 +24,4 @@ It will try to read the label attribute from each of the columns.
 \item \code{get_lbls_robust()}: robust
 
 }}
-\keyword{misc}
+\keyword{internal}

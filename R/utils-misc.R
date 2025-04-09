@@ -194,3 +194,30 @@ pseudo_log_projection <- function(base = 10) {
   )
 }
 
+#' Prefix Repeat Parameters
+#'
+#' This function modifies a given dataset by prefixing repeating parameter values with their corresponding category values.
+#'
+#' @param dataset Input data frame.
+#' @param cat_var Dataset column name that contains the category values.
+#' @param par_var Dataset column name that contains the parameter values.
+#'
+#' @return Modified dataset where the repeated parameter values have been prefixed with their corresponding category values.
+#'
+#' @keywords misc
+#' @export
+prefix_repeat_parameters <- function(dataset, cat_var, par_var) {
+  unique_cat_par_combinations <- unique(dataset[c(cat_var, par_var)])
+  dup_mask <- duplicated(unique_cat_par_combinations[par_var])
+  unique_repeat_params <- unique_cat_par_combinations[[par_var]][dup_mask]
+  mask <- (dataset[[par_var]] %in% unique_repeat_params)
+ 
+  if (is.factor(dataset[[par_var]])) {
+    mask2 <- unique_cat_par_combinations[[par_var]] %in% unique_repeat_params
+    repeat_par_rows <- unique_cat_par_combinations[mask2, ]
+    extra_levels <- paste0(repeat_par_rows[[cat_var]], "-", repeat_par_rows[[par_var]])
+    levels(dataset[[par_var]]) <- c(levels(dataset[[par_var]]), extra_levels)
+  }
+  dataset[mask, par_var] <- paste0(dataset[[cat_var]][mask], "-", dataset[[par_var]][mask])
+  return(dataset)
+}

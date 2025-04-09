@@ -31,6 +31,9 @@ specs <- list(
     ",
     bookmark = "
     The application shall support bookmarking. Boxplot selection by click and double click are explicitly excluded.
+    ",
+    jumping_feature = "
+    The module can communicate subject values to other modules.
     "
 ),
 
@@ -96,6 +99,12 @@ lineplot_module = list(
     ",
     bookmark = "
     The application shall support bookmarking. Clicks and brush are explicitely excluded.
+    ",
+    reference_values = "
+    The chart optionally displays reference values as horizontal lines. Those are provided as separate columns of the visit-dependent dataset.
+    ",
+    jumping_feature = "
+    The module can communicate subject values to other modules.
     "
 ),
 
