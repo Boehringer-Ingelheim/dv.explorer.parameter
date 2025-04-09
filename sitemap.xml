@@ -1,360 +1,146 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>/404.html</loc>
-  </url>
-  <url>
-    <loc>/LICENSE-text.html</loc>
-  </url>
-  <url>
-    <loc>/articles/boxplot.html</loc>
-  </url>
-  <url>
-    <loc>/articles/correlation_heatmap.html</loc>
-  </url>
-  <url>
-    <loc>/articles/forest.html</loc>
-  </url>
-  <url>
-    <loc>/articles/index.html</loc>
-  </url>
-  <url>
-    <loc>/articles/lineplot.html</loc>
-  </url>
-  <url>
-    <loc>/articles/qc.html</loc>
-  </url>
-  <url>
-    <loc>/articles/roc.html</loc>
-  </url>
-  <url>
-    <loc>/articles/scatterplot.html</loc>
-  </url>
-  <url>
-    <loc>/articles/scatterplotmatrix.html</loc>
-  </url>
-  <url>
-    <loc>/articles/wfphm.html</loc>
-  </url>
-  <url>
-    <loc>/articles/zz_buildinfo.html</loc>
-  </url>
-  <url>
-    <loc>/authors.html</loc>
-  </url>
-  <url>
-    <loc>/index.html</loc>
-  </url>
-  <url>
-    <loc>/news/index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/HM2SVG_plot.html</loc>
-  </url>
-  <url>
-    <loc>/reference/HM2SVG_server.html</loc>
-  </url>
-  <url>
-    <loc>/reference/apply_cat_palette_legend.html</loc>
-  </url>
-  <url>
-    <loc>/reference/bar_D3.html</loc>
-  </url>
-  <url>
-    <loc>/reference/boxplot_chart.html</loc>
-  </url>
-  <url>
-    <loc>/reference/boxplot_composed.html</loc>
-  </url>
-  <url>
-    <loc>/reference/bp_count_table.html</loc>
-  </url>
-  <url>
-    <loc>/reference/bp_get_closest_gen_click.html</loc>
-  </url>
-  <url>
-    <loc>/reference/bp_listings_table.html</loc>
-  </url>
-  <url>
-    <loc>/reference/bp_significance_table.html</loc>
-  </url>
-  <url>
-    <loc>/reference/bp_subset_data.html</loc>
-  </url>
-  <url>
-    <loc>/reference/bp_summary_table.html</loc>
-  </url>
-  <url>
-    <loc>/reference/cash-.pack_of_constants.html</loc>
-  </url>
-  <url>
-    <loc>/reference/ch_subset_data.html</loc>
-  </url>
-  <url>
-    <loc>/reference/check_selected_choices.html</loc>
-  </url>
-  <url>
-    <loc>/reference/composed.html</loc>
-  </url>
-  <url>
-    <loc>/reference/compute_metric.html</loc>
-  </url>
-  <url>
-    <loc>/reference/compute_roc.html</loc>
-  </url>
-  <url>
-    <loc>/reference/default_lineplot_functions.html</loc>
-  </url>
-  <url>
-    <loc>/reference/dplyr_.data.html</loc>
-  </url>
-  <url>
-    <loc>/reference/equal_and_mask_from_vec.html</loc>
-  </url>
-  <url>
-    <loc>/reference/fp_stats.html</loc>
-  </url>
-  <url>
-    <loc>/reference/fp_subset_data.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_dens_data.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_dens_spec.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_explore_roc_data.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_explore_roc_spec.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_gt_summary_table.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_histo_data.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_histo_spec.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_lbl.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_lbl_robust.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_lbls.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_metric_data.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_metric_spec.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_quantile_data.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_raincloud_spec.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_roc_data.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_roc_spec.html</loc>
-  </url>
-  <url>
-    <loc>/reference/get_summary_data.html</loc>
-  </url>
-  <url>
-    <loc>/reference/heatmap_D3.html</loc>
-  </url>
-  <url>
-    <loc>/reference/index.html</loc>
-  </url>
-  <url>
-    <loc>/reference/mock_app_boxplot.html</loc>
-  </url>
-  <url>
-    <loc>/reference/mock_app_boxplot_mm.html</loc>
-  </url>
-  <url>
-    <loc>/reference/mock_app_corr_hm.html</loc>
-  </url>
-  <url>
-    <loc>/reference/mock_app_correlation_hm_mm.html</loc>
-  </url>
-  <url>
-    <loc>/reference/mock_app_forest.html</loc>
-  </url>
-  <url>
-    <loc>/reference/mock_app_lineplot.html</loc>
-  </url>
-  <url>
-    <loc>/reference/mock_app_scatterplot.html</loc>
-  </url>
-  <url>
-    <loc>/reference/mock_app_scatterplotmatrix.html</loc>
-  </url>
-  <url>
-    <loc>/reference/mock_roc.html</loc>
-  </url>
-  <url>
-    <loc>/reference/mock_wfphm.html</loc>
-  </url>
-  <url>
-    <loc>/reference/mod_boxplot.html</loc>
-  </url>
-  <url>
-    <loc>/reference/mod_corr_hm.html</loc>
-  </url>
-  <url>
-    <loc>/reference/mod_forest.html</loc>
-  </url>
-  <url>
-    <loc>/reference/mod_lineplot.html</loc>
-  </url>
-  <url>
-    <loc>/reference/mod_roc.html</loc>
-  </url>
-  <url>
-    <loc>/reference/mod_scatterplot.html</loc>
-  </url>
-  <url>
-    <loc>/reference/mod_scatterplotmatrix.html</loc>
-  </url>
-  <url>
-    <loc>/reference/name_label_formatter.html</loc>
-  </url>
-  <url>
-    <loc>/reference/outlier_container.html</loc>
-  </url>
-  <url>
-    <loc>/reference/outlier_selector.html</loc>
-  </url>
-  <url>
-    <loc>/reference/pack_of_constants.html</loc>
-  </url>
-  <url>
-    <loc>/reference/pal_div_palette.html</loc>
-  </url>
-  <url>
-    <loc>/reference/pal_get_cat_palette.html</loc>
-  </url>
-  <url>
-    <loc>/reference/pal_get_cont_palette.html</loc>
-  </url>
-  <url>
-    <loc>/reference/pal_get_scale_type_lim.html</loc>
-  </url>
-  <url>
-    <loc>/reference/pal_seq_palette.html</loc>
-  </url>
-  <url>
-    <loc>/reference/pal_zero_palette.html</loc>
-  </url>
-  <url>
-    <loc>/reference/parameter_UI.html</loc>
-  </url>
-  <url>
-    <loc>/reference/parse_ci.html</loc>
-  </url>
-  <url>
-    <loc>/reference/possibly_set_lbls.html</loc>
-  </url>
-  <url>
-    <loc>/reference/rename_with_list.html</loc>
-  </url>
-  <url>
-    <loc>/reference/resolve_or_return.html</loc>
-  </url>
-  <url>
-    <loc>/reference/rlang_assign.html</loc>
-  </url>
-  <url>
-    <loc>/reference/roc_subset_data.html</loc>
-  </url>
-  <url>
-    <loc>/reference/rpl_nulls_name.html</loc>
-  </url>
-  <url>
-    <loc>/reference/set_lbl.html</loc>
-  </url>
-  <url>
-    <loc>/reference/set_lbls.html</loc>
-  </url>
-  <url>
-    <loc>/reference/sp_subset_data.html</loc>
-  </url>
-  <url>
-    <loc>/reference/spm_subset_data.html</loc>
-  </url>
-  <url>
-    <loc>/reference/str_to_hash.html</loc>
-  </url>
-  <url>
-    <loc>/reference/strip_data_pronoun.html</loc>
-  </url>
-  <url>
-    <loc>/reference/subset_adsl.html</loc>
-  </url>
-  <url>
-    <loc>/reference/subset_bds_param.html</loc>
-  </url>
-  <url>
-    <loc>/reference/swap_val_names.html</loc>
-  </url>
-  <url>
-    <loc>/reference/test_disjunct_cols.html</loc>
-  </url>
-  <url>
-    <loc>/reference/test_one_cat_per_par.html</loc>
-  </url>
-  <url>
-    <loc>/reference/test_one_row_per_sbj.html</loc>
-  </url>
-  <url>
-    <loc>/reference/transformation.html</loc>
-  </url>
-  <url>
-    <loc>/reference/transformation_utils.html</loc>
-  </url>
-  <url>
-    <loc>/reference/wfphm.html</loc>
-  </url>
-  <url>
-    <loc>/reference/wfphm_hmcat.html</loc>
-  </url>
-  <url>
-    <loc>/reference/wfphm_hmcat_subset.html</loc>
-  </url>
-  <url>
-    <loc>/reference/wfphm_hmcont.html</loc>
-  </url>
-  <url>
-    <loc>/reference/wfphm_hmcont_subset.html</loc>
-  </url>
-  <url>
-    <loc>/reference/wfphm_hmpar.html</loc>
-  </url>
-  <url>
-    <loc>/reference/wfphm_hmpar_subset.html</loc>
-  </url>
-  <url>
-    <loc>/reference/wfphm_wf.html</loc>
-  </url>
-  <url>
-    <loc>/reference/wfphm_wf_apply_outliers.html</loc>
-  </url>
-  <url>
-    <loc>/reference/wfphm_wf_rename_cols.html</loc>
-  </url>
-  <url>
-    <loc>/reference/wfphm_wf_subset_data_cont.html</loc>
-  </url>
-  <url>
-    <loc>/reference/wfphm_wf_subset_data_par.html</loc>
-  </url>
+<urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
+<url><loc>/404.html</loc></url>
+<url><loc>/LICENSE-text.html</loc></url>
+<url><loc>/articles/boxplot.html</loc></url>
+<url><loc>/articles/correlation_heatmap.html</loc></url>
+<url><loc>/articles/forest.html</loc></url>
+<url><loc>/articles/index.html</loc></url>
+<url><loc>/articles/lineplot_main_article.html</loc></url>
+<url><loc>/articles/lineplot_reference_values.html</loc></url>
+<url><loc>/articles/qc.html</loc></url>
+<url><loc>/articles/roc.html</loc></url>
+<url><loc>/articles/scatterplot.html</loc></url>
+<url><loc>/articles/scatterplotmatrix.html</loc></url>
+<url><loc>/articles/wfphm.html</loc></url>
+<url><loc>/articles/zz_buildinfo.html</loc></url>
+<url><loc>/authors.html</loc></url>
+<url><loc>/index.html</loc></url>
+<url><loc>/news/index.html</loc></url>
+<url><loc>/reference/HM2SVG_plot.html</loc></url>
+<url><loc>/reference/HM2SVG_server.html</loc></url>
+<url><loc>/reference/apply_cat_palette_legend.html</loc></url>
+<url><loc>/reference/bar_D3.html</loc></url>
+<url><loc>/reference/boxplot_UI.html</loc></url>
+<url><loc>/reference/boxplot_chart.html</loc></url>
+<url><loc>/reference/boxplot_composed.html</loc></url>
+<url><loc>/reference/boxplot_server.html</loc></url>
+<url><loc>/reference/bp_count_table.html</loc></url>
+<url><loc>/reference/bp_get_closest_gen_click.html</loc></url>
+<url><loc>/reference/bp_listings_table.html</loc></url>
+<url><loc>/reference/bp_significance_table.html</loc></url>
+<url><loc>/reference/bp_subset_data.html</loc></url>
+<url><loc>/reference/bp_summary_table.html</loc></url>
+<url><loc>/reference/cash-.pack_of_constants.html</loc></url>
+<url><loc>/reference/ch_subset_data.html</loc></url>
+<url><loc>/reference/check_selected_choices.html</loc></url>
+<url><loc>/reference/composed.html</loc></url>
+<url><loc>/reference/compute_metric.html</loc></url>
+<url><loc>/reference/compute_roc.html</loc></url>
+<url><loc>/reference/corr_hm_UI.html</loc></url>
+<url><loc>/reference/corr_hm_server.html</loc></url>
+<url><loc>/reference/default_lineplot_functions.html</loc></url>
+<url><loc>/reference/dplyr_.data.html</loc></url>
+<url><loc>/reference/equal_and_mask_from_vec.html</loc></url>
+<url><loc>/reference/forest_UI.html</loc></url>
+<url><loc>/reference/forest_server.html</loc></url>
+<url><loc>/reference/fp_stats.html</loc></url>
+<url><loc>/reference/fp_subset_data.html</loc></url>
+<url><loc>/reference/get_dens_data.html</loc></url>
+<url><loc>/reference/get_dens_spec.html</loc></url>
+<url><loc>/reference/get_explore_roc_data.html</loc></url>
+<url><loc>/reference/get_explore_roc_spec.html</loc></url>
+<url><loc>/reference/get_gt_summary_table.html</loc></url>
+<url><loc>/reference/get_histo_data.html</loc></url>
+<url><loc>/reference/get_histo_spec.html</loc></url>
+<url><loc>/reference/get_lbl.html</loc></url>
+<url><loc>/reference/get_lbl_robust.html</loc></url>
+<url><loc>/reference/get_lbls.html</loc></url>
+<url><loc>/reference/get_metric_data.html</loc></url>
+<url><loc>/reference/get_metric_spec.html</loc></url>
+<url><loc>/reference/get_quantile_data.html</loc></url>
+<url><loc>/reference/get_raincloud_spec.html</loc></url>
+<url><loc>/reference/get_roc_data.html</loc></url>
+<url><loc>/reference/get_roc_spec.html</loc></url>
+<url><loc>/reference/get_summary_data.html</loc></url>
+<url><loc>/reference/heatmap_D3.html</loc></url>
+<url><loc>/reference/index.html</loc></url>
+<url><loc>/reference/lineplot_UI.html</loc></url>
+<url><loc>/reference/lineplot_server.html</loc></url>
+<url><loc>/reference/mock_app_boxplot.html</loc></url>
+<url><loc>/reference/mock_app_boxplot_mm.html</loc></url>
+<url><loc>/reference/mock_app_corr_hm.html</loc></url>
+<url><loc>/reference/mock_app_correlation_hm_mm.html</loc></url>
+<url><loc>/reference/mock_app_forest.html</loc></url>
+<url><loc>/reference/mock_app_lineplot.html</loc></url>
+<url><loc>/reference/mock_app_lineplot_mm_safetyData.html</loc></url>
+<url><loc>/reference/mock_app_scatterplot.html</loc></url>
+<url><loc>/reference/mock_app_scatterplotmatrix.html</loc></url>
+<url><loc>/reference/mock_roc.html</loc></url>
+<url><loc>/reference/mock_wfphm.html</loc></url>
+<url><loc>/reference/mod_boxplot.html</loc></url>
+<url><loc>/reference/mod_boxplot_papo.html</loc></url>
+<url><loc>/reference/mod_corr_hm.html</loc></url>
+<url><loc>/reference/mod_forest.html</loc></url>
+<url><loc>/reference/mod_lineplot.html</loc></url>
+<url><loc>/reference/mod_roc.html</loc></url>
+<url><loc>/reference/mod_scatterplot.html</loc></url>
+<url><loc>/reference/mod_scatterplotmatrix.html</loc></url>
+<url><loc>/reference/name_label_formatter.html</loc></url>
+<url><loc>/reference/outlier_container.html</loc></url>
+<url><loc>/reference/outlier_selector.html</loc></url>
+<url><loc>/reference/pack_of_constants.html</loc></url>
+<url><loc>/reference/pal_div_palette.html</loc></url>
+<url><loc>/reference/pal_get_cat_palette.html</loc></url>
+<url><loc>/reference/pal_get_cont_palette.html</loc></url>
+<url><loc>/reference/pal_get_scale_type_lim.html</loc></url>
+<url><loc>/reference/pal_seq_palette.html</loc></url>
+<url><loc>/reference/pal_zero_palette.html</loc></url>
+<url><loc>/reference/parameter_UI.html</loc></url>
+<url><loc>/reference/parse_ci.html</loc></url>
+<url><loc>/reference/possibly_set_lbls.html</loc></url>
+<url><loc>/reference/prefix_repeat_parameters.html</loc></url>
+<url><loc>/reference/rename_with_list.html</loc></url>
+<url><loc>/reference/resolve_or_return.html</loc></url>
+<url><loc>/reference/rlang_assign.html</loc></url>
+<url><loc>/reference/roc_UI.html</loc></url>
+<url><loc>/reference/roc_server.html</loc></url>
+<url><loc>/reference/roc_subset_data.html</loc></url>
+<url><loc>/reference/rpl_nulls_name.html</loc></url>
+<url><loc>/reference/scatterplot_UI.html</loc></url>
+<url><loc>/reference/scatterplot_server.html</loc></url>
+<url><loc>/reference/scatterplotmatrix_UI.html</loc></url>
+<url><loc>/reference/scatterplotmatrix_server.html</loc></url>
+<url><loc>/reference/set_lbl.html</loc></url>
+<url><loc>/reference/set_lbls.html</loc></url>
+<url><loc>/reference/sp_subset_data.html</loc></url>
+<url><loc>/reference/spm_subset_data.html</loc></url>
+<url><loc>/reference/str_to_hash.html</loc></url>
+<url><loc>/reference/strip_data_pronoun.html</loc></url>
+<url><loc>/reference/subset_adsl.html</loc></url>
+<url><loc>/reference/subset_bds_param.html</loc></url>
+<url><loc>/reference/swap_val_names.html</loc></url>
+<url><loc>/reference/test_disjunct_cols.html</loc></url>
+<url><loc>/reference/test_one_cat_per_par.html</loc></url>
+<url><loc>/reference/test_one_row_per_sbj.html</loc></url>
+<url><loc>/reference/transformation.html</loc></url>
+<url><loc>/reference/transformation_utils.html</loc></url>
+<url><loc>/reference/wfphm.html</loc></url>
+<url><loc>/reference/wfphm_UI.html</loc></url>
+<url><loc>/reference/wfphm_hmcat.html</loc></url>
+<url><loc>/reference/wfphm_hmcat_UI.html</loc></url>
+<url><loc>/reference/wfphm_hmcat_server.html</loc></url>
+<url><loc>/reference/wfphm_hmcat_subset.html</loc></url>
+<url><loc>/reference/wfphm_hmcont.html</loc></url>
+<url><loc>/reference/wfphm_hmcont_subset.html</loc></url>
+<url><loc>/reference/wfphm_hmpar.html</loc></url>
+<url><loc>/reference/wfphm_hmpar_subset.html</loc></url>
+<url><loc>/reference/wfphm_server.html</loc></url>
+<url><loc>/reference/wfphm_wf.html</loc></url>
+<url><loc>/reference/wfphm_wf_UI.html</loc></url>
+<url><loc>/reference/wfphm_wf_apply_outliers.html</loc></url>
+<url><loc>/reference/wfphm_wf_rename_cols.html</loc></url>
+<url><loc>/reference/wfphm_wf_server.html</loc></url>
+<url><loc>/reference/wfphm_wf_subset_data_cont.html</loc></url>
+<url><loc>/reference/wfphm_wf_subset_data_par.html</loc></url>
 </urlset>
+
