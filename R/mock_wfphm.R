@@ -16,7 +16,7 @@ mock_wfphm_mm_app <- function() {
       ),
       module_list = list(
         "Waterfall" = mod_wfphm(
-          subjid_var = "SUBJID",
+          subjid_var = "USUBJID",
           bm_dataset_name = "adbm",
           group_dataset_name = "group",
           cat_palette = list(SEX = function(x) {
@@ -30,7 +30,7 @@ mock_wfphm_mm_app <- function() {
         )
       ),
       filter_data = "group",
-      filter_key = "SUBJID"
+      filter_key = "USUBJID"
     )
   } else {
     rlang::abort("dv.manager is required to run this mock")
@@ -116,8 +116,8 @@ mock_app_hmcat <- function(dry_run = FALSE,
   srv_params <- list(
     id = "not_ebas",
     dataset = group_dataset,
-    subjid_var = "SUBJID",
-    sorted_x = shiny::reactive(levels(data[["sl"]][["SUBJID"]])),
+    subjid_var = "USUBJID",
+    sorted_x = shiny::reactive(levels(data[["sl"]][["USUBJID"]])),
     margin = shiny::reactive(c(top = 20, bottom = 20, left = 200, right = 20))
   )
 
@@ -162,8 +162,8 @@ mock_app_hmcont <- function(dry_run = FALSE,
   srv_params <- list(
     id = "not_ebas",
     dataset = group_dataset,
-    subjid_var = "SUBJID",
-    sorted_x = shiny::reactive(levels(data[["sl"]][["SUBJID"]])),
+    subjid_var = "USUBJID",
+    sorted_x = shiny::reactive(levels(data[["sl"]][["USUBJID"]])),
     margin = shiny::reactive(c(top = 20, bottom = 20, left = 200, right = 20))
   )
 
@@ -209,9 +209,9 @@ mock_app_hmpar <- function(dry_run = FALSE,
     cat_var = "PARCAT",
     par_var = "PARAM",
     visit_var = "VISIT",
-    subjid_var = "SUBJID",
+    subjid_var = "USUBJID",
     value_vars = c("VALUE1", "VALUE2"),
-    sorted_x = shiny::reactive(levels(data[["sl"]][["SUBJID"]])),
+    sorted_x = shiny::reactive(levels(data[["sl"]][["USUBJID"]])),
     tr_mapper = tr_mapper_def(),
     margin = shiny::reactive(c(top = 20, bottom = 20, left = 200, right = 20)),
     show_x_ticks = TRUE
@@ -263,7 +263,7 @@ mock_app_wf <- function(dry_run = FALSE,
     cat_var = "PARCAT",
     par_var = "PARAM",
     visit_var = "VISIT",
-    subjid_var = "SUBJID",
+    subjid_var = "USUBJID",
     value_vars = c("VALUE1", "VALUE2", "VALUE3"),
     margin = shiny::reactive(c(top = 20, bottom = 20, left = 200, right = 20))
   )
@@ -314,7 +314,7 @@ mock_app_wfphm <- function(dry_run = FALSE,
     cat_var = "PARCAT",
     par_var = "PARAM",
     visit_var = "VISIT",
-    subjid_var = "SUBJID",
+    subjid_var = "USUBJID",
     value_vars = c("VALUE1", "VALUE2", "VALUE3")
   )
 

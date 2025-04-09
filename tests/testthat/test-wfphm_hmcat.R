@@ -3,7 +3,7 @@
 
 local({
   data <- data.frame(
-    SUBJID = factor(1:3),
+    USUBJID = factor(1:3),
     CAT1 = factor(c("c11", "c12", "c13")),
     CAT2 = factor(c("c21", "c22", "c23")),
     CAT3 = factor(c("c31", "c32", "c33"))
@@ -19,7 +19,7 @@ local({
     palette = list(CAT1 = function(x) {
       color
     }),
-    subjid_var = "SUBJID",
+    subjid_var = "USUBJID",
     sorted_x = sorted_x
   )
 
@@ -76,7 +76,7 @@ local({
       )
     ), {
     data <- data.frame(
-      SUBJID = factor(c(1, 1, 3)),
+      USUBJID = factor(c(1, 1, 3)),
       CAT1 = factor(c("c11", "c12", "c13")),
       CAT2 = factor(c("c21", "c22", "c23")),
       CAT3 = factor(c("c31", "c32", "c33"))
@@ -89,7 +89,7 @@ local({
         palette = list(CAT1 = function(x) {
           color
         }),
-        subjid_var = "SUBJID",
+        subjid_var = "USUBJID",
         sorted_x = sorted_x
       ),
       class = "validation"
@@ -100,7 +100,7 @@ local({
 
   test_that("wfphm_hmcat_subset subsest properly with ordered factors", {
     data <- data.frame(
-      SUBJID = factor(1:3),
+      USUBJID = factor(1:3),
       CAT1 = factor(c("c11", "c12", "c13"), ordered = TRUE),
       CAT2 = factor(c("c21", "c22", "c23")),
       CAT3 = factor(c("c31", "c32", "c33"))
@@ -110,7 +110,7 @@ local({
       data,
       "CAT1",
       palette = list(),
-      subjid_var = "SUBJID",
+      subjid_var = "USUBJID",
       sorted_x = 1:3
     )
 
@@ -123,7 +123,7 @@ local({
 
 root_app <- start_app_driver(rlang::quo({
   data <- data.frame(
-    SUBJID = factor(1:3),
+    USUBJID = factor(1:3),
     CAT1 = factor(c("c11", "c12", "c13")),
     CAT2 = factor(c("c21", "c22", "c23")),
     CAT3 = factor(c("c31", "c32", "c33"))
@@ -131,7 +131,7 @@ root_app <- start_app_driver(rlang::quo({
 
   srv_args <- list(
     dataset = shiny::reactive(data),
-    subjid_var = "SUBJID",
+    subjid_var = "USUBJID",
     cat_palette = list(CAT1 = function(x) {
       "red"
     }),

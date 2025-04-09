@@ -1,6 +1,6 @@
 # nolint start
 grp_ds <- tibble::tribble(
-  ~SUBJID, ~GRP1, ~GRP2,
+  ~USUBJID, ~GRP1, ~GRP2,
   "S1", "G11", "G21",
   "S2", "G12", "G22"
 ) %>%
@@ -17,7 +17,7 @@ test_that("subset data to the selected parameters visits with no grouping" |>
     )
   ), {
   pred_ds <- tibble::tribble(
-    ~SUBJID, ~P_PARCAT, ~P_PARAM, ~P_VAL, ~P_VISIT,
+    ~USUBJID, ~P_PARCAT, ~P_PARAM, ~P_VAL, ~P_VISIT,
     "S1", "PC1", "P1", 1, "PV1",
     "S2", "PC1", "P1", 2, "PV1",
     "S1", "PC1", "P1", 3, "PV2", # Different visits are not subset
@@ -29,7 +29,7 @@ test_that("subset data to the selected parameters visits with no grouping" |>
     )
 
   resp_ds <- tibble::tribble(
-    ~SUBJID, ~R_PARCAT, ~R_PARAM, ~R_VAL, ~R_VISIT,
+    ~USUBJID, ~R_PARCAT, ~R_PARAM, ~R_VAL, ~R_VISIT,
     "S1", "RC1", "R1", "A", "RV1",
     "S2", "RC1", "R1", "B", "RV1",
     "S1", "RC1", "R2", "C", "RV1",
@@ -69,7 +69,7 @@ test_that("subset data to the selected parameters visits with no grouping" |>
     pred_ds = pred_ds,
     resp_ds = resp_ds,
     group_ds = grp_ds,
-    subj_col = "SUBJID",
+    subj_col = "USUBJID",
     pred_cat_col = "P_PARCAT",
     pred_par_col = "P_PARAM",
     pred_vis_col = "P_VISIT",
@@ -89,7 +89,7 @@ test_that("subset data to the selected parameters visits with grouping" |>
     )
   ), {
   pred_ds <- tibble::tribble(
-    ~SUBJID, ~P_PARCAT, ~P_PARAM, ~P_VAL, ~P_VISIT,
+    ~USUBJID, ~P_PARCAT, ~P_PARAM, ~P_VAL, ~P_VISIT,
     "S1", "PC1", "P1", 1, "PV1",
     "S2", "PC1", "P1", 2, "PV1",
     "S1", "PC1", "P1", 3, "PV2", # Different visits are not subset
@@ -101,7 +101,7 @@ test_that("subset data to the selected parameters visits with grouping" |>
     )
 
   resp_ds <- tibble::tribble(
-    ~SUBJID, ~R_PARCAT, ~R_PARAM, ~R_VAL, ~R_VISIT,
+    ~USUBJID, ~R_PARCAT, ~R_PARAM, ~R_VAL, ~R_VISIT,
     "S1", "RC1", "R1", "A", "RV1",
     "S2", "RC1", "R1", "B", "RV1",
     "S1", "RC1", "R2", "C", "RV1",
@@ -116,7 +116,7 @@ test_that("subset data to the selected parameters visits with grouping" |>
     )
 
   grp_ds <- tibble::tribble(
-    ~SUBJID, ~GRP1, ~GRP2,
+    ~USUBJID, ~GRP1, ~GRP2,
     "S1", "G11", "G21",
     "S2", "G12", "G22"
   ) %>%
@@ -153,7 +153,7 @@ test_that("subset data to the selected parameters visits with grouping" |>
     pred_ds = pred_ds,
     resp_ds = resp_ds,
     group_ds = grp_ds,
-    subj_col = "SUBJID",
+    subj_col = "USUBJID",
     pred_cat_col = "P_PARCAT",
     pred_par_col = "P_PARAM",
     pred_vis_col = "P_VISIT",
@@ -173,7 +173,7 @@ test_that("subset data with pasted parameters and categories when there is repet
     )
   ), {
   pred_ds <- tibble::tribble(
-    ~SUBJID, ~P_PARCAT, ~P_PARAM, ~P_VAL, ~P_VISIT,
+    ~USUBJID, ~P_PARCAT, ~P_PARAM, ~P_VAL, ~P_VISIT,
     "S1", "PC1", "P1", 1, "PV1",
     "S2", "PC1", "P1", 2, "PV1",
     "S1", "PC2", "P1", 3, "PV1",
@@ -184,7 +184,7 @@ test_that("subset data with pasted parameters and categories when there is repet
     )
 
   resp_ds <- tibble::tribble(
-    ~SUBJID, ~R_PARCAT, ~R_PARAM, ~R_VAL, ~R_VISIT,
+    ~USUBJID, ~R_PARCAT, ~R_PARAM, ~R_VAL, ~R_VISIT,
     "S1", "RC1", "R1", "A", "RV1",
     "S2", "RC1", "R1", "B", "RV1"
   ) %>%
@@ -219,7 +219,7 @@ test_that("subset data with pasted parameters and categories when there is repet
     pred_ds = pred_ds,
     resp_ds = resp_ds,
     group_ds = grp_ds,
-    subj_col = "SUBJID",
+    subj_col = "USUBJID",
     pred_cat_col = "P_PARCAT",
     pred_par_col = "P_PARAM",
     pred_vis_col = "P_VISIT",
@@ -243,7 +243,7 @@ test_that("subset data is correct when param_name repeats across categories" |>
   # one below.
 
   pred_ds <- tibble::tribble(
-    ~SUBJID, ~P_PARCAT, ~P_PARAM, ~P_VAL, ~P_VISIT,
+    ~USUBJID, ~P_PARCAT, ~P_PARAM, ~P_VAL, ~P_VISIT,
     # Note that S1 has P1 in PC2 but not PC1, if selected only considering PARAM, even when PC1 is selected and P1 too, the line from S1 would be included
     # Additionally it would not be captured by the too much row validations as there would still be one row per participant.
     # This is controlled since 0.0.1-14 as selection is done considering both PARAM and PARCAT.
@@ -256,7 +256,7 @@ test_that("subset data is correct when param_name repeats across categories" |>
     )
 
   resp_ds <- tibble::tribble(
-    ~SUBJID, ~R_PARCAT, ~R_PARAM, ~R_VAL, ~R_VISIT,
+    ~USUBJID, ~R_PARCAT, ~R_PARAM, ~R_VAL, ~R_VISIT,
     "S1", "RC1", "R1", " 10", "RV1",
     "S2", "RC1", "R1", "110", "RV1",
     "S3", "RC1", "R1", "111", "RV1"
@@ -291,7 +291,7 @@ test_that("subset data is correct when param_name repeats across categories" |>
     pred_ds = pred_ds,
     resp_ds = resp_ds,
     group_ds = grp_ds,
-    subj_col = "SUBJID",
+    subj_col = "USUBJID",
     pred_cat_col = "P_PARCAT",
     pred_par_col = "P_PARAM",
     pred_vis_col = "P_VISIT",
@@ -304,7 +304,7 @@ test_that("subset data is correct when param_name repeats across categories" |>
 
 test_that("validation error when there is more than one row per subject", {
   ill_pred_ds <- tibble::tribble(
-    ~SUBJID, ~P_PARCAT, ~P_PARAM, ~P_VAL, ~P_VISIT,
+    ~USUBJID, ~P_PARCAT, ~P_PARAM, ~P_VAL, ~P_VISIT,
     "S1", "PC1", "P1", 1, "PV1",
     "S1", "PC1", "P1", 2, "PV1" # Repeated subject
   ) %>%
@@ -313,7 +313,7 @@ test_that("validation error when there is more than one row per subject", {
     )
 
   pred_ds <- tibble::tribble(
-    ~SUBJID, ~P_PARCAT, ~P_PARAM, ~P_VAL, ~P_VISIT,
+    ~USUBJID, ~P_PARCAT, ~P_PARAM, ~P_VAL, ~P_VISIT,
     "S1", "PC1", "P1", 1, "PV1",
     "S2", "PC1", "P1", 2, "PV1" # Repeated subject
   ) %>%
@@ -322,7 +322,7 @@ test_that("validation error when there is more than one row per subject", {
     )
 
   resp_ds <- tibble::tribble(
-    ~SUBJID, ~R_PARCAT, ~R_PARAM, ~R_VAL, ~R_VISIT,
+    ~USUBJID, ~R_PARCAT, ~R_PARAM, ~R_VAL, ~R_VISIT,
     "S1", "RC1", "R1", "A", "RV1",
     "S2", "RC1", "R1", "B", "RV1"
   ) %>%
@@ -331,7 +331,7 @@ test_that("validation error when there is more than one row per subject", {
     )
 
   ill_resp_ds <- tibble::tribble(
-    ~SUBJID, ~R_PARCAT, ~R_PARAM, ~R_VAL, ~R_VISIT,
+    ~USUBJID, ~R_PARCAT, ~R_PARAM, ~R_VAL, ~R_VISIT,
     "S1", "RC1", "R1", "A", "RV1",
     "S1", "RC1", "R1", "B", "RV1",
     "S2", "RC1", "R1", "A", "RV1"
@@ -352,7 +352,7 @@ test_that("validation error when there is more than one row per subject", {
     pred_ds = ill_pred_ds,
     resp_ds = resp_ds,
     group_ds = grp_ds,
-    subj_col = "SUBJID",
+    subj_col = "USUBJID",
     pred_cat_col = "P_PARCAT",
     pred_par_col = "P_PARAM",
     pred_vis_col = "P_VISIT",
@@ -378,7 +378,7 @@ test_that("validation error when there is more than one row per subject", {
     pred_ds = pred_ds,
     resp_ds = ill_resp_ds,
     group_ds = grp_ds,
-    subj_col = "SUBJID",
+    subj_col = "USUBJID",
     pred_cat_col = "P_PARCAT",
     pred_par_col = "P_PARAM",
     pred_vis_col = "P_VISIT",
@@ -395,7 +395,7 @@ test_that("validation error when there is more than one row per subject", {
 
 test_that("validation error when the response is not binary, warn when empty response", {
   pred_ds <- tibble::tribble(
-    ~SUBJID, ~P_PARCAT, ~P_PARAM, ~P_VAL, ~P_VISIT,
+    ~USUBJID, ~P_PARCAT, ~P_PARAM, ~P_VAL, ~P_VISIT,
     "S1", "PC1", "P1", 1, "PV1",
     "S2", "PC1", "P1", 2, "PV1",
     "S3", "PC1", "P1", 2, "PV1"
@@ -405,7 +405,7 @@ test_that("validation error when the response is not binary, warn when empty res
     )
 
   resp_ds <- tibble::tribble(
-    ~SUBJID, ~R_PARCAT, ~R_PARAM, ~R_VAL, ~R_VISIT,
+    ~USUBJID, ~R_PARCAT, ~R_PARAM, ~R_VAL, ~R_VISIT,
     "S1", "RC1", "R1", "A", "RV1",
     "S2", "RC1", "R1", "B", "RV1",
     "S3", "RC1", "R1", "", "RV1"
@@ -415,7 +415,7 @@ test_that("validation error when the response is not binary, warn when empty res
     )
 
   ill_resp_ds <- tibble::tribble(
-    ~SUBJID, ~R_PARCAT, ~R_PARAM, ~R_VAL, ~R_VISIT,
+    ~USUBJID, ~R_PARCAT, ~R_PARAM, ~R_VAL, ~R_VISIT,
     "S1", "RC1", "R1", "A", "RV1",
     "S2", "RC1", "R1", "B", "RV1",
     "S3", "RC1", "R1", "C", "RV1" # Third response level
@@ -436,7 +436,7 @@ test_that("validation error when the response is not binary, warn when empty res
     pred_ds = pred_ds,
     resp_ds = resp_ds,
     group_ds = grp_ds,
-    subj_col = "SUBJID",
+    subj_col = "USUBJID",
     pred_cat_col = "P_PARCAT",
     pred_par_col = "P_PARAM",
     pred_vis_col = "P_VISIT",
@@ -459,7 +459,7 @@ test_that("validation error when the response is not binary, warn when empty res
     pred_ds = pred_ds,
     resp_ds = ill_resp_ds,
     group_ds = grp_ds,
-    subj_col = "SUBJID",
+    subj_col = "USUBJID",
     pred_cat_col = "P_PARCAT",
     pred_par_col = "P_PARAM",
     pred_vis_col = "P_VISIT",
@@ -476,7 +476,7 @@ test_that("validation error when the response is not binary, warn when empty res
 
 test_that("warn when  error when the returned dataframe has 0 rows", {
   pred_ds <- tibble::tribble(
-    ~SUBJID, ~P_PARCAT, ~P_PARAM, ~P_VAL, ~P_VISIT,
+    ~USUBJID, ~P_PARCAT, ~P_PARAM, ~P_VAL, ~P_VISIT,
     "S1", "PC1", "P1", 1, "PV1",
     "S2", "PC1", "P1", 2, "PV1",
     "S3", "PC1", "P1", 2, "PV1"
@@ -486,7 +486,7 @@ test_that("warn when  error when the returned dataframe has 0 rows", {
     )
 
   resp_ds <- tibble::tribble(
-    ~SUBJID, ~R_PARCAT, ~R_PARAM, ~R_VAL, ~R_VISIT,
+    ~USUBJID, ~R_PARCAT, ~R_PARAM, ~R_VAL, ~R_VISIT,
     "S1", "RC1", "R1", "A", "RV1",
     "S2", "RC1", "R1", "B", "RV1",
     "S3", "RC1", "R1", "", "RV1"
@@ -507,7 +507,7 @@ test_that("warn when  error when the returned dataframe has 0 rows", {
     pred_ds = pred_ds,
     resp_ds = resp_ds,
     group_ds = grp_ds,
-    subj_col = "SUBJID",
+    subj_col = "USUBJID",
     pred_cat_col = "P_PARCAT",
     pred_par_col = "P_PARAM",
     pred_vis_col = "P_VISIT",

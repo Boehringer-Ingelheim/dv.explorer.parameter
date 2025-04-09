@@ -28,7 +28,7 @@ mock_app_lineplot <- function(dry_run = FALSE,
       id = "not_ebas",
       bm_dataset = bm_dataset,
       group_dataset = group_dataset,
-      subjid_var = "SUBJID",
+      subjid_var = "USUBJID",
       cat_var = "PARCAT",
       par_var = "PARAM",
       visit_vars = c("VISIT", "VISIT2"),
@@ -117,7 +117,7 @@ mock_app_lineplot_user_fn <- function(in_fluid = TRUE, defaults = list()) {
           `(gMean fold change - 1)*100%` = gmean_fold_change_percent_fn
         ),
         value_vars = c("VALUE1", "VALUE2"),
-        subjid_var = "SUBJID",
+        subjid_var = "USUBJID",
         cat_var = "PARCAT",
         visit_vars = c("VISIT", "VISIT2"),
         additional_listing_vars = c("CONT1", "CAT2")
@@ -138,7 +138,7 @@ mock_app_lineplot_mm <- function() {
       group_dataset_name = "sl",
       visit_vars = "VISIT",
       value_vars = c("VALUE1", "VALUE2"),
-      subjid_var = "SUBJID",
+      subjid_var = "USUBJID",
       cat_var = "PARCAT"
     )
   )
@@ -150,7 +150,7 @@ mock_app_lineplot_mm <- function() {
     data = list("DS" = list(bm = bm_dataset, sl = group_dataset)),
     module_list = module_list,
     filter_data = "sl",
-    filter_key = "SUBJID"
+    filter_key = "USUBJID"
   )
 }
 
@@ -169,7 +169,7 @@ mock_app_lineplot_mm_safetyData <- function() {
       group_dataset_name = "sl",
       visit_vars = c("VISIT", "AVISITN"),
       value_vars = c("AVAL", "CHG"),
-      subjid_var = "SUBJID",
+      subjid_var = "USUBJID",
       cat_var = "PARCAT1",
       default_centrality_fn = "Mean",
       default_dispersion_fn = "Standard deviation",
@@ -186,6 +186,6 @@ mock_app_lineplot_mm_safetyData <- function() {
     data = list("DS" = list(bm = data[["bm"]], sl = data[["sl"]])),
     module_list = module_list,
     filter_data = "sl",
-    filter_key = "SUBJID"
+    filter_key = "USUBJID"
   )
 }

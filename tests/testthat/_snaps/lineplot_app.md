@@ -11,8 +11,8 @@
       subject_listing_contents
     Output
       $col_names
-      [1] "Label of VISIT2" "Label of CAT2"   "Label of CAT2.1" "Label of PARAM" 
-      [5] "Label of SUBJID" "Label of PARCAT" "Label of VALUE2"
+      [1] "Label of VISIT2"  "Label of CAT2"    "Label of CAT2.1"  "Label of PARAM"  
+      [5] "Label of USUBJID" "Label of PARCAT"  "Label of VALUE2" 
       
       $contents
            [,1] [,2] [,3] [,4]      [,5] [,6]      [,7] 
@@ -65,8 +65,8 @@
       subject_listing_contents
     Output
       $col_names
-      [1] "Label of VISIT2" "Label of CAT2"   "Label of CAT2.1" "Label of PARAM" 
-      [5] "Label of SUBJID" "Label of PARCAT" "Label of VALUE2"
+      [1] "Label of VISIT2"  "Label of CAT2"    "Label of CAT2.1"  "Label of PARAM"  
+      [5] "Label of USUBJID" "Label of PARCAT"  "Label of VALUE2" 
       
       $contents
             [,1] [,2] [,3] [,4]      [,5] [,6]      [,7] 

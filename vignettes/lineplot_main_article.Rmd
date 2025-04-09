@@ -146,6 +146,6 @@ dv.manager::run_app(
   data = list("DS" = list(adbm = adbm_dataset, adsl = adsl_dataset)),
   module_list = module_list,
   filter_data = "adsl",
-  filter_key = "SUBJID"
+  filter_key = "USUBJID"
 )
 ```
