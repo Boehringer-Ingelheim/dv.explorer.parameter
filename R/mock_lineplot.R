@@ -139,7 +139,9 @@ mock_app_lineplot_mm <- function() {
       visit_vars = "VISIT",
       value_vars = c("VALUE1", "VALUE2"),
       subjid_var = "SUBJID",
-      cat_var = "PARCAT"
+      cat_var = "PARCAT",
+      default_cat = "PARCAT3",
+      default_par = "PARAM34"
     )
   )
 
@@ -176,6 +178,39 @@ mock_app_lineplot_mm_safetyData <- function() {
       default_cat = "CHEM",
       default_par = "Bilirubin (umol/L)",
       default_main_group = "ARM",
+      default_visit_var = "VISIT"
+    )
+  )
+
+  data <- safety_data()
+
+  dv.manager::run_app(
+    data = list("DS" = list(bm = data[["bm"]], sl = data[["sl"]])),
+    module_list = module_list,
+    filter_data = "sl",
+    filter_key = "SUBJID"
+  )
+}
+
+
+mock_app_lineplot_mm_safetyData_Subject <- function() {
+  if (!requireNamespace("dv.manager")) {
+    stop("Install dv.manager")
+  }
+
+  module_list <- list(
+    "lineplot" = dv.explorer.parameter::mod_lineplot(
+      module_id = "lineplot",
+      bm_dataset_name = "bm",
+      group_dataset_name = "sl",
+      visit_vars = c("VISIT", "AVISITN"),
+      value_vars = c("AVAL", "CHG"),
+      subjid_var = "SUBJID",
+      cat_var = "PARCAT1",
+      default_centrality_fn = "Subject-level",
+      default_dispersion_fn = "None",
+      default_cat = "CHEM",
+      default_par = "Bilirubin (umol/L)",
       default_visit_var = "VISIT"
     )
   )
