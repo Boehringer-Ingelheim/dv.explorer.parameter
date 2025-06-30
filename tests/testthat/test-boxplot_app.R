@@ -120,6 +120,7 @@ test_that("listing table appears according to click" |>
     app$set_inputs("not_ebas-click" = click, allow_no_input_binding_ = TRUE)
     app$wait_for_idle()
     table <- app$get_value(output = ID$OUTPUT$TABLES$LISTING)
+    i <- i + 1
   }
 
   table <- app$get_html(paste0("#", ID$OUTPUT$TABLES$LISTING))
