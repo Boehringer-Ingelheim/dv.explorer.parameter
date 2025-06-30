@@ -160,6 +160,20 @@ lineplot_chart <- function(data, title = NULL, ref_line_data = NULL, log_project
   if (CNT$MAIN_GROUP %in% names(data)) trace_grp1 <- CNT$MAIN_GROUP
   if (CNT$SBJ %in% names(data)) trace_grp1 <- CNT$SBJ
 
+  
+  
+  # Create the color palette for the line plot
+  if (CNT$MAIN_GROUP %in% names(data)) {
+    main_group_unique_vals <- unique(data[[CNT$MAIN_GROUP]])
+    main_group_palette <- scales::hue_pal()(length(main_group_unique_vals))
+    names(main_group_palette) <- main_group_unique_vals
+  }else {
+    main_group_unique_vals <- c("Selected", "Unselected")
+    main_group_palette <- c("black", "grey85")
+  }
+  
+  
+  
   trace_grp2 <- NULL
   if (CNT$SUB_GROUP %in% names(data)) trace_grp2 <- CNT$SUB_GROUP
 
@@ -184,14 +198,14 @@ lineplot_chart <- function(data, title = NULL, ref_line_data = NULL, log_project
   }
   data[[LP_ID$LINE_HIGHLIGHT_MASK]] <- lp_selected_line_mask(data, matching_rows)
 
-  if (CNT$MAIN_GROUP %in% names(data)) {
-    plot_aesthetic <- utils::modifyList(
-      plot_aesthetic,
-      ggplot2::aes(
-        color = .data[[CNT$MAIN_GROUP]]
-      )
-    )
-  }
+  # if (CNT$MAIN_GROUP %in% names(data)) {
+  #   plot_aesthetic <- utils::modifyList(
+  #     plot_aesthetic,
+  #     ggplot2::aes(
+  #       color = .data[[CNT$MAIN_GROUP]]
+  #     )
+  #   )
+  # }
 
   if (CNT$SUB_GROUP %in% names(data)) {
     plot_aesthetic <- utils::modifyList(
@@ -217,23 +231,41 @@ lineplot_chart <- function(data, title = NULL, ref_line_data = NULL, log_project
   if (draw_whiskers) {
     dodge_width <- LP_ID$MISC$DODGE_WIDTH
   }
+  
+  
+  # Separate data to selected and unselected
+  if (any(data[[LP_ID$LINE_HIGHLIGHT_MASK]])) {
+    data_selected <- data[data[[LP_ID$LINE_HIGHLIGHT_MASK]], ]
+    data_unselected <- data[!data[[LP_ID$LINE_HIGHLIGHT_MASK]], ]
+  } else {
+    data_selected <- data
+    data_unselected <- data[0, ]
+  }
 
   # in order to highlight selected lines, we _decrease_ the alpha of the rest
   alpha_selected <- alpha
-  alpha_unselected <- LP_CNT$UNSELECTED_LINE_ALPHA * alpha
+  #alpha_unselected <- LP_CNT$UNSELECTED_LINE_ALPHA * alpha
+  alpha_unselected <- LP_CNT$UNSELECTED_LINE_ALPHA
+  #* alpha
   if (!any(data[[LP_ID$LINE_HIGHLIGHT_MASK]])) alpha_unselected <- alpha
 
+  
+  
+  
   fig <- ggplot2::ggplot(data = data, mapping = plot_aesthetic) +
-    ggplot2::geom_line(
-      linewidth = 1.1, # more readable for stippled lines
-      position = ggplot2::position_dodge(width = dodge_width)
-    ) +
-    ggplot2::geom_point(
-      size = 3,
-      position = ggplot2::position_dodge(width = dodge_width)
-    ) +
+    ggplot2::geom_line(data = data_unselected, ggplot2::aes(color = I("grey85")),
+                       linewidth = 1.1,
+                       position = ggplot2::position_dodge(width = dodge_width)
+                       ) +
+    ggplot2::geom_point(data = data_unselected, ggplot2::aes(color = I("grey85")),
+                        size = 3,
+                        position = ggplot2::position_dodge(width = dodge_width)
+                        ) +
+    
+    
     ggplot2::aes(alpha = .data[[LP_ID$LINE_HIGHLIGHT_MASK]]) +
     ggplot2::scale_alpha_manual(values = c(`TRUE` = alpha_selected, `FALSE` = alpha_unselected)) +
+    
     ggplot2::xlab(x_label) +
     ggplot2::ylab(y_label) +
     ggplot2::labs(color = NULL, linetype = NULL) +
@@ -251,6 +283,41 @@ lineplot_chart <- function(data, title = NULL, ref_line_data = NULL, log_project
       alpha = "none" # Excludes LINE_HIGHLIGHT_MASK column from the legend, because posit grammars are very intuitive
     )
 
+  
+  
+  # Add the selected lines so they appear in the foreground
+  if (CNT$MAIN_GROUP %in% names(data)) {
+    fig <- fig +
+      ggplot2::geom_line(
+        data = data_selected,
+        mapping = ggplot2::aes(color = .data[[CNT$MAIN_GROUP]]),
+        linewidth = 1.1,
+        position = ggplot2::position_dodge(width = dodge_width)
+      ) +
+      ggplot2::geom_point(
+        data = data_selected,
+        mapping = ggplot2::aes(color = .data[[CNT$MAIN_GROUP]]),
+        size = 3,
+        position = ggplot2::position_dodge(width = dodge_width)
+      )
+  } else {
+    fig <- fig +
+      ggplot2::geom_line(
+        data = data_selected,
+        color = I("black"),
+        linewidth = 1.1,
+        position = ggplot2::position_dodge(width = dodge_width)
+      ) +
+      ggplot2::geom_point(
+        data = data_selected,
+        color = I("black"),
+        size = 3,
+        position = ggplot2::position_dodge(width = dodge_width)
+      )
+  }
+  
+  
+  
   # Ticks for continuous time variable
   if (is.numeric(data[[CNT$VIS]])) {
     fig <- fig + ggplot2::scale_x_continuous(
@@ -268,6 +335,15 @@ lineplot_chart <- function(data, title = NULL, ref_line_data = NULL, log_project
       ymin = .data[[LP_ID$MISC$WHISKER_BOTTOM]],
       ymax = .data[[LP_ID$MISC$WHISKER_TOP]]
     )
+    
+    # Add color mapping if MAIN_GROUP is present
+    if (CNT$MAIN_GROUP %in% names(data)) {
+      errorbar_aesthetic <- utils::modifyList(
+        errorbar_aesthetic,
+        ggplot2::aes(color = .data[[CNT$MAIN_GROUP]])
+      )
+    }
+    
     fig <- fig + ggplot2::geom_errorbar(
       mapping = errorbar_aesthetic,
       width = LP_ID$MISC$ERROR_BAR_WIDTH,
