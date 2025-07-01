@@ -22,7 +22,7 @@ ID <- poc(
     TABPANEL = tns(LP_ID$TAB_TABLES),
     TABLES = poc(
       SUBJECT_LISTING = tns(LP_ID$SUBJECT_LISTING) %>% structure(tab = LP_MSG$LABEL$SUBJECT_LISTING),
-      SUMMARY_LISTING = tns(LP_ID$SUBJECT_LISTING) %>% structure(tab = LP_MSG$LABEL$SUBJECT_LISTING),
+      SUMMARY_LISTING = tns(LP_ID$SUMMARY_LISTING) %>% structure(tab = LP_MSG$LABEL$SUMMARY_LISTING),
       COUNT_LISTING = tns(LP_ID$COUNT_LISTING) %>% structure(tab = LP_MSG$LABEL$COUNT_LISTING)
     )
   )
@@ -116,8 +116,8 @@ test_that("listing/count tables appears according to click" |>
   click <- readRDS("app/data/lp_click.rds")
 
   i <- 0
-  listing_table <- NULL
-  while ((!is.data.frame(listing_table) || nrow(listing_table) < 1) && i < 10) {
+  subject_listing_contents <- NULL
+  while ((!is.list(subject_listing_contents) || nrow(subject_listing_contents[["contents"]]) < 1) && i < 10) {
     app$set_inputs("not_ebas-click" = click, allow_no_input_binding_ = TRUE)
     app$wait_for_idle()
     subject_listing_contents <- app$get_value(export = tns("subject_listing_contents"))
@@ -173,8 +173,8 @@ test_that("listing/count table appears according to brush" |>
   brush <- readRDS("app/data/lp_brush.rds")
 
   i <- 0
-  listing_table <- NULL
-  while ((!is.data.frame(listing_table) || nrow(listing_table) < 1) && i < 10) {
+  subject_listing_contents <- NULL
+  while ((!is.list(subject_listing_contents) || nrow(subject_listing_contents[["contents"]]) < 1) && i < 10) {
     app$set_inputs("not_ebas-brush" = brush, allow_no_input_binding_ = TRUE)
     app$wait_for_idle()
     subject_listing_contents <- app$get_value(export = tns("subject_listing_contents"))
