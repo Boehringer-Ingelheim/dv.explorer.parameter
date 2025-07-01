@@ -235,7 +235,6 @@ lineplot_chart <- function(data, title = NULL, ref_line_data = NULL, log_project
 
   # in order to highlight selected lines, we _decrease_ the alpha of the rest
   alpha_selected <- alpha
-  #alpha_unselected <- LP_CNT$UNSELECTED_LINE_ALPHA * alpha
   alpha_unselected <- LP_CNT$UNSELECTED_LINE_ALPHA
   if (!any(data[[LP_ID$LINE_HIGHLIGHT_MASK]])) alpha_unselected <- alpha
 
