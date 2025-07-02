@@ -1,3 +1,8 @@
+# dv.explorer.parameter 0.1.7-9000
+
+* lineplot:
+    * Enhanced line plot visibility for user selected subjects  
+
 # dv.explorer.parameter 0.1.6
 
 * All modules:

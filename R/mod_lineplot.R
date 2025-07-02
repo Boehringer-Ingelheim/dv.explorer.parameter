@@ -250,11 +250,8 @@ lineplot_chart <- function(data, title = NULL, ref_line_data = NULL, log_project
                         size = 3,
                         position = ggplot2::position_dodge(width = dodge_width)
                         ) +
-
-
     ggplot2::aes(alpha = .data[[LP_ID$LINE_HIGHLIGHT_MASK]]) +
     ggplot2::scale_alpha_manual(values = c(`TRUE` = alpha_selected, `FALSE` = alpha_unselected)) +
-
     ggplot2::xlab(x_label) +
     ggplot2::ylab(y_label) +
     ggplot2::labs(color = NULL, linetype = NULL) +
@@ -272,7 +269,8 @@ lineplot_chart <- function(data, title = NULL, ref_line_data = NULL, log_project
       alpha = "none" # Excludes LINE_HIGHLIGHT_MASK column from the legend, because posit grammars are very intuitive
     )
 
-
+  # Ensure that data for selected subjects are displayed using their existing color always, when grouping variables are used
+  fig <- fig + ggplot2::scale_color_manual(values = main_group_palette)
 
   # Add the selected lines so they appear in the foreground
   if (CNT$MAIN_GROUP %in% names(data)) {
