@@ -264,6 +264,10 @@ lineplot_chart <- function(data, title = NULL, ref_line_data = NULL, log_project
       axis.text.y = ggplot2::element_text(size = STYLE$AXIS_TEXT_SIZE),
       strip.text.x = ggplot2::element_text(size = STYLE$STRIP_TEXT_SIZE),
       strip.text.y = ggplot2::element_text(size = STYLE$STRIP_TEXT_SIZE)
+    ) +
+    ggplot2::guides(
+      color = ggplot2::guide_legend(override.aes = list(alpha = 1)),
+      alpha = "none" # Excludes LINE_HIGHLIGHT_MASK column from the legend, because posit grammars are very intuitive
     )
 
   # Ensure that data for selected subjects are displayed using their existing color always, when grouping variables are used
