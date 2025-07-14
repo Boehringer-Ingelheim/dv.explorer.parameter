@@ -244,7 +244,7 @@ lineplot_chart <- function(data, title = NULL, ref_line_data = NULL, log_project
     ggplot2::geom_line(
       data = data_unselected,
       linewidth = 1.1, # more readable for stippled lines
-      ggplot2::aes(color = unselected_color), alpha = alpha,      
+      ggplot2::aes(color = unselected_color), alpha = alpha,
       position = ggplot2::position_dodge(width = dodge_width)
     ) +
     ggplot2::geom_point(
@@ -272,7 +272,7 @@ lineplot_chart <- function(data, title = NULL, ref_line_data = NULL, log_project
 
   # Ensure that data for selected subjects are displayed using their existing color always, when grouping variables are used
   fig <- fig + ggplot2::scale_color_manual(
-    values = color_palette, 
+    values = color_palette,
     breaks = setdiff(names(color_palette), unselected_color)
   )
   if (!(CNT$MAIN_GROUP %in% names(data))) fig <- fig + ggplot2::guides(color = "none")

@@ -100,53 +100,18 @@ test_that("lp_count_table counts the number of rows grouped by everything except
   expect_equal(actual_output, expected_output)
 })
 
-
 # patient selection
 
 test_that("lineplot_chart maintains existing color in lines of selected patients, and changes color to light grey in lines of unselected patients", {
-  df <- structure(list(
-    subject_id = structure(c(
-      1L, 2L, 3L, 4L, 5L, 6L,
-      7L, 8L, 9L, 10L, 11L, 12L, 13L, 14L, 15L, 16L, 17L, 18L, 19L,
-      20L, 1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L, 11L, 12L, 13L,
-      14L, 15L, 16L, 17L, 18L, 19L, 20L, 1L, 2L, 3L, 4L, 5L, 6L, 7L,
-      8L, 9L, 10L, 11L, 12L, 13L, 14L, 15L, 16L, 17L, 18L, 19L, 20L
-    ), levels = c(
-      "1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
-      "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"
-    ), class = "factor", label = "Label of SUBJID"),
-    category = structure(c(
-      1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L,
-      1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L,
-      1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L,
-      1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L,
-      1L, 1L, 1L, 1L, 1L, 1L
-    ), levels = "PARCAT1", class = "factor", label = "Label of PARCAT"),
-    parameter = structure(c(
-      1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L,
-      1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L,
-      1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L,
-      1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L,
-      1L, 1L, 1L, 1L, 1L, 1L
-    ), levels = "PARAM11", class = "factor", label = "Label of PARAM"),
-    visit = structure(c(
-      1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L,
-      1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 2L, 2L, 2L, 2L, 2L,
-      2L, 2L, 2L, 2L, 2L, 2L, 2L, 2L, 2L, 2L, 2L, 2L, 2L, 2L, 2L,
-      3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L, 3L,
-      3L, 3L, 3L, 3L, 3L
-    ), levels = c("VISIT1", "VISIT2", "VISIT3"), class = "factor", label = "Label of VISIT"), value = structure(1:60, label = "Label of VALUE1"),
-    line_highlight_mask = c(
-      FALSE, FALSE, FALSE, FALSE, FALSE,
-      FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
-      FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE,
-      FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
-      FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, TRUE, FALSE,
-      FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE,
-      FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE,
-      TRUE
-    )
-  ), row.names = c(NA, 60L), class = "data.frame")
+
+  df <- tibble::tibble(
+    !!CNT$SBJ := factor(rep(1:2, 3)),
+    !!CNT$CAT := factor(rep("PARCAT1", 6)),
+    !!CNT$PAR := factor(rep("PARAM11", 6)),
+    !!CNT$VIS := factor(rep(c(rep("VISIT1", 2), rep("VISIT2", 2), rep("VISIT3", 2)))),
+    !!CNT$VAL := c(1:2, 4, 3, 5:6),
+    line_highlight_mask = c(FALSE, TRUE, FALSE, TRUE, FALSE, TRUE)
+  )
 
   test_plot <- lineplot_chart(data = df)
 
@@ -154,21 +119,23 @@ test_that("lineplot_chart maintains existing color in lines of selected patients
 })
 
 
+# patient selection transparency via slider
 
+test_that("transparency slider controls the transparency level in the color of both the selected and the unselected patients", {
 
+  df <- tibble::tibble(
+    !!CNT$SBJ := factor(rep(1:2, 3)),
+    !!CNT$CAT := factor(rep("PARCAT1", 6)),
+    !!CNT$PAR := factor(rep("PARAM11", 6)),
+    !!CNT$VIS := factor(rep(c(rep("VISIT1", 2), rep("VISIT2", 2), rep("VISIT3", 2)))),
+    !!CNT$VAL := c(1:2, 4, 3, 5:6),
+    line_highlight_mask = c(FALSE, TRUE, FALSE, TRUE, FALSE, TRUE)
+  )
 
+  test_plot_tvs <- lineplot_chart(data = df, alpha = 0.7)
 
-
-
-
-
-
-
-
-
-
-
-
+  vdiffr::expect_doppelganger(title = "patient-selection-tvs", fig = test_plot_tvs)
+})
 
 test_that(
   "centrality and dispersion calculations are correct",
