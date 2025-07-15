@@ -129,7 +129,7 @@ test_that("transparency slider controls the transparency level in the color of b
     !!CNT$PAR := factor(rep("PARAM11", 6)),
     !!CNT$VIS := factor(rep(c(rep("VISIT1", 2), rep("VISIT2", 2), rep("VISIT3", 2)))),
     !!CNT$VAL := c(1:2, 4, 3, 5:6),
-    line_highlight_mask = c(FALSE, TRUE, FALSE, TRUE, FALSE, TRUE)
+    !!LP_ID$LINE_HIGHLIGHT_MASK := c(FALSE, TRUE, FALSE, TRUE, FALSE, TRUE)
   )
 
   test_plot_tvs <- lineplot_chart(data = df, alpha = 0.7)
