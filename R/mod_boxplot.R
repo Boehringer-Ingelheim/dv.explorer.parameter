@@ -248,6 +248,7 @@ boxplot_server <- function(id,
                            value_vars = "AVAL",
                            visit_var = "AVISIT",
                            subjid_var = "USUBJID",
+                           anlfl_vars = NULL,
                            default_cat = NULL,
                            default_par = NULL,
                            default_visit = NULL,
@@ -740,6 +741,7 @@ mod_boxplot <- function(module_id,
                         value_vars = "AVAL",
                         visit_var = "AVISIT",
                         subjid_var = "SUBJID",
+                        anlfl_vars = NULL,
                         default_cat = NULL,
                         default_par = NULL,
                         default_visit = NULL,
@@ -791,6 +793,7 @@ mod_boxplot_API_docs <- list(
   value_vars = "",
   visit_var = "",
   subjid_var = "",
+  anlfl_vars = "",
   default_cat = "",
   default_par = "",
   default_visit = "",
@@ -811,6 +814,7 @@ mod_boxplot_API_spec <- TC$group(
   value_vars = TC$col("bm_dataset_name", TC$numeric()) |> TC$flag("one_or_more"),
   visit_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())) |> TC$flag("map_character_to_factor"),
   subjid_var = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("subjid_var", "map_character_to_factor"),
+  anlfl_vars = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("optional", "ignore"),
   default_cat = TC$choice_from_col_contents("cat_var") |> TC$flag("zero_or_more", "optional"),
   default_par = TC$choice_from_col_contents("par_var") |> TC$flag("zero_or_more", "optional"),
   default_visit = TC$choice_from_col_contents("visit_var") |> TC$flag("optional"),
@@ -824,7 +828,7 @@ mod_boxplot_API_spec <- TC$group(
 
 check_mod_boxplot <- function(
     afmm, datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id, cat_var, par_var, value_vars,
-    visit_var, subjid_var, default_cat, default_par, default_visit, default_value, default_main_group,
+    visit_var, subjid_var, anlfl_vars, default_cat, default_par, default_visit, default_value, default_main_group,
     default_sub_group, default_page_group, server_wrapper_func) {
   warn <- CM$container()
   err <- CM$container()
@@ -833,7 +837,7 @@ check_mod_boxplot <- function(
   # Something along the lines of OK <- CM$check_API(mod_corr_hm_API_spec, args = match.call(), warn, err)
   OK <- check_mod_boxplot_auto(
     afmm, datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id, cat_var, par_var, value_vars,
-    visit_var, subjid_var, default_cat, default_par, default_visit, default_value, default_main_group,
+    visit_var, subjid_var, anlfl_vars, default_cat, default_par, default_visit, default_value, default_main_group,
     default_sub_group, default_page_group, server_wrapper_func, warn, err
   )
 
