@@ -4,8 +4,9 @@
 
 # dv.explorer.parameter::mod_boxplot
 check_mod_boxplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id,
-    cat_var, par_var, value_vars, visit_var, subjid_var, default_cat, default_par, default_visit, default_value,
-    default_main_group, default_sub_group, default_page_group, server_wrapper_func, warn, err) {
+    cat_var, par_var, anlfl_vars, value_vars, visit_var, subjid_var, default_cat, default_par, default_visit,
+    default_value, default_main_group, default_sub_group, default_page_group, server_wrapper_func, warn,
+    err) {
     OK <- logical(0)
     used_dataset_names <- new.env(parent = emptyenv())
     OK[["module_id"]] <- CM$check_module_id("module_id", module_id, warn, err)
@@ -26,6 +27,10 @@ check_mod_boxplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, g
     flags <- list(map_character_to_factor = TRUE)
     OK[["par_var"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("par_var", par_var, subkind,
         flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
+    subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
+    flags <- list(zero_or_more = TRUE, optional = TRUE)
+    OK[["anlfl_vars"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("anlfl_vars", anlfl_vars,
+        subkind, flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
     subkind <- list(kind = "numeric", min = NA, max = NA)
     flags <- list(one_or_more = TRUE)
     OK[["value_vars"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("value_vars", value_vars,

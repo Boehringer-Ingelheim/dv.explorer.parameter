@@ -30,6 +30,7 @@ mock_app_boxplot <- function(dry_run = FALSE, update_query_string = TRUE, srv_de
       subjid_var = "SUBJID",
       cat_var = "PARCAT",
       par_var = "PARAM",
+      anlfl_vars = NULL,
       visit_var = "VISIT",
       value_vars = c("VALUE1", "VALUE2", "VALUE3")
     ),
@@ -69,7 +70,8 @@ mock_app_boxplot_mm <- function(update_query_string = TRUE) {
         visit_var = "VISIT",
         value_vars = c("VALUE1", "VALUE2"),
         subjid_var = "SUBJID",
-        cat_var = "PARCAT"
+        cat_var = "PARCAT",
+        anlfl_vars = NULL
       )
     ),
     filter_data = "adsl",

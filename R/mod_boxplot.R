@@ -6,6 +6,11 @@ BP <- poc( # nolint
     PAR = "par",
     PAR_VALUE = "par_value",
     PAR_VISIT = "par_visit",
+
+    ###############################
+    ANLFL_FILTER = "anlfl_filter",
+
+
     PAR_TRANSFORM = "par_transform",
     GRP_BUTTON = "grp_button",
     MAIN_GRP = "main_grp",
@@ -36,6 +41,11 @@ BP <- poc( # nolint
       CAT = "Category",
       PAR_VALUE = "Value",
       PAR_VISIT = "Visit",
+
+      ###############################
+      ANLFL_FILTER = "Analysis Flag Filter",
+
+
       PAR_TRANSFORM = "Transform",
       GRP_BUTTON = "Grouping",
       MAIN_GRP = "Group",
@@ -96,12 +106,36 @@ boxplot_UI <- function(id) { # nolint
   # UI ----
   ns <- shiny::NS(id)
 
+
+
+  # parameter_menu <- if (!is.null(anlfl_vars) && length(anlfl_vars) > 0) {
+  #   drop_menu_helper(
+  #     ns(BP$ID$PAR_BUTTON), BP$MSG$LABEL$PAR_BUTTON,
+  #     parameter_UI(id = ns(BP$ID$PAR)),
+  #     col_menu_UI(ns(BP$ID$ANLFL_FILTER)),
+  #     col_menu_UI(ns(BP$ID$PAR_VALUE)),
+  #     val_menu_UI(id = ns(BP$ID$PAR_VISIT))
+  #   )
+  # } else {
+  #   drop_menu_helper(
+  #     ns(BP$ID$PAR_BUTTON), BP$MSG$LABEL$PAR_BUTTON,
+  #     parameter_UI(id = ns(BP$ID$PAR)),
+  #     col_menu_UI(ns(BP$ID$PAR_VALUE)),
+  #     val_menu_UI(id = ns(BP$ID$PAR_VISIT))
+  #   )
+  # }
+
+
+
   parameter_menu <- drop_menu_helper(
     ns(BP$ID$PAR_BUTTON), BP$MSG$LABEL$PAR_BUTTON,
     parameter_UI(id = ns(BP$ID$PAR)),
+    col_menu_UI(ns(BP$ID$ANLFL_FILTER)),
     col_menu_UI(ns(BP$ID$PAR_VALUE)),
     val_menu_UI(id = ns(BP$ID$PAR_VISIT))
   )
+
+
 
   group_menu <- drop_menu_helper(
     ns(BP$ID$GRP_BUTTON), BP$MSG$LABEL$GRP_BUTTON,
@@ -122,7 +156,6 @@ boxplot_UI <- function(id) { # nolint
     store_ui(ns("store"))
   )
 
-
   top_menu <- shiny::tagList(
     add_top_menu_dependency(),
     fontawesome::fa_html_dependency(),
@@ -131,8 +164,6 @@ boxplot_UI <- function(id) { # nolint
     state_menu,
     other_menu
   )
-
-
 
   # Charts and tables ----
 
@@ -181,6 +212,7 @@ boxplot_UI <- function(id) { # nolint
   } else {
     main_ui
   }
+
 }
 
 #' Boxplot server function
@@ -245,6 +277,11 @@ boxplot_server <- function(id,
                            dataset_name = shiny::reactive(character(0)),
                            cat_var = "PARCAT",
                            par_var = "PARAM",
+
+                           ###################################
+                           anlfl_vars = NULL,
+
+
                            value_vars = "AVAL",
                            visit_var = "AVISIT",
                            subjid_var = "USUBJID",
@@ -257,15 +294,24 @@ boxplot_server <- function(id,
                            default_page_group = NULL,
                            on_sbj_click = function(x) {
                            }) {
+  #anlfl_vars
+
   # All these are covered by check_mod_boxplot_auto
   ac <- checkmate::makeAssertCollection()
   # id assert ---- It goes on its own as id is used to provide context to the other assertions
   checkmate::assert_string(id, min.chars = 1, add = ac)
   # non reactive asserts
-
   ###### Check types of reactive variables, pred_dataset, ...
   checkmate::assert_string(cat_var, min.chars = 1, add = ac)
   checkmate::assert_string(par_var, min.chars = 1, add = ac)
+
+  message("Type of anlfl_vars: ", typeof(anlfl_vars))
+  message("Is null? ", is.null(anlfl_vars))
+  message("Is character? ", is.character(anlfl_vars))
+
+  ###############################################
+  checkmate::assert_character(anlfl_vars, min.chars = 1, null.ok = TRUE, any.missing = FALSE, add = ac)
+
   checkmate::assert_character(default_cat, min.chars = 1, null.ok = TRUE, add = ac)
   checkmate::assert_character(default_par, min.chars = 1, null.ok = TRUE, add = ac)
   checkmate::assert_string(default_visit, min.chars = 1, null.ok = TRUE, add = ac)
@@ -282,7 +328,6 @@ boxplot_server <- function(id,
   checkmate::assert_string(subjid_var, min.chars = 1, add = ac)
 
   checkmate::reportAssertions(ac)
-
   # module constants ----
   VAR <- poc( # nolint Parameters from the function that will be considered constant across the function
     CAT = cat_var,
@@ -328,6 +373,7 @@ boxplot_server <- function(id,
           ),
           .var.name = ns("bm_dataset")
         )
+
         unique_par_names <- bm_dataset() |>
           dplyr::distinct(dplyr::across(c(VAR$CAT, VAR$PAR))) |>
           dplyr::group_by(dplyr::across(c(VAR$PAR))) |>
@@ -343,6 +389,28 @@ boxplot_server <- function(id,
       },
       label = ns("v_bm_dataset")
     )
+
+    ########################################################
+    v_filtered_bm_dataset <- shiny::reactive({
+      data <- v_bm_dataset()
+
+      selected_flag <- NULL
+      if (!is.null(inputs[[BP$ID$ANLFL_FILTER]])) {
+        selected_flag <- inputs[[BP$ID$ANLFL_FILTER]]()
+      }
+
+      # filter if anlfl_vars is not NULL
+      # filter if selected_flag is not an empty vector
+      # filter if the selected flag variable exists in input dataset
+      if (!is.null(selected_flag) && length(selected_flag) > 0 && selected_flag %in% names(data)) {
+        data <- dplyr::filter(data, .data[[selected_flag]] == "Y")
+      }
+      data
+    })
+
+
+
+
 
     # input
 
@@ -391,6 +459,21 @@ boxplot_server <- function(id,
         name %in% VAR$VAL
       }, include_none = FALSE, default = default_value
     )
+
+
+    #####################################################
+    # analysis flag filter input
+    if (!is.null(anlfl_vars) && length(anlfl_vars) > 0) {
+      inputs[[BP$ID$ANLFL_FILTER]] <- col_menu_server(
+        id = BP$ID$ANLFL_FILTER,
+        data = v_bm_dataset,
+        label = BP$MSG$LABEL$ANLFL_FILTER,
+        include_func = function(x, name) name %in% anlfl_vars,
+        include_none = FALSE, default = anlfl_vars[1]
+      )
+    }
+
+
     inputs[[BP$ID$VIOLIN_CHECK]] <- shiny::reactive({
       input[[BP$ID$VIOLIN_CHECK]]
     })
@@ -538,13 +621,17 @@ boxplot_server <- function(id,
         )
       )
 
+
       bp_subset_data(
         cat = l_inputs[[BP$ID$PAR]][["cat"]],
         par = l_inputs[[BP$ID$PAR]][["par"]],
         val_col = l_inputs[[BP$ID$PAR_VALUE]],
         vis = l_inputs[[BP$ID$PAR_VISIT]],
         group_vect = group_vect,
-        bm_ds = v_bm_dataset(),
+
+        #bm_ds = v_bm_dataset(),
+        ################################################
+        bm_ds = v_filtered_bm_dataset(),
         group_ds = v_group_dataset(),
         subj_col = VAR$SBJ,
         cat_col = VAR$CAT,
@@ -552,6 +639,7 @@ boxplot_server <- function(id,
         vis_col = VAR$VIS
       )
     })
+
 
     bp_title_data <- shiny::reactive({
       l_inputs <- v_input_subset()
@@ -737,6 +825,11 @@ mod_boxplot <- function(module_id,
                         receiver_id = NULL,
                         cat_var = "PARCAT",
                         par_var = "PARAM",
+
+                        #################################
+                        anlfl_vars = NULL,
+
+
                         value_vars = "AVAL",
                         visit_var = "AVISIT",
                         subjid_var = "SUBJID",
@@ -748,6 +841,9 @@ mod_boxplot <- function(module_id,
                         default_sub_group = NULL,
                         default_page_group = NULL,
                         server_wrapper_func = function(x) list(subj_id = x)) {
+  #anlfl_vars
+
+
   mod <- list(
     ui = boxplot_UI,
     server = function(afmm) {
@@ -765,6 +861,10 @@ mod_boxplot <- function(module_id,
           bm_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[bm_dataset_name]]),
           group_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[group_dataset_name]]),
           dataset_name = afmm[["dataset_name"]],
+
+          ########################################
+          anlfl_vars = anlfl_vars,
+
           on_sbj_click = on_sbj_click_fun,
           cat_var = cat_var, par_var = par_var, value_vars = value_vars, visit_var = visit_var, subjid_var = subjid_var,
           default_cat = default_cat, default_par = default_par, default_visit = default_visit,
@@ -788,6 +888,10 @@ mod_boxplot_API_docs <- list(
   receiver_id = "",
   cat_var = "",
   par_var = "",
+
+  ##################################
+  anlfl_vars = "",
+
   value_vars = "",
   visit_var = "",
   subjid_var = "",
@@ -808,6 +912,10 @@ mod_boxplot_API_spec <- TC$group(
   receiver_id = TC$character() |> TC$flag("optional", "ignore"),
   cat_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("map_character_to_factor"),
   par_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("map_character_to_factor"),
+
+  ################################################
+  anlfl_vars = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("zero_or_more", "optional"),
+
   value_vars = TC$col("bm_dataset_name", TC$numeric()) |> TC$flag("one_or_more"),
   visit_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())) |> TC$flag("map_character_to_factor"),
   subjid_var = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("subjid_var", "map_character_to_factor"),
@@ -823,7 +931,12 @@ mod_boxplot_API_spec <- TC$group(
 
 
 check_mod_boxplot <- function(
-    afmm, datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id, cat_var, par_var, value_vars,
+    afmm, datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id, cat_var, par_var,
+
+    ################
+    anlfl_vars,
+
+    value_vars,
     visit_var, subjid_var, default_cat, default_par, default_visit, default_value, default_main_group,
     default_sub_group, default_page_group, server_wrapper_func) {
   warn <- CM$container()
@@ -832,20 +945,45 @@ check_mod_boxplot <- function(
   # TODO: Replace this function with a generic one that performs the checks based on mod_boxplot_API_spec.
   # Something along the lines of OK <- CM$check_API(mod_corr_hm_API_spec, args = match.call(), warn, err)
   OK <- check_mod_boxplot_auto(
-    afmm, datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id, cat_var, par_var, value_vars,
+    afmm, datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id, cat_var, par_var,
+
+
+    ################
+    anlfl_vars,
+
+
+    value_vars,
     visit_var, subjid_var, default_cat, default_par, default_visit, default_value, default_main_group,
     default_sub_group, default_page_group, server_wrapper_func, warn, err
   )
 
   # Checks that API spec does not (yet?) capture
+  #ahwopu
+  if (OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] && OK[["visit_var"]] && OK[["anlfl_vars"]]) {
 
-  # #ahwopu
-  if (OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] && OK[["visit_var"]]) {
+    for (anlfl_var in anlfl_vars) {
+      CM$check_unique_sub_cat_par_vis(
+        datasets, "bm_dataset_name", bm_dataset_name,
+        subjid_var, cat_var, par_var, visit_var,
+
+        #########################################
+        anlfl = anlfl_var,
+
+
+        warn, err
+      )
+    }
+
+  } else if (OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] && OK[["visit_var"]]) {
+    # Call it once with no analysis flag if none were provided
     CM$check_unique_sub_cat_par_vis(
       datasets, "bm_dataset_name", bm_dataset_name,
-      subjid_var, cat_var, par_var, visit_var, warn, err
+      subjid_var, cat_var, par_var, visit_var,
+      anlfl = NULL,  # explicitly pass NULL
+      warn, err
     )
   }
+
 
   res <- list(warnings = warn[["messages"]], errors = err[["messages"]])
   return(res)

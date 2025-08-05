@@ -4,8 +4,8 @@
 
 # dv.explorer.parameter::mod_boxplot
 map_afmm_mod_boxplot_auto <- function(afmm, module_id, bm_dataset_name, group_dataset_name, receiver_id,
-    cat_var, par_var, value_vars, visit_var, subjid_var, default_cat, default_par, default_visit, default_value,
-    default_main_group, default_sub_group, default_page_group, server_wrapper_func) {
+    cat_var, par_var, anlfl_vars, value_vars, visit_var, subjid_var, default_cat, default_par, default_visit,
+    default_value, default_main_group, default_sub_group, default_page_group, server_wrapper_func) {
     res <- afmm
     mapping_summary <- character(0)
     for (ds_name in names(afmm[["data"]])) {
