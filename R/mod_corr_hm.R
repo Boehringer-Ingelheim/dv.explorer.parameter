@@ -949,7 +949,7 @@ check_mod_corr_hm <- function(
   if (OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] && OK[["visit_var"]]) {
     CM$check_unique_sub_cat_par_vis(
       datasets, "bm_dataset_name", bm_dataset_name,
-      subjid_var, cat_var, par_var, visit_var, warn, err
+      subjid_var, cat_var, par_var, visit_var, NULL, warn = warn, err = err
     )
   }
 
