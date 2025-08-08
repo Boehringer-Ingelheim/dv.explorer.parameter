@@ -840,8 +840,6 @@ CM <- local({ # _C_hecked _M_odule
       )
     })
 
-    #supposedly_unique <- dataset[c(sub, cat, par, vis)]
-
 
     ##################################################
     vars_to_check <- c(sub, cat, par, vis)
@@ -888,7 +886,7 @@ CM <- local({ # _C_hecked _M_odule
           "have indeed identical subject, category, parameter and visit values, but differ in columns: ",
           paste(diff_cols, collapse = ", "), ".",
           "<pre>",
-          #df_to_string(dataset[target_rows[1:2], c(sub, cat, par, vis, diff_cols)]),
+
           ####################################
           df_to_string(dataset[target_rows[1:2], unique(c(sub, cat, par, vis, anlfl, diff_cols))]),
 

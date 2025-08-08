@@ -107,26 +107,6 @@ boxplot_UI <- function(id) { # nolint
   ns <- shiny::NS(id)
 
 
-
-  # parameter_menu <- if (!is.null(anlfl_vars) && length(anlfl_vars) > 0) {
-  #   drop_menu_helper(
-  #     ns(BP$ID$PAR_BUTTON), BP$MSG$LABEL$PAR_BUTTON,
-  #     parameter_UI(id = ns(BP$ID$PAR)),
-  #     col_menu_UI(ns(BP$ID$ANLFL_FILTER)),
-  #     col_menu_UI(ns(BP$ID$PAR_VALUE)),
-  #     val_menu_UI(id = ns(BP$ID$PAR_VISIT))
-  #   )
-  # } else {
-  #   drop_menu_helper(
-  #     ns(BP$ID$PAR_BUTTON), BP$MSG$LABEL$PAR_BUTTON,
-  #     parameter_UI(id = ns(BP$ID$PAR)),
-  #     col_menu_UI(ns(BP$ID$PAR_VALUE)),
-  #     val_menu_UI(id = ns(BP$ID$PAR_VISIT))
-  #   )
-  # }
-
-
-
   parameter_menu <- drop_menu_helper(
     ns(BP$ID$PAR_BUTTON), BP$MSG$LABEL$PAR_BUTTON,
     parameter_UI(id = ns(BP$ID$PAR)),
@@ -629,7 +609,7 @@ boxplot_server <- function(id,
         vis = l_inputs[[BP$ID$PAR_VISIT]],
         group_vect = group_vect,
 
-        #bm_ds = v_bm_dataset(),
+
         ################################################
         bm_ds = v_filtered_bm_dataset(),
         group_ds = v_group_dataset(),
