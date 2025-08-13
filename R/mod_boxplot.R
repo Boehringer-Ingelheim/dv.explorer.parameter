@@ -371,22 +371,22 @@ boxplot_server <- function(id,
     )
 
     ########################################################
-    v_filtered_bm_dataset <- shiny::reactive({
-      data <- v_bm_dataset()
-
-      selected_flag <- NULL
-      if (!is.null(inputs[[BP$ID$ANLFL_FILTER]])) {
-        selected_flag <- inputs[[BP$ID$ANLFL_FILTER]]()
-      }
+    # v_filtered_bm_dataset <- shiny::reactive({
+    #   data <- v_bm_dataset()
+    #
+    #   selected_flag <- NULL
+    #   if (!is.null(inputs[[BP$ID$ANLFL_FILTER]])) {
+    #     selected_flag <- inputs[[BP$ID$ANLFL_FILTER]]()
+    #   }
 
       # filter if anlfl_vars is not NULL
       # filter if selected_flag is not an empty vector
       # filter if the selected flag variable exists in input dataset
-      if (!is.null(selected_flag) && length(selected_flag) > 0 && selected_flag %in% names(data)) {
-        data <- dplyr::filter(data, .data[[selected_flag]] == "Y")
-      }
-      data
-    })
+    #   if (!is.null(selected_flag) && length(selected_flag) > 0 && selected_flag %in% names(data)) {
+    #     data <- dplyr::filter(data, .data[[selected_flag]] == "Y")
+    #   }
+    #   data
+    # })
 
 
 
@@ -608,15 +608,19 @@ boxplot_server <- function(id,
         val_col = l_inputs[[BP$ID$PAR_VALUE]],
         vis = l_inputs[[BP$ID$PAR_VISIT]],
         group_vect = group_vect,
-
+        bm_ds = v_bm_dataset(),
 
         ################################################
-        bm_ds = v_filtered_bm_dataset(),
+        #bm_ds = v_filtered_bm_dataset(),
         group_ds = v_group_dataset(),
         subj_col = VAR$SBJ,
         cat_col = VAR$CAT,
         par_col = VAR$PAR,
-        vis_col = VAR$VIS
+        vis_col = VAR$VIS,
+
+        ##########################################
+        #anlfl_vars = anlfl_vars,
+        selected_flag = if (!is.null(inputs[[BP$ID$ANLFL_FILTER]])) inputs[[BP$ID$ANLFL_FILTER]]() else NULL
       )
     })
 
@@ -893,7 +897,7 @@ mod_boxplot_API_spec <- TC$group(
   cat_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("map_character_to_factor"),
   par_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("map_character_to_factor"),
 
-  ################################################
+  ################################################ "zero_or_more", "optional",
   anlfl_vars = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("zero_or_more", "optional"),
 
   value_vars = TC$col("bm_dataset_name", TC$numeric()) |> TC$flag("one_or_more"),
@@ -1044,11 +1048,24 @@ bp_subset_data <- function(cat,
                            group_vect,
                            bm_ds,
                            group_ds,
-                           subj_col) {
+                           subj_col,
+                           #anlfl_vars = NULL,
+                           selected_flag = NULL) {
+
+  #   if (!is.null(anlfl_vars) &&
+  #     length(anlfl_vars) > 0 &&
+  #     !is.null(selected_flag) &&
+  #     selected_flag %in% names(bm_ds)) {
+  #
+  #   bm_ds <- dplyr::filter(bm_ds, .data[[selected_flag]] == "Y")
+  # }
+  #browser()
   bm_fragment <- subset_bds_param(
     ds = bm_ds, par = par, par_col = par_col,
     cat = cat, cat_col = cat_col, val_col = val_col,
-    vis = vis, vis_col = vis_col, subj_col = subj_col
+    vis = vis, vis_col = vis_col, subj_col = subj_col,
+    #anlfl = anlfl_vars,
+    anlfl_col = selected_flag
   )
 
   # Covered by #ahwopu
@@ -1093,6 +1110,9 @@ bp_subset_data <- function(cat,
     joint_data[[CNT$PAR]] <- factor(joint_data[[CNT$PAR]], levels = par)
   }
   joint_data[[CNT$CAT]] <- factor(joint_data[[CNT$CAT]], levels = cat)
+  if (!is.null(selected_flag) && CNT$ANLFL %in% names(joint_data)) {
+    joint_data[[CNT$ANLFL]] <- factor(joint_data[[CNT$ANLFL]], levels = "Y")
+  }
   joint_data[[CNT$VIS]] <- factor(joint_data[[CNT$VIS]], levels = vis)
   joint_data[[CNT$SBJ]] <- droplevels(joint_data[[CNT$SBJ]])
 
