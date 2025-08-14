@@ -86,8 +86,7 @@ LP_CNT <- poc(
   CENTRALITY = "centrality",
   DISPERSION = "dispersion",
   SINGLE_PLOT_HEIGHT_PX = 600,
-  MULTI_PLOT_HEIGHT_PX = 400,
-  UNSELECTED_LINE_ALPHA = 0.3
+  MULTI_PLOT_HEIGHT_PX = 400
 )
 
 # Changes from the original:
@@ -100,7 +99,7 @@ LP_CNT <- poc(
 
 #' Lineplot UI function
 #' @inheritParams lineplot_server
-#' @keywords developers 
+#' @keywords developers
 #' @export
 lineplot_UI <- function(id) {
   # UI ----
@@ -160,6 +159,20 @@ lineplot_chart <- function(data, title = NULL, ref_line_data = NULL, log_project
   if (CNT$MAIN_GROUP %in% names(data)) trace_grp1 <- CNT$MAIN_GROUP
   if (CNT$SBJ %in% names(data)) trace_grp1 <- CNT$SBJ
 
+  unselected_color <- "grey85"
+  # Custom color palette (mimics R original and adds `unselected_color` on top)
+  if (CNT$MAIN_GROUP %in% names(data)) {
+    # TODO: Leave only `levels` option once adoption of dv.manager 2.1.10 is widespread
+    #       That version maps all character columns to factor
+    main_group_unique_vals <- unique(data[[CNT$MAIN_GROUP]])
+    if (is.factor(data[[CNT$MAIN_GROUP]])) main_group_unique_vals <- levels(data[[CNT$MAIN_GROUP]])
+
+    color_palette <- c(scales::hue_pal()(length(main_group_unique_vals)), unselected_color)
+    names(color_palette) <- c(main_group_unique_vals, unselected_color)
+  }else {
+    color_palette <- unselected_color
+  }
+
   trace_grp2 <- NULL
   if (CNT$SUB_GROUP %in% names(data)) trace_grp2 <- CNT$SUB_GROUP
 
@@ -218,22 +231,28 @@ lineplot_chart <- function(data, title = NULL, ref_line_data = NULL, log_project
     dodge_width <- LP_ID$MISC$DODGE_WIDTH
   }
 
-  # in order to highlight selected lines, we _decrease_ the alpha of the rest
-  alpha_selected <- alpha
-  alpha_unselected <- LP_CNT$UNSELECTED_LINE_ALPHA * alpha
-  if (!any(data[[LP_ID$LINE_HIGHLIGHT_MASK]])) alpha_unselected <- alpha
+  # Separate data to selected and unselected
+  if (any(data[[LP_ID$LINE_HIGHLIGHT_MASK]])) {
+    data_selected <- data[data[[LP_ID$LINE_HIGHLIGHT_MASK]], ]
+    data_unselected <- data[!data[[LP_ID$LINE_HIGHLIGHT_MASK]], ]
+  } else {
+    data_selected <- data
+    data_unselected <- data[0, ]
+  }
 
   fig <- ggplot2::ggplot(data = data, mapping = plot_aesthetic) +
     ggplot2::geom_line(
+      data = data_unselected,
       linewidth = 1.1, # more readable for stippled lines
+      ggplot2::aes(color = unselected_color), alpha = alpha,
       position = ggplot2::position_dodge(width = dodge_width)
     ) +
     ggplot2::geom_point(
+      data = data_unselected,
       size = 3,
-      position = ggplot2::position_dodge(width = dodge_width)
+      ggplot2::aes(color = unselected_color), alpha = alpha,
+      position = ggplot2::position_dodge(width = dodge_width),
     ) +
-    ggplot2::aes(alpha = .data[[LP_ID$LINE_HIGHLIGHT_MASK]]) +
-    ggplot2::scale_alpha_manual(values = c(`TRUE` = alpha_selected, `FALSE` = alpha_unselected)) +
     ggplot2::xlab(x_label) +
     ggplot2::ylab(y_label) +
     ggplot2::labs(color = NULL, linetype = NULL) +
@@ -250,6 +269,28 @@ lineplot_chart <- function(data, title = NULL, ref_line_data = NULL, log_project
       color = ggplot2::guide_legend(override.aes = list(alpha = 1)),
       alpha = "none" # Excludes LINE_HIGHLIGHT_MASK column from the legend, because posit grammars are very intuitive
     )
+
+  # Ensure that data for selected subjects are displayed using their existing color always, when grouping variables are used
+  fig <- fig + ggplot2::scale_color_manual(
+    values = color_palette,
+    breaks = setdiff(names(color_palette), unselected_color)
+  )
+  if (!(CNT$MAIN_GROUP %in% names(data))) fig <- fig + ggplot2::guides(color = "none")
+
+  # Add the selected lines so they appear in the foreground
+  fig <- fig +
+   ggplot2::geom_line(
+     data = data_selected,
+     linewidth = 1.1,
+     position = ggplot2::position_dodge(width = dodge_width),
+     alpha = alpha
+   ) +
+   ggplot2::geom_point(
+     data = data_selected,
+     size = 3,
+     position = ggplot2::position_dodge(width = dodge_width),
+     alpha = alpha
+   )
 
   # Ticks for continuous time variable
   if (is.numeric(data[[CNT$VIS]])) {
@@ -279,7 +320,7 @@ lineplot_chart <- function(data, title = NULL, ref_line_data = NULL, log_project
   for (entry_name in names(ref_line_data)){
     fig <- local({ # local because of NSE symbol capture
       ref_line_var_data <- ref_line_data[[entry_name]]
-      
+
       label_col_name <- paste0(CNT$VAL, "_label")
       ref_line_var_data[[label_col_name]] <- entry_name
       colors <- ref_line_var_data[[CNT$MAIN_GROUP]]
@@ -297,7 +338,7 @@ lineplot_chart <- function(data, title = NULL, ref_line_data = NULL, log_project
       return(fig)
     })
   }
-  
+
   if (length(ref_line_data)) {
     # Extend default ggplot2 palette to include an extra black level to indicate a reference line common to all groups
     # Adapted from https://stackoverflow.com/a/8197703
@@ -315,7 +356,7 @@ lineplot_chart <- function(data, title = NULL, ref_line_data = NULL, log_project
       res <- setNames(res, lev)
       return(res)
     }
-    
+
     ref_line_colors <- gg_color_hue(levels(ref_line_data[[1]][[CNT$MAIN_GROUP]]))
     fig <- fig + ggplot2::scale_color_manual(values = ref_line_colors)
   }
@@ -493,22 +534,22 @@ append_extra_vars <- function(left, right, right_extra_vars) {
 generate_ref_line_data <- function(df, show_all_ref_vals) {
   checkmate::assert_subset(CNT$PAR, names(df))
   checkmate::assert_logical(show_all_ref_vals, len = 1)
-  
+
   originally_grouped <- (CNT$MAIN_GROUP %in% names(df))
-  
+
   # Introduce artificial grouping. It is removed from the result before exiting this function
   if (!originally_grouped) df[[CNT$MAIN_GROUP]] <- as.factor("Common reference value")
-  
+
   # Introduce extra level to customize color of reference lines that would otherwise overlap
-  df[[CNT$MAIN_GROUP]] <- factor(df[[CNT$MAIN_GROUP]], 
+  df[[CNT$MAIN_GROUP]] <- factor(df[[CNT$MAIN_GROUP]],
                                  levels = union(levels(df[[CNT$MAIN_GROUP]]), "Common reference value"))
   if (show_all_ref_vals) { # Make all lines apply to all groups
     df[[CNT$MAIN_GROUP]] <- factor("Common reference value", levels = levels(df[[CNT$MAIN_GROUP]]))
   }
-  
+
   common_vars <- c(CNT$PAR, CNT$MAIN_GROUP)
   ref_line_vars <- setdiff(names(df), common_vars)
-  
+
   res <- list() # one data.frame per ref_line_var indicating which ref lines to draw for each parameter
 
   for (var in ref_line_vars){
@@ -516,11 +557,11 @@ generate_ref_line_data <- function(df, show_all_ref_vals) {
     if (show_all_ref_vals) entry_name <- paste0(entry_name, "\n(all ref. values)")
     var_df <- unique(df[c(common_vars, var)])
     names(var_df)[names(var_df) == var] <- CNT$VAL
-    
+
     res[[entry_name]] <- var_df[FALSE, ] # data.frame without rows
     for (param in unique(df[[CNT$PAR]])){
       var_param_df <- var_df[var_df[[CNT$PAR]] == param, ]
-      
+
       if (length(unique(var_param_df[[CNT$VAL]])) == 1) {
         # All groups share the same reference value so we group them as one
         row <- var_param_df[1, ]
@@ -540,7 +581,7 @@ generate_ref_line_data <- function(df, show_all_ref_vals) {
     }
     if (nrow(res[[entry_name]]) == 0) res[[entry_name]] <- NULL # Drop empty ref_line_vars
   }
-  
+
   if (!originally_grouped) for (i in seq_along(res)) res[[i]][[CNT$MAIN_GROUP]] <- NULL
 
   return(res)
@@ -551,16 +592,16 @@ compute_overlap_of_ref_line_data <- function(ref_line_data) {
   for (name in names(ref_line_data)){
     element <- ref_line_data[[name]]
     if (CNT$MAIN_GROUP %in% names(element)) {
-      
+
       repeat_mask <- duplicated(element[c(CNT$PAR, CNT$VAL)])
       repeat_vals_per_par <- unique(element[c(CNT$PAR, CNT$VAL)][repeat_mask, ])
-      
+
       for (i_row in seq_len(nrow(repeat_vals_per_par))){
         row <- repeat_vals_per_par[i_row, ]
         mask <- element[[CNT$PAR]] == row[[CNT$PAR]] & element[[CNT$VAL]] == row[[CNT$VAL]]
         repeat_groups <- element[mask, CNT$MAIN_GROUP]
         if (length(repeat_groups)) {
-          overlap_info[[length(overlap_info) + 1]] <- list(parameter = row[[CNT$PAR]], value = row[[CNT$VAL]], 
+          overlap_info[[length(overlap_info) + 1]] <- list(parameter = row[[CNT$PAR]], value = row[[CNT$VAL]],
                                                          groups = repeat_groups)
         }
       }
@@ -928,7 +969,7 @@ lineplot_server <- function(id,
 
       ds
     })
-    
+
     ref_line_data <- shiny::reactive({
       visit_var <- input_lp[[LP_ID$PAR_VISIT_COL]]()
 
@@ -1017,16 +1058,16 @@ lineplot_server <- function(id,
           alpha = alpha
         )
       )
-       
+
       repeat_info <- compute_overlap_of_ref_line_data(ref_line_data)
       for (i in seq_along(repeat_info)){
         e <- repeat_info[[i]]
-        msg <- sprintf("Reference lines for parameter %s and groups %s overlap on value %s.", 
+        msg <- sprintf("Reference lines for parameter %s and groups %s overlap on value %s.",
                        e$parameter, paste(e$groups, collapse = ", "), e$value)
         shiny::showNotification(ui = msg, duration = NULL, closeButton = TRUE, type = "warning",
                                 id = paste0(LP_ID$OVERLAP_WARNING, i))
       }
-      
+
       plot
     })
 
@@ -1813,10 +1854,10 @@ check_mod_lineplot <- function(
       }
     }
   }
-  
+
   if (OK[["subjid_var"]] && OK[["par_var"]] && OK[["ref_line_vars"]]) {
     ds <- datasets[[bm_dataset_name]]
-    
+
     for (ref_line_var in ref_line_vars){
       combinations <- unique(ds[c(subjid_var, par_var, ref_line_var)])
       # broad pass (any floating point difference is detected)
@@ -1829,8 +1870,8 @@ check_mod_lineplot <- function(
                    duplicated(combinations[c(subjid_var, par_var)], fromLast = TRUE))
       }
       dup_df <- combinations[dups, ]
-      
-      
+
+
       CM$assert(
         container = err,
         cond = nrow(dup_df) == 0,

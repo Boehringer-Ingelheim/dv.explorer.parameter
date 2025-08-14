@@ -86,7 +86,7 @@ Which generates the following plot:
 
 # Grouped and ungrouped reference values
 
-We can modify that call to `mod_lineplot` by providing a value for the `ref_line_vars` parameter so that in points to one or more `lb` numerical columns holding reference values:
+We can modify that call to `mod_lineplot` by providing a value for the `ref_line_vars` parameter so that it points to one or more `lb` numerical columns holding reference values:
 ```{r, eval=FALSE}
 dv.explorer.parameter::mod_lineplot(
   ..., default_main_group = "SEX", ref_line_vars = c("A1LO", "A1HI")
