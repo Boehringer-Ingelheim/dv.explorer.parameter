@@ -50,7 +50,6 @@
 
 subset_bds_param <- function(ds, par, par_col, cat, cat_col,
                              val_col, vis, vis_col, subj_col,
-                             #anlfl = NULL,
                              anlfl_col = NULL) {
   # Check types
   ac <- checkmate::makeAssertCollection()
@@ -73,9 +72,6 @@ subset_bds_param <- function(ds, par, par_col, cat, cat_col,
   checkmate::qassert(ds[[vis_col]], "f")
   if (!is.null(anlfl_col) && anlfl_col %in% names(ds)) {
     checkmate::qassert(anlfl_col, "S1")
-    # if (!is.factor(ds[[anlfl_col]])) {
-    #   ds[[anlfl_col]] <- factor(ds[[anlfl_col]])
-    # }
     checkmate::qassert(ds[[anlfl_col]], "f")
   }
   checkmate::reportAssertions(ac)
