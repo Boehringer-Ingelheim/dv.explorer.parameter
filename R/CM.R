@@ -851,7 +851,7 @@ CM <- local({ # _C_hecked _M_odule
       )
 
       first_duplicates <- head(supposedly_unique[dup_mask, ], 5)
-      names(first_duplicates) <- paste(prefixes, names(first_duplicates)) ###
+      names(first_duplicates) <- paste(prefixes, names(first_duplicates))
       dups <- df_to_string(first_duplicates)
 
       unique_repeats <- unique(supposedly_unique[dup_mask, ])
