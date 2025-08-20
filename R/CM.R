@@ -772,19 +772,8 @@ CM <- local({ # _C_hecked _M_odule
     return(ok)
   }
 
-
-
-
-
-
-
-
-
   check_unique_sub_cat_par_vis <- function(datasets, ds_name, ds_value, sub, cat, par, vis,
-                                           ####################################
-                                           anlfl = NULL,
-
-                                           warn, err) {
+                                           anlfl = NULL, warn, err) {
     ok <- TRUE
     df_to_string <- function(df) {
       names(df) <- sprintf("[%s] ", names(df))
@@ -794,11 +783,16 @@ CM <- local({ # _C_hecked _M_odule
 
     dataset <- datasets[[ds_value]]
 
+    # If specified, filter on analysis flag
+    if (!is.null(anlfl)) {
+      dataset <- dataset[dataset[[anlfl]] %in% "Y", ]
+    }
+
     unique_cat_par_combinations <- unique(dataset[c(cat, par)])
     dup_mask <- duplicated(unique_cat_par_combinations[par])
 
     ok <- assert(err, !any(dup_mask), {
-      unique_repeat_params <- unique_cat_par_combinations[[par]][dup_mask]
+      unique_repeat_params <- unique(unique_cat_par_combinations[[par]][dup_mask])
       dups <- df_to_string(
         data.frame(
           check.names = FALSE,
@@ -825,30 +819,29 @@ CM <- local({ # _C_hecked _M_odule
         )
       })
 
-      paste0(
-        sprintf('The dataset provided by %s ("%s") contains parameter names that repeat across categories.',
-                format_inline_asis(ds_name), ds_value),
+      # Text to indicate filter on analysis flag
+      if (is.null(anlfl)) {
+        ds_filter <- ""
+      } else {
+        ds_filter <- paste0(" filtered on `", format_inline_asis(sprintf('%s = "Y"', anlfl)), "`")
+      }
+
+      paste(
+        sprintf('The dataset provided by `%s` ("%s")%s', format_inline_asis(ds_name), ds_value, ds_filter),
+        "contains parameter names that repeat across categories.",
         "This module expects them to be unique. This is the list of duplicates:",
         paste0("<pre>", dups, "</pre>"),
         "In order to bypass this issue, we suggest you preprocess that dataset with this command:",
         paste0("<pre>", prefix_repeat_params_command, "</pre>"),
-        sprintf('<small><i>In case the dataset labeled as "%s" has a different name in your application code, ', ds_value),
+        sprintf('<small><i>In case the dataset labeled as "%s" has a different name in your application code,', ds_value),
         "substitute it with the actual name of the variable holding that dataset.</i></small><br>",
-        "The ", format_inline_asis("dv.explorer.parameter::prefix_repeat_parameters"), " function ",
+        "The", format_inline_asis("dv.explorer.parameter::prefix_repeat_parameters"), "function",
         "will rename the repeat parameters by prefixing them with the category they belong to, as shown on this table:",
         "<pre>", deduplicated_table, "</pre>"
       )
     })
 
-
-    ##################################################
-    vars_to_check <- c(sub, cat, par, vis)
-    if (!is.null(anlfl)) {
-      vars_to_check <- c(vars_to_check, anlfl)
-    }
-    supposedly_unique <- dataset[vars_to_check]
-
-
+    supposedly_unique <- dataset[c(sub, cat, par, vis)]
     dup_mask <- duplicated(supposedly_unique)
 
     ok <- ok && assert(err, !any(dup_mask), {
@@ -857,17 +850,8 @@ CM <- local({ # _C_hecked _M_odule
         rep("Parameter:", length(par)), rep("Visit:", length(vis))
       )
 
-      ############################################
-      if (!is.null(anlfl)) {
-        prefixes <- c(prefixes, rep("Flag:", length(anlfl)))
-      }
-
-
-
-
-
       first_duplicates <- head(supposedly_unique[dup_mask, ], 5)
-      names(first_duplicates) <- paste(prefixes, names(first_duplicates))
+      names(first_duplicates) <- paste(prefixes, names(first_duplicates)) ###
       dups <- df_to_string(first_duplicates)
 
       unique_repeats <- unique(supposedly_unique[dup_mask, ])
@@ -886,18 +870,16 @@ CM <- local({ # _C_hecked _M_odule
           "have indeed identical subject, category, parameter and visit values, but differ in columns: ",
           paste(diff_cols, collapse = ", "), ".",
           "<pre>",
-
-          ####################################
-          df_to_string(dataset[target_rows[1:2], unique(c(sub, cat, par, vis, anlfl, diff_cols))]),
-
-
+          df_to_string(dataset[target_rows[1:2], c(sub, cat, par, vis, anlfl, diff_cols)]),
           "</pre>"
         )
       }
 
       paste(
-        sprintf("The dataset provided by `%s` (%s) contains repeated rows with identical subject, category, parameter", ds_name, ds_value),
-        sprintf("and visit values. This module expects them to be unique. There are a total of %d duplicates.", sum(dup_mask)),
+        sprintf("The dataset provided by `%s` (%s)%s", ds_name, ds_value, ds_filter),
+        "contains repeated rows with identical subject, category, parameter and visit values.",
+        "This module expects them to be unique.",
+        sprintf("There are a total of %d duplicates.", sum(dup_mask)),
         "Here are the first few:",
         paste0("<pre>", dups, "</pre>"),
         sprintf("These findings can be partially confirmed by examining that rows <b>%d</b> and <b>%d</b> of that dataset",
@@ -908,22 +890,6 @@ CM <- local({ # _C_hecked _M_odule
 
     return(ok)
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   list(
     module = module,
