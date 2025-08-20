@@ -791,6 +791,13 @@ CM <- local({ # _C_hecked _M_odule
     unique_cat_par_combinations <- unique(dataset[c(cat, par)])
     dup_mask <- duplicated(unique_cat_par_combinations[par])
 
+    # Text to indicate filter on analysis flag
+    if (is.null(anlfl)) {
+      ds_filter <- ""
+    } else {
+      ds_filter <- paste0(" filtered on `", format_inline_asis(sprintf('%s = "Y"', anlfl)), "`")
+    }
+
     ok <- assert(err, !any(dup_mask), {
       unique_repeat_params <- unique(unique_cat_par_combinations[[par]][dup_mask])
       dups <- df_to_string(
@@ -818,13 +825,6 @@ CM <- local({ # _C_hecked _M_odule
           Category = cats, "Old parameter name" = pars, "New parameter name" = paste0(cats, "-", pars)
         )
       })
-
-      # Text to indicate filter on analysis flag
-      if (is.null(anlfl)) {
-        ds_filter <- ""
-      } else {
-        ds_filter <- paste0(" filtered on `", format_inline_asis(sprintf('%s = "Y"', anlfl)), "`")
-      }
 
       paste(
         sprintf('The dataset provided by `%s` ("%s")%s', format_inline_asis(ds_name), ds_value, ds_filter),
