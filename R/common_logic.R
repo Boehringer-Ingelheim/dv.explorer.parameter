@@ -89,7 +89,7 @@ subset_bds_param <- function(ds, par, par_col, cat, cat_col,
 
   mask <- ds[[cat_col]] %in% cat & ds[[par_col]] %in% par & ds[[vis_col]] %in% vis
   if (!is.null(anlfl_col) && anlfl_col %in% names(ds)) {
-    mask <- mask & !is.na(ds[[anlfl_col]]) & ds[[anlfl_col]] == "Y"
+    mask <- mask & ds[[anlfl_col]] %in% "Y"
   }
   subset_ds <- ds[mask, selected_cols]
   colnames(subset_ds) <- names(selected_cols)
