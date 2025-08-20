@@ -290,7 +290,8 @@ boxplot_server <- function(id,
   message("Is character? ", is.character(anlfl_vars))
 
   ###############################################
-  checkmate::assert_character(anlfl_vars, min.chars = 1, null.ok = TRUE, any.missing = FALSE, add = ac)
+  checkmate::assert_character(anlfl_vars, min.chars = 1, null.ok = TRUE,
+                              any.missing = FALSE, unique = TRUE, add = ac)
 
   checkmate::assert_character(default_cat, min.chars = 1, null.ok = TRUE, add = ac)
   checkmate::assert_character(default_par, min.chars = 1, null.ok = TRUE, add = ac)
@@ -594,7 +595,7 @@ boxplot_server <- function(id,
         vis_col = VAR$VIS,
 
         ##########################################
-        selected_flag = if (!is.null(inputs[[BP$ID$ANLFL_FILTER]])) inputs[[BP$ID$ANLFL_FILTER]]() else NULL
+        anlfl_col = if (!is.null(inputs[[BP$ID$ANLFL_FILTER]])) inputs[[BP$ID$ANLFL_FILTER]]() else NULL
       )
     })
 
@@ -1022,13 +1023,13 @@ bp_subset_data <- function(cat,
                            bm_ds,
                            group_ds,
                            subj_col,
-                           selected_flag = NULL) {
+                           anlfl_col = NULL) {
 
   bm_fragment <- subset_bds_param(
     ds = bm_ds, par = par, par_col = par_col,
     cat = cat, cat_col = cat_col, val_col = val_col,
     vis = vis, vis_col = vis_col, subj_col = subj_col,
-    anlfl_col = selected_flag
+    anlfl_col = anlfl_col
   )
 
   # Covered by #ahwopu
@@ -1073,7 +1074,7 @@ bp_subset_data <- function(cat,
     joint_data[[CNT$PAR]] <- factor(joint_data[[CNT$PAR]], levels = par)
   }
   joint_data[[CNT$CAT]] <- factor(joint_data[[CNT$CAT]], levels = cat)
-  if (!is.null(selected_flag) && CNT$ANLFL %in% names(joint_data)) {
+  if (!is.null(anlfl_col) && CNT$ANLFL %in% names(joint_data)) {
     joint_data[[CNT$ANLFL]] <- factor(joint_data[[CNT$ANLFL]], levels = "Y")
   }
   joint_data[[CNT$VIS]] <- factor(joint_data[[CNT$VIS]], levels = vis)
