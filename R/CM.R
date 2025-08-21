@@ -827,7 +827,7 @@ CM <- local({ # _C_hecked _M_odule
       })
 
       paste(
-        sprintf('The dataset provided by `%s` ("%s")%s', format_inline_asis(ds_name), ds_value, ds_filter),
+        sprintf("The dataset provided by `%s` (%s)%s", ds_name, ds_value, ds_filter),
         "contains parameter names that repeat across categories.",
         "This module expects them to be unique. This is the list of duplicates:",
         paste0("<pre>", dups, "</pre>"),
@@ -858,9 +858,12 @@ CM <- local({ # _C_hecked _M_odule
       target <- unique_repeats[1, ]
       target_rows <- which(supposedly_unique[[sub]] == target[[sub]] & supposedly_unique[[cat]] == target[[cat]] &
                              supposedly_unique[[par]] == target[[par]] & supposedly_unique[[vis]] == target[[vis]])
+      target_rownames <- attr(dataset[target_rows, ], "row.names")
 
-      row_a <- dataset[target_rows[[1]], ]
-      row_b <- dataset[target_rows[[2]], ]
+      browser()
+
+      row_a <- dataset[target_rows[1], ]
+      row_b <- dataset[target_rows[2], ]
       diff_cols <- character(0)
       for (col in names(row_a)) if (!identical(row_a[[col]], row_b[[col]])) diff_cols <- c(diff_cols, col)
 
@@ -883,7 +886,7 @@ CM <- local({ # _C_hecked _M_odule
         "Here are the first few:",
         paste0("<pre>", dups, "</pre>"),
         sprintf("These findings can be partially confirmed by examining that rows <b>%d</b> and <b>%d</b> of that dataset",
-                target_rows[[1]], target_rows[[2]]),
+                target_rownames[1], target_rownames[2]),
         col_diff_report
       )
     })
