@@ -11,6 +11,7 @@ boxplot_server(
   dataset_name = shiny::reactive(character(0)),
   cat_var = "PARCAT",
   par_var = "PARAM",
+  anlfl_vars = NULL,
   value_vars = "AVAL",
   visit_var = "AVISIT",
   subjid_var = "USUBJID",

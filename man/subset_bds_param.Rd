@@ -13,7 +13,8 @@ subset_bds_param(
   val_col,
   vis,
   vis_col,
-  subj_col
+  subj_col,
+  anlfl_col = NULL
 )
 }
 \arguments{

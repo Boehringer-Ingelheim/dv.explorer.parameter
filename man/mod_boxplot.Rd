@@ -11,6 +11,7 @@ mod_boxplot(
   receiver_id = NULL,
   cat_var = "PARCAT",
   par_var = "PARAM",
+  anlfl_vars = NULL,
   value_vars = "AVAL",
   visit_var = "AVISIT",
   subjid_var = "SUBJID",
