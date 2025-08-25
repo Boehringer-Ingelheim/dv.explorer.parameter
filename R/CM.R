@@ -860,8 +860,6 @@ CM <- local({ # _C_hecked _M_odule
                              supposedly_unique[[par]] == target[[par]] & supposedly_unique[[vis]] == target[[vis]])
       target_rownames <- attr(dataset[target_rows, ], "row.names")
 
-      browser()
-
       row_a <- dataset[target_rows[1], ]
       row_b <- dataset[target_rows[2], ]
       diff_cols <- character(0)

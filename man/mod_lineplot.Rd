@@ -13,6 +13,7 @@ mod_lineplot(
   subjid_var = "USUBJID",
   cat_var = "PARCAT",
   par_var = "PARAM",
+  anlfl_vars = NULL,
   visit_vars = c("AVISIT"),
   cdisc_visit_vars = character(0),
   value_vars = "AVAL",

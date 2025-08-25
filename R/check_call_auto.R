@@ -208,10 +208,10 @@ check_mod_forest_auto <- function(afmm, datasets, module_id, bm_dataset_name, gr
 
 # dv.explorer.parameter::mod_lineplot
 check_mod_lineplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id,
-    summary_fns, subjid_var, cat_var, par_var, visit_vars, cdisc_visit_vars, value_vars, additional_listing_vars,
-    ref_line_vars, default_centrality_fn, default_dispersion_fn, default_cat, default_par, default_val,
-    default_visit_var, default_visit_val, default_main_group, default_sub_group, default_transparency,
-    default_y_axis_projection, warn, err) {
+    summary_fns, subjid_var, cat_var, par_var, anlfl_vars, visit_vars, cdisc_visit_vars, value_vars,
+    additional_listing_vars, ref_line_vars, default_centrality_fn, default_dispersion_fn, default_cat,
+    default_par, default_val, default_visit_var, default_visit_val, default_main_group, default_sub_group,
+    default_transparency, default_y_axis_projection, warn, err) {
     OK <- logical(0)
     used_dataset_names <- new.env(parent = emptyenv())
     OK[["module_id"]] <- CM$check_module_id("module_id", module_id, warn, err)
@@ -239,6 +239,10 @@ check_mod_lineplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, 
     flags <- list(map_character_to_factor = TRUE)
     OK[["par_var"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("par_var", par_var, subkind,
         flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
+    subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
+    flags <- list(zero_or_more = TRUE, optional = TRUE)
+    OK[["anlfl_vars"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("anlfl_vars", anlfl_vars,
+        subkind, flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
     subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor"), list(kind = "numeric",
         min = NA, max = NA)))
     flags <- list(one_or_more = TRUE, map_character_to_factor = TRUE)

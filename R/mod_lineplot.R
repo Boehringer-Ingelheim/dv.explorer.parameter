@@ -4,6 +4,7 @@ LP_ID <- poc(
   GRP_BUTTON = "grp_button",
   VIS_BUTTON = "vis_button",
   PAR = "par",
+  ANLFL_FILTER = "anlfl_filter",
   PAR_VALUE_TRANSFORM = "par_value",
   PAR_VISIT_COL = "par_visit_col",
   PAR_VISIT = "par_visit",
@@ -41,6 +42,7 @@ LP_MSG <- poc(
     PAR_BUTTON = "Parameter",
     VIS_BUTTON = "Visit",
     PAR = "Parameter",
+    ANLFL_FILTER = "Analysis Flag Filter",
     CAT = "Category",
     PAR_VALUE_TRANSFORM = "Value and transform",
     PAR_VISIT_COL = "Visit variable",
@@ -279,18 +281,18 @@ lineplot_chart <- function(data, title = NULL, ref_line_data = NULL, log_project
 
   # Add the selected lines so they appear in the foreground
   fig <- fig +
-   ggplot2::geom_line(
-     data = data_selected,
-     linewidth = 1.1,
-     position = ggplot2::position_dodge(width = dodge_width),
-     alpha = alpha
-   ) +
-   ggplot2::geom_point(
-     data = data_selected,
-     size = 3,
-     position = ggplot2::position_dodge(width = dodge_width),
-     alpha = alpha
-   )
+    ggplot2::geom_line(
+      data = data_selected,
+      linewidth = 1.1,
+      position = ggplot2::position_dodge(width = dodge_width),
+      alpha = alpha
+    ) +
+    ggplot2::geom_point(
+      data = data_selected,
+      size = 3,
+      position = ggplot2::position_dodge(width = dodge_width),
+      alpha = alpha
+    )
 
   # Ticks for continuous time variable
   if (is.numeric(data[[CNT$VIS]])) {
@@ -447,16 +449,16 @@ lp_count_table <- function(df) {
 }
 
 # Light wrapper around bp_subset_data that allows for visit to be a numerical variable
-lp_subset_data <- function(cat, cat_col, par, par_col, val_col,
-                           vis, vis_col, group_vect, bm_ds, group_ds, subj_col) {
+lp_subset_data <- function(cat, cat_col, par, par_col, val_col, vis, vis_col,
+                           group_vect, bm_ds, group_ds, subj_col, anlfl_col = NULL) {
   numerical_visit <- is.numeric(bm_ds[[vis_col]])
   if (numerical_visit) {
     attrs <- attributes(bm_ds[[vis_col]])
     bm_ds[[vis_col]] <- as.factor(bm_ds[[vis_col]])
   }
   res <- bp_subset_data(
-    cat, cat_col, par, par_col, val_col,
-    vis, vis_col, group_vect, bm_ds, group_ds, subj_col
+    cat, cat_col, par, par_col, val_col, vis, vis_col,
+    group_vect, bm_ds, group_ds, subj_col, anlfl_col = anlfl_col
   )
   if (numerical_visit) {
     res[[CNT$VIS]] <- as.numeric(as.character(res[[CNT$VIS]]))
@@ -602,7 +604,7 @@ compute_overlap_of_ref_line_data <- function(ref_line_data) {
         repeat_groups <- element[mask, CNT$MAIN_GROUP]
         if (length(repeat_groups)) {
           overlap_info[[length(overlap_info) + 1]] <- list(parameter = row[[CNT$PAR]], value = row[[CNT$VAL]],
-                                                         groups = repeat_groups)
+                                                           groups = repeat_groups)
         }
       }
     }
@@ -714,6 +716,10 @@ lineplot_server <- function(id,
                             subjid_var = "USUBJID",
                             cat_var = "PARCAT",
                             par_var = "PARAM",
+
+                            #####################################
+                            anlfl_vars = NULL,
+
                             visit_vars = c("AVISIT"),
                             cdisc_visit_vars = character(0),
                             value_vars = "AVAL",
@@ -733,6 +739,11 @@ lineplot_server <- function(id,
                             default_y_axis_projection = "Linear") {
   ac <- checkmate::makeAssertCollection()
   # non reactive asserts
+
+  ###############################################
+  checkmate::assert_character(anlfl_vars, min.chars = 1, null.ok = TRUE,
+                              any.missing = FALSE, unique = TRUE, add = ac)
+
   checkmate::assert_string(cat_var, min.chars = 1, add = ac)
   checkmate::assert_string(par_var, min.chars = 1, add = ac)
   checkmate::assert_character(additional_listing_vars, min.chars = 1, add = ac)
@@ -879,6 +890,18 @@ lineplot_server <- function(id,
       default = default_sub_group
     )
 
+    # analysis flag filter input ----
+    if (!is.null(anlfl_vars) && length(anlfl_vars) > 0) {
+      input_lp[[LP_ID$ANLFL_FILTER]] <- col_menu_server(
+        id = LP_ID$ANLFL_FILTER,
+        data = v_bm_dataset,
+        label = LP_MSG$LABEL$ANLFL_FILTER,
+        include_func = function(x, name) name %in% anlfl_vars,
+        include_none = FALSE,
+        default = anlfl_vars[1]
+      )
+    }
+
     # input validation ----
     v_input_subset <- shiny::reactive(
       {
@@ -904,6 +927,13 @@ lineplot_server <- function(id,
 
       group_vect <- drop_nones(unlist(group_vect))
 
+      # Only pass analysis flags if the input has been defined
+      if (!is.null(l_input_lp[[LP_ID$ANLFL_FILTER]])) {
+        anlfl_col <- l_input_lp[[LP_ID$ANLFL_FILTER]]()
+      } else {
+        anlfl_col <- NULL
+      }
+
       lp_subset_data(
         cat = l_input_lp[[LP_ID$PAR]][["cat"]](),
         par = l_input_lp[[LP_ID$PAR]][["par"]](),
@@ -919,7 +949,8 @@ lineplot_server <- function(id,
           col <- l_input_lp[[LP_ID$PAR_VISIT_COL]]()
           shiny::req(col)
           col
-        })()
+        })(),
+        anlfl_col = anlfl_col
       )
     })
 
@@ -1199,6 +1230,10 @@ lineplot_server <- function(id,
       parameter_menu <- drop_menu_helper(
         ns(LP_ID$PAR_BUTTON), LP_MSG$LABEL$PAR_BUTTON,
         parameter_UI(id = ns(LP_ID$PAR)),
+
+        ############################################
+        col_menu_UI(ns(LP_ID$ANLFL_FILTER)),
+
         col_menu_UI(ns(LP_ID$PAR_VALUE_TRANSFORM))
       )
 
@@ -1645,6 +1680,7 @@ mod_lineplot <- function(module_id,
                          subjid_var = "USUBJID",
                          cat_var = "PARCAT",
                          par_var = "PARAM",
+                         anlfl_vars = NULL,
                          visit_vars = c("AVISIT"),
                          cdisc_visit_vars = character(0),
                          value_vars = "AVAL",
@@ -1680,6 +1716,7 @@ mod_lineplot <- function(module_id,
         subjid_var = subjid_var,
         cat_var = cat_var,
         par_var = par_var,
+        anlfl_vars = anlfl_vars,
         visit_vars = visit_vars,
         cdisc_visit_vars = cdisc_visit_vars,
         value_vars = value_vars,
@@ -1723,6 +1760,10 @@ mod_lineplot_API_docs <- list(
   subjid_var = "",
   cat_var = "",
   par_var = "",
+
+  ##################################
+  anlfl_vars = "",
+
   visit_vars = "",
   cdisc_visit_vars = "",
   value_vars = "",
@@ -1760,6 +1801,8 @@ mod_lineplot_API_spec <- TC$group(
   subjid_var = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("subjid_var", "map_character_to_factor"),
   cat_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("map_character_to_factor"),
   par_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("map_character_to_factor"),
+  anlfl_vars = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |>
+    TC$flag("zero_or_more", "optional"),
   visit_vars = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())) |> TC$flag("one_or_more", "map_character_to_factor"),
   cdisc_visit_vars = TC$col("bm_dataset_name", TC$numeric()) |> TC$flag("zero_or_more"),
   # FIXME: ? Interaction between visit_vars and cdisc_visit_vars; one needs to be specified
@@ -1784,7 +1827,8 @@ mod_lineplot_API_spec <- TC$group(
 
 check_mod_lineplot <- function(
     afmm, datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id, summary_fns,
-    subjid_var, cat_var, par_var, visit_vars, cdisc_visit_vars, value_vars, additional_listing_vars,
+    subjid_var, cat_var, par_var, anlfl_vars = NULL,
+    visit_vars, cdisc_visit_vars, value_vars, additional_listing_vars,
     ref_line_vars, default_centrality_fn, default_dispersion_fn, default_cat, default_par,
     default_val, default_visit_var, default_visit_val, default_main_group, default_sub_group,
     default_transparency, default_y_axis_projection) {
@@ -1796,20 +1840,37 @@ check_mod_lineplot <- function(
 
   OK <- check_mod_lineplot_auto(
     afmm, datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id,
-    summary_fns, subjid_var, cat_var, par_var, visit_vars, cdisc_visit_vars, value_vars, additional_listing_vars,
+    summary_fns, subjid_var, cat_var, par_var, anlfl_vars,
+    visit_vars, cdisc_visit_vars, value_vars, additional_listing_vars,
     ref_line_vars, default_centrality_fn, default_dispersion_fn, default_cat, default_par, default_val,
     default_visit_var, default_visit_val, default_main_group, default_sub_group, default_transparency,
     default_y_axis_projection, warn, err
   )
 
   # Checks that API spec does not (yet?) capture
-  if (OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] && OK[["visit_vars"]] && OK[["cdisc_visit_vars"]]) {
-    for (visit_var in c(visit_vars, cdisc_visit_vars)){
-      CM$check_unique_sub_cat_par_vis(
-        datasets, "bm_dataset_name", bm_dataset_name,
-        subjid_var, cat_var, par_var, visit_var, NULL, warn = warn, err = err
-      )
+  if (OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] &&
+      OK[["visit_vars"]] && OK[["cdisc_visit_vars"]] && OK[["anlfl_vars"]]) {
+
+    for (visit_var in c(visit_vars, cdisc_visit_vars)) {
+      if (!is.null(anlfl_vars)) {
+        # Check grouping values are unique for specified analysis flags
+        for (anlfl_var in anlfl_vars) {
+          CM$check_unique_sub_cat_par_vis(
+            datasets, "bm_dataset_name", bm_dataset_name,
+            subjid_var, cat_var, par_var, visit_var, anlfl = anlfl_var,
+            warn = warn, err = err
+          )
+        }
+      } else {
+        # Check grouping values are unique without subsetting on analysis flags
+        CM$check_unique_sub_cat_par_vis(
+          datasets, "bm_dataset_name", bm_dataset_name,
+          subjid_var, cat_var, par_var, visit_var,
+          warn = warn, err = err
+        )
+      }
     }
+
   }
 
   if (OK[["visit_vars"]] && OK[["cdisc_visit_vars"]]) {
