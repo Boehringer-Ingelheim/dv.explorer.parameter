@@ -4,7 +4,7 @@
 
 # dv.explorer.parameter::mod_boxplot
 map_afmm_mod_boxplot_auto <- function(afmm, module_id, bm_dataset_name, group_dataset_name, receiver_id,
-    cat_var, par_var, anlfl_vars, value_vars, visit_var, subjid_var, default_cat, default_par, default_visit,
+    cat_var, par_var, value_vars, visit_var, anlfl_vars, subjid_var, default_cat, default_par, default_visit,
     default_value, default_main_group, default_sub_group, default_page_group, server_wrapper_func) {
     res <- afmm
     mapping_summary <- character(0)
@@ -150,7 +150,7 @@ map_afmm_mod_forest_auto <- function(afmm, module_id, bm_dataset_name, group_dat
 
 # dv.explorer.parameter::mod_lineplot
 map_afmm_mod_lineplot_auto <- function(afmm, module_id, bm_dataset_name, group_dataset_name, receiver_id,
-    summary_fns, subjid_var, cat_var, par_var, anlfl_vars, visit_vars, cdisc_visit_vars, value_vars,
+    summary_fns, subjid_var, cat_var, par_var, visit_vars, cdisc_visit_vars, anlfl_vars, value_vars,
     additional_listing_vars, ref_line_vars, default_centrality_fn, default_dispersion_fn, default_cat,
     default_par, default_val, default_visit_var, default_visit_val, default_main_group, default_sub_group,
     default_transparency, default_y_axis_projection) {

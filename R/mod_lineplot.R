@@ -664,6 +664,10 @@ compute_overlap_of_ref_line_data <- function(ref_line_data) {
 #' Column from `bm_dataset` that correspond to the parameter visit and is interpreted as a CDISC
 #' Visit Days (skipping day 0; jumping from value -1 to value 1 in the X axis)
 #'
+#' @param anlfl_vars `[character(n)]`
+#'
+#' Columns from `bm_dataset` that correspond to analysis flags
+#'
 #' @param value_vars `[character(n)]`
 #'
 #' Columns from `bm_dataset` that correspond to values of the parameters
@@ -716,12 +720,12 @@ lineplot_server <- function(id,
                             subjid_var = "USUBJID",
                             cat_var = "PARCAT",
                             par_var = "PARAM",
+                            visit_vars = c("AVISIT"),
+                            cdisc_visit_vars = character(0),
 
                             #####################################
                             anlfl_vars = NULL,
 
-                            visit_vars = c("AVISIT"),
-                            cdisc_visit_vars = character(0),
                             value_vars = "AVAL",
                             additional_listing_vars = character(0),
                             ref_line_vars = character(0),
@@ -1230,11 +1234,8 @@ lineplot_server <- function(id,
       parameter_menu <- drop_menu_helper(
         ns(LP_ID$PAR_BUTTON), LP_MSG$LABEL$PAR_BUTTON,
         parameter_UI(id = ns(LP_ID$PAR)),
-
-        ############################################
-        col_menu_UI(ns(LP_ID$ANLFL_FILTER)),
-
-        col_menu_UI(ns(LP_ID$PAR_VALUE_TRANSFORM))
+        col_menu_UI(ns(LP_ID$PAR_VALUE_TRANSFORM)),
+        col_menu_UI(ns(LP_ID$ANLFL_FILTER))
       )
 
       visit_menu <- drop_menu_helper(
@@ -1680,9 +1681,9 @@ mod_lineplot <- function(module_id,
                          subjid_var = "USUBJID",
                          cat_var = "PARCAT",
                          par_var = "PARAM",
-                         anlfl_vars = NULL,
                          visit_vars = c("AVISIT"),
                          cdisc_visit_vars = character(0),
+                         anlfl_vars = NULL,
                          value_vars = "AVAL",
                          additional_listing_vars = character(0),
                          ref_line_vars = character(0),
@@ -1716,9 +1717,9 @@ mod_lineplot <- function(module_id,
         subjid_var = subjid_var,
         cat_var = cat_var,
         par_var = par_var,
-        anlfl_vars = anlfl_vars,
         visit_vars = visit_vars,
         cdisc_visit_vars = cdisc_visit_vars,
+        anlfl_vars = anlfl_vars,
         value_vars = value_vars,
         additional_listing_vars = additional_listing_vars,
         ref_line_vars = ref_line_vars,
@@ -1760,12 +1761,12 @@ mod_lineplot_API_docs <- list(
   subjid_var = "",
   cat_var = "",
   par_var = "",
+  visit_vars = "",
+  cdisc_visit_vars = "",
 
   ##################################
   anlfl_vars = "",
 
-  visit_vars = "",
-  cdisc_visit_vars = "",
   value_vars = "",
   additional_listing_vars = "",
   ref_line_vars = "",
@@ -1801,11 +1802,11 @@ mod_lineplot_API_spec <- TC$group(
   subjid_var = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("subjid_var", "map_character_to_factor"),
   cat_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("map_character_to_factor"),
   par_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("map_character_to_factor"),
-  anlfl_vars = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |>
-    TC$flag("zero_or_more", "optional"),
   visit_vars = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())) |> TC$flag("one_or_more", "map_character_to_factor"),
   cdisc_visit_vars = TC$col("bm_dataset_name", TC$numeric()) |> TC$flag("zero_or_more"),
   # FIXME: ? Interaction between visit_vars and cdisc_visit_vars; one needs to be specified
+  anlfl_vars = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |>
+    TC$flag("zero_or_more", "optional"),
   value_vars = TC$col("bm_dataset_name", TC$numeric()) |> TC$flag("one_or_more"),
   additional_listing_vars = TC$col("bm_dataset_name", TC$anything()) |> TC$flag("zero_or_more", "optional"),
   ref_line_vars = TC$col("bm_dataset_name", TC$numeric()) |> TC$flag("zero_or_more", "optional"),
@@ -1827,9 +1828,9 @@ mod_lineplot_API_spec <- TC$group(
 
 check_mod_lineplot <- function(
     afmm, datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id, summary_fns,
-    subjid_var, cat_var, par_var, anlfl_vars = NULL,
-    visit_vars, cdisc_visit_vars, value_vars, additional_listing_vars,
-    ref_line_vars, default_centrality_fn, default_dispersion_fn, default_cat, default_par,
+    subjid_var, cat_var, par_var, visit_vars, cdisc_visit_vars, anlfl_vars,
+    value_vars, additional_listing_vars, ref_line_vars,
+    default_centrality_fn, default_dispersion_fn, default_cat, default_par,
     default_val, default_visit_var, default_visit_val, default_main_group, default_sub_group,
     default_transparency, default_y_axis_projection) {
   warn <- CM$container()
@@ -1839,9 +1840,8 @@ check_mod_lineplot <- function(
   # Something along the lines of OK <- CM$check_API(mod_corr_hm_API_spec, args = match.call(), warn, err)
 
   OK <- check_mod_lineplot_auto(
-    afmm, datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id,
-    summary_fns, subjid_var, cat_var, par_var, anlfl_vars,
-    visit_vars, cdisc_visit_vars, value_vars, additional_listing_vars,
+    afmm, datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id, summary_fns,
+    subjid_var, cat_var, par_var, visit_vars, cdisc_visit_vars, anlfl_vars, value_vars, additional_listing_vars,
     ref_line_vars, default_centrality_fn, default_dispersion_fn, default_cat, default_par, default_val,
     default_visit_var, default_visit_val, default_main_group, default_sub_group, default_transparency,
     default_y_axis_projection, warn, err

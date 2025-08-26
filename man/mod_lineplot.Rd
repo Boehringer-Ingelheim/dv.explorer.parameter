@@ -13,9 +13,9 @@ mod_lineplot(
   subjid_var = "USUBJID",
   cat_var = "PARCAT",
   par_var = "PARAM",
-  anlfl_vars = NULL,
   visit_vars = c("AVISIT"),
   cdisc_visit_vars = character(0),
+  anlfl_vars = NULL,
   value_vars = "AVAL",
   additional_listing_vars = character(0),
   ref_line_vars = character(0),
@@ -73,6 +73,10 @@ Columns from \code{bm_dataset} that correspond to the parameter category, parame
 
 Column from \code{bm_dataset} that correspond to the parameter visit and is interpreted as a CDISC
 Visit Days (skipping day 0; jumping from value -1 to value 1 in the X axis)}
+
+\item{anlfl_vars}{\verb{[character(n)]}
+
+Columns from \code{bm_dataset} that correspond to analysis flags}
 
 \item{value_vars}{\verb{[character(n)]}
 
