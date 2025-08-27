@@ -261,8 +261,9 @@ map_afmm_mod_roc_auto <- function(afmm, module_id, pred_dataset_name, resp_datas
 
 # dv.explorer.parameter::mod_scatterplot
 map_afmm_mod_scatterplot_auto <- function(afmm, module_id, bm_dataset_name, group_dataset_name, cat_var,
-    par_var, value_vars, visit_var, subjid_var, default_x_cat, default_x_par, default_x_value, default_x_visit,
-    default_y_cat, default_y_par, default_y_value, default_y_visit, default_group, default_color, compute_lm_cor_fn) {
+    par_var, value_vars, visit_var, anlfl_vars, subjid_var, default_x_cat, default_x_par, default_x_value,
+    default_x_visit, default_y_cat, default_y_par, default_y_value, default_y_visit, default_group, default_color,
+    compute_lm_cor_fn) {
     res <- afmm
     mapping_summary <- character(0)
     for (ds_name in names(afmm[["data"]])) {

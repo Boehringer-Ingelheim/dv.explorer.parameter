@@ -31,9 +31,10 @@
 #'
 #' Values from `vis_col` to be subset
 #'
-#' @param subj_col,par_col,cat_col,vis_col `[character(1)]`
+#' @param subj_col,par_col,cat_col,vis_col,anlfl_col `[character(1)]`
 #'
-#' Column for subject id, category, parameter and visit. All specified columns must be factors
+#' Column for subject id, category, parameter, visit and analysis flag. All
+#' specified columns must be factors. Analysis flag is optional.
 #'
 #' @return
 #'
@@ -47,7 +48,7 @@
 #' - When the same parameter is repeated across different categories an error is raised
 #'
 #' @keywords data, internal
-
+#'
 subset_bds_param <- function(ds, par, par_col, cat, cat_col,
                              val_col, vis, vis_col, subj_col,
                              anlfl_col = NULL) {

@@ -377,7 +377,7 @@ check_mod_roc_auto <- function(afmm, datasets, module_id, pred_dataset_name, res
 
 # dv.explorer.parameter::mod_scatterplot
 check_mod_scatterplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, group_dataset_name,
-    cat_var, par_var, value_vars, visit_var, subjid_var, default_x_cat, default_x_par, default_x_value,
+    cat_var, par_var, value_vars, visit_var, anlfl_vars, subjid_var, default_x_cat, default_x_par, default_x_value,
     default_x_visit, default_y_cat, default_y_par, default_y_value, default_y_visit, default_group, default_color,
     compute_lm_cor_fn, warn, err) {
     OK <- logical(0)
@@ -405,6 +405,10 @@ check_mod_scatterplot_auto <- function(afmm, datasets, module_id, bm_dataset_nam
         min = NA, max = NA)))
     flags <- list(map_character_to_factor = TRUE)
     OK[["visit_var"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("visit_var", visit_var,
+        subkind, flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
+    subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
+    flags <- list(zero_or_more = TRUE, optional = TRUE)
+    OK[["anlfl_vars"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("anlfl_vars", anlfl_vars,
         subkind, flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
     subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
     flags <- list(subjid_var = TRUE, map_character_to_factor = TRUE)
