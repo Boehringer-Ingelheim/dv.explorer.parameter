@@ -37,9 +37,9 @@ Values from \code{vis_col} to be subset}
 
 data frames to be used as inputs in \link{subset_bds_param} and \link{subset_adsl}}
 
-\item{subj_col, par_col, cat_col, vis_col}{\verb{[character(1)]}
+\item{subj_col}{\verb{[character(1)]}
 
-Column for subject id, category, parameter and visit. All specified columns must be factors}
+Column for subject id. \code{subj_col} must be a factor}
 }
 \value{
 \verb{[data.frame()]}

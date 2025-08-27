@@ -34,9 +34,10 @@ Column containing values for the parameters}
 
 Values from \code{vis_col} to be subset}
 
-\item{subj_col, par_col, cat_col, vis_col}{\verb{[character(1)]}
+\item{subj_col, par_col, cat_col, vis_col, anlfl_col}{\verb{[character(1)]}
 
-Column for subject id, category, parameter and visit. All specified columns must be factors}
+Column for subject id, category, parameter, visit and analysis flag. All
+specified columns must be factors. Analysis flag is optional.}
 }
 \value{
 \tabular{lllll}{

@@ -40,9 +40,10 @@ Columns to be subset and renamed.}
 
 data frames to be used as inputs in \link{subset_bds_param} and \link{subset_adsl}}
 
-\item{subj_col, par_col, cat_col, vis_col}{\verb{[character(1)]}
+\item{subj_col, par_col, cat_col, vis_col, anlfl_col}{\verb{[character(1)]}
 
-Column for subject id, category, parameter and visit. All specified columns must be factors}
+Column for subject id, category, parameter, visit and analysis flag. All
+specified columns must be factors. Analysis flag is optional.}
 }
 \value{
 \verb{[data.frame()]}

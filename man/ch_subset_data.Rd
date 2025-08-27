@@ -17,9 +17,9 @@ Column containing values for the parameters}
 
 data frames to be used as inputs in \link{subset_bds_param}}
 
-\item{subj_col, par_col, cat_col, vis_col}{\verb{[character(1)]}
+\item{subj_col}{\verb{[character(1)]}
 
-Column for subject id, category, parameter and visit. All specified columns must be factors}
+Column for subject id. \code{subj_col} must be a factor}
 }
 \value{
 \verb{[data.frame()]}\tabular{lllll}{
