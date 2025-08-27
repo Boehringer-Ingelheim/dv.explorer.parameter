@@ -53,7 +53,7 @@ map_afmm_mod_boxplot_auto <- function(afmm, module_id, bm_dataset_name, group_da
 
 # dv.explorer.parameter::mod_corr_hm
 map_afmm_mod_corr_hm_auto <- function(afmm, module_id, bm_dataset_name, subjid_var, cat_var, par_var,
-    visit_var, value_vars, default_cat, default_par, default_visit, default_value) {
+    visit_var, anlfl_vars, value_vars, default_cat, default_par, default_visit, default_value) {
     res <- afmm
     mapping_summary <- character(0)
     for (ds_name in names(afmm[["data"]])) {

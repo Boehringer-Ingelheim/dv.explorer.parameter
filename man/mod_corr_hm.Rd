@@ -11,6 +11,7 @@ mod_corr_hm(
   cat_var = "PARCAT",
   par_var = "PARAM",
   visit_var = "AVISIT",
+  anlfl_vars = NULL,
   value_vars = "AVAL",
   default_cat = NULL,
   default_par = NULL,
@@ -34,6 +35,10 @@ Column corresponding to the subject ID}
 \item{cat_var, par_var, visit_var}{\verb{[character(1)]}
 
 Columns from \code{bm_dataset} that correspond to the parameter category, parameter and visit}
+
+\item{anlfl_vars}{\verb{[character(n)]}
+
+Columns from \code{bm_dataset} that correspond to analysis flags}
 
 \item{value_vars}{\verb{[character(n)]}
 

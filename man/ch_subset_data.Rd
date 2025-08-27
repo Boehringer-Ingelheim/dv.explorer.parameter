@@ -4,7 +4,16 @@
 \alias{ch_subset_data}
 \title{Subset datasets for correlation heatmap}
 \usage{
-ch_subset_data(sel, cat_col, par_col, val_col, vis_col, bm_ds, subj_col)
+ch_subset_data(
+  sel,
+  cat_col,
+  par_col,
+  val_col,
+  vis_col,
+  bm_ds,
+  subj_col,
+  anlfl_col = NULL
+)
 }
 \arguments{
 \item{sel}{a data.frame with three columns CNT$CAT, CMT$PAR, CNT$VIS.}
@@ -17,9 +26,10 @@ Column containing values for the parameters}
 
 data frames to be used as inputs in \link{subset_bds_param}}
 
-\item{subj_col}{\verb{[character(1)]}
+\item{subj_col, par_col, cat_col, vis_col, anlfl_col}{\verb{[character(1)]}
 
-Column for subject id. \code{subj_col} must be a factor}
+Column for subject id, category, parameter, visit and analysis flag. All
+specified columns must be factors. Analysis flag is optional.}
 }
 \value{
 \verb{[data.frame()]}\tabular{lllll}{

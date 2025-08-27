@@ -83,7 +83,8 @@ check_mod_boxplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, g
 
 # dv.explorer.parameter::mod_corr_hm
 check_mod_corr_hm_auto <- function(afmm, datasets, module_id, bm_dataset_name, subjid_var, cat_var, par_var,
-    visit_var, value_vars, default_cat, default_par, default_visit, default_value, warn, err) {
+    visit_var, anlfl_vars, value_vars, default_cat, default_par, default_visit, default_value, warn,
+    err) {
     OK <- logical(0)
     used_dataset_names <- new.env(parent = emptyenv())
     OK[["module_id"]] <- CM$check_module_id("module_id", module_id, warn, err)
@@ -106,6 +107,10 @@ check_mod_corr_hm_auto <- function(afmm, datasets, module_id, bm_dataset_name, s
         min = NA, max = NA)))
     flags <- list(map_character_to_factor = TRUE)
     OK[["visit_var"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("visit_var", visit_var,
+        subkind, flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
+    subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
+    flags <- list(zero_or_more = TRUE, optional = TRUE)
+    OK[["anlfl_vars"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("anlfl_vars", anlfl_vars,
         subkind, flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
     subkind <- list(kind = "numeric", min = NA, max = NA)
     flags <- list(one_or_more = TRUE)
