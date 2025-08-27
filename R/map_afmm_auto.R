@@ -311,8 +311,8 @@ map_afmm_mod_scatterplot_auto <- function(afmm, module_id, bm_dataset_name, grou
 
 # dv.explorer.parameter::mod_scatterplotmatrix
 map_afmm_mod_scatterplotmatrix_auto <- function(afmm, module_id, bm_dataset_name, group_dataset_name,
-    cat_var, par_var, value_vars, visit_var, subjid_var, default_cat, default_par, default_visit, default_value,
-    default_main_group) {
+    cat_var, par_var, value_vars, visit_var, anlfl_vars, subjid_var, default_cat, default_par, default_visit,
+    default_value, default_main_group) {
     res <- afmm
     mapping_summary <- character(0)
     for (ds_name in names(afmm[["data"]])) {
