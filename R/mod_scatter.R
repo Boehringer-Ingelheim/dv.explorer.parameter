@@ -1005,7 +1005,7 @@ sp_subset_data <- function(x_cat,
   xy_dataset <- dplyr::left_join(xy_dataset, grp_fragment, by = CNT$SBJ)
 
   # Drop levels for all non present levels in the factors, should we do this, or relevel to selection
-  # Relabel incase the joint breaks something or droplevels breaks something
+  # Relabel in case the joint breaks something or droplevels breaks something
 
   shiny::validate(
     need_rows(xy_dataset)
