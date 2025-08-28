@@ -111,16 +111,37 @@ scatterplot_UI <- function(id) { # nolint
 
   parameter_menu <- drop_menu_helper(
     ns(SP$ID$PAR_BUTTON), SP$MSG$LABEL$PAR_BUTTON,
-    # X axis
-    shiny::h4("X axis", style = "color: darkblue"),
-    parameter_UI(id = ns(SP$ID$X$PAR)),
-    col_menu_UI(ns(SP$ID$X$PAR_VALUE)),
-    val_menu_UI(id = ns(SP$ID$X$PAR_VISIT)),
-    # Y axis
-    shiny::h4("Y axis", style = "color: darkblue"),
-    parameter_UI(id = ns(SP$ID$Y$PAR)),
-    col_menu_UI(ns(SP$ID$Y$PAR_VALUE)),
-    val_menu_UI(id = ns(SP$ID$Y$PAR_VISIT))
+    shiny::fluidRow(
+      # X-axis
+      shiny::column(
+        5,
+        shiny::div(
+          shiny::h4("X-axis", style = "color: darkblue"),
+          parameter_UI(id = ns(SP$ID$X$PAR)),
+          col_menu_UI(ns(SP$ID$X$PAR_VALUE)),
+          val_menu_UI(id = ns(SP$ID$X$PAR_VISIT)),
+          style = "border: 1px solid grey; padding-left: 15px; padding-right: 15px"
+        ),
+        style = "padding-left: 0px; padding-right: 10px"
+      ),
+      # Y-axis
+      shiny::column(
+        5,
+        shiny::div(
+          shiny::h4("Y-axis", style = "color: darkblue"),
+           parameter_UI(id = ns(SP$ID$Y$PAR)),
+           col_menu_UI(ns(SP$ID$Y$PAR_VALUE)),
+           val_menu_UI(id = ns(SP$ID$Y$PAR_VISIT)),
+           style = "border: 1px solid grey; padding-left: 15px; padding-right: 15px"
+        ),
+        style = "padding-left: 0px; padding-right: 10px"
+      )
+    ),
+    # Analysis flag filter
+    shiny::div(
+      col_menu_UI(ns(SP$ID$ANLFL_FILTER)),
+      style = "padding-top: 15px"
+    )
   )
 
   group_menu <- drop_menu_helper(
@@ -135,7 +156,6 @@ scatterplot_UI <- function(id) { # nolint
 
   other_menu <- drop_menu_helper(
     ns(SP$ID$OTHER_BUTTON), SP$MSG$LABEL$OTHER_BUTTON,
-    col_menu_UI(ns(SP$ID$ANLFL_FILTER)),
     shiny::tags[["label"]](SP$MSG$LABEL$X_LIM, class = "control-label"),
     shiny::splitLayout(
       shiny::numericInput(ns(SP$ID$X_LIM_MAX), NULL, NULL, width = 75),
@@ -185,7 +205,7 @@ scatterplot_UI <- function(id) { # nolint
     )
   )
 
-  #   # main_ui ----
+  # main_ui ----
 
   main_ui <- shiny::tagList(
     shiny::div(top_menu, class = "bm_top_menu_bar"),
