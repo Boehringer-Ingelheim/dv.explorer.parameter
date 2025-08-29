@@ -977,7 +977,7 @@ bp_subset_data <- function(cat,
                            bm_ds,
                            group_ds,
                            subj_col,
-                           anlfl_col) {
+                           anlfl_col = NULL) {
 
   bm_fragment <- subset_bds_param(
     ds = bm_ds, par = par, par_col = par_col,
