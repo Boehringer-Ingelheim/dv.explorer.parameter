@@ -14,6 +14,7 @@ SP <- poc( # nolint
       PAR_VALUE = "y_par_value",
       PAR_VISIT = "y_par_visit"
     ),
+    ANLFL_FILTER = "anlfl_filter",
     GRP_BUTTON = "grp_button",
     GRP = "group",
     COLOR = "color",
@@ -40,6 +41,7 @@ SP <- poc( # nolint
       CAT = "Category",
       PAR_VALUE = "Value",
       PAR_VISIT = "Visit",
+      ANLFL_FILTER = "Analysis Flag Filter",
       PAR_TRANSFORM = "Transform",
       GRP_BUTTON = "Grouping",
       GRP = "Group by",
@@ -109,16 +111,37 @@ scatterplot_UI <- function(id) { # nolint
 
   parameter_menu <- drop_menu_helper(
     ns(SP$ID$PAR_BUTTON), SP$MSG$LABEL$PAR_BUTTON,
-    # X axis
-    shiny::h2("X axis"),
-    parameter_UI(id = ns(SP$ID$X$PAR)),
-    col_menu_UI(ns(SP$ID$X$PAR_VALUE)),
-    val_menu_UI(id = ns(SP$ID$X$PAR_VISIT)),
-    # Y axis
-    shiny::h2("Y axis"),
-    parameter_UI(id = ns(SP$ID$Y$PAR)),
-    col_menu_UI(ns(SP$ID$Y$PAR_VALUE)),
-    val_menu_UI(id = ns(SP$ID$Y$PAR_VISIT)),
+    shiny::fluidRow(
+      # X-axis
+      shiny::column(
+        5,
+        shiny::div(
+          shiny::h4("X-axis", style = "color: darkblue"),
+          parameter_UI(id = ns(SP$ID$X$PAR)),
+          col_menu_UI(ns(SP$ID$X$PAR_VALUE)),
+          val_menu_UI(id = ns(SP$ID$X$PAR_VISIT)),
+          style = "border: 1px solid grey; padding-left: 15px; padding-right: 15px"
+        ),
+        style = "padding-left: 0px; padding-right: 10px"
+      ),
+      # Y-axis
+      shiny::column(
+        5,
+        shiny::div(
+          shiny::h4("Y-axis", style = "color: darkblue"),
+           parameter_UI(id = ns(SP$ID$Y$PAR)),
+           col_menu_UI(ns(SP$ID$Y$PAR_VALUE)),
+           val_menu_UI(id = ns(SP$ID$Y$PAR_VISIT)),
+           style = "border: 1px solid grey; padding-left: 15px; padding-right: 15px"
+        ),
+        style = "padding-left: 0px; padding-right: 10px"
+      )
+    ),
+    # Analysis flag filter
+    shiny::div(
+      col_menu_UI(ns(SP$ID$ANLFL_FILTER)),
+      style = "padding-top: 15px"
+    )
   )
 
   group_menu <- drop_menu_helper(
@@ -128,7 +151,7 @@ scatterplot_UI <- function(id) { # nolint
     ),
     col_menu_UI(
       id = ns(SP$ID$COLOR)
-    ),
+    )
   )
 
   other_menu <- drop_menu_helper(
@@ -182,7 +205,7 @@ scatterplot_UI <- function(id) { # nolint
     )
   )
 
-  #   # main_ui ----
+  # main_ui ----
 
   main_ui <- shiny::tagList(
     shiny::div(top_menu, class = "bm_top_menu_bar"),
@@ -239,6 +262,10 @@ scatterplot_UI <- function(id) { # nolint
 #'
 #' Columns from `bm_dataset` that correspond to values of the parameters
 #'
+#' @param anlfl_vars `[character(n)]`
+#'
+#' Columns from `bm_dataset` that correspond to analysis flags
+#'
 #' @param subjid_var `[character(1)]`
 #'
 #' Column corresponding to subject ID
@@ -266,6 +293,7 @@ scatterplot_server <- function(id,
                                par_var = "PARAM",
                                value_vars = "AVAL",
                                visit_var = "AVISIT",
+                               anlfl_vars = NULL,
                                subjid_var = "USUBJID",
                                default_x_cat = NULL,
                                default_x_par = NULL,
@@ -286,6 +314,8 @@ scatterplot_server <- function(id,
   ###### Check types of reactive variables, pred_dataset, ...
   checkmate::assert_string(cat_var, min.chars = 1, add = ac)
   checkmate::assert_string(par_var, min.chars = 1, add = ac)
+  checkmate::assert_character(anlfl_vars, min.chars = 1, null.ok = TRUE,
+                              any.missing = FALSE, unique = TRUE, add = ac)
   checkmate::assert_string(default_x_cat, min.chars = 1, null.ok = TRUE, add = ac)
   checkmate::assert_string(default_x_par, min.chars = 1, null.ok = TRUE, add = ac)
   checkmate::assert_string(default_x_visit, min.chars = 1, null.ok = TRUE, add = ac)
@@ -438,6 +468,15 @@ scatterplot_server <- function(id,
       include_none = FALSE,
       default = default_y_value
     )
+    if (!is.null(anlfl_vars) && length(anlfl_vars) > 0) {
+      inputs[[SP$ID$ANLFL_FILTER]] <- col_menu_server(
+        id = SP$ID$ANLFL_FILTER,
+        data = v_bm_dataset,
+        label = SP$MSG$LABEL$ANLFL_FILTER,
+        include_func = function(x, name) name %in% anlfl_vars,
+        include_none = FALSE, default = anlfl_vars[1]
+      )
+    }
     inputs[[SP$ID$CHART_BRUSH]] <- shiny::reactive({
       shiny::req(!is.null(input[[SP$ID$CHART_BRUSH]]))
       input[[SP$ID$CHART_BRUSH]]
@@ -535,7 +574,7 @@ scatterplot_server <- function(id,
       session$sendCustomMessage(
         "dv_bm_toggle_warning_mark",
         list(
-          id = ns(BP$ID$PAR_BUTTON),
+          id = ns(SP$ID$PAR_BUTTON),
           add_mark = !param_iv$is_valid()
         )
       )
@@ -545,7 +584,7 @@ scatterplot_server <- function(id,
       session$sendCustomMessage(
         "dv_bm_toggle_warning_mark",
         list(
-          id = ns(BP$ID$GRP_BUTTON),
+          id = ns(SP$ID$GRP_BUTTON),
           add_mark = !group_iv$is_valid()
         )
       )
@@ -563,6 +602,9 @@ scatterplot_server <- function(id,
           SP$ID$Y$PAR, SP$ID$Y$PAR_VISIT, SP$ID$Y$PAR_VALUE,
           SP$ID$GRP, SP$ID$COLOR
         )
+        if (!is.null(inputs[[SP$ID$ANLFL_FILTER]]))
+          subset_inputs <- c(subset_inputs, SP$ID$ANLFL_FILTER)
+
         resolve_reactives <- function(x) {
           if (is.list(x)) {
             return(purrr::map(x, resolve_reactives))
@@ -604,7 +646,8 @@ scatterplot_server <- function(id,
         subj_col = VAR$SBJ,
         cat_col = VAR$CAT,
         par_col = VAR$PAR,
-        vis_col = VAR$VIS
+        vis_col = VAR$VIS,
+        anlfl_col = l_input[[SP$ID$ANLFL_FILTER]]
       )
     })
 
@@ -709,6 +752,7 @@ mod_scatterplot <- function(module_id,
                             par_var = "PARAM",
                             value_vars = "AVAL",
                             visit_var = "AVISIT",
+                            anlfl_vars = NULL,
                             subjid_var = "USUBJID",
                             default_x_cat = NULL,
                             default_x_par = NULL,
@@ -733,6 +777,7 @@ mod_scatterplot <- function(module_id,
         par_var = par_var,
         value_vars = value_vars,
         visit_var = visit_var,
+        anlfl_vars = anlfl_vars,
         subjid_var = subjid_var,
         default_x_cat = default_x_cat,
         default_x_par = default_x_par,
@@ -763,6 +808,7 @@ mod_scatterplot_API_docs <- list(
   par_var = "",
   value_vars = "",
   visit_var = "",
+  anlfl_vars = "",
   subjid_var = "",
   default_x_cat = "",
   default_x_par = "",
@@ -785,6 +831,7 @@ mod_scatterplot_API_spec <- TC$group(
   par_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("map_character_to_factor"),
   value_vars = TC$col("bm_dataset_name", TC$numeric()) |> TC$flag("one_or_more"),
   visit_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())) |> TC$flag("map_character_to_factor"),
+  anlfl_vars = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("zero_or_more", "optional"),
   subjid_var = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("subjid_var", "map_character_to_factor"),
   default_x_cat = TC$choice_from_col_contents("cat_var") |> TC$flag("optional"),
   default_x_par = TC$choice_from_col_contents("par_var") |> TC$flag("optional"),
@@ -800,25 +847,45 @@ mod_scatterplot_API_spec <- TC$group(
 ) |> TC$attach_docs(mod_scatterplot_API_docs)
 
 check_mod_scatterplot <- function(
-    afmm, datasets, module_id, bm_dataset_name, group_dataset_name, cat_var, par_var, value_vars, visit_var, subjid_var,
-    default_x_cat, default_x_par, default_x_value, default_x_visit, default_y_cat, default_y_par, default_y_value,
-    default_y_visit, default_group, default_color, compute_lm_cor_fn) {
+    afmm, datasets, module_id, bm_dataset_name, group_dataset_name,
+    cat_var, par_var, value_vars, visit_var, anlfl_vars, subjid_var,
+    default_x_cat, default_x_par, default_x_value, default_x_visit,
+    default_y_cat, default_y_par, default_y_value, default_y_visit,
+    default_group, default_color, compute_lm_cor_fn) {
   warn <- CM$container()
   err <- CM$container()
 
   # TODO: Replace this function with a generic one that performs the checks based on mod_boxplot_API_spec.
   # Something along the lines of OK <- CM$check_API(mod_corr_hm_API_spec, args = match.call(), warn, err)
   OK <- check_mod_scatterplot_auto(
-    afmm, datasets, module_id, bm_dataset_name, group_dataset_name, cat_var, par_var, value_vars, visit_var, subjid_var,
-    default_x_cat, default_x_par, default_x_value, default_x_visit, default_y_cat, default_y_par, default_y_value,
-    default_y_visit, default_group, default_color, compute_lm_cor_fn, warn, err
+    afmm, datasets, module_id, bm_dataset_name, group_dataset_name,
+    cat_var, par_var, value_vars, visit_var, anlfl_vars, subjid_var,
+    default_x_cat, default_x_par, default_x_value, default_x_visit,
+    default_y_cat, default_y_par, default_y_value, default_y_visit,
+    default_group, default_color, compute_lm_cor_fn, warn, err
   )
 
   # Checks that API spec does not (yet?) capture
-  if (OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] && OK[["visit_var"]]) {
-    CM$check_unique_sub_cat_par_vis(
-      datasets, "bm_dataset_name", bm_dataset_name, subjid_var, cat_var, par_var, visit_var, NULL, warn = warn, err = err
-    )
+  if (OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] && OK[["visit_var"]] && OK[["anlfl_vars"]]) {
+
+    if (!is.null(anlfl_vars)) {
+      # Check grouping values are unique for specified analysis flags
+      for (anlfl_var in anlfl_vars) {
+        CM$check_unique_sub_cat_par_vis(
+          datasets, "bm_dataset_name", bm_dataset_name,
+          subjid_var, cat_var, par_var, visit_var, anlfl_var,
+          warn = warn, err = err
+        )
+      }
+    } else {
+      # Check grouping values are unique without subsetting on analysis flags
+      CM$check_unique_sub_cat_par_vis(
+        datasets, "bm_dataset_name", bm_dataset_name,
+        subjid_var, cat_var, par_var, visit_var,
+        warn = warn, err = err
+      )
+    }
+
   }
 
   res <- list(warnings = warn[["messages"]], errors = err[["messages"]])
@@ -888,8 +955,6 @@ mod_scatterplot <- CM$module(mod_scatterplot, check_mod_scatterplot, dataset_inf
 #'
 #' @keywords internal
 #'
-#'
-
 sp_subset_data <- function(x_cat,
                            y_cat,
                            cat_col,
@@ -904,23 +969,24 @@ sp_subset_data <- function(x_cat,
                            group_vect,
                            bm_ds,
                            group_ds,
-                           subj_col) {
+                           subj_col,
+                           anlfl_col = NULL) {
   x_bm_fragment <- subset_bds_param(
     ds = bm_ds, par = x_par, par_col = par_col,
     cat = x_cat, cat_col = cat_col, val_col = x_val_col,
-    vis = x_vis, vis_col = vis_col, subj_col = subj_col
+    vis = x_vis, vis_col = vis_col, subj_col = subj_col,
+    anlfl_col = anlfl_col
   ) |>
     dplyr::select(
       CNT$SBJ,
       !!CNT$X_VAL := CNT$VAL # nolint
     )
 
-
-
   y_bm_fragment <- subset_bds_param(
     ds = bm_ds, par = y_par, par_col = par_col,
     cat = y_cat, cat_col = cat_col, val_col = y_val_col,
-    vis = y_vis, vis_col = vis_col, subj_col = subj_col
+    vis = y_vis, vis_col = vis_col, subj_col = subj_col,
+    anlfl_col = anlfl_col
   ) |>
     dplyr::select(
       CNT$SBJ,
@@ -959,7 +1025,7 @@ sp_subset_data <- function(x_cat,
   xy_dataset <- dplyr::left_join(xy_dataset, grp_fragment, by = CNT$SBJ)
 
   # Drop levels for all non present levels in the factors, should we do this, or relevel to selection
-  # Relabel incase the joint breaks something or droplevels breaks something
+  # Relabel in case the joint breaks something or droplevels breaks something
 
   shiny::validate(
     need_rows(xy_dataset)

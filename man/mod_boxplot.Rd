@@ -13,6 +13,7 @@ mod_boxplot(
   par_var = "PARAM",
   value_vars = "AVAL",
   visit_var = "AVISIT",
+  anlfl_vars = NULL,
   subjid_var = "SUBJID",
   default_cat = NULL,
   default_par = NULL,
@@ -47,6 +48,10 @@ Columns from \code{bm_dataset} that correspond to the parameter category, parame
 \item{value_vars}{\verb{[character(n)]}
 
 Columns from \code{bm_dataset} that correspond to values of the parameters}
+
+\item{anlfl_vars}{\verb{[character(n)]}
+
+Columns from \code{bm_dataset} that correspond to analysis flags}
 
 \item{subjid_var}{\verb{[character(1)]}
 
