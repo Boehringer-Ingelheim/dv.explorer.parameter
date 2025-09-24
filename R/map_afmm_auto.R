@@ -360,7 +360,7 @@ map_afmm_mod_scatterplotmatrix_auto <- function(afmm, module_id, bm_dataset_name
 
 # dv.explorer.parameter::mod_wfphm
 map_afmm_mod_wfphm_auto <- function(afmm, module_id, bm_dataset_name, group_dataset_name, cat_var, par_var,
-    visit_var, subjid_var, value_vars, bar_group_palette, cat_palette, tr_mapper, show_x_ticks) {
+    visit_var, anlfl_vars, subjid_var, value_vars, bar_group_palette, cat_palette, tr_mapper, show_x_ticks) {
     res <- afmm
     mapping_summary <- character(0)
     for (ds_name in names(afmm[["data"]])) {

@@ -52,6 +52,7 @@
 subset_bds_param <- function(ds, par, par_col, cat, cat_col,
                              val_col, vis, vis_col, subj_col,
                              anlfl_col = NULL) {
+  print(paste("Analysis flag column passed in subset_bds_param:", anlfl_col))
   # Check types
   ac <- checkmate::makeAssertCollection()
   checkmate::qassert(ds, "d")
@@ -90,6 +91,7 @@ subset_bds_param <- function(ds, par, par_col, cat, cat_col,
 
   mask <- ds[[cat_col]] %in% cat & ds[[par_col]] %in% par & ds[[vis_col]] %in% vis
   if (!is.null(anlfl_col) && anlfl_col %in% names(ds)) {
+    print(unique(ds[[anlfl_col]]))
     mask <- mask & ds[[anlfl_col]] %in% "Y"
   }
   subset_ds <- ds[mask, selected_cols]

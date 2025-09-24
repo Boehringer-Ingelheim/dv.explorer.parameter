@@ -525,8 +525,8 @@ check_mod_scatterplotmatrix_auto <- function(afmm, datasets, module_id, bm_datas
 
 # dv.explorer.parameter::mod_wfphm
 check_mod_wfphm_auto <- function(afmm, datasets, module_id, bm_dataset_name, group_dataset_name, cat_var,
-    par_var, visit_var, subjid_var, value_vars, bar_group_palette, cat_palette, tr_mapper, show_x_ticks,
-    warn, err) {
+    par_var, visit_var, anlfl_vars, subjid_var, value_vars, bar_group_palette, cat_palette, tr_mapper,
+    show_x_ticks, warn, err) {
     OK <- logical(0)
     used_dataset_names <- new.env(parent = emptyenv())
     OK[["module_id"]] <- CM$check_module_id("module_id", module_id, warn, err)
@@ -548,6 +548,10 @@ check_mod_wfphm_auto <- function(afmm, datasets, module_id, bm_dataset_name, gro
         min = NA, max = NA)))
     flags <- list(map_character_to_factor = TRUE)
     OK[["visit_var"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("visit_var", visit_var,
+        subkind, flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
+    subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
+    flags <- list(zero_or_more = TRUE, optional = TRUE)
+    OK[["anlfl_vars"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("anlfl_vars", anlfl_vars,
         subkind, flags, bm_dataset_name, datasets[[bm_dataset_name]], warn, err)
     subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
     flags <- list(subjid_var = TRUE, map_character_to_factor = TRUE)
