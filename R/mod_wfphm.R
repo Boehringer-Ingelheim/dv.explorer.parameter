@@ -331,7 +331,7 @@ wfphm_wf_server <- function(id,
                             },
                             bar_group_palette = list(),
                             margin) {
-  browser()
+  
   # id assert ---- It goes on its own as id is used to provide context to the other assertions
   checkmate::assert_string(id, min.chars = 1)
 
@@ -340,9 +340,7 @@ wfphm_wf_server <- function(id,
     ns <- session[["ns"]]
 
     ##############################################
-    anlfl_selected <- shiny::reactive({
-      input[[WFPHM_ID$WF$ANLFL_FILTER]]
-    })
+    
 
     # paste ctxt ----
     paste_ctxt <- paste_ctxt_factory(ns(""))
@@ -409,7 +407,7 @@ wfphm_wf_server <- function(id,
       var = visit_var
     )
 
-browser()
+
 
     if (!is.null(anlfl_vars) && length(anlfl_vars) > 0) {
       inputs[[WFPHM_ID$WF$ANLFL_FILTER]] <- col_menu_server(
@@ -420,10 +418,9 @@ browser()
         include_none = FALSE,
         default = anlfl_vars[1]
       )
+    } else {      
+      inputs[[WFPHM_ID$WF$ANLFL_FILTER]] <- shiny::reactive(NULL)
     }
-
-
-
 
     inputs[[WFPHM_ID$WF$VALUE]] <- col_menu_server(
       id = WFPHM_ID$WF$VALUE,
@@ -473,7 +470,7 @@ browser()
         msg = WFPHM_MSG$WF$VALIDATE$NO_CAT_SEL
       )
     )
-
+ 
     par_iv$add_rule(
       get_id(inputs[["visit"]]),
       sv_not_empty(inputs[["visit"]],
@@ -515,6 +512,8 @@ browser()
 
         subset_inputs <- c(WFPHM_ID$WF$CONT, WFPHM_ID$WF$GROUP, WFPHM_ID$WF$PAR,WFPHM_ID$WF$VISIT,
                            WFPHM_ID$WF$VALUE, WFPHM_ID$WF$CHECK, WFPHM_ID$WF$ANLFL_FILTER)
+
+
         resolve_reactives <- function(x) {
           if (is.list(x)) {
             return(purrr::map(x, resolve_reactives))
@@ -527,7 +526,7 @@ browser()
     )
     # TODO: |> shiny::debounce(BP$VAL$SUBSET_DEBOUNCE_TIME)
 
-    browser()
+    
     data <- shiny::reactive(
       {
         # The original dataset in the app has subjects A B C and D. After globally filtering only participants A B and C
@@ -537,7 +536,7 @@ browser()
         l_inputs <- v_input_subset()
 
         df <- if (l_inputs[["check"]]) {
-          browser()
+          
           wfphm_wf_subset_data_cont(
             val_col = l_inputs[["cont"]],
             color_col = l_inputs[["group"]],
@@ -545,7 +544,7 @@ browser()
             subj_col = subjid_var
           )
         } else {
-          browser()
+          
           wfphm_wf_subset_data_par(
             cat = l_inputs[["par"]][["cat"]],
             par = l_inputs[["par"]][["par"]],
@@ -624,7 +623,7 @@ browser()
           group_iv$is_valid()
       }),
       #######################################
-      !!WFPHM_ID$WF$ANLFL_FILTER := anlfl_selected
+      anlfl = inputs[[WFPHM_ID$WF$ANLFL_FILTER]]
     )
 
 
@@ -696,7 +695,7 @@ wfphm_wf_subset_data_par <- function(cat,
                                      subj_col,
                                      anlfl_col = NULL) {
   print(paste("Analysis flag column passed in wfphm_wf_subset_data_par:", anlfl_col))
-  browser()
+  
   bm_fragment <- subset_bds_param(
     ds = bm_ds, par = par, par_col = par_col,
     cat = cat, cat_col = cat_col, val_col = val_col,
@@ -771,7 +770,7 @@ wfphm_wf_subset_data_cont <- function(val_col,
                                       color_col,
                                       group_ds,
                                       subj_col) {
-  browser()
+  
   group_vect <- stats::setNames(c(color_col, val_col), c(CNT$MAIN_GROUP, CNT$VAL))
 
   grp_fragment <- subset_adsl(
@@ -816,7 +815,7 @@ wfphm_wf_subset_data_cont <- function(val_col,
 #' @keywords internal
 
 wfphm_wf_apply_outliers <- function(df, ll, ul) {
-  browser()
+  
   df <- force(df)
   ll <- force(ll)
   ul <- force(ul)
@@ -858,7 +857,7 @@ wfphm_wf_apply_outliers <- function(df, ll, ul) {
 #'
 #' @keywords internal
 wfphm_wf_rename_cols <- function(df) {
-  browser()
+  
   contain_visit <- CNT$VIS %in% names(df)
   visit <- levels(df[[CNT$VIS]])
   param <- levels(df[[CNT$PAR]])
@@ -997,7 +996,7 @@ wfphm_hmcat_server <- function(id,
                                sorted_x,
                                cat_palette = list(),
                                margin) {
-  browser()
+  
   # id assert ---- It goes on its own as id is used to provide context to the other assertions
   checkmate::assert_string(id, min.chars = 1)
 
@@ -1168,7 +1167,7 @@ wfphm_hmcat_server <- function(id,
 #'
 #' @keywords internal
 wfphm_hmcat_subset <- function(data, selection, palette, subjid_var, sorted_x) {
-  browser()
+  
   lbls <- get_lbls_robust(data)
 
   df <- data[, c(subjid_var, selection), drop = FALSE]
@@ -1309,7 +1308,7 @@ wfphm_hmcont_server <- function(id,
                                 subjid_var,
                                 sorted_x,
                                 margin) {
-  browser()
+  
   # id assert ---- It goes on its own as id is used to provide context to the other assertions
   checkmate::assert_string(id, min.chars = 1)
 
@@ -1464,7 +1463,7 @@ wfphm_hmcont_server <- function(id,
 #' @param sorted_x the ordered subject ids
 #' @keywords internal
 wfphm_hmcont_subset <- function(data, selection, subjid_var, sorted_x) {
-  browser()
+  
   lbls <- get_lbls_robust(data)
 
   df <- data[, c(subjid_var, selection), drop = FALSE]
@@ -1666,7 +1665,7 @@ wfphm_hmpar_server <- function(id,
                                tr_mapper,
                                margin,
                                show_x_ticks) {
-  browser()
+  
   # id assert ---- It goes on its own as id is used to provide context to the other assertions
   checkmate::assert_string(id, min.chars = 1)
 
@@ -1694,6 +1693,10 @@ wfphm_hmpar_server <- function(id,
       .var.name = paste_ctxt(tr_mapper)
     )
     checkmate::assert_multi_class(dataset, c("reactive", "shinymeta_reactive"),
+      add = ac,
+      .var.name = paste_ctxt(dataset)
+    )
+    checkmate::assert_multi_class(anlfl_reactive, c("reactive", "shinymeta_reactive"),
       add = ac,
       .var.name = paste_ctxt(dataset)
     )
@@ -1815,8 +1818,8 @@ wfphm_hmpar_server <- function(id,
     # data ----
     data <- shiny::reactive(
       {
-        anlfl_col <- if (!is.null(anlfl_reactive)) anlfl_reactive() else NULL
-
+        anlfl_col <- anlfl_reactive()
+        
         wfphm_hmpar_subset(
           v_dataset(),
           v_input()[["cat"]],
@@ -1910,7 +1913,7 @@ wfphm_hmpar_subset <- function(
     anlfl_col = NULL
     ) {
   print(paste("Analysis flag column passed in wfphm_hmpar_subset:", anlfl_col))
-  browser()
+  
   df <- subset_bds_param(
     ds = data,
     par = par_selection,
@@ -2146,7 +2149,7 @@ wfphm_server <- function(id,
                          cat_palette = list(),
                          tr_mapper = tr_mapper_def(),
                          show_x_ticks = TRUE) {
-  browser()
+  
   module <- function(input, output, session) {
     ns <- session[["ns"]]
 
@@ -2198,7 +2201,6 @@ wfphm_server <- function(id,
 
     wf_margin <- shiny::reactive(
       {
-        browser()
         c(top = 10, bottom = 10, right = max_margin()[["right"]], left = max_margin()[["left"]])
       },
       label = ns(" df_margin")
@@ -2230,11 +2232,7 @@ wfphm_server <- function(id,
     wf <- do.call(wfphm_wf_server, wf_args)
 
     ####################################
-    anlfl_reactive <- if (!is.null(anlfl_vars) && length(anlfl_vars) > 0) {
-      wf[[WFPHM_ID$WF$ANLFL_FILTER]]
-    } else {
-      NULL
-    }
+        
 
     hmcat_args <- list(
       id = WFPHM_ID$WFPHM$HMCAT, dataset = v_group_dataset,
@@ -2257,7 +2255,7 @@ wfphm_server <- function(id,
       tr_mapper = tr_mapper, margin = hmpar_margin,
       show_x_ticks = show_x_ticks
       ##############################
-      ,  anlfl_reactive = anlfl_reactive
+      ,  anlfl_reactive = wf[["anlfl"]]
     )
     hmpar <- do.call(wfphm_hmpar_server, hmpar_args)
 
@@ -2310,7 +2308,7 @@ wfphm_server <- function(id,
 }
 
 tr_mapper_def <- function() {
-  browser()
+  
   list(
     "Original" = tr_identity,
     "Scale by (result-mean)/SD of each parameter" = tr_z_score,
@@ -2339,7 +2337,7 @@ mod_wfphm <- function(
     cat_palette = list(),
     tr_mapper = tr_mapper_def(),
     show_x_ticks = TRUE) {
-  browser()
+  
   mod <- list(
     ui = function(id) wfphm_UI(id, names(tr_mapper)),
     server = function(afmm) {
@@ -2404,7 +2402,7 @@ mod_wfphm_API_spec <- TC$group(
 check_mod_wfphm <- function(
     afmm, datasets, module_id, bm_dataset_name, group_dataset_name, cat_var, par_var, visit_var, anlfl_vars, subjid_var,
     value_vars, bar_group_palette, cat_palette, tr_mapper, show_x_ticks) {
-  browser()
+  
   warn <- CM$container()
   err <- CM$container()
 
@@ -2444,7 +2442,7 @@ check_mod_wfphm <- function(
 }
 
 dataset_info_wfphm <- function(bm_dataset_name, group_dataset_name, ...) {
-  browser()
+  
   # TODO: Replace this function with a generic one that builds the list based on mod_boxplot_API_spec.
   # Something along the lines of CM$dataset_info(mod_wfphm_API_spec, args = match.call())
   return(list(all = unique(c(bm_dataset_name, group_dataset_name)), subject_level = group_dataset_name))

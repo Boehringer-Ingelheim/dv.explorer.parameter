@@ -16,6 +16,8 @@ test_data <- function(random_bm_values = FALSE) {
   bm[["VISIT2"]] <- bm[["VISITN"]] * bm[["VISITN"]]
   bm[["PARCAT"]] <- paste0("PARCAT", bm[["PARCATN"]])
   bm[["PARAM"]] <- paste0("PARAM", bm[["PARCATN"]], bm[["PARAMN"]])
+  bm[["ANLFL1"]] <- "Y"
+  bm[["ANLFL2"]] <- ""
   if (random_bm_values) {
     bm[["VALUE1"]] <- stats::runif(n = nrow(bm), min = 0, max = 100)
     bm[["VALUE2"]] <- stats::runif(n = nrow(bm), min = 0, max = 100)
@@ -42,8 +44,20 @@ test_data <- function(random_bm_values = FALSE) {
       PARCAT = factor(.data[["PARCAT"]]),
       PARAM = factor(.data[["PARAM"]]),
       VISIT = factor(.data[["VISIT"]]),
-      VISIT2 = factor(.data[["VISIT2"]]) # NOTE(miguel): Remove to make mock process numerical visits
+      VISIT2 = factor(.data[["VISIT2"]]), # NOTE(miguel): Remove to make mock process numerical visits
+      ANLFL1 = factor(.data[["ANLFL1"]]),
+      ANLFL2 = factor(.data[["ANLFL2"]])
     )
+
+  bm2 <- bm
+  bm2[["VALUE1"]] <- -bm2[["VALUE1"]]
+  bm2[["VALUE2"]] <- -bm2[["VALUE2"]]
+  bm2[["VALUE3"]] <- -bm2[["VALUE3"]]
+  bm2[["ANLFL1"]] <- factor("")
+  bm2[["ANLFL2"]] <- factor("Y")
+
+  bm <- rbind(bm, bm2)
+    
 
   # Duplicate for the rest of test cases, default with no default, default, bookmark, setup
   sl <- dplyr::mutate(

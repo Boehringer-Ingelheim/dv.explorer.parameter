@@ -209,6 +209,7 @@ mock_app_hmpar <- function(dry_run = FALSE,
     cat_var = "PARCAT",
     par_var = "PARAM",
     visit_var = "VISIT",
+    anlfl_reactive = shiny::reactive("ANLFL1"),
     subjid_var = "SUBJID",
     value_vars = c("VALUE1", "VALUE2"),
     sorted_x = shiny::reactive(levels(data[["sl"]][["SUBJID"]])),
@@ -265,6 +266,7 @@ mock_app_wf <- function(dry_run = FALSE,
     visit_var = "VISIT",
     subjid_var = "SUBJID",
     value_vars = c("VALUE1", "VALUE2", "VALUE3"),
+    anlfl_vars = c("ANLFL1", "ANLFL2"),
     margin = shiny::reactive(c(top = 20, bottom = 20, left = 200, right = 20))
   )
 
@@ -315,6 +317,7 @@ mock_app_wfphm <- function(dry_run = FALSE,
     par_var = "PARAM",
     visit_var = "VISIT",
     subjid_var = "SUBJID",
+    anlfl_vars = c("ANLFL1", "ANLFL2"),
     value_vars = c("VALUE1", "VALUE2", "VALUE3")
   )
 
