@@ -8,8 +8,7 @@ WFPHM_ID <- pack_of_constants( # nolint
     PAR = "par",
     LOG = "log",
     VALUE = "value",
-    VISIT = "visit",
-    ANLFL_FILTER = "anlfl_filter",
+    VISIT = "visit",    
     OUTLIER = "outlier",
     CHART = "chart"
   ),
@@ -48,6 +47,7 @@ WFPHM_ID <- pack_of_constants( # nolint
     FILENAME = "filename",
     SAVE_PNG = "save_png",
     SAVE_SVG = "save_svg",
+    ANLFL_FILTER = "anlfl_filter",
     CHART_WIDTH = "chart_width"
   )
 )
@@ -87,8 +87,7 @@ WFPHM_MSG <- pack_of_constants( # nolint
     PAR_COL = "Display demographic baseline information",
     CONT = "Value",
     PAR = c("Category", "Parameter"),
-    VISIT = "Visit",
-    ANLFL_FILTER = "Analysis Flag Filter",
+    VISIT = "Visit",    
     VALUE = "Value",
     VALIDATE = pack_of_constants(
       NO_CONT_SEL = "(Waterfall) Select a continuous variable",
@@ -146,7 +145,8 @@ WFPHM_MSG <- pack_of_constants( # nolint
       SAVE_PNG = "Save as PNG",
       SAVE_SVG = "Save as SVG",
       CHART_WIDTH = "Chart width in pixels"
-    )
+    ),
+    ANLFL_FILTER = "Analysis Flag Filter"
   )
 )
 
@@ -293,8 +293,7 @@ wfphm_wf_UI <- function(id) { # nolintr
       paste0("input['", ns(WFPHM_ID$WF$CHECK), "']===false"),
       parameter_UI(id = ns(WFPHM_ID$WF$PAR)),
       col_menu_UI(ns(WFPHM_ID$WF$VALUE)),
-      val_menu_UI(id = ns(WFPHM_ID$WF$VISIT)),
-      col_menu_UI(id = ns(WFPHM_ID$WF$ANLFL_FILTER))
+      val_menu_UI(id = ns(WFPHM_ID$WF$VISIT))
     ),
     col_menu_UI(id = ns(WFPHM_ID$WF$GROUP)),
     shiny::conditionalPanel(
@@ -324,12 +323,12 @@ wfphm_wf_server <- function(id,
                             cat_var, par_var,
                             visit_var,
                             subjid_var,
-                            value_vars,
-                            anlfl_vars = NULL,
+                            value_vars,                            
                             .default_group_palette = function(x) {
                               pal_get_cat_palette(x, viridisLite::viridis(length(unique(x))))
                             },
                             bar_group_palette = list(),
+                            anlfl_reactive,
                             margin) {
   
   # id assert ---- It goes on its own as id is used to provide context to the other assertions
@@ -406,21 +405,6 @@ wfphm_wf_server <- function(id,
       data = bm_dataset,
       var = visit_var
     )
-
-
-
-    if (!is.null(anlfl_vars) && length(anlfl_vars) > 0) {
-      inputs[[WFPHM_ID$WF$ANLFL_FILTER]] <- col_menu_server(
-        id = WFPHM_ID$WF$ANLFL_FILTER,
-        data = bm_dataset,
-        label = WFPHM_MSG$WF$ANLFL_FILTER,
-        include_func = function(x, name) name %in% anlfl_vars,
-        include_none = FALSE,
-        default = anlfl_vars[1]
-      )
-    } else {      
-      inputs[[WFPHM_ID$WF$ANLFL_FILTER]] <- shiny::reactive(NULL)
-    }
 
     inputs[[WFPHM_ID$WF$VALUE]] <- col_menu_server(
       id = WFPHM_ID$WF$VALUE,
@@ -511,7 +495,7 @@ wfphm_wf_server <- function(id,
         )
 
         subset_inputs <- c(WFPHM_ID$WF$CONT, WFPHM_ID$WF$GROUP, WFPHM_ID$WF$PAR,WFPHM_ID$WF$VISIT,
-                           WFPHM_ID$WF$VALUE, WFPHM_ID$WF$CHECK, WFPHM_ID$WF$ANLFL_FILTER)
+                           WFPHM_ID$WF$VALUE, WFPHM_ID$WF$CHECK)
 
 
         resolve_reactives <- function(x) {
@@ -557,7 +541,7 @@ wfphm_wf_server <- function(id,
             cat_col = cat_var,
             par_col = par_var,
             vis_col = visit_var,
-            anlfl_col = l_inputs[[WFPHM_ID$WF$ANLFL_FILTER]]
+            anlfl_col = anlfl_reactive()
           )
         }
         df |>
@@ -621,9 +605,7 @@ wfphm_wf_server <- function(id,
         shiny::req(!is.null(inputs[["check"]]()))
         ((!inputs[["check"]]() && par_iv$is_valid()) || (inputs[["check"]]() && cont_iv$is_valid())) &&
           group_iv$is_valid()
-      }),
-      #######################################
-      anlfl = inputs[[WFPHM_ID$WF$ANLFL_FILTER]]
+      })
     )
 
 
@@ -2090,7 +2072,8 @@ wfphm_UI <- function(id, tr_choices = names(tr_mapper_def())) { # nolint
       ),
       shiny::actionButton(inputId = ns(WFPHM_ID$WFPHM$SAVE_PNG), label = WFPHM_MSG$WFPHM$DOWNLOAD$SAVE_PNG),
       shiny::actionButton(inputId = ns(WFPHM_ID$WFPHM$SAVE_SVG), label = WFPHM_MSG$WFPHM$DOWNLOAD$SAVE_SVG)
-    )
+    ),    
+    col_menu_UI(id = ns(WFPHM_ID$WFPHM$ANLFL_FILTER))
   )
 
   wfphm_mainpanel <- shiny::div(
@@ -2173,6 +2156,19 @@ wfphm_server <- function(id,
       bm_dataset()
     })
 
+    if (!is.null(anlfl_vars) && length(anlfl_vars) > 0) {
+      anlfl_selection <- col_menu_server(
+        id = WFPHM_ID$WFPHM$ANLFL_FILTER,
+        data = bm_dataset,
+        label = WFPHM_MSG$WFPHM$ANLFL_FILTER,
+        include_func = function(x, name) name %in% anlfl_vars,
+        include_none = FALSE,
+        default = anlfl_vars[1]
+      )
+    } else {      
+      anlfl_selection <- shiny::reactive(NULL)
+    }
+
     shiny::observe({
       shiny::req(input[[WFPHM_ID$WFPHM$SAVE_PNG]] > 0)
       shiny::req(input[[WFPHM_ID$WFPHM$CHART_WIDTH]])
@@ -2227,7 +2223,7 @@ wfphm_server <- function(id,
       visit_var = visit_var, subjid_var = subjid_var,
       value_vars = value_vars, margin = wf_margin,
       bar_group_palette = bar_group_palette,
-      anlfl_vars = anlfl_vars
+      anlfl_reactive = anlfl_selection
     )
     wf <- do.call(wfphm_wf_server, wf_args)
 
@@ -2255,7 +2251,7 @@ wfphm_server <- function(id,
       tr_mapper = tr_mapper, margin = hmpar_margin,
       show_x_ticks = show_x_ticks
       ##############################
-      ,  anlfl_reactive = wf[["anlfl"]]
+      ,  anlfl_reactive = anlfl_selection
     )
     hmpar <- do.call(wfphm_hmpar_server, hmpar_args)
 
