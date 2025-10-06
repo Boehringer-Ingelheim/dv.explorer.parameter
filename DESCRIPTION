@@ -23,10 +23,10 @@ Imports: shiny (>= 1.7.1), dplyr (>= 1.0.7), broom (>= 0.7.9), ggplot2
         digest, rlang, tibble, checkmate (>= 2.0.0), GGally,
         fontawesome, shinyvalidate, htmltools, RColorBrewer, scales,
         shinyWidgets, r2d3, stats, Hmisc, base64enc, viridisLite,
-        vegawidget, pROC, gt, utils, precrec, glue, dv.manager (>= 2.1.4)
+        vegawidget, pROC, gt, utils, precrec, glue, dv.manager (>= 2.2.1)
 Depends: R (>= 4.0)
 Date: Tue May 31 12:12:27 2022
 Branch: dev
 ParentCommit: 9edd5ae0b32a3c7afbcf7215187748f310087a8a
 VignetteBuilder: knitr
-Remotes: boehringer-ingelheim/dv.manager@v2.1.10
+Remotes: boehringer-ingelheim/dv.manager@main
