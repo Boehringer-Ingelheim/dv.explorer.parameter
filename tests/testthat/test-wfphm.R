@@ -44,7 +44,8 @@ C <- pack_of_constants(
   NON_GXP_TAG = "#not_ebas-non_gxp_tag",
   SAVE_PNG = tns("save_png"),
   SAVE_SVG = tns("save_svg"),
-  FILENAME = tns("filename")
+  FILENAME = tns("filename"),
+  ANLFL_FILTER = tns("anlfl_filter-val")
 )
 
 test_that(
@@ -68,8 +69,9 @@ test_that(
       !!C$PCAT := "PARCAT1"
     )
 
-    app$set_inputs(
-      !!C$PPAR := "PARAM11"
+      app$set_inputs(
+      !!C$PPAR := "PARAM11",
+      !!C$ANLFL_FILTER := "ANLFL1"
     )
 
     app$wait_for_idle()
@@ -87,7 +89,6 @@ test_that(
         }
       )
     }
-
 
     expect_snapshot(cran = TRUE, exported_values[["not_ebas-wf_args"]] |> resolve_reactive())
     expect_snapshot(cran = TRUE, exported_values[["not_ebas-hmcat_args"]] |> resolve_reactive())
