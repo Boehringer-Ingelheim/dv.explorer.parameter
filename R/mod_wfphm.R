@@ -1815,7 +1815,7 @@ wfphm_hmpar_server <- function(id,
           v_sorted_x(),
           input_menu[["outlier"]](),
           get_tr_apply(tr_mapper[[v_input()[["transform"]]]]),
-          anlfl_col=anlfl_col
+          anlfl_col = anlfl_col
         )
       },
       label = ns(" data")
@@ -2166,7 +2166,6 @@ wfphm_server <- function(id,
       anlfl_selection <- col_menu_server(
         id = WFPHM_ID$WFPHM$ANLFL_FILTER,
         data = bm_dataset,
-        #label = WFPHM_MSG$WFPHM$ANLFL_FILTER,
         label = NULL,
         include_func = function(x, name) name %in% anlfl_vars,
         include_none = FALSE,
