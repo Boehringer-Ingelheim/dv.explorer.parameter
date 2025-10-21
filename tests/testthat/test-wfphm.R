@@ -70,6 +70,68 @@ test_that(
     )
 
       app$set_inputs(
+      !!C$PPAR := "PARAM11"
+    )
+
+    app$wait_for_idle()
+    exported_values <- app$get_values(export = TRUE)[["export"]]
+
+    resolve_reactive <- function(x) {
+      lapply(
+        x,
+        function(v) {
+          if (is.function(v)) {
+            shiny::isolate(v())
+          } else {
+            v
+          }
+        }
+      )
+    }
+
+    expect_snapshot(cran = TRUE, exported_values[["not_ebas-wf_args"]] |> resolve_reactive())
+    expect_snapshot(cran = TRUE, exported_values[["not_ebas-hmcat_args"]] |> resolve_reactive())
+    expect_snapshot(cran = TRUE, exported_values[["not_ebas-hmcont_args"]] |> resolve_reactive())
+    expect_snapshot(cran = TRUE, exported_values[["not_ebas-hmpar_args"]] |> resolve_reactive(), transform = function(x) {
+      is_bytecode <- grepl("bytecode", x)
+      ifelse(is_bytecode, "<bytecode: RANDOM VALUE - NO SNAPSHOT>", x)
+    })
+  }
+)
+
+app_anlfl <- start_app_driver(rlang::quo({
+  mock_app_wfphm(anlfl_flags = TRUE)
+}))
+on.exit(if ("stop" %in% names(app_anlfl)) app_anlfl$stop())
+
+fail_if_app_not_started <- function() {
+  if (is.null(app_anlfl)) rlang::abort("App could not be started")
+}
+
+test_that(
+  paste(
+    component,
+    "calls are done with the correct arguments including analysis flag variables"
+  ) %>%
+    vdoc[["add_spec"]](c(
+      specs$wfphm$wfphm$composition,
+      specs$wfphm$wfphm$x_sorted
+    )
+    ),
+  {
+    testthat::skip_if_not(run_shiny_tests)
+    fail_if_app_not_started()
+    skip_if_suspect_check()
+
+    app <- shinytest2::AppDriver$new(app_anlfl$get_url())
+
+    app$set_inputs(
+      !!C$CAT := "CAT1",
+      !!C$CONT := "CONT1",
+      !!C$PCAT := "PARCAT1"
+    )
+
+    app$set_inputs(
       !!C$PPAR := "PARAM11",
       !!C$ANLFL_FILTER := "ANLFL1"
     )
@@ -99,6 +161,7 @@ test_that(
     })
   }
 )
+
 
 test_that(
   paste(
@@ -196,6 +259,7 @@ test_that(
     expect_length(app$get_html(C$NON_GXP_TAG), 1)
   }
 )
+
 
 test_that(
   "wfphm validation error when bm_dataset or group_dataset have 0 rows",

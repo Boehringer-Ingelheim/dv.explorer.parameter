@@ -330,6 +330,7 @@ scatter_plot <- function(df, x_var, y_var) {
   if (y_min == y_max) y_max <- y_min + 1
   y_width <- y_max - y_min
 
+
   nx <- (x - x_min) / x_width * scatter_size
   ny <- (1 - (y - y_min) / y_width) * scatter_size
 
@@ -643,6 +644,11 @@ corr_hm_server <- function(id,
           )
         )
         subset_inputs <- c(CH_ID$PAR_VALUE_TRANSFORM, CH_ID$CORR_METHOD)
+
+        if (!is.null(inputs[[CH_ID$ANLFL_FILTER]]))  {
+          subset_inputs <- c(subset_inputs, CH_ID$ANLFL_FILTER)
+        }
+
         resolve_reactives <- function(x) {
           if (is.list(x)) {
             return(purrr::map(x, resolve_reactives))
@@ -657,6 +663,7 @@ corr_hm_server <- function(id,
     # data reactives ----
 
     data_subset <- shiny::reactive({
+
       res <- ch_subset_data(
         sel = mpvs(),
         cat_col = VAR$CAT,
@@ -723,7 +730,6 @@ corr_hm_server <- function(id,
       click <- v_click_xy()
       x_var <- click[["x"]]
       y_var <- click[["y"]]
-
       df <- data_subset()
       df <- df[df[[CNT$PAR]] %in% c(x_var, y_var), ]
       na_inf_idx <- is.na(df[[CNT$VAL]]) | !is.finite(df[[CNT$VAL]])
@@ -842,7 +848,6 @@ ch_subset_data <- function(sel, cat_col, par_col, val_col, vis_col,
 
   paste_par_vis <- function(p, v) paste0(p, " - ", v)
   sel_par_vis <- paste_par_vis(sel[[CNT$PAR]], sel[[CNT$VIS]])
-
   res <- subset_bds_param(
     ds = bm_ds, par = par, par_col = par_col,
     cat = cat, cat_col = cat_col, val_col = val_col,

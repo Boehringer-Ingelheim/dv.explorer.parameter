@@ -328,7 +328,7 @@ wfphm_wf_server <- function(id,
                               pal_get_cat_palette(x, viridisLite::viridis(length(unique(x))))
                             },
                             bar_group_palette = list(),
-                            anlfl_reactive,
+                            anlfl_reactive = NULL,
                             margin) {
 
   # id assert ---- It goes on its own as id is used to provide context to the other assertions
@@ -519,6 +519,8 @@ wfphm_wf_server <- function(id,
 
         l_inputs <- v_input_subset()
 
+        anlfl_col <- if (!is.null(anlfl_reactive)) anlfl_reactive() else NULL
+
         df <- if (l_inputs[["check"]]) {
 
           wfphm_wf_subset_data_cont(
@@ -541,7 +543,7 @@ wfphm_wf_server <- function(id,
             cat_col = cat_var,
             par_col = par_var,
             vis_col = visit_var,
-            anlfl_col = anlfl_reactive()
+            anlfl_col = anlfl_col
           )
         }
         df |>
@@ -1678,10 +1680,12 @@ wfphm_hmpar_server <- function(id,
       add = ac,
       .var.name = paste_ctxt(dataset)
     )
-    checkmate::assert_multi_class(anlfl_reactive, c("reactive", "shinymeta_reactive"),
-      add = ac,
-      .var.name = paste_ctxt(dataset)
-    )
+    if (!is.null(anlfl_reactive)) {
+      checkmate::assert_multi_class(anlfl_reactive, c("reactive", "shinymeta_reactive"),
+        add = ac,
+        .var.name = paste_ctxt(dataset)
+      )
+    }
 
     # margin is only forwarded so asserting is done in [barplot_d3_server]
     checkmate::reportAssertions(ac)
@@ -1800,7 +1804,7 @@ wfphm_hmpar_server <- function(id,
     # data ----
     data <- shiny::reactive(
       {
-        anlfl_col <- anlfl_reactive()
+        anlfl_col <- if (!is.null(anlfl_reactive)) anlfl_reactive() else NULL
 
         wfphm_hmpar_subset(
           v_dataset(),
