@@ -678,7 +678,7 @@ wfphm_wf_subset_data_par <- function(cat,
                                      group_ds,
                                      subj_col,
                                      anlfl_col = NULL) {
-  print(paste("Analysis flag column passed in wfphm_wf_subset_data_par:", anlfl_col))
+  log_inform(paste("Analysis flag column passed in wfphm_wf_subset_data_par:", anlfl_col), level = "debug")
 
   bm_fragment <- subset_bds_param(
     ds = bm_ds, par = par, par_col = par_col,
@@ -1898,7 +1898,7 @@ wfphm_hmpar_subset <- function(
     scale,
     anlfl_col = NULL
     ) {
-  print(paste("Analysis flag column passed in wfphm_hmpar_subset:", anlfl_col))
+  log_inform(paste("Analysis flag column passed in wfphm_hmpar_subset:", anlfl_col), level = "debug")
 
   df <- subset_bds_param(
     ds = data,

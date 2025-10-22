@@ -1395,7 +1395,7 @@ roc_subset_data <- function(pred_cat,
   # Force factors from the beginning if they are not factors
   as_factor_if_not_factor <- function(x) {
     if (!is.factor(x)) {
-      log_inform("Cohercing to factor")
+      log_inform("Cohercing to factor", level = "inform")
       as.factor(x)
     } else {
       x
