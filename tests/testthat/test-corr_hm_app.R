@@ -26,7 +26,7 @@ ID <- poc( # nolint
   )
 )
 
-root_app <- start_app_driver(dv.explorer.parameter::mock_app_corr_hm())
+roto_app <- start_app_driver(dv.explorer.parameter::mock_app_corr_hm())
 on.exit(if ("stop" %in% names(root_app)) root_app$stop())
 
 fail_if_app_not_started <- function() {
@@ -34,7 +34,8 @@ fail_if_app_not_started <- function() {
 }
 
 test_that("correlation chart is included according to selection" |>
-  vdoc[["add_spec"]](c(specs$corr_hm_module$correlation_chart, specs$corr_hm_module$composition)), {skip("This test is likely to fail when comparing snapshots, it is left here aiming to update it in the future so that it doesn't use snapshot comparison, at which point the skip can be removed")
+  vdoc[["add_spec"]](c(specs$corr_hm_module$correlation_chart, specs$corr_hm_module$composition)), {
+  skip("This test is likely to fail when comparing snapshots, it is left here aiming to update it in the future so that it doesn't use snapshot comparison, at which point the skip can be removed")
   testthat::skip_if_not(run_shiny_tests)
   fail_if_app_not_started()
   skip_if_suspect_check()
@@ -107,7 +108,8 @@ test_that(
 )
 
 test_that("bookmark is restored. Clicks are excluded" |>
-  vdoc[["add_spec"]](c(specs$corr_hm_module$bookmark)), {skip("skipping for now")
+  vdoc[["add_spec"]](c(specs$corr_hm_module$bookmark)), {
+  skip("skipping for now because it causes snapshot differences that can't be reviewed manually - bookmark issue")
   # Lots of out of memory warnings because the bookmark is too long. Repair, leave, or keep?
   testthat::skip_if_not(run_shiny_tests)
   fail_if_app_not_started()

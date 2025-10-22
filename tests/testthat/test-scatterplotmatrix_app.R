@@ -70,7 +70,8 @@ test_that("data is subset according to selection", {
 })
 
 test_that("scatterplotmatrix chart is included according to selection" |>
-  vdoc[["add_spec"]](c(specs$scatterplot_matrix_module$composition, specs$scatterplot_matrix_module$scatterplot_matrix_chart)), {skip("This test is likely to fail when comparing snapshots, it is left here aiming to update it in the future so that it doesn't use snapshot comparison, at which point the skip can be removed")
+  vdoc[["add_spec"]](c(specs$scatterplot_matrix_module$composition, specs$scatterplot_matrix_module$scatterplot_matrix_chart)), {
+  skip("This test is likely to fail when comparing snapshots, it is left here aiming to update it in the future so that it doesn't use snapshot comparison, at which point the skip can be removed")
   testthat::skip_if_not(run_shiny_tests)
   fail_if_app_not_started()
   skip_if_suspect_check()

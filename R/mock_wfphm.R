@@ -21,7 +21,7 @@ mock_wfphm_mm_app <- function(anlfl_flags = FALSE) {
 
     dv.manager::run_app(
       data = list(
-        "Sample Data" = list(adbm =data[["bm"]], group =data[["sl"]])
+        "Sample Data" = list(adbm = data[["bm"]], group = data[["sl"]])
       ),
       module_list = list(
         "Waterfall" = mod_wfphm(

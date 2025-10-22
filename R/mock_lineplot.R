@@ -11,8 +11,7 @@ mock_app_lineplot <- function(dry_run = FALSE,
                               data = test_data(anlfl_flags = anlfl_flags),
                               anlfl_flags = FALSE
                              ) {
-  #data <- test_data(anlfl_flags = anlfl_flags)
-  bm_dataset <- shiny::reactive({
+    bm_dataset <- shiny::reactive({
     data[["bm"]]
   })
   group_dataset <- shiny::reactive({

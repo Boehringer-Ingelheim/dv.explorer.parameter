@@ -38,7 +38,8 @@ fail_if_app_not_started <- function() {
 }
 
 test_that("lineplot chart is included according to selection" |>
-  vdoc[["add_spec"]](c(specs$lineplot_module$composition, specs$lineplot_module$lineplot_chart, specs$lineplot_module$grouping, specs$lineplot_module$summarizing)), {skip("This test is likely to fail when comparing snapshots, it is left here aiming to update it in the future so that it doesn't use snapshot comparison, at which point the skip can be removed")
+  vdoc[["add_spec"]](c(specs$lineplot_module$composition, specs$lineplot_module$lineplot_chart, specs$lineplot_module$grouping, specs$lineplot_module$summarizing)), {
+  skip("This test is likely to fail when comparing snapshots, it is left here aiming to update it in the future so that it doesn't use snapshot comparison, at which point the skip can be removed")
   testthat::skip_if_not(run_shiny_tests)
   fail_if_app_not_started()
   skip_if_suspect_check()
