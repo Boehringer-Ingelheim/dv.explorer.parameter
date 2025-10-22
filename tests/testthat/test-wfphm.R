@@ -58,7 +58,7 @@ test_that(
       specs$wfphm$wfphm$x_sorted
     )
     ),
-  {skip("skipping for now because it causes snapshot differences that can't be reviewed manually - bookmark issue")
+  {
     testthat::skip_if_not(run_shiny_tests)
     fail_if_app_not_started()
     skip_if_suspect_check()
@@ -118,7 +118,7 @@ test_that(
       specs$wfphm$wfphm$x_sorted
     )
     ),
-  {skip("skipping for now because it causes snapshot differences that can't be reviewed manually - bookmark issue")
+  {
     testthat::skip_if_not(run_shiny_tests)
     fail_if_app_not_started()
     skip_if_suspect_check()
