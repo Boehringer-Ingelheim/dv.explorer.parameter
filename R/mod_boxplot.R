@@ -399,8 +399,6 @@ boxplot_server <- function(id,
       }, include_none = FALSE, default = default_value
     )
 
-
-    #####################################################
     # analysis flag filter input
     if (!is.null(anlfl_vars) && length(anlfl_vars) > 0) {
       inputs[[BP$ID$ANLFL_FILTER]] <- col_menu_server(
@@ -411,7 +409,6 @@ boxplot_server <- function(id,
         include_none = FALSE, default = anlfl_vars[1]
       )
     }
-
 
     inputs[[BP$ID$VIOLIN_CHECK]] <- shiny::reactive({
       input[[BP$ID$VIOLIN_CHECK]]
@@ -527,10 +524,8 @@ boxplot_server <- function(id,
           )
         )
 
-        subset_inputs <- c(BP$ID$PAR, BP$ID$PAR_VISIT, BP$ID$PAR_VALUE,
-                           BP$ID$MAIN_GRP, BP$ID$SUB_GRP, BP$ID$PAGE_GRP)
-        if (!is.null(inputs[[BP$ID$ANLFL_FILTER]]))
-          subset_inputs <- c(subset_inputs, BP$ID$ANLFL_FILTER)
+        subset_inputs <- c(BP$ID$PAR, BP$ID$PAR_VISIT, BP$ID$PAR_VALUE, BP$ID$MAIN_GRP, BP$ID$SUB_GRP, BP$ID$PAGE_GRP)
+        if (!is.null(inputs[[BP$ID$ANLFL_FILTER]])) subset_inputs <- c(subset_inputs, BP$ID$ANLFL_FILTER)
 
         resolve_reactives <- function(x) {
           if (is.list(x)) {
@@ -576,8 +571,6 @@ boxplot_server <- function(id,
         cat_col = VAR$CAT,
         par_col = VAR$PAR,
         vis_col = VAR$VIS,
-
-        ##########################################
         anlfl_col = l_inputs[[BP$ID$ANLFL_FILTER]]
       )
     })
