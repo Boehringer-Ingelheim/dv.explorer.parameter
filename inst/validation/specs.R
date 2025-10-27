@@ -19,7 +19,7 @@ specs <- list(
     ",
     single_listing = "
     The single listing shall contain a table containing the details of a clicked subject.
-    ",    
+    ",
     data_count = "
     The data count shall contain a table containing the count of subjects per parameter and grouping variable.
     ",
@@ -47,7 +47,7 @@ corr_hm_module = list(
     The chart shall display a correlation heatmap for a given selection.
     ",
     scatter_chart = "
-    The scatter shall display a scatter plot of the clicked 
+    The scatter shall display a scatter plot of the clicked
     ",
     bookmark = "
     The application shall support bookmarking. Clicks and brush are explicitely excluded.
@@ -193,7 +193,7 @@ wf <- list(
             the x axis shall be sorted in descending order
             ",
         plot_y_axis = "
-            the y axis/bar's heigth shall represent the selected height value for each subject            
+            the y axis/bar's heigth shall represent the selected height value for each subject
             ",
         plot_y_axis_label = "
         when a parameter is used the label must indicate which value column is being used
@@ -318,7 +318,7 @@ hmpar <- list(
             ",
         plot_x_axis_ticks = "
             the module shall allow the user to hide the x axis ticks
-            "        
+            "
 )
 
 # roc_module ----
@@ -335,7 +335,7 @@ roc_module <- list(
             ",
         selection = list(
             predictor = "
-            from the predictor dataset: 
+            from the predictor dataset:
                 - the user shall be able to choose N parameters as predictors
                 - the user shall be able to choose a single numerical column containing the value of the parameter
                 - the user shall be able to choose a single value from the visit column
@@ -352,7 +352,7 @@ roc_module <- list(
             from the grouping dataset:
                 - the user shall be able to choose a single categorical column for grouping
             "
-            ),        
+            ),
         outputs = list(
             roc_curve = list(
                 facets = "
@@ -362,7 +362,7 @@ roc_module <- list(
                 axis = "
                 the x axis shall represent 1-Specificity
                 the y axis shall represent Sensitivity
-                both axis limits shall be 0 and 1            
+                both axis limits shall be 0 and 1
                 ",
                 plot = "
                 the plot shall contain a line plot
@@ -447,7 +447,7 @@ roc_module <- list(
             explore_auc = list(
                 axis = "
                 the x axis shall represent the AUC
-                the y axis shall represent the value of the parameter or pameter-group combination                
+                the y axis shall represent the value of the parameter or pameter-group combination
                 elements shall be colored according to the value of the grouping
                 ",
                 plot = "
@@ -468,7 +468,15 @@ roc_module <- list(
         bookmark = "The module shall allow bookmarking"
 )
 
+# common_logic ----
+common_logic <- list(
+  anlfl_col_data_filtering = "
+        The function shall subset a biomarker dataset using the provided category, parameter, visit, and subject selections as well as the specified analysis flag column (anlfl_col).
+        Only rows with a value of 'Y' in the analysis flag column are retained.
+    "
+)
 
+specs[["common_logic"]] <- common_logic
 
 # specs ----
 specs[["wfphm"]] <- list(
@@ -482,6 +490,7 @@ specs[["wfphm"]] <- list(
 specs[["roc"]] <- roc_module
 
 specs
+
 
 
 # nolint end

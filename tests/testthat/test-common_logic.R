@@ -77,7 +77,12 @@ test_that("subset_bds_param subsets a biomarker dataset, retaining labels", {
 })
 
 
-test_that("subset_bds_param subsets a biomarker dataset making also use of anlfl_col, retaining labels", {
+test_that(
+  vdoc$add_spec(
+    "subset_bds_param subsets a biomarker dataset making also use of anlfl_col, retaining labels",
+    specs$common_logic$anlfl_col_data_filtering
+  ),
+  {
   # Create initial dataset -actual
   bm_df <- tibble::as_tibble(expand.grid(
     cat = factor(c("CA", "CB", "CC")),
