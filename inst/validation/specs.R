@@ -471,7 +471,7 @@ roc_module <- list(
 # common_logic ----
 common_logic <- list(
   anlfl_col_data_filtering = "
-        The function shall subset a biomarker dataset using the provided category, parameter, visit, and subject selections as well as the specified analysis flag column (anlfl_col).
+        The function shall subset a biomarker dataset using the provided category, parameter, visit, and subject selections as well as the specified analysis flag column.
         Only rows with a value of 'Y' in the analysis flag column are retained.
     "
 )
