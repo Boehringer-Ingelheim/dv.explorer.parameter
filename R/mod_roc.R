@@ -1127,8 +1127,7 @@ check_mod_roc <- function(
   if (OK[["subjid_var"]] && OK[["pred_cat_var"]] && OK[["pred_par_var"]] && OK[["pred_visit_var"]]) {
     CM$check_unique_sub_cat_par_vis(
       datasets, "pred_dataset_name", pred_dataset_name,
-      subjid_var, pred_cat_var, pred_par_var, pred_visit_var,
-      warn, err
+      subjid_var, pred_cat_var, pred_par_var, pred_visit_var, NULL, warn = warn, err = err
     )
   }
 
@@ -1396,7 +1395,7 @@ roc_subset_data <- function(pred_cat,
   # Force factors from the beginning if they are not factors
   as_factor_if_not_factor <- function(x) {
     if (!is.factor(x)) {
-      log_inform("Cohercing to factor")
+      log_inform("Cohercing to factor", level = "inform")
       as.factor(x)
     } else {
       x

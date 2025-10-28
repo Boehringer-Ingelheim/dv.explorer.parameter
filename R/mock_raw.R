@@ -1,4 +1,4 @@
-test_data <- function(random_bm_values = FALSE) {
+test_data <- function(random_bm_values = FALSE, anlfl_flags = FALSE) {
   set.seed(1)
 
   n_participants <- 20
@@ -16,6 +16,10 @@ test_data <- function(random_bm_values = FALSE) {
   bm[["VISIT2"]] <- bm[["VISITN"]] * bm[["VISITN"]]
   bm[["PARCAT"]] <- paste0("PARCAT", bm[["PARCATN"]])
   bm[["PARAM"]] <- paste0("PARAM", bm[["PARCATN"]], bm[["PARAMN"]])
+  if (anlfl_flags) {
+    bm[["ANLFL1"]] <- "Y"
+    bm[["ANLFL2"]] <- ""
+  }
   if (random_bm_values) {
     bm[["VALUE1"]] <- stats::runif(n = nrow(bm), min = 0, max = 100)
     bm[["VALUE2"]] <- stats::runif(n = nrow(bm), min = 0, max = 100)
@@ -45,6 +49,23 @@ test_data <- function(random_bm_values = FALSE) {
       VISIT2 = factor(.data[["VISIT2"]]) # NOTE(miguel): Remove to make mock process numerical visits
     )
 
+  if (anlfl_flags) {
+    bm <- bm |>
+      dplyr::mutate(
+        ANLFL1 = factor(.data[["ANLFL1"]]),
+        ANLFL2 = factor(.data[["ANLFL2"]])
+      )
+
+    bm2 <- bm
+    bm2[["VALUE1"]] <- -bm2[["VALUE1"]]
+    bm2[["VALUE2"]] <- -bm2[["VALUE2"]]
+    bm2[["VALUE3"]] <- -bm2[["VALUE3"]]
+    bm2[["ANLFL1"]] <- factor("")
+    bm2[["ANLFL2"]] <- factor("Y")
+
+    bm <- rbind(bm, bm2)
+  }
+
   # Duplicate for the rest of test cases, default with no default, default, bookmark, setup
   sl <- dplyr::mutate(
     sl,
@@ -58,7 +79,6 @@ test_data <- function(random_bm_values = FALSE) {
   for (col in names(sl)) {
     attr(sl[[col]], "label") <- paste("Label of", col)
   }
-
   list(bm = bm, sl = sl)
 }
 

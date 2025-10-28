@@ -13,6 +13,7 @@ boxplot_server(
   par_var = "PARAM",
   value_vars = "AVAL",
   visit_var = "AVISIT",
+  anlfl_vars = NULL,
   subjid_var = "USUBJID",
   default_cat = NULL,
   default_par = NULL,
@@ -34,13 +35,17 @@ Dataframes as described in the \verb{Input dataframes} section}
 
 a reactive indicating when the dataset has possibly changed its columns}
 
-\item{cat_var, par_var, visit_var, }{\verb{[character(1)]}
+\item{cat_var, par_var, visit_var}{\verb{[character(1)]}
 
 Columns from \code{bm_dataset} that correspond to the parameter category, parameter and visit}
 
 \item{value_vars}{\verb{[character(n)]}
 
 Columns from \code{bm_dataset} that correspond to values of the parameters}
+
+\item{anlfl_vars}{\verb{[character(n)]}
+
+Columns from \code{bm_dataset} that correspond to analysis flags}
 
 \item{subjid_var}{\verb{[character(1)]}
 

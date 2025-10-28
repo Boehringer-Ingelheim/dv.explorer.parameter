@@ -9,6 +9,7 @@ CH_ID <- poc( # nolint
   PAR_BUTTON = "par_button",
   PAR_VALUE_TRANSFORM = "par_value",
   MULTI_PAR_VIS = "multi_par_vis",
+  ANLFL_FILTER = "anlfl_filter",
   CORR_BUTTON = "corr_button",
   CORR_METHOD = "corr_method",
   CORR_METHOD_PEARSON = "pearson",
@@ -27,6 +28,7 @@ CH_MSG <- poc( # nolint
     CAT = "Category",
     PAR_VALUE_TRANSFORM = "Value and transform",
     PAR_VISIT = "Visit",
+    ANLFL_FILTER = "Analysis Flag Filter",
     GRP_BUTTON = "Grouping",
     MAIN_GRP = "Group",
     SUB_GRP = "Subgroup",
@@ -115,7 +117,8 @@ corr_hm_UI <- function(id, default_cat = NULL, default_par = NULL, default_visit
       id = ns(CH_ID$MULTI_PAR_VIS), default_cat = default_cat,
       default_par = default_par, default_visit = default_visit
     ),
-    col_menu_UI(ns(CH_ID$PAR_VALUE_TRANSFORM))
+    col_menu_UI(ns(CH_ID$PAR_VALUE_TRANSFORM)),
+    col_menu_UI(ns(CH_ID$ANLFL_FILTER))
   )
 
   correlation_menu <- drop_menu_helper(
@@ -327,6 +330,7 @@ scatter_plot <- function(df, x_var, y_var) {
   if (y_min == y_max) y_max <- y_min + 1
   y_width <- y_max - y_min
 
+
   nx <- (x - x_min) / x_width * scatter_size
   ny <- (1 - (y - y_min) / y_width) * scatter_size
 
@@ -487,6 +491,10 @@ scatter_plot <- function(df, x_var, y_var) {
 #'
 #' Columns from `bm_dataset` that correspond to the parameter category, parameter and visit
 #'
+#' @param anlfl_vars `[character(n)]`
+#'
+#' Columns from `bm_dataset` that correspond to analysis flags
+#'
 #' @param value_vars `[character(n)]`
 #'
 #' Columns from `bm_dataset` that correspond to values of the parameters
@@ -503,6 +511,7 @@ corr_hm_server <- function(id,
                            cat_var = "PARCAT",
                            par_var = "PARAM",
                            visit_var = "AVISIT",
+                           anlfl_vars = NULL,
                            value_vars = "AVAL",
                            default_value = NULL) {
   # module constants ----
@@ -553,6 +562,18 @@ corr_hm_server <- function(id,
         name %in% VAR$VAL
       }, include_none = FALSE, default = default_value
     )
+
+    # analysis flag filter input ----
+    if (!is.null(anlfl_vars) && length(anlfl_vars) > 0) {
+      inputs[[CH_ID$ANLFL_FILTER]] <- col_menu_server(
+        id = CH_ID$ANLFL_FILTER,
+        data = v_ch_dataset,
+        label = CH_MSG$LABEL$ANLFL_FILTER,
+        include_func = function(x, name) name %in% anlfl_vars,
+        include_none = FALSE,
+        default = anlfl_vars[1]
+      )
+    }
 
     mpvs <- multi_param_visit_selector_server(
       CH_ID$MULTI_PAR_VIS, v_ch_dataset,
@@ -623,6 +644,11 @@ corr_hm_server <- function(id,
           )
         )
         subset_inputs <- c(CH_ID$PAR_VALUE_TRANSFORM, CH_ID$CORR_METHOD)
+
+        if (!is.null(inputs[[CH_ID$ANLFL_FILTER]]))  {
+          subset_inputs <- c(subset_inputs, CH_ID$ANLFL_FILTER)
+        }
+
         resolve_reactives <- function(x) {
           if (is.list(x)) {
             return(purrr::map(x, resolve_reactives))
@@ -637,6 +663,7 @@ corr_hm_server <- function(id,
     # data reactives ----
 
     data_subset <- shiny::reactive({
+
       res <- ch_subset_data(
         sel = mpvs(),
         cat_col = VAR$CAT,
@@ -644,7 +671,8 @@ corr_hm_server <- function(id,
         val_col = v_input_subset()[[CH_ID$PAR_VALUE_TRANSFORM]],
         vis_col = VAR$VIS,
         bm_ds = v_ch_dataset(),
-        subj_col = VAR$SBJ
+        subj_col = VAR$SBJ,
+        anlfl_col = v_input_subset()[[CH_ID$ANLFL_FILTER]]
       )
 
       shiny::validate(
@@ -702,7 +730,6 @@ corr_hm_server <- function(id,
       click <- v_click_xy()
       x_var <- click[["x"]]
       y_var <- click[["y"]]
-
       df <- data_subset()
       df <- df[df[[CNT$PAR]] %in% c(x_var, y_var), ]
       na_inf_idx <- is.na(df[[CNT$VAL]]) | !is.finite(df[[CNT$VAL]])
@@ -813,18 +840,19 @@ corr_hm_server <- function(id,
 #' |xx|xx|xx|xx|xx|
 #'
 #' @keywords internal
-ch_subset_data <- function(sel, cat_col, par_col, val_col, vis_col, bm_ds, subj_col) {
+ch_subset_data <- function(sel, cat_col, par_col, val_col, vis_col,
+                           bm_ds, subj_col, anlfl_col = NULL) {
   cat <- unique(sel[[CNT$CAT]])
   par <- unique(sel[[CNT$PAR]])
   vis <- unique(sel[[CNT$VIS]])
 
   paste_par_vis <- function(p, v) paste0(p, " - ", v)
   sel_par_vis <- paste_par_vis(sel[[CNT$PAR]], sel[[CNT$VIS]])
-
   res <- subset_bds_param(
     ds = bm_ds, par = par, par_col = par_col,
     cat = cat, cat_col = cat_col, val_col = val_col,
-    vis = vis, vis_col = vis_col, subj_col = subj_col
+    vis = vis, vis_col = vis_col, subj_col = subj_col,
+    anlfl_col = anlfl_col
   )
 
   shiny::validate(
@@ -873,6 +901,7 @@ mod_corr_hm <- function(module_id, bm_dataset_name,
                         cat_var = "PARCAT",
                         par_var = "PARAM",
                         visit_var = "AVISIT",
+                        anlfl_vars = NULL,
                         value_vars = "AVAL",
                         default_cat = NULL, default_par = NULL, default_visit = NULL,
                         default_value = NULL) {
@@ -885,7 +914,7 @@ mod_corr_hm <- function(module_id, bm_dataset_name,
         id = module_id,
         bm_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[bm_dataset_name]]),
         default_value = default_value, subjid_var = subjid_var, cat_var = cat_var, par_var = par_var,
-        visit_var = visit_var, value_vars = value_vars
+        visit_var = visit_var, anlfl_vars = anlfl_vars, value_vars = value_vars
       )
     },
     module_id = module_id
@@ -903,6 +932,7 @@ mod_corr_hm_API_docs <- list(
   cat_var = "",
   par_var = "",
   visit_var = "",
+  anlfl_vars = "",
   value_vars = "",
   default_cat = "",
   default_par = "",
@@ -917,6 +947,8 @@ mod_corr_hm_API_spec <- TC$group(
   cat_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("map_character_to_factor"),
   par_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("map_character_to_factor"),
   visit_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())) |> TC$flag("map_character_to_factor"),
+  anlfl_vars = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |>
+    TC$flag("zero_or_more", "optional"),
   value_vars = TC$col("bm_dataset_name", TC$numeric()) |> TC$flag("one_or_more"),
   default_cat = TC$choice_from_col_contents("cat_var") |> TC$flag("zero_or_more", "optional"),
   default_par = TC$choice_from_col_contents("par_var") |> TC$flag("zero_or_more", "optional"),
@@ -927,7 +959,7 @@ mod_corr_hm_API_spec <- TC$group(
 
 check_mod_corr_hm <- function(
     afmm, datasets, module_id, bm_dataset_name, subjid_var, cat_var, par_var, visit_var,
-    value_vars, default_cat, default_par, default_visit, default_value) {
+    anlfl_vars, value_vars, default_cat, default_par, default_visit, default_value) {
   warn <- CM$container()
   err <- CM$container()
 
@@ -936,7 +968,7 @@ check_mod_corr_hm <- function(
 
   OK <- check_mod_corr_hm_auto(
     afmm, datasets, module_id, bm_dataset_name, subjid_var, cat_var, par_var, visit_var,
-    value_vars, default_cat, default_par, default_visit, default_value,
+    anlfl_vars, value_vars, default_cat, default_par, default_visit, default_value,
     warn, err
   )
 
@@ -946,11 +978,25 @@ check_mod_corr_hm <- function(
     OK[["subjid_var"]] <- CM$assert(err, is.factor(dataset[[subjid_var]]), "Column referenced by `subjid_var` should be a factor.")
   }
 
-  if (OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] && OK[["visit_var"]]) {
-    CM$check_unique_sub_cat_par_vis(
-      datasets, "bm_dataset_name", bm_dataset_name,
-      subjid_var, cat_var, par_var, visit_var, warn, err
-    )
+  if (OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] && OK[["visit_var"]] && OK[["anlfl_vars"]]) {
+
+    if (!is.null(anlfl_vars)) {
+      # Check grouping values are unique for specified analysis flags
+      for (anlfl_var in anlfl_vars) {
+        CM$check_unique_sub_cat_par_vis(
+          datasets, "bm_dataset_name", bm_dataset_name,
+          subjid_var, cat_var, par_var, visit_var, anlfl_var,
+          warn = warn, err = err
+        )
+      }
+    } else {
+      CM$check_unique_sub_cat_par_vis(
+        datasets, "bm_dataset_name", bm_dataset_name,
+        subjid_var, cat_var, par_var, visit_var,
+        warn = warn, err = err
+      )
+    }
+
   }
 
   res <- list(warnings = warn[["messages"]], errors = err[["messages"]])
