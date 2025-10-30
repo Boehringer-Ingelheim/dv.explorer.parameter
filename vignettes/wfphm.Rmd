@@ -3,8 +3,11 @@ title: "Waterfall plus heatmap module"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Waterfall plus heatmap module}
-  %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
 ```{r, include = FALSE}
@@ -74,9 +77,10 @@ rest of the plots follow a particular pattern.
 
 # Mandatory Arguments for the module
 
-[dv.explorer.parameter::mod_wfphm()] module uses several arguments with the following two being mandatory and
-the rest optional. Some of the optional As part of app creation, the app
-creator should specify the values for these arguments as applicable.
+[dv.explorer.parameter::mod_wfphm()] module uses several arguments with
+the following two being mandatory and the rest optional. Some of the
+optional As part of app creation, the app creator should specify the
+values for these arguments as applicable.
 
 **Mandatory Arguments**
 
@@ -84,12 +88,11 @@ creator should specify the values for these arguments as applicable.
     in the app.
 
 -   `bm_dataset_name` : The name of dataset contains the variables to be
-    displayed on the waterfall and parameter heatmap plots in the WfpHm module.
-    The dataset should at
-    least have the columns with names specified for the *cat_var*,
-    *par_var*, *value_vars*, *visit_var* and *subjid_var* optional
-    arguments. The default values for these optional arguments if not
-    specified are defined below.
+    displayed on the waterfall and parameter heatmap plots in the WfpHm
+    module. The dataset should at least have the columns with names
+    specified for the *cat_var*, *par_var*, *value_vars*, *visit_var*
+    and *subjid_var* optional arguments. The default values for these
+    optional arguments if not specified are defined below.
 
     -   `cat_var`: "PARCAT1"
     -   `par_var`: "PARAM"
@@ -99,19 +102,21 @@ creator should specify the values for these arguments as applicable.
     -   `visit_var`: "AVISIT"
     -   `subjid_var`: "SUBJID"
 
--   `group_dataset_name` : The name of dataset used to define groups in the waterfall plot and the variables
-    to be displayed in the continuous and categorical heatmaps.
+-   `group_dataset_name` : The name of dataset used to define groups in
+    the waterfall plot and the variables to be displayed in the
+    continuous and categorical heatmaps.
 
     The dataset should at least have the columns with names:
+
     -   `subjid_var`: "SUBJID"
 
-Refer to
-`dv.explorer.parameter::mod_wfphm()` for the complete list of arguments and their description.
+Refer to `dv.explorer.parameter::mod_wfphm()` for the complete list of
+arguments and their description.
 
 # Input dataset
 
-The `mod_wfphm` module is designed to work with [ADaM Basic Data Structure
-(BDS) using
+The `mod_wfphm` module is designed to work with [ADaM Basic Data
+Structure (BDS) using
 PARAMCD](https://www.cdisc.org/kb/examples/adam-basic-data-structure-bds-using-paramcd-80288192).
 The default values of arguments for the module matches the naming of
 this standard dataset.
@@ -132,8 +137,8 @@ to illustrate the basic features of the module. More complex ones will
 be created in the later part of the guide to describe additional
 features of the module.
 
-This example datasets includes only a subset of the columns from the ADaM
-standard dataset mentioned above.
+This example datasets includes only a subset of the columns from the
+ADaM standard dataset mentioned above.
 
 ```{r}
 example_dataset <- list(
@@ -153,11 +158,11 @@ example_dataset <- list(
 )
 ```
 
-``` {r}
+```{r}
 DT::datatable(example_dataset[["adsl"]], rownames = FALSE)
 ```
 
-``` {r}
+```{r}
 DT::datatable(example_dataset[["adbm"]], rownames = FALSE)
 ```
 
@@ -172,7 +177,8 @@ module_list <- list(
   "WFPHM" = dv.explorer.parameter::mod_wfphm(
     module_id = "wfphm",
     bm_dataset_name = "adbm",
-    group_dataset_name = "adsl"
+    group_dataset_name = "adsl",
+    subjid_var = "SUBJID"
   )
 )
 
@@ -190,7 +196,7 @@ Each plot in the module is driven by selections made under the
 corresponding menu at the top. Various options to select the variables
 to be plotted are available from the menu.
 
-![](images/menu2.png){width="100%"}
+![](images/menu2_.png){width="100%"}
 
 Menus in this module are data-driven when possible, this means that
 their content changes depending on the content of the dataset.
@@ -201,73 +207,52 @@ contents and how they relate to the dataset.
 ## Waterfall plot
 
 This plot shows a bar chart representing the value of a variable per
-subject in the adbm dataset in descending order. The variable shown in the
-plot is selected from the waterfall menu option
-
-### Plotting columns
-
-::: {style="display: flex;"}
-<div>
-
-![](images/wf_value_col.png){width="50%"}
-
-</div>
-
-<div>
-
-![](images/wf_grouping_col.png){width="50%"}
-
-</div>
-:::
-
-Dropdown menus for this plot are filled up the following way:
-
--   The *Value* dropdown will contain all the columns in the bm dataset
-    that are numerical
--   The *Grouping* dropdown will contain all the columns in the group dataset
-    that are categorical
-
-As per the selections made in the screenshot above:
-
--   The height of the bar in the chart represent the value of the
-    *WEIGHT* variable for each participant
--   Each bar is colored and labelled according to the *SUBJID*. We can
-    change this selection for a more meaningful one, for example
-    *COUNTRY*
+subject in the adbm dataset in descending order, at a particular visit.
+The variable shown in the plot is selected from the waterfall menu option
 
 ### Plotting parameters
 
 The [ADaM Basic Data Structure (BDS) using
 PARAMCD](https://www.cdisc.org/kb/examples/adam-basic-data-structure-bds-using-paramcd-80288192)
 is used to store parameter values for a given subject across several
-visits. Any of these parameters can also be selected to be plotted in
-the waterfall. To do so the *"Use Parameters"* check box in the menu
-should be checked.
+visits. Any of these parameters can be selected to be plotted in
+the waterfall.
 
-::: {style="display: flex;"}
+:::::: {style="display: flex;"}
 <div>
 
-![](images/wf_cat_param.png){width="75%"}
+![](images/wf_cat_param_.png){width="75%"}
 
 </div>
 
 <div>
 
-![](images/wf_par_param.png){width="75%"}
+![](images/wf_par_param_.png){width="75%"}
 
 </div>
 
 <div>
 
-![](images/wf_visit_param.png){width="75%"}
+![](images/wf_value_param_.png){width="75%"}
 
 </div>
-:::
 
-Checking the *"Use Parameter"* box at the top of the menu changes the
-set of avaliable dropdown menus.
+<div>
 
-Dropdown menus are filled up in the following way:
+![](images/wf_visit_param_.png){width="75%"}
+
+</div>
+
+
+<div>
+
+![](images/wf_grouping_param_.png){width="75%"}
+
+</div>
+
+::::::
+
+Dropdown menus for this plot are filled up the following way:
 
 -   The *Category* dropdown will contain all the factor levels in the
     *PARCAT1* column.
@@ -278,6 +263,8 @@ Dropdown menus are filled up in the following way:
     in the dataset. We will cover this menu in a subsequent section.
 -   The *Visit* dropdown will contain all the factor levels in the
     *AVISIT* column.
+-   The *Grouping* dropdown will contain all the columns in the group
+    dataset that are categorical
 
 According to the selections made in the screenshot:
 
@@ -286,12 +273,47 @@ According to the selections made in the screenshot:
     -   as listed in the *AVAL* column
     -   for the visit *V1*
     -   for each participant
--   As in the previous section, each bar is colored and labelled
+-   Each bar is colored and labelled
     according to the *SUBJID*
 -   A gray line is shown for participant 3 value because that particular
-    *Parameter*, *Visit*, *Value* combination is missing
+    *Parameter*, *Visit*, *Value* combination is missing (there is a issue here as
+    currently the line is not grey but yellow!)
 
-![](images/wf_app_param.png){width="100%"}
+![](images/wf_app_param_.png){width="100%"}
+
+### Plotting demographic baseline information
+
+It is also possible to plot subject level / demographic data. To do so 
+the *"Display demographic baseline information"* check box in the menu should be checked.
+
+::::: {style="display: flex;"}
+<div>
+
+![](images/wf_value_col_.png){width="50%"}
+
+</div>
+
+<div>
+
+![](images/wf_grouping_col_.png){width="50%"}
+
+</div>
+:::::
+
+Dropdown menus for this plot are filled up the following way:
+
+-   The *Value* dropdown will contain all the columns in the bm dataset
+    that are numerical
+-   The *Grouping* dropdown will contain all the columns in the group
+    dataset that are categorical
+
+As per the selections made in the screenshot above:
+
+-   The height of the bar in the chart represent the value of the
+    *WEIGHT* variable for each participant
+-   Each bar is colored and labelled according to the *SUBJID*. We can
+    change this selection for a more meaningful one, for example
+    *COUNTRY*
 
 ### The Value Dropdown
 
@@ -300,9 +322,10 @@ represent the parameter values, usually *AVAL* represents the raw value.
 But deriving new values is quite common for example *Change from
 Baseline* or transformation of the value such as logarithms.
 
-By default, the module have a list of common parameter value columns that,
-if present in the dataset, will appear in the menu (e.g.: "AVAL", "CHG"
-or "PCHG". See `dv.explorer.parameter::wfphm_server` for a full list)
+By default, the module have a list of common parameter value columns
+that, if present in the dataset, will appear in the menu (e.g.: "AVAL",
+"CHG" or "PCHG". See `dv.explorer.parameter::wfphm_server` for a full
+list)
 
 But if a custom column is derived we can modify the call to the module
 so it is included in the menu as seen in the example below.
@@ -317,7 +340,8 @@ module_list_custom_aval <- list(
     module_id = "wfphm",
     value_vars = c("CUSTOM_AVAL"), # We have added this argument
     bm_dataset_name = "adbm",
-    group_dataset_name = "adsl"
+    group_dataset_name = "adsl",
+    subjid_var = "SUBJID"
   )
 )
 dv.manager::run_app(
@@ -328,7 +352,7 @@ dv.manager::run_app(
 )
 ```
 
-![](images/wf_custom_aval_param_1.png){width="25%"}
+![](images/wf_custom_aval_param_1_.png){width="25%"}
 
 The new argument in the module call indicates that *CUSTOM_AVAL* is a
 column that contains values associated to parameters and is therefore
@@ -342,7 +366,8 @@ module_list_custom_aval <- list(
     module_id = "wfphm",
     value_vars = c("AVAL", "CUSTOM_AVAL"), # We have added this argument
     bm_dataset_name = "adbm",
-    group_dataset_name = "adsl"
+    group_dataset_name = "adsl",
+    subjid_var = "SUBJID"
   )
 )
 
@@ -354,7 +379,7 @@ dv.manager::run_app(
 )
 ```
 
-![](images/wf_custom_aval_param_2.png){width="25%"}
+![](images/wf_custom_aval_param_2_.png){width="25%"}
 
 ## Outliers menu
 
@@ -362,7 +387,7 @@ At the bottom of the waterfall menu we can define which values are
 considered outliers. The outliers will be colored in gray and labelled
 accordingly.
 
-![](images/wf_outlier_param.png){width="100%"}
+![](images/wf_outlier_param_.png){width="100%"}
 
 ## Continuous and categorical heatmap
 
@@ -373,8 +398,8 @@ and a continuous heatmaps.
 
 Dropdown menu is filled up the following way:
 
--   The *Categorical* dropdown will contain all the columns in the
-    group dataset that are categorical
+-   The *Categorical* dropdown will contain all the columns in the group
+    dataset that are categorical
 
 As per the selections made in the screenshot:
 
@@ -390,8 +415,8 @@ As per the selections made in the screenshot:
 
 Dropdown menus is filled up the following way:
 
--   The *Continuous* dropdown will contain all the columns in the
-    group dataset that are numerical
+-   The *Continuous* dropdown will contain all the columns in the group
+    dataset that are numerical
 
 As per the selections made in the screenshot:
 
@@ -401,16 +426,16 @@ As per the selections made in the screenshot:
 
 ![](images/cc_cont.png){width="100%"}
 
-
 ## Parameter heatmap
 
 The last plot is the parameter heatmap that plots a heatmap where the
 rows represent different parameters.
 
-The menus in this plot follow similar rules to those presented in the 
+The menus in this plot follow similar rules to those presented in the
 Plotting Parameter section in the Waterfall plot with the difference
-that the *Category* and *Parameter* menus now accept selecting multiple values.
-The *Transformation* menu will be covered in a separate section below.
+that the *Category* and *Parameter* menus now accept selecting multiple
+values. The *Transformation* menu will be covered in a separate section
+below.
 
 ![](images/hmpar_app.png){width="100%"}
 
@@ -442,8 +467,9 @@ as Z-score or Min-Max. The transformation is applied to each parameter
 (i.e. to each row of the heatmap) independently.
 
 ::: {style="padding: 1em 1em 1em 1em;  margin-bottom: 5px;  border: 1px solid #64a1ce;  border-radius: 5px;  background:#f5f5f5 5px center/3em no-repeat;"}
-![](images/Note.png){width="4%"} **Note** Outliers definition, described in the previous section, does
-not affect the calculation of the transformations
+![](images/Note.png){width="4%"} **Note** Outliers definition, described
+in the previous section, does not affect the calculation of the
+transformations
 :::
 
 <br>
@@ -451,11 +477,11 @@ not affect the calculation of the transformations
 ![](images/hmpar_transformation.png){width="25%"}
 
 By default, the module include several transformation (See
-`dv.explorer.parameter::wfphm_server` for a full list) but the user can include
-custom transformations if needed for their data. The function is applied
-to each row independently, meaning the function receives a vector with
-all the values from a row and it must returned a similar vector with the
-transformed values.
+`dv.explorer.parameter::wfphm_server` for a full list) but the user can
+include custom transformations if needed for their data. The function is
+applied to each row independently, meaning the function receives a
+vector with all the values from a row and it must returned a similar
+vector with the transformed values.
 
 ```{r, eval = FALSE}
 module_list_custom_transformation <- list( # nolint
@@ -481,6 +507,15 @@ dv.manager::run_app(
 ```
 
 ![](images/hmpar_transformation_custom.png){width="25%"}
+
+
+## Download chart menu
+
+The download chart menu allows
+
+
+![](images/download_chart.png){width="100%"}
+
 
 ## Using column labels in the menus
 
