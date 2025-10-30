@@ -11,6 +11,7 @@ wfphm_server(
   cat_var = "PARCAT1",
   par_var = "PARAM",
   visit_var = "AVISIT",
+  anlfl_vars = NULL,
   subjid_var = "USUBJID",
   value_vars = "AVAL",
   bar_group_palette = list(),

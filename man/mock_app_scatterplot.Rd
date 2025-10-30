@@ -8,7 +8,8 @@ mock_app_scatterplot(
   dry_run = FALSE,
   update_query_string = TRUE,
   srv_defaults = list(),
-  ui_defaults = list()
+  ui_defaults = list(),
+  anlfl_flags = FALSE
 )
 }
 \arguments{

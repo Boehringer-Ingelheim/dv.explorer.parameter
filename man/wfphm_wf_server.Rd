@@ -18,6 +18,7 @@ wfphm_wf_server(
     viridisLite::viridis(length(unique(x))))
  },
   bar_group_palette = list(),
+  anlfl_reactive = NULL,
   margin
 )
 }

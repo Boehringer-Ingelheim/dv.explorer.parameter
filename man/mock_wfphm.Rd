@@ -11,13 +11,14 @@
 \alias{mock_app_wfphm}
 \title{Mock functions}
 \usage{
-mock_wfphm_mm_app()
+mock_wfphm_mm_app(anlfl_flags = FALSE)
 
 mock_app_wfphm2(
   dry_run = FALSE,
   update_query_string = TRUE,
   srv_defaults = list(),
-  ui_defaults = list()
+  ui_defaults = list(),
+  anlfl_flags = FALSE
 )
 
 mock_app_hmcat(
@@ -38,21 +39,24 @@ mock_app_hmpar(
   dry_run = FALSE,
   update_query_string = TRUE,
   srv_args = list(),
-  ui_args = list()
+  ui_args = list(),
+  anlfl_flags = FALSE
 )
 
 mock_app_wf(
   dry_run = FALSE,
   update_query_string = TRUE,
   srv_args = list(),
-  ui_args = list()
+  ui_args = list(),
+  anlfl_flags = FALSE
 )
 
 mock_app_wfphm(
   dry_run = FALSE,
   update_query_string = TRUE,
   srv_args = list(),
-  ui_args = list()
+  ui_args = list(),
+  anlfl_flags = FALSE
 )
 }
 \arguments{

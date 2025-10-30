@@ -4,7 +4,7 @@
 \alias{mock_app_correlation_hm_mm}
 \title{Mock corr hm app}
 \usage{
-mock_app_correlation_hm_mm()
+mock_app_correlation_hm_mm(anlfl_flags = FALSE)
 }
 \description{
 Mock corr hm app

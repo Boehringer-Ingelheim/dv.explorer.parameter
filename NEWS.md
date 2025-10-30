@@ -1,7 +1,7 @@
-# dv.explorer.parameter 0.1.8-9000
+# dv.explorer.parameter 0.1.9
 
 * boxplot, lineplot, scatter plot, scatter plot matrix, correlation heatmap, waterfall plus heatmap :
-    * Added the option to filter the input dataset based on Yes/No flag variables that exist in it.
+    * Added the option to filter the input dataset based on Y/N flag variables that exist in it.
 
 # dv.explorer.parameter 0.1.8
 

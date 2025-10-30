@@ -16,7 +16,7 @@ bp_subset_data(
   bm_ds,
   group_ds,
   subj_col,
-  anlfl_col
+  anlfl_col = NULL
 )
 }
 \arguments{

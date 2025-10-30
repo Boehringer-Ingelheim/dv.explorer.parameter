@@ -9,7 +9,8 @@ mock_app_lineplot(
   update_query_string = TRUE,
   srv_defaults = list(),
   ui_defaults = list(),
-  data = test_data()
+  data = test_data(anlfl_flags = anlfl_flags),
+  anlfl_flags = FALSE
 )
 }
 \arguments{

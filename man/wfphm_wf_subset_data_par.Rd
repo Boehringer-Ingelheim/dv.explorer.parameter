@@ -15,7 +15,8 @@ wfphm_wf_subset_data_par(
   color_col,
   bm_ds,
   group_ds,
-  subj_col
+  subj_col,
+  anlfl_col = NULL
 )
 }
 \arguments{
@@ -37,9 +38,10 @@ Values from \code{vis_col} to be subset}
 
 data frames to be used as inputs in \link{subset_bds_param} and \link{subset_adsl}}
 
-\item{subj_col}{\verb{[character(1)]}
+\item{subj_col, par_col, cat_col, vis_col, anlfl_col}{\verb{[character(1)]}
 
-Column for subject id. \code{subj_col} must be a factor}
+Column for subject id, category, parameter, visit and analysis flag. All
+specified columns must be factors. Analysis flag is optional.}
 }
 \value{
 \verb{[data.frame()]}
