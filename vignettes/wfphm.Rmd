@@ -196,7 +196,7 @@ Each plot in the module is driven by selections made under the
 corresponding menu at the top. Various options to select the variables
 to be plotted are available from the menu.
 
-![](images/menu2_.png){width="100%"}
+![](images/menu2.png){width="100%"}
 
 Menus in this module are data-driven when possible, this means that
 their content changes depending on the content of the dataset.
@@ -208,7 +208,7 @@ contents and how they relate to the dataset.
 
 This plot shows a bar chart representing the value of a variable per
 subject in the adbm dataset in descending order, at a particular visit.
-The variable shown in the plot is selected from the waterfall menu option
+The variable shown in the plot is selected from the waterfall menu option.
 
 ### Plotting parameters
 
@@ -221,32 +221,32 @@ the waterfall.
 :::::: {style="display: flex;"}
 <div>
 
-![](images/wf_cat_param_.png){width="75%"}
+![](images/wf_cat_param.png){width="75%"}
 
 </div>
 
 <div>
 
-![](images/wf_par_param_.png){width="75%"}
+![](images/wf_par_param.png){width="75%"}
 
 </div>
 
 <div>
 
-![](images/wf_value_param_.png){width="75%"}
+![](images/wf_value_param.png){width="75%"}
 
 </div>
 
 <div>
 
-![](images/wf_visit_param_.png){width="75%"}
+![](images/wf_visit_param.png){width="75%"}
 
 </div>
 
 
 <div>
 
-![](images/wf_grouping_param_.png){width="75%"}
+![](images/wf_grouping_param.png){width="75%"}
 
 </div>
 
@@ -279,7 +279,7 @@ According to the selections made in the screenshot:
     *Parameter*, *Visit*, *Value* combination is missing (there is a issue here as
     currently the line is not grey but yellow!)
 
-![](images/wf_app_param_.png){width="100%"}
+![](images/wf_app_param.png){width="100%"}
 
 ### Plotting demographic baseline information
 
@@ -289,13 +289,13 @@ the *"Display demographic baseline information"* check box in the menu should be
 ::::: {style="display: flex;"}
 <div>
 
-![](images/wf_value_col_.png){width="50%"}
+![](images/wf_value_col.png){width="50%"}
 
 </div>
 
 <div>
 
-![](images/wf_grouping_col_.png){width="50%"}
+![](images/wf_grouping_col.png){width="50%"}
 
 </div>
 :::::
@@ -352,7 +352,7 @@ dv.manager::run_app(
 )
 ```
 
-![](images/wf_custom_aval_param_1_.png){width="25%"}
+![](images/wf_custom_aval_param_1.png){width="25%"}
 
 The new argument in the module call indicates that *CUSTOM_AVAL* is a
 column that contains values associated to parameters and is therefore
@@ -379,7 +379,7 @@ dv.manager::run_app(
 )
 ```
 
-![](images/wf_custom_aval_param_2_.png){width="25%"}
+![](images/wf_custom_aval_param_2.png){width="25%"}
 
 ## Outliers menu
 
@@ -387,7 +387,7 @@ At the bottom of the waterfall menu we can define which values are
 considered outliers. The outliers will be colored in gray and labelled
 accordingly.
 
-![](images/wf_outlier_param_.png){width="100%"}
+![](images/wf_outlier_param.png){width="100%"}
 
 ## Continuous and categorical heatmap
 
@@ -494,7 +494,8 @@ module_list_custom_transformation <- list( # nolint
       }
     ),
     bm_dataset_name = "adbm",
-    group_dataset_name = "adsl"
+    group_dataset_name = "adsl",
+    subjid_var = "SUBJID"     
   )
 )
 
@@ -511,7 +512,7 @@ dv.manager::run_app(
 
 ## Download chart menu
 
-The download chart menu allows
+The download chart menu allows to save a configuration of visualisations to your local environment, as a .png or .svg file. 
 
 
 ![](images/download_chart.png){width="100%"}
@@ -526,7 +527,7 @@ the entries by setting a label attribute for the columns.
 # Assign some labels to the dataset
 example_dataset_labelled <- example_dataset
 attr(example_dataset_labelled[["adbm"]][["SUBJID"]], "label") <- "Subject ID"
-attr(example_dataset_labelled[["adbm"]][["SEX"]], "label") <- "Subject Sex"
+attr(example_dataset_labelled[["adsl"]][["SEX"]], "label") <- "Subject Sex"
 attr(example_dataset_labelled[["adbm"]][["PARCAT1"]], "label") <- "Parameter Category"
 
 dv.manager::run_app(
