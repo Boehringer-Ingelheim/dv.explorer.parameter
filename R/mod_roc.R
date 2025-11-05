@@ -1127,14 +1127,14 @@ check_mod_roc <- function(
   if (OK[["subjid_var"]] && OK[["pred_cat_var"]] && OK[["pred_par_var"]] && OK[["pred_visit_var"]]) {
     CM$check_unique_sub_cat_par_vis(
       datasets, "pred_dataset_name", pred_dataset_name,
-      subjid_var, pred_cat_var, pred_par_var, pred_visit_var, NULL, warn = warn, err = err
+      subjid_var, pred_cat_var, pred_par_var, pred_visit_var, anlfl = NULL, warn = warn, err = err
     )
   }
 
   if (OK[["subjid_var"]] && OK[["resp_cat_var"]] && OK[["resp_par_var"]] && OK[["resp_visit_var"]]) {
     CM$check_unique_sub_cat_par_vis(
       datasets, "resp_dataset_name", resp_dataset_name,
-      subjid_var, resp_cat_var, resp_par_var, resp_visit_var,
+      subjid_var, resp_cat_var, resp_par_var, resp_visit_var, anlfl = NULL,
       warn, err
     )
   }
