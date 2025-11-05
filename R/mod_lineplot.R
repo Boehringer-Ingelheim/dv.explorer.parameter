@@ -787,7 +787,7 @@ lineplot_server <- function(id,
     v_group_dataset <- shiny::reactive(
       {
         ac <- checkmate::makeAssertCollection()
-        checkmate::assert_data_frame(group_dataset(), min.rows = 1, .var.name = ns("group_dataset"), add = ac)
+        checkmate::assert_data_frame(group_dataset(), .var.name = ns("group_dataset"), add = ac)
         checkmate::assert_names(
           names(group_dataset()),
           type = "unique",
@@ -815,7 +815,7 @@ lineplot_server <- function(id,
         df <- bm_dataset()
         # NOTE: None of these checks should never fail because the CM$module wrapper should prevent them
         ac <- checkmate::makeAssertCollection()
-        checkmate::assert_data_frame(df, min.rows = 1, .var.name = ns("bm_dataset"), add = ac)
+        checkmate::assert_data_frame(df, .var.name = ns("bm_dataset"), add = ac)
         checkmate::assert_names(
           names(df),
           type = "unique",
