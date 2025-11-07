@@ -353,7 +353,7 @@ scatterplot_server <- function(id,
     v_group_dataset <- shiny::reactive(
       {
         ac <- checkmate::makeAssertCollection()
-        checkmate::assert_data_frame(group_dataset(), min.rows = 1, .var.name = ns("group_dataset"))
+        checkmate::assert_data_frame(group_dataset(), .var.name = ns("group_dataset"))
         checkmate::assert_names(
           names(group_dataset()),
           type = "unique",
@@ -361,6 +361,12 @@ scatterplot_server <- function(id,
         )
         checkmate::assert_factor(group_dataset()[[VAR$SBJ]], add = ac, .var.name = ns("group_dataset"))
         checkmate::reportAssertions(ac)
+        shiny::validate(
+          shiny::need(
+            nrow(group_dataset()) > 0,
+            "Group dataset has 0 rows"
+          )
+        )
         group_dataset()
       },
       label = ns(" v_group_dataset")
@@ -369,7 +375,7 @@ scatterplot_server <- function(id,
     v_bm_dataset <- shiny::reactive(
       {
         ac <- checkmate::makeAssertCollection()
-        checkmate::assert_data_frame(bm_dataset(), min.rows = 1, .var.name = ns("bm_dataset"))
+        checkmate::assert_data_frame(bm_dataset(), .var.name = ns("bm_dataset"))
         checkmate::assert_names(
           names(bm_dataset()),
           type = "unique",
@@ -378,6 +384,7 @@ scatterplot_server <- function(id,
           ),
           .var.name = ns("bm_dataset")
         )
+        if (nrow(bm_dataset()) > 0) {
         unique_par_names <- bm_dataset() |>
           dplyr::distinct(dplyr::across(c(VAR$CAT, VAR$PAR))) |>
           dplyr::group_by(dplyr::across(c(VAR$PAR))) |>
@@ -387,8 +394,17 @@ scatterplot_server <- function(id,
 
         unique_par_names <- unique_par_names == 1
         checkmate::assert_true(unique_par_names, .var.name = ns("bm_dataset"))
+        }
         checkmate::assert_factor(bm_dataset()[[VAR$SBJ]], .var.name = ns("bm_dataset"))
         checkmate::reportAssertions(ac)
+
+        shiny::validate(
+          shiny::need(
+            nrow(bm_dataset()) > 0,
+            "Parameter dataset has 0 rows"
+          )
+        )
+
         bm_dataset()
       },
       label = ns("v_bm_dataset")
