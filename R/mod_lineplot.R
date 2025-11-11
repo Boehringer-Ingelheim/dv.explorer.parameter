@@ -787,15 +787,24 @@ lineplot_server <- function(id,
     v_group_dataset <- shiny::reactive(
       {
         ac <- checkmate::makeAssertCollection()
-        checkmate::assert_data_frame(group_dataset(), min.rows = 1, .var.name = ns("group_dataset"), add = ac)
+        checkmate::assert_data_frame(group_dataset(), .var.name = ns("group_dataset"), add = ac)
         checkmate::assert_names(
           names(group_dataset()),
           type = "unique",
           must.include = c(VAR$SBJ), .var.name = ns("group_dataset"),
           add = ac
         )
+
         checkmate::assert_factor(group_dataset()[[VAR$SBJ]], add = ac, .var.name = ns("group_dataset"))
         checkmate::reportAssertions(ac)
+
+        shiny::validate(
+          shiny::need(
+            nrow(group_dataset()) > 0,
+            "Group dataset has 0 rows"
+          )
+        )
+
         group_dataset()
       },
       label = ns(" v_group_dataset")
@@ -806,7 +815,7 @@ lineplot_server <- function(id,
         df <- bm_dataset()
         # NOTE: None of these checks should never fail because the CM$module wrapper should prevent them
         ac <- checkmate::makeAssertCollection()
-        checkmate::assert_data_frame(df, min.rows = 1, .var.name = ns("bm_dataset"), add = ac)
+        checkmate::assert_data_frame(df, .var.name = ns("bm_dataset"), add = ac)
         checkmate::assert_names(
           names(df),
           type = "unique",
@@ -817,18 +826,27 @@ lineplot_server <- function(id,
           add = ac
         )
 
-        unique_par_names <- df |>
-          dplyr::distinct(dplyr::across(c(VAR$CAT, VAR$PAR))) |>
-          dplyr::group_by(dplyr::across(c(VAR$PAR))) |>
-          dplyr::tally() |>
-          dplyr::pull(.data[["n"]]) |>
-          max()
+        if (nrow(bm_dataset()) > 0) {
+          unique_par_names <- df |>
+            dplyr::distinct(dplyr::across(c(VAR$CAT, VAR$PAR))) |>
+            dplyr::group_by(dplyr::across(c(VAR$PAR))) |>
+            dplyr::tally() |>
+            dplyr::pull(.data[["n"]]) |>
+            max()
 
-        unique_par_names <- unique_par_names == 1
-        checkmate::assert_true(unique_par_names, .var.name = ns("bm_dataset"), add = ac)
+          unique_par_names <- unique_par_names == 1
+          checkmate::assert_true(unique_par_names, .var.name = ns("bm_dataset"), add = ac)
+        }
         checkmate::assert_factor(df[[VAR$SBJ]], .var.name = ns("subject column"), add = ac)
 
         checkmate::reportAssertions(ac)
+        shiny::validate(
+          shiny::need(
+            nrow(df) > 0,
+            "Parameter dataset has 0 rows"
+          )
+        )
+
         df
       },
       label = ns("v_bm_dataset")
