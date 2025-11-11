@@ -209,6 +209,8 @@ boxplot_UI <- function(id) { # nolint
 #'
 #' It must contain, at least, the column passed in the parameter, `subjid_var`.
 #'
+#' @param id Shiny ID `[character(1)]`
+#'
 #' @param bm_dataset,group_dataset `[data.frame()]`
 #'
 #' Dataframes as described in the `Input dataframes` section
@@ -726,9 +728,6 @@ boxplot_server <- function(id,
 
 #' Invoke boxplot module
 #'
-#' @details `mod_boxplot_papo` is a deprecated function that was required to use the jumping feature in combination
-#' with `dv.papo` but is no longer required. The function is still available for compatibility reasons.
-#'
 #' @param module_id `[character(1)]`
 #'
 #' Module Shiny id
@@ -902,13 +901,6 @@ dataset_info_boxplot <- function(bm_dataset_name, group_dataset_name, ...) {
 
 mod_boxplot <- CM$module(mod_boxplot, check_mod_boxplot, dataset_info_boxplot, map_afmm_mod_boxplot_auto)
 
-#' Boxplot wrapper when its output is fed into the papo module
-#' @keywords main
-#' @export
-mod_boxplot_papo <- function(...) {
-  .Deprecated("mod_boxplot_papo", msg = "'mod_boxplot_papo' is no longer required and should be replaced by 'mod_boxplot'. It is still available for compatibility purposes") # nolint
-  mod_boxplot(...)
-}
 
 # Data manipulation
 

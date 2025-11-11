@@ -69,8 +69,4 @@ A function that will be applied to the server returned value. Its default value 
 \code{mod_boxplot} is a Shiny module prepared to display data with boxplot charts with different levels of grouping.
 It also includes a set of listings with information about the population, distribution and statistical comparisons.
 }
-\details{
-\code{mod_boxplot_papo} is a deprecated function that was required to use the jumping feature in combination
-with \code{dv.papo} but is no longer required. The function is still available for compatibility reasons.
-}
 \keyword{main}

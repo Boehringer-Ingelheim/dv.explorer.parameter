@@ -45,6 +45,10 @@ It expects the following format:
 
 columns used as indicated in each of the subplots}
 
+\item{anlfl_vars}{\verb{[character(n)]}
+
+Columns from \code{bm_dataset} that correspond to analysis flags}
+
 \item{value_vars}{\verb{[character(1+)]}
 
 possible colum values. If column is labelled, label will be displayed in the value menu}

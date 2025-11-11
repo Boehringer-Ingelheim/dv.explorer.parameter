@@ -23,6 +23,8 @@ scatterplotmatrix_server(
 )
 }
 \arguments{
+\item{id}{Shiny ID \verb{[character(1)]}}
+
 \item{bm_dataset, group_dataset}{\verb{[data.frame()]}
 
 Dataframes as described in the \verb{Input dataframes} section}

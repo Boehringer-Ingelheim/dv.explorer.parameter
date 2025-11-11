@@ -264,9 +264,22 @@ WFPHM_MSG <- pack_of_constants( # nolint
 #'
 #' @name wfphm_wf
 #'
-NULL
+#' @keywords internal
+wfphm_wf <- function(id,
+                     dataset,
+                     cat_var,
+                     par_var,
+                     visit_var,
+                     subjid_var,
+                     value_vars,
+                     bar_group_palette,
+                     margin) {
+  stop("Documentation-only placeholder.")
+}
 
 #' Waterfall UI function
+#' @describeIn wfphm_wf UI
+#' @inheritParams wfphm_wf
 #' @keywords developers
 wfphm_wf_UI <- function(id) { # nolintr
 
@@ -316,7 +329,41 @@ wfphm_wf_UI <- function(id) { # nolintr
 
 # nolint start cyclocomp_linter
 #' Waterfall server function
+#'
 #' @keywords developers
+#'
+#' @param id Shiny ID `[character(1)]`
+#'
+#' @param bm_dataset,group_dataset `[data.frame()]`
+#'
+#' @param cat_var,par_var,visit_var `[character(1)]`
+#'
+#' Columns from `bm_dataset` that correspond to the parameter category, parameter and visit
+#'
+#' @param value_vars `[character(n)]`
+#'
+#' Columns from `bm_dataset` that correspond to values of the parameters
+#'
+#' @param subjid_var `[character(1)]`
+#'
+#' Column corresponding to subject ID
+#'
+#' @param .default_group_palette
+#'
+#' Function defining the default color palette for groups.
+#'
+#' @param bar_group_palette Named list mapping each group to a color
+#'   Used to override default colors returned by `.default_group_palette`
+#'   For example: `list("Placebo" = "#999999", "Treatment" = "#E69F00")`
+#'
+#' @param anlfl_reactive
+#'
+#' Optional reactive flag variable
+#'
+#' @param margin
+#'
+#' Numeric vector of plot margins (top, bottom, left, right)
+#'
 wfphm_wf_server <- function(id,
                             bm_dataset,
                             group_dataset,
@@ -869,30 +916,7 @@ wfphm_wf_rename_cols <- function(df) {
 #'
 #' @param id Shiny ID `[character(1)]`
 #'
-#' @param dataset `[shiny::reactive(data.frame) | shinymeta::metaReactive(data.frame)]`
 #'
-#' It expects the following format:
-#'
-#'  - it contains, at least, the columns specified in the parameters: `subjid_var`
-#'  - `subjid_var` columns is a factor
-#'
-#' @param subjid_var `[character(1)]`
-#'
-#' column used as indicated in the details section
-#'
-#' @param sorted_x `[factor(*) | shiny::reactive(factor(*)) | shinymeta::metaReactive(factor(*))]`
-#'
-#' indicates how the levels of `subjid_var` should be ordered in the X axis.
-#'
-#' @param cat_palette `[list(functions)]`
-#'
-#' list of functions that receive the values of the variable and returns a vector with the colors for each of the values
-#' Each palette is applied when the name of the entry in the list matches the name of the selected categorical
-#' variable
-#'
-#' @param margin `[numeric(4) | shiny::reactive(numeric(4)) | shinymeta::metaReactive(numeric(4))]`
-#'
-#'  margin to be used on each of the sides. It must contain four entries named `top`, `bottom`, `left` and `right`
 #'
 #' @return
 #'
@@ -937,6 +961,8 @@ wfphm_wf_rename_cols <- function(df) {
 NULL
 
 #' Waterfall plus heatmap categorical heatmap UI function
+#' @describeIn wfphm_hmcat UI
+#' @inheritParams wfphm_hmcat
 #' @keywords developers
 wfphm_hmcat_UI <- function(id) { # nolint
 
@@ -973,6 +999,33 @@ wfphm_hmcat_UI <- function(id) { # nolint
 }
 
 #' Waterfall plus heatmap categorical heatmap server function
+#' @describeIn wfphm_hmcat Server
+#'
+#' @param dataset `[shiny::reactive(data.frame) | shinymeta::metaReactive(data.frame)]`
+#'
+#' It expects the following format:
+#'
+#'  - it contains, at least, the columns specified in the parameters: `subjid_var`
+#'  - `subjid_var` columns is a factor
+#'
+#' @param subjid_var `[character(1)]`
+#'
+#' column used as indicated in the details section
+#'
+#' @param sorted_x `[factor(*) | shiny::reactive(factor(*)) | shinymeta::metaReactive(factor(*))]`
+#'
+#' indicates how the levels of `subjid_var` should be ordered in the X axis.
+#'
+#' @param cat_palette `[list(functions)]`
+#'
+#' list of functions that receive the values of the variable and returns a vector with the colors for each of the values
+#' Each palette is applied when the name of the entry in the list matches the name of the selected categorical
+#' variable
+#'
+#' @param margin `[numeric(4) | shiny::reactive(numeric(4)) | shinymeta::metaReactive(numeric(4))]`
+#'
+#'  margin to be used on each of the sides. It must contain four entries named `top`, `bottom`, `left` and `right`
+#'
 #' @keywords developers
 wfphm_hmcat_server <- function(id,
                                dataset,
@@ -2125,6 +2178,9 @@ wfphm_UI <- function(id, tr_choices = names(tr_mapper_def())) { # nolint
 #' @keywords developers
 #' @param bm_dataset `[shiny::reactive(data.frame) | shinymeta::metaReactive(data.frame)]`
 #' @param group_dataset `[shiny::reactive(data.frame) | shinymeta::metaReactive(data.frame)]`
+#' @param anlfl_vars `[character(n)]`
+#'
+#' Columns from `bm_dataset` that correspond to analysis flags
 #'
 #' @keywords developers
 #' @inheritParams wfphm_UI
@@ -2330,6 +2386,10 @@ tr_mapper_def <- function() {
 #' @param bm_dataset_name,group_dataset_name
 #'
 #' The name of the dataset
+#'
+#' @param anlfl_vars `[character(n)]`
+#'
+#' Columns from `bm_dataset` that correspond to analysis flags
 #'
 #' @export
 mod_wfphm <- function(

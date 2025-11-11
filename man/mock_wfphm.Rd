@@ -60,6 +60,8 @@ mock_app_wfphm(
 )
 }
 \arguments{
+\item{anlfl_flags}{indicates that the input data contain analysis flag variables or not}
+
 \item{dry_run}{Return parameters used in the call}
 
 \item{update_query_string}{automatically update query string with app state}

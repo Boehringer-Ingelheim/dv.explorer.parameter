@@ -87,9 +87,13 @@ NULL
 
 #' Correlation heatmap UI function
 #'
+#' @describeIn mod_corr_hm UI
+#' @inheritParams mod_corr_hm
+#'
 #' @keywords developers
 #'
 #' @param id `[character(1)]`
+#' @param default_corr_method Default correlation method `[character(1)]`
 #'
 #' Shiny ID
 #'

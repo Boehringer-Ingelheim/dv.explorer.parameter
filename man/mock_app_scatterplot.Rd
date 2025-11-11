@@ -18,6 +18,8 @@ mock_app_scatterplot(
 \item{update_query_string}{automatically update query string with app state}
 
 \item{ui_defaults, srv_defaults}{a list of values passed to the ui/server function}
+
+\item{anlfl_flags}{indicates that the input data contain analysis flag variables or not}
 }
 \description{
 Mock scatterplot app

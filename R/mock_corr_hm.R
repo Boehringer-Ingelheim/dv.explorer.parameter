@@ -58,6 +58,7 @@ mock_app_corr_hm <- function(dry_run = FALSE, update_query_string = TRUE, srv_de
 
 #' Mock corr hm app
 #' @keywords mock
+#' @inheritParams mock_app_boxplot
 #' @export
 
 mock_app_correlation_hm_mm <- function(anlfl_flags = FALSE) {

@@ -246,6 +246,8 @@ scatterplot_UI <- function(id) { # nolint
 #'
 #' It expects to contain, at least, `subjid_var`
 #'
+#' @param id Shiny ID `[character(1)]`
+#'
 #' @param bm_dataset,group_dataset `[data.frame()]`
 #'
 #' Dataframes as described in the `Input dataframes` section

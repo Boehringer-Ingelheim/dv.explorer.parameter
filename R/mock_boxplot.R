@@ -3,6 +3,7 @@
 #' @param dry_run Return parameters used in the call
 #' @param update_query_string automatically update query string with app state
 #' @param ui_defaults,srv_defaults a list of values passed to the ui/server function
+#' @param anlfl_flags indicates that the input data contain analysis flag variables or not
 #' @export
 
 mock_app_boxplot <- function(dry_run = FALSE, update_query_string = TRUE, srv_defaults = list(), ui_defaults = list(), anlfl_flags = FALSE) {

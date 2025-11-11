@@ -22,6 +22,33 @@ wfphm_wf_server(
   margin
 )
 }
+\arguments{
+\item{id}{Shiny ID \verb{[character(1)]}}
+
+\item{bm_dataset, group_dataset}{\verb{[data.frame()]}}
+
+\item{cat_var, par_var, visit_var}{\verb{[character(1)]}
+
+Columns from \code{bm_dataset} that correspond to the parameter category, parameter and visit}
+
+\item{subjid_var}{\verb{[character(1)]}
+
+Column corresponding to subject ID}
+
+\item{value_vars}{\verb{[character(n)]}
+
+Columns from \code{bm_dataset} that correspond to values of the parameters}
+
+\item{.default_group_palette}{Function defining the default color palette for groups.}
+
+\item{bar_group_palette}{Named list mapping each group to a color
+Used to override default colors returned by \code{.default_group_palette}
+For example: \code{list("Placebo" = "#999999", "Treatment" = "#E69F00")}}
+
+\item{anlfl_reactive}{Optional reactive flag variable}
+
+\item{margin}{Numeric vector of plot margins (top, bottom, left, right)}
+}
 \description{
 Waterfall server function
 }
