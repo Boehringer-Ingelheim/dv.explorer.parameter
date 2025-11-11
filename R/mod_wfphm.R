@@ -279,7 +279,6 @@ wfphm_wf <- function(id,
 
 #' Waterfall UI function
 #' @describeIn wfphm_wf UI
-#' @inheritParams wfphm_wf
 #' @keywords developers
 wfphm_wf_UI <- function(id) { # nolintr
 
@@ -962,7 +961,6 @@ NULL
 
 #' Waterfall plus heatmap categorical heatmap UI function
 #' @describeIn wfphm_hmcat UI
-#' @inheritParams wfphm_hmcat
 #' @keywords developers
 wfphm_hmcat_UI <- function(id) { # nolint
 
