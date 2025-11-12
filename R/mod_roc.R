@@ -255,8 +255,8 @@ roc_UI <- function(id) {
     shiny::column(
       width = 3,
       shiny::div(
-        shiny::div(shiny::uiOutput(ns(ROC_ID$ROC$INFO_PANEL)), class = "panel-body"),
-        class = "panel panel-default"
+        shiny::div(shiny::uiOutput(ns(ROC_ID$ROC$INFO_PANEL)), class = "card-body"),
+        class = "card"
       )
     )
   )
