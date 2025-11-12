@@ -14,6 +14,7 @@ wfphm_hmpar_server(
   cat_var,
   par_var,
   visit_var,
+  anlfl_reactive = NULL,
   subjid_var,
   value_vars,
   sorted_x,

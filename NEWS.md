@@ -1,3 +1,10 @@
+# dv.explorer.parameter 0.1.9
+
+* boxplot, lineplot, scatter plot, scatter plot matrix, correlation heatmap, waterfall plus heatmap :
+    * Added the option to filter the input dataset based on Y/N flag variables that exist in it.
+* boxplot:
+    * `mod_boxplot_papo` was already deprecated and now it has been completely removed
+
 # dv.explorer.parameter 0.1.8
 
 * lineplot:

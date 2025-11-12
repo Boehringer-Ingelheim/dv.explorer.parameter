@@ -8,7 +8,8 @@ mock_app_scatterplotmatrix(
   dry_run = FALSE,
   update_query_string = TRUE,
   srv_defaults = list(),
-  ui_defaults = list()
+  ui_defaults = list(),
+  anlfl_flags = FALSE
 )
 }
 \arguments{
@@ -17,6 +18,8 @@ mock_app_scatterplotmatrix(
 \item{update_query_string}{automatically update query string with app state}
 
 \item{ui_defaults, srv_defaults}{a list of values passed to the ui/server function}
+
+\item{anlfl_flags}{indicates that the input data contain analysis flag variables or not}
 }
 \description{
 Mock matrix of scatterplots app

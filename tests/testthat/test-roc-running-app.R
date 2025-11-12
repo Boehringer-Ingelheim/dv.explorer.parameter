@@ -108,6 +108,7 @@ test_that("charts are created" |>
     if (!is.null(t)) suppressMessages(app$set_inputs(!!!rlang::list2(!!ID$MISC$PANEL := t)))
     app$wait_for_idle()
     app$expect_values(output = o, name = o)
+    ##############################################################
   }
 })
 
@@ -142,6 +143,7 @@ test_that("charts are created. Ungrouped" |>
     if (!is.null(t)) suppressMessages(app$set_inputs(!!!rlang::list2(!!ID$MISC$PANEL := t)))
     app$wait_for_idle()
     app$expect_values(output = o, name = o_ungrouped)
+    ###############################################
   }
 })
 

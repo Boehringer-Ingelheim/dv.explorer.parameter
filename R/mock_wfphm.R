@@ -8,11 +8,20 @@ NULL
 #' @describeIn mock_wfphm Mock app running the module inside dv.manager
 #'
 #' @export
-mock_wfphm_mm_app <- function() {
+mock_wfphm_mm_app <- function(anlfl_flags = FALSE) {
   if (requireNamespace("dv.manager")) {
+
+    data <- test_data(anlfl_flags = anlfl_flags)
+
+    if (anlfl_flags) {
+      anlfl_vars <- c("ANLFL1", "ANLFL2")
+    } else {
+      anlfl_vars <- NULL
+    }
+
     dv.manager::run_app(
       data = list(
-        "Sample Data" = list(adbm = test_data()[["bm"]], group = test_data()[["sl"]])
+        "Sample Data" = list(adbm = data[["bm"]], group = data[["sl"]])
       ),
       module_list = list(
         "Waterfall" = mod_wfphm(
@@ -26,7 +35,8 @@ mock_wfphm_mm_app <- function() {
           cat_var = "PARCAT",
           visit_var = "VISIT",
           value_vars = c("VALUE1", "VALUE2"),
-          module_id = "mod_WF"
+          module_id = "mod_WF",
+          anlfl_vars = anlfl_vars
         )
       ),
       filter_data = "group",
@@ -44,8 +54,9 @@ mock_wfphm_mm_app <- function() {
 mock_app_wfphm2 <- function(dry_run = FALSE,
                             update_query_string = TRUE,
                             srv_defaults = list(),
-                            ui_defaults = list()) {
-  data <- test_data()
+                            ui_defaults = list(),
+                            anlfl_flags = FALSE) {
+  data <- test_data(anlfl_flags = anlfl_flags)
   bm_dataset <- shiny::reactive({
     d <- data[["bm"]]
   })
@@ -65,6 +76,11 @@ mock_app_wfphm2 <- function(dry_run = FALSE,
     ui_defaults
   )
 
+  if (anlfl_flags) {
+    anlfl_vars <- c("ANLFL1", "ANLFL2")
+  } else {
+    anlfl_vars <- NULL
+  }
 
   srv_params <- c(
     list(
@@ -73,7 +89,9 @@ mock_app_wfphm2 <- function(dry_run = FALSE,
       group_dataset = group_dataset,
       cat_var = "PARCAT",
       visit_var = "VISIT",
-      value_vars = c("VALUE1", "VALUE2", "VALUE3")
+      value_vars = c("VALUE1", "VALUE2", "VALUE3"),
+      subjid_var = "SUBJID",
+      anlfl_vars = anlfl_vars
     ),
     srv_defaults
   )
@@ -191,8 +209,9 @@ mock_app_hmcont <- function(dry_run = FALSE,
 mock_app_hmpar <- function(dry_run = FALSE,
                            update_query_string = TRUE,
                            srv_args = list(),
-                           ui_args = list()) {
-  data <- test_data()
+                           ui_args = list(),
+                           anlfl_flags = FALSE) {
+  data <- test_data(anlfl_flags = anlfl_flags)
 
   dataset <- shiny::reactive({
     data[["bm"]]
@@ -216,6 +235,10 @@ mock_app_hmpar <- function(dry_run = FALSE,
     margin = shiny::reactive(c(top = 20, bottom = 20, left = 200, right = 20)),
     show_x_ticks = TRUE
   )
+
+  if (anlfl_flags) {
+    srv_params$anlfl_reactive <- shiny::reactive("ANLFL1")
+  }
 
   ui_params[names(ui_args)] <- ui_args
   srv_params[names(srv_args)] <- srv_args
@@ -241,8 +264,9 @@ mock_app_hmpar <- function(dry_run = FALSE,
 mock_app_wf <- function(dry_run = FALSE,
                         update_query_string = TRUE,
                         srv_args = list(),
-                        ui_args = list()) {
-  data <- test_data()
+                        ui_args = list(),
+                        anlfl_flags = FALSE) {
+  data <- test_data(anlfl_flags = anlfl_flags)
 
   bm_dataset <- shiny::reactive({
     data[["bm"]]
@@ -268,6 +292,10 @@ mock_app_wf <- function(dry_run = FALSE,
     margin = shiny::reactive(c(top = 20, bottom = 20, left = 200, right = 20))
   )
 
+  if (anlfl_flags) {
+    srv_params$anlfl_reactive <- shiny::reactive("ANLFL1")
+  }
+
   ui_params[names(ui_args)] <- ui_args
   srv_params[names(srv_args)] <- srv_args
 
@@ -292,8 +320,9 @@ mock_app_wf <- function(dry_run = FALSE,
 mock_app_wfphm <- function(dry_run = FALSE,
                            update_query_string = TRUE,
                            srv_args = list(),
-                           ui_args = list()) {
-  data <- test_data()
+                           ui_args = list(),
+                           anlfl_flags = FALSE) {
+  data <- test_data(anlfl_flags = anlfl_flags)
 
   bm_dataset <- shiny::reactive({
     data[["bm"]]
@@ -307,6 +336,12 @@ mock_app_wfphm <- function(dry_run = FALSE,
     id = "not_ebas"
   )
 
+  if (anlfl_flags) {
+    anlfl_vars <- c("ANLFL1", "ANLFL2")
+  } else {
+    anlfl_vars <- NULL
+  }
+
   srv_params <- list(
     id = "not_ebas",
     bm_dataset = bm_dataset,
@@ -315,6 +350,7 @@ mock_app_wfphm <- function(dry_run = FALSE,
     par_var = "PARAM",
     visit_var = "VISIT",
     subjid_var = "SUBJID",
+    anlfl_vars = anlfl_vars,
     value_vars = c("VALUE1", "VALUE2", "VALUE3")
   )
 

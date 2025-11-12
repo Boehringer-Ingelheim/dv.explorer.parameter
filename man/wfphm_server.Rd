@@ -11,6 +11,7 @@ wfphm_server(
   cat_var = "PARCAT1",
   par_var = "PARAM",
   visit_var = "AVISIT",
+  anlfl_vars = NULL,
   subjid_var = "USUBJID",
   value_vars = "AVAL",
   bar_group_palette = list(),
@@ -29,6 +30,10 @@ wfphm_server(
 \item{cat_var, par_var, visit_var, subjid_var}{\verb{[character(1)]}
 
 columns used as indicated in each of the subplots}
+
+\item{anlfl_vars}{\verb{[character(n)]}
+
+Columns from \code{bm_dataset} that correspond to analysis flags}
 
 \item{value_vars}{\verb{[character(1+)]}
 

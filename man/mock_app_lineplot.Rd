@@ -9,7 +9,8 @@ mock_app_lineplot(
   update_query_string = TRUE,
   srv_defaults = list(),
   ui_defaults = list(),
-  data = test_data()
+  data = test_data(anlfl_flags = anlfl_flags),
+  anlfl_flags = FALSE
 )
 }
 \arguments{
@@ -20,6 +21,8 @@ mock_app_lineplot(
 \item{ui_defaults, srv_defaults}{a list of values passed to the ui/server function}
 
 \item{data}{data for the mock application}
+
+\item{anlfl_flags}{indicates that the input data contain analysis flag variables or not}
 }
 \description{
 Mock lineplot app

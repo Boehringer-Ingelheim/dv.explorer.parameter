@@ -4,8 +4,8 @@
 
 # dv.explorer.parameter::mod_boxplot
 map_afmm_mod_boxplot_auto <- function(afmm, module_id, bm_dataset_name, group_dataset_name, receiver_id,
-    cat_var, par_var, value_vars, visit_var, subjid_var, default_cat, default_par, default_visit, default_value,
-    default_main_group, default_sub_group, default_page_group, server_wrapper_func) {
+    cat_var, par_var, value_vars, visit_var, anlfl_vars, subjid_var, default_cat, default_par, default_visit,
+    default_value, default_main_group, default_sub_group, default_page_group, server_wrapper_func) {
     res <- afmm
     mapping_summary <- character(0)
     for (ds_name in names(afmm[["data"]])) {
@@ -53,7 +53,7 @@ map_afmm_mod_boxplot_auto <- function(afmm, module_id, bm_dataset_name, group_da
 
 # dv.explorer.parameter::mod_corr_hm
 map_afmm_mod_corr_hm_auto <- function(afmm, module_id, bm_dataset_name, subjid_var, cat_var, par_var,
-    visit_var, value_vars, default_cat, default_par, default_visit, default_value) {
+    visit_var, anlfl_vars, value_vars, default_cat, default_par, default_visit, default_value) {
     res <- afmm
     mapping_summary <- character(0)
     for (ds_name in names(afmm[["data"]])) {
@@ -150,10 +150,10 @@ map_afmm_mod_forest_auto <- function(afmm, module_id, bm_dataset_name, group_dat
 
 # dv.explorer.parameter::mod_lineplot
 map_afmm_mod_lineplot_auto <- function(afmm, module_id, bm_dataset_name, group_dataset_name, receiver_id,
-    summary_fns, subjid_var, cat_var, par_var, visit_vars, cdisc_visit_vars, value_vars, additional_listing_vars,
-    ref_line_vars, default_centrality_fn, default_dispersion_fn, default_cat, default_par, default_val,
-    default_visit_var, default_visit_val, default_main_group, default_sub_group, default_transparency,
-    default_y_axis_projection) {
+    summary_fns, subjid_var, cat_var, par_var, visit_vars, cdisc_visit_vars, anlfl_vars, value_vars,
+    additional_listing_vars, ref_line_vars, default_centrality_fn, default_dispersion_fn, default_cat,
+    default_par, default_val, default_visit_var, default_visit_val, default_main_group, default_sub_group,
+    default_transparency, default_y_axis_projection) {
     res <- afmm
     mapping_summary <- character(0)
     for (ds_name in names(afmm[["data"]])) {
@@ -261,8 +261,9 @@ map_afmm_mod_roc_auto <- function(afmm, module_id, pred_dataset_name, resp_datas
 
 # dv.explorer.parameter::mod_scatterplot
 map_afmm_mod_scatterplot_auto <- function(afmm, module_id, bm_dataset_name, group_dataset_name, cat_var,
-    par_var, value_vars, visit_var, subjid_var, default_x_cat, default_x_par, default_x_value, default_x_visit,
-    default_y_cat, default_y_par, default_y_value, default_y_visit, default_group, default_color, compute_lm_cor_fn) {
+    par_var, value_vars, visit_var, anlfl_vars, subjid_var, default_x_cat, default_x_par, default_x_value,
+    default_x_visit, default_y_cat, default_y_par, default_y_value, default_y_visit, default_group, default_color,
+    compute_lm_cor_fn) {
     res <- afmm
     mapping_summary <- character(0)
     for (ds_name in names(afmm[["data"]])) {
@@ -310,8 +311,8 @@ map_afmm_mod_scatterplot_auto <- function(afmm, module_id, bm_dataset_name, grou
 
 # dv.explorer.parameter::mod_scatterplotmatrix
 map_afmm_mod_scatterplotmatrix_auto <- function(afmm, module_id, bm_dataset_name, group_dataset_name,
-    cat_var, par_var, value_vars, visit_var, subjid_var, default_cat, default_par, default_visit, default_value,
-    default_main_group) {
+    cat_var, par_var, value_vars, visit_var, anlfl_vars, subjid_var, default_cat, default_par, default_visit,
+    default_value, default_main_group) {
     res <- afmm
     mapping_summary <- character(0)
     for (ds_name in names(afmm[["data"]])) {
@@ -359,7 +360,7 @@ map_afmm_mod_scatterplotmatrix_auto <- function(afmm, module_id, bm_dataset_name
 
 # dv.explorer.parameter::mod_wfphm
 map_afmm_mod_wfphm_auto <- function(afmm, module_id, bm_dataset_name, group_dataset_name, cat_var, par_var,
-    visit_var, subjid_var, value_vars, bar_group_palette, cat_palette, tr_mapper, show_x_ticks) {
+    visit_var, anlfl_vars, subjid_var, value_vars, bar_group_palette, cat_palette, tr_mapper, show_x_ticks) {
     res <- afmm
     mapping_summary <- character(0)
     for (ds_name in names(afmm[["data"]])) {

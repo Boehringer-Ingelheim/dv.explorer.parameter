@@ -13,6 +13,7 @@ mod_boxplot(
   par_var = "PARAM",
   value_vars = "AVAL",
   visit_var = "AVISIT",
+  anlfl_vars = NULL,
   subjid_var = "SUBJID",
   default_cat = NULL,
   default_par = NULL,
@@ -48,6 +49,10 @@ Columns from \code{bm_dataset} that correspond to the parameter category, parame
 
 Columns from \code{bm_dataset} that correspond to values of the parameters}
 
+\item{anlfl_vars}{\verb{[character(n)]}
+
+Columns from \code{bm_dataset} that correspond to analysis flags}
+
 \item{subjid_var}{\verb{[character(1)]}
 
 Column corresponding to subject ID}
@@ -63,9 +68,5 @@ A function that will be applied to the server returned value. Its default value 
 \description{
 \code{mod_boxplot} is a Shiny module prepared to display data with boxplot charts with different levels of grouping.
 It also includes a set of listings with information about the population, distribution and statistical comparisons.
-}
-\details{
-\code{mod_boxplot_papo} is a deprecated function that was required to use the jumping feature in combination
-with \code{dv.papo} but is no longer required. The function is still available for compatibility reasons.
 }
 \keyword{main}

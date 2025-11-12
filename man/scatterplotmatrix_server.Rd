@@ -13,6 +13,7 @@ scatterplotmatrix_server(
   par_var = "PARAM",
   value_vars = "AVAL",
   visit_var = "AVISIT",
+  anlfl_vars = NULL,
   subjid_var = "USUBJID",
   default_cat = NULL,
   default_par = NULL,
@@ -22,6 +23,8 @@ scatterplotmatrix_server(
 )
 }
 \arguments{
+\item{id}{Shiny ID \verb{[character(1)]}}
+
 \item{bm_dataset, group_dataset}{\verb{[data.frame()]}
 
 Dataframes as described in the \verb{Input dataframes} section}
@@ -37,6 +40,10 @@ Columns from \code{bm_dataset} that correspond to the parameter category, parame
 \item{value_vars}{\verb{[character(n)]}
 
 Columns from \code{bm_dataset} that correspond to values of the parameters}
+
+\item{anlfl_vars}{\verb{[character(n)]}
+
+Columns from \code{bm_dataset} that correspond to analysis flags}
 
 \item{subjid_var}{\verb{[character(1)]}
 
