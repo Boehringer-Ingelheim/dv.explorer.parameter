@@ -1,6 +1,7 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>/404.html</loc></url>
 <url><loc>/LICENSE-text.html</loc></url>
+<url><loc>/PULL_REQUEST_TEMPLATE.html</loc></url>
 <url><loc>/articles/boxplot.html</loc></url>
 <url><loc>/articles/correlation_heatmap.html</loc></url>
 <url><loc>/articles/forest.html</loc></url>
@@ -36,7 +37,6 @@
 <url><loc>/reference/composed.html</loc></url>
 <url><loc>/reference/compute_metric.html</loc></url>
 <url><loc>/reference/compute_roc.html</loc></url>
-<url><loc>/reference/corr_hm_UI.html</loc></url>
 <url><loc>/reference/corr_hm_server.html</loc></url>
 <url><loc>/reference/default_lineplot_functions.html</loc></url>
 <url><loc>/reference/dplyr_.data.html</loc></url>
@@ -78,7 +78,6 @@
 <url><loc>/reference/mock_roc.html</loc></url>
 <url><loc>/reference/mock_wfphm.html</loc></url>
 <url><loc>/reference/mod_boxplot.html</loc></url>
-<url><loc>/reference/mod_boxplot_papo.html</loc></url>
 <url><loc>/reference/mod_corr_hm.html</loc></url>
 <url><loc>/reference/mod_forest.html</loc></url>
 <url><loc>/reference/mod_lineplot.html</loc></url>
@@ -127,8 +126,6 @@
 <url><loc>/reference/wfphm.html</loc></url>
 <url><loc>/reference/wfphm_UI.html</loc></url>
 <url><loc>/reference/wfphm_hmcat.html</loc></url>
-<url><loc>/reference/wfphm_hmcat_UI.html</loc></url>
-<url><loc>/reference/wfphm_hmcat_server.html</loc></url>
 <url><loc>/reference/wfphm_hmcat_subset.html</loc></url>
 <url><loc>/reference/wfphm_hmcont.html</loc></url>
 <url><loc>/reference/wfphm_hmcont_subset.html</loc></url>
@@ -136,7 +133,6 @@
 <url><loc>/reference/wfphm_hmpar_subset.html</loc></url>
 <url><loc>/reference/wfphm_server.html</loc></url>
 <url><loc>/reference/wfphm_wf.html</loc></url>
-<url><loc>/reference/wfphm_wf_UI.html</loc></url>
 <url><loc>/reference/wfphm_wf_apply_outliers.html</loc></url>
 <url><loc>/reference/wfphm_wf_rename_cols.html</loc></url>
 <url><loc>/reference/wfphm_wf_server.html</loc></url>

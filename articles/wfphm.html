@@ -8,8 +8,8 @@
 <title>Waterfall plus heatmap module • dv.explorer.parameter</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
-<link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Waterfall plus heatmap module">
 </head>
 <body>
@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">dv.explorer.parameter</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.8</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.9</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -79,7 +79,7 @@
 
     
     
-<p><img src="images%2Fwfphm_app.png"></p>
+<p><img src="images/wfphm_app.png"></p>
 <p>This guide provides a detailed overview of the <strong>Waterfall plus
 Heatmap (WfpHm)</strong> module and its features. It is meant to provide
 guidance to App Creators on creating Apps in DaVinci using the WfpHm
@@ -97,7 +97,7 @@ in the waterfall plot and the heatmaps to look for patterns.</p>
 </h4>
 <p><br></p>
 <div style="padding: 1em 1em 1em 1em;  margin-bottom: 5px;  border: 1px solid #64a1ce;  border-radius: 5px;  background:#f5f5f5 5px center/3em no-repeat;">
-<p><img src="images%2Finfo.png" style="width:4.0%"><strong>“Parameter”
+<p><img src="images/info.png" style="width:4.0%"><strong>“Parameter”
 Term Disambiguation</strong></p>
 <p>The guide uses the term <strong>“parameter”</strong> at several
 places. This term in the guide represents clinical analysis parameters
@@ -254,7 +254,8 @@ dataset for this app.</p>
 <span>  <span class="st">"WFPHM"</span> <span class="op">=</span> <span class="fu">dv.explorer.parameter</span><span class="fu">::</span><span class="fu"><a href="../reference/wfphm.html">mod_wfphm</a></span><span class="op">(</span></span>
 <span>    module_id <span class="op">=</span> <span class="st">"wfphm"</span>,</span>
 <span>    bm_dataset_name <span class="op">=</span> <span class="st">"adbm"</span>,</span>
-<span>    group_dataset_name <span class="op">=</span> <span class="st">"adsl"</span></span>
+<span>    group_dataset_name <span class="op">=</span> <span class="st">"adsl"</span>,</span>
+<span>    subjid_var <span class="op">=</span> <span class="st">"SUBJID"</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -270,7 +271,7 @@ dataset for this app.</p>
 <p>Each plot in the module is driven by selections made under the
 corresponding menu at the top. Various options to select the variables
 to be plotted are available from the menu.</p>
-<p><img src="images%2Fmenu2.png" style="width:100.0%"></p>
+<p><img src="images/menu2.png" style="width:100.0%"></p>
 <p>Menus in this module are data-driven when possible, this means that
 their content changes depending on the content of the dataset.</p>
 <p>Let’s review each plot and its respective menu to see what are their
@@ -280,17 +281,82 @@ contents and how they relate to the dataset.</p>
 <h3 id="waterfall-plot">Waterfall plot<a class="anchor" aria-label="anchor" href="#waterfall-plot"></a>
 </h3>
 <p>This plot shows a bar chart representing the value of a variable per
-subject in the adbm dataset in descending order. The variable shown in
-the plot is selected from the waterfall menu option</p>
+subject in the adbm dataset in descending order, at a particular visit.
+The variable shown in the plot is selected from the waterfall menu
+option.</p>
 <div class="section level4">
-<h4 id="plotting-columns">Plotting columns<a class="anchor" aria-label="anchor" href="#plotting-columns"></a>
+<h4 id="plotting-parameters">Plotting parameters<a class="anchor" aria-label="anchor" href="#plotting-parameters"></a>
 </h4>
+<p>The <a href="https://www.cdisc.org/kb/examples/adam-basic-data-structure-bds-using-paramcd-80288192" class="external-link">ADaM
+Basic Data Structure (BDS) using PARAMCD</a> is used to store parameter
+values for a given subject across several visits. Any of these
+parameters can be selected to be plotted in the waterfall.</p>
 <div style="display: flex;">
 <div>
-<p><img src="images%2Fwf_value_col.png" style="width:50.0%"></p>
+<p><img src="images/wf_cat_param.png" style="width:75.0%"></p>
 </div>
 <div>
-<p><img src="images%2Fwf_grouping_col.png" style="width:50.0%"></p>
+<p><img src="images/wf_par_param.png" style="width:75.0%"></p>
+</div>
+<div>
+<p><img src="images/wf_value_param.png" style="width:75.0%"></p>
+</div>
+<div>
+<p><img src="images/wf_visit_param.png" style="width:75.0%"></p>
+</div>
+<div>
+<p><img src="images/wf_grouping_param.png" style="width:75.0%"></p>
+</div>
+</div>
+<p>Dropdown menus for this plot are filled up the following way:</p>
+<ul>
+<li>The <em>Category</em> dropdown will contain all the factor levels in
+the <em>PARCAT1</em> column.</li>
+<li>The <em>Parameter</em> dropdown will contain all the factor levels
+in the <em>PARAM</em> column whose corresponding <em>PARCAT1</em> is
+selected in the <em>Category</em> menu.</li>
+<li>The <em>Value</em> dropdown will contain a subset of the numerical
+columns in the dataset. We will cover this menu in a subsequent
+section.</li>
+<li>The <em>Visit</em> dropdown will contain all the factor levels in
+the <em>AVISIT</em> column.</li>
+<li>The <em>Grouping</em> dropdown will contain all the columns in the
+group dataset that are categorical</li>
+</ul>
+<p>According to the selections made in the screenshot:</p>
+<ul>
+<li>The height of the bar will represent the value of:
+<ul>
+<li>the <em>P1</em> parameter which is listed under the <em>PC1</em>
+category</li>
+<li>as listed in the <em>AVAL</em> column</li>
+<li>for the visit <em>V1</em>
+</li>
+<li>for each participant</li>
+</ul>
+</li>
+<li>Each bar is colored and labelled according to the
+<em>SUBJID</em>
+</li>
+<li>A gray line is shown for participant 3 value because that particular
+<em>Parameter</em>, <em>Visit</em>, <em>Value</em> combination is
+missing (there is a issue here as currently the line is not grey but
+yellow!)</li>
+</ul>
+<p><img src="images/wf_app_param.png" style="width:100.0%"></p>
+</div>
+<div class="section level4">
+<h4 id="plotting-demographic-baseline-information">Plotting demographic baseline information<a class="anchor" aria-label="anchor" href="#plotting-demographic-baseline-information"></a>
+</h4>
+<p>It is also possible to plot subject level / demographic data. To do
+so the <em>“Display demographic baseline information”</em> check box in
+the menu should be checked.</p>
+<div style="display: flex;">
+<div>
+<p><img src="images/wf_value_col.png" style="width:50.0%"></p>
+</div>
+<div>
+<p><img src="images/wf_grouping_col.png" style="width:50.0%"></p>
 </div>
 </div>
 <p>Dropdown menus for this plot are filled up the following way:</p>
@@ -309,62 +375,6 @@ We can change this selection for a more meaningful one, for example
 <em>COUNTRY</em>
 </li>
 </ul>
-</div>
-<div class="section level4">
-<h4 id="plotting-parameters">Plotting parameters<a class="anchor" aria-label="anchor" href="#plotting-parameters"></a>
-</h4>
-<p>The <a href="https://www.cdisc.org/kb/examples/adam-basic-data-structure-bds-using-paramcd-80288192" class="external-link">ADaM
-Basic Data Structure (BDS) using PARAMCD</a> is used to store parameter
-values for a given subject across several visits. Any of these
-parameters can also be selected to be plotted in the waterfall. To do so
-the <em>“Use Parameters”</em> check box in the menu should be
-checked.</p>
-<div style="display: flex;">
-<div>
-<p><img src="images%2Fwf_cat_param.png" style="width:75.0%"></p>
-</div>
-<div>
-<p><img src="images%2Fwf_par_param.png" style="width:75.0%"></p>
-</div>
-<div>
-<p><img src="images%2Fwf_visit_param.png" style="width:75.0%"></p>
-</div>
-</div>
-<p>Checking the <em>“Use Parameter”</em> box at the top of the menu
-changes the set of avaliable dropdown menus.</p>
-<p>Dropdown menus are filled up in the following way:</p>
-<ul>
-<li>The <em>Category</em> dropdown will contain all the factor levels in
-the <em>PARCAT1</em> column.</li>
-<li>The <em>Parameter</em> dropdown will contain all the factor levels
-in the <em>PARAM</em> column whose corresponding <em>PARCAT1</em> is
-selected in the <em>Category</em> menu.</li>
-<li>The <em>Value</em> dropdown will contain a subset of the numerical
-columns in the dataset. We will cover this menu in a subsequent
-section.</li>
-<li>The <em>Visit</em> dropdown will contain all the factor levels in
-the <em>AVISIT</em> column.</li>
-</ul>
-<p>According to the selections made in the screenshot:</p>
-<ul>
-<li>The height of the bar will represent the value of:
-<ul>
-<li>the <em>P1</em> parameter which is listed under the <em>PC1</em>
-category</li>
-<li>as listed in the <em>AVAL</em> column</li>
-<li>for the visit <em>V1</em>
-</li>
-<li>for each participant</li>
-</ul>
-</li>
-<li>As in the previous section, each bar is colored and labelled
-according to the <em>SUBJID</em>
-</li>
-<li>A gray line is shown for participant 3 value because that particular
-<em>Parameter</em>, <em>Visit</em>, <em>Value</em> combination is
-missing</li>
-</ul>
-<p><img src="images%2Fwf_app_param.png" style="width:100.0%"></p>
 </div>
 <div class="section level4">
 <h4 id="the-value-dropdown">The Value Dropdown<a class="anchor" aria-label="anchor" href="#the-value-dropdown"></a>
@@ -390,7 +400,8 @@ module so it is included in the menu as seen in the example below.</p>
 <span>    module_id <span class="op">=</span> <span class="st">"wfphm"</span>,</span>
 <span>    value_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"CUSTOM_AVAL"</span><span class="op">)</span>, <span class="co"># We have added this argument</span></span>
 <span>    bm_dataset_name <span class="op">=</span> <span class="st">"adbm"</span>,</span>
-<span>    group_dataset_name <span class="op">=</span> <span class="st">"adsl"</span></span>
+<span>    group_dataset_name <span class="op">=</span> <span class="st">"adsl"</span>,</span>
+<span>    subjid_var <span class="op">=</span> <span class="st">"SUBJID"</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span><span class="fu">dv.manager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/dv.manager/man/run_app.html" class="external-link">run_app</a></span><span class="op">(</span></span>
@@ -399,7 +410,7 @@ module so it is included in the menu as seen in the example below.</p>
 <span>  filter_data <span class="op">=</span> <span class="st">"adbm"</span>,</span>
 <span>  filter_key <span class="op">=</span> <span class="st">"SUBJID"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="images%2Fwf_custom_aval_param_1.png" style="width:25.0%"></p>
+<p><img src="images/wf_custom_aval_param_1.png" style="width:25.0%"></p>
 <p>The new argument in the module call indicates that
 <em>CUSTOM_AVAL</em> is a column that contains values associated to
 parameters and is therefore included in the menu. The previous
@@ -412,7 +423,8 @@ specified then all should be specified.</p>
 <span>    module_id <span class="op">=</span> <span class="st">"wfphm"</span>,</span>
 <span>    value_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"AVAL"</span>, <span class="st">"CUSTOM_AVAL"</span><span class="op">)</span>, <span class="co"># We have added this argument</span></span>
 <span>    bm_dataset_name <span class="op">=</span> <span class="st">"adbm"</span>,</span>
-<span>    group_dataset_name <span class="op">=</span> <span class="st">"adsl"</span></span>
+<span>    group_dataset_name <span class="op">=</span> <span class="st">"adsl"</span>,</span>
+<span>    subjid_var <span class="op">=</span> <span class="st">"SUBJID"</span></span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -422,7 +434,7 @@ specified then all should be specified.</p>
 <span>  filter_data <span class="op">=</span> <span class="st">"adbm"</span>,</span>
 <span>  filter_key <span class="op">=</span> <span class="st">"SUBJID"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="images%2Fwf_custom_aval_param_2.png" style="width:25.0%"></p>
+<p><img src="images/wf_custom_aval_param_2.png" style="width:25.0%"></p>
 </div>
 </div>
 <div class="section level3">
@@ -431,7 +443,7 @@ specified then all should be specified.</p>
 <p>At the bottom of the waterfall menu we can define which values are
 considered outliers. The outliers will be colored in gray and labelled
 accordingly.</p>
-<p><img src="images%2Fwf_outlier_param.png" style="width:100.0%"></p>
+<p><img src="images/wf_outlier_param.png" style="width:100.0%"></p>
 </div>
 <div class="section level3">
 <h3 id="continuous-and-categorical-heatmap">Continuous and categorical heatmap<a class="anchor" aria-label="anchor" href="#continuous-and-categorical-heatmap"></a>
@@ -455,7 +467,7 @@ accordingly.</li>
 participant is displayed where each cell is labelled and colored
 accordingly.</li>
 </ul>
-<p><img src="images%2Fcc_cat.png" style="width:100.0%"></p>
+<p><img src="images/cc_cat.png" style="width:100.0%"></p>
 </div>
 <div class="section level4">
 <h4 id="continuous-heatmap">Continuous heatmap<a class="anchor" aria-label="anchor" href="#continuous-heatmap"></a>
@@ -471,7 +483,7 @@ group dataset that are numerical</li>
 participant is displayed where each cell is labelled and colored
 accordingly</li>
 </ul>
-<p><img src="images%2Fcc_cont.png" style="width:100.0%"></p>
+<p><img src="images/cc_cont.png" style="width:100.0%"></p>
 </div>
 </div>
 <div class="section level3">
@@ -484,7 +496,7 @@ Plotting Parameter section in the Waterfall plot with the difference
 that the <em>Category</em> and <em>Parameter</em> menus now accept
 selecting multiple values. The <em>Transformation</em> menu will be
 covered in a separate section below.</p>
-<p><img src="images%2Fhmpar_app.png" style="width:100.0%"></p>
+<p><img src="images/hmpar_app.png" style="width:100.0%"></p>
 <p>Therefore according to the present selection we are observing:</p>
 <ul>
 <li>In the first row the color of the cell represents the value of:
@@ -524,11 +536,11 @@ be defined for each parameter.</p>
 such as Z-score or Min-Max. The transformation is applied to each
 parameter (i.e. to each row of the heatmap) independently.</p>
 <div style="padding: 1em 1em 1em 1em;  margin-bottom: 5px;  border: 1px solid #64a1ce;  border-radius: 5px;  background:#f5f5f5 5px center/3em no-repeat;">
-<p><img src="images%2FNote.png" style="width:4.0%"><strong>Note</strong> Outliers definition, described in the previous
+<p><img src="images/Note.png" style="width:4.0%"><strong>Note</strong> Outliers definition, described in the previous
 section, does not affect the calculation of the transformations</p>
 </div>
 <p><br></p>
-<p><img src="images%2Fhmpar_transformation.png" style="width:25.0%"></p>
+<p><img src="images/hmpar_transformation.png" style="width:25.0%"></p>
 <p>By default, the module include several transformation (See
 <code><a href="../reference/wfphm_server.html">dv.explorer.parameter::wfphm_server</a></code> for a full list) but
 the user can include custom transformations if needed for their data.
@@ -546,7 +558,8 @@ similar vector with the transformed values.</p>
 <span>      <span class="op">}</span></span>
 <span>    <span class="op">)</span>,</span>
 <span>    bm_dataset_name <span class="op">=</span> <span class="st">"adbm"</span>,</span>
-<span>    group_dataset_name <span class="op">=</span> <span class="st">"adsl"</span></span>
+<span>    group_dataset_name <span class="op">=</span> <span class="st">"adsl"</span>,</span>
+<span>    subjid_var <span class="op">=</span> <span class="st">"SUBJID"</span>     </span>
 <span>  <span class="op">)</span></span>
 <span><span class="op">)</span></span>
 <span></span>
@@ -556,8 +569,15 @@ similar vector with the transformed values.</p>
 <span>  filter_data <span class="op">=</span> <span class="st">"adbm"</span>,</span>
 <span>  filter_key <span class="op">=</span> <span class="st">"SUBJID"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="images%2Fhmpar_transformation_custom.png" style="width:25.0%"></p>
+<p><img src="images/hmpar_transformation_custom.png" style="width:25.0%"></p>
 </div>
+</div>
+<div class="section level3">
+<h3 id="download-chart-menu">Download chart menu<a class="anchor" aria-label="anchor" href="#download-chart-menu"></a>
+</h3>
+<p>The download chart menu allows to save a configuration of
+visualisations to your local environment, as a .png or .svg file.</p>
+<p><img src="images/download_chart.png" style="width:100.0%"></p>
 </div>
 <div class="section level3">
 <h3 id="using-column-labels-in-the-menus">Using column labels in the menus<a class="anchor" aria-label="anchor" href="#using-column-labels-in-the-menus"></a>
@@ -568,7 +588,7 @@ decorate the entries by setting a label attribute for the columns.</p>
 <code class="sourceCode R"><span><span class="co"># Assign some labels to the dataset</span></span>
 <span><span class="va">example_dataset_labelled</span> <span class="op">&lt;-</span> <span class="va">example_dataset</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">example_dataset_labelled</span><span class="op">[[</span><span class="st">"adbm"</span><span class="op">]</span><span class="op">]</span><span class="op">[[</span><span class="st">"SUBJID"</span><span class="op">]</span><span class="op">]</span>, <span class="st">"label"</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"Subject ID"</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">example_dataset_labelled</span><span class="op">[[</span><span class="st">"adbm"</span><span class="op">]</span><span class="op">]</span><span class="op">[[</span><span class="st">"SEX"</span><span class="op">]</span><span class="op">]</span>, <span class="st">"label"</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"Subject Sex"</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">example_dataset_labelled</span><span class="op">[[</span><span class="st">"adsl"</span><span class="op">]</span><span class="op">]</span><span class="op">[[</span><span class="st">"SEX"</span><span class="op">]</span><span class="op">]</span>, <span class="st">"label"</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"Subject Sex"</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/attr.html" class="external-link">attr</a></span><span class="op">(</span><span class="va">example_dataset_labelled</span><span class="op">[[</span><span class="st">"adbm"</span><span class="op">]</span><span class="op">]</span><span class="op">[[</span><span class="st">"PARCAT1"</span><span class="op">]</span><span class="op">]</span>, <span class="st">"label"</span><span class="op">)</span> <span class="op">&lt;-</span> <span class="st">"Parameter Category"</span></span>
 <span></span>
 <span><span class="fu">dv.manager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/dv.manager/man/run_app.html" class="external-link">run_app</a></span><span class="op">(</span></span>
@@ -632,7 +652,7 @@ for applicable module arguments.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
 </div>
 
     </footer>

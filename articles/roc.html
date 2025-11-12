@@ -8,8 +8,8 @@
 <title>ROC • dv.explorer.parameter</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
-<link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="ROC">
 </head>
 <body>
@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">dv.explorer.parameter</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.8</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.9</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -75,7 +75,7 @@
 
     
     
-<p><img src="images%2FROC.png"></p>
+<p><img src="images/ROC.png"></p>
 <p>This guide provides a detailed overview of the <code>mod_roc</code>
 module and its features. It is meant to provide guidance to App Creators
 on creating Apps in DaVinci using the <code>mod_roc</code> module.
@@ -91,7 +91,7 @@ binary endpoint.</p>
 </h4>
 <p><br></p>
 <div style="padding: 1em 1em 1em 1em;  margin-bottom: 5px;  border: 1px solid #64a1ce;  border-radius: 5px;  background:#f5f5f5 5px center/3em no-repeat;">
-<p><img src="images%2Finfo.png" style="width:4.0%"><strong>“Parameter”
+<p><img src="images/info.png" style="width:4.0%"><strong>“Parameter”
 Term Disambiguation</strong></p>
 <p>The guide uses the term <strong>“parameter”</strong> at several
 places. This term in the guide represents clinical analysis parameters
@@ -186,9 +186,9 @@ complete list of arguments and their description.</p>
 <col width="33%">
 </colgroup>
 <tbody><tr class="odd">
-<td><img src="images%2Fpredictor_menu.png"></td>
-<td><img src="images%2Fresponse_menu.png"></td>
-<td><img src="images%2Fother_menu.png"></td>
+<td><img src="images/predictor_menu.png"></td>
+<td><img src="images/response_menu.png"></td>
+<td><img src="images/other_menu.png"></td>
 </tr></tbody>
 </table>
 <p>A set of menus allows to select which parameters will be used as
@@ -209,7 +209,7 @@ optimal cut points (see
 figure will show a tooltip providing additional information for each of
 the points.</p>
 <p>Facetting can be replaced by a Nx4 matrix of plots sorted by AUC.</p>
-<p><img src="images%2FROC.png"></p>
+<p><img src="images/ROC.png"></p>
 </div>
 <div class="section level3">
 <h3 id="histogram-and-density">Histogram and Density<a class="anchor" aria-label="anchor" href="#histogram-and-density"></a>
@@ -219,8 +219,8 @@ and grouping variable. Each plot represents a histogram or density plot
 for the values of each predictor parameter grouped and colored based on
 the response value.</p>
 <table class="table"><tbody><tr class="odd">
-<td><img src="images%2Fhisto.png"></td>
-<td><img src="images%2Fdens.png"></td>
+<td><img src="images/histo.png"></td>
+<td><img src="images/dens.png"></td>
 </tr></tbody></table>
 </div>
 <div class="section level3">
@@ -234,7 +234,7 @@ plot, the bottom part correspond to individual data points, and the
 markes between them correspond to %5, 25%, 50%, 75% and 95% quantiles.
 Hovering over the figure will show a tooltip providing additional
 information for each of the points and markers.</p>
-<p><img src="images%2Frain.png"></p>
+<p><img src="images/rain.png"></p>
 </div>
 <div class="section level3">
 <h3 id="metrics">Metrics<a class="anchor" aria-label="anchor" href="#metrics"></a>
@@ -245,7 +245,7 @@ graph indicating the performance of the classification with respect to
 the threshold use for classification. The X axis can represent the score
 represented by the parameter value, raw, normalized or normalized and
 ranked.</p>
-<p><img src="images%2Fmetrics.png"></p>
+<p><img src="images/metrics.png"></p>
 </div>
 <div class="section level3">
 <h3 id="explore">Explore<a class="anchor" aria-label="anchor" href="#explore"></a>
@@ -254,14 +254,14 @@ ranked.</p>
 and its confidence interval per parameter, or parameter and grouping.
 All predictors parameters are represented regardless of the selection in
 the Predictor menu.</p>
-<p><img src="images%2Fexplore.png"></p>
+<p><img src="images/explore.png"></p>
 </div>
 <div class="section level3">
 <h3 id="summary">Summary<a class="anchor" aria-label="anchor" href="#summary"></a>
 </h3>
 <p>This table summarizes the results of the ROC curves and its optimal
 cut points.</p>
-<p><img src="images%2Fsummary.png"></p>
+<p><img src="images/summary.png"></p>
 </div>
 </div>
 <div class="section level2">
@@ -337,7 +337,7 @@ exhaustive and is only prepared to catch common errors).</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
 </div>
 
     </footer>

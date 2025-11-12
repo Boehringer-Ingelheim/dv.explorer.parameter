@@ -8,8 +8,8 @@
 <title>Lineplot reference values • dv.explorer.parameter</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.4.2/css/all.min.css" rel="stylesheet">
-<link href="../deps/font-awesome-6.4.2/css/v4-shims.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Lineplot reference values">
 </head>
 <body>
@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">dv.explorer.parameter</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.8</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.9</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -183,7 +183,7 @@ Laboratory values dataset <i><small>[expand/collapse]</small></i>
 <span>  value_vars <span class="op">=</span> <span class="st">"AVAL"</span>, visit_vars <span class="op">=</span> <span class="st">"AVISITN"</span>, default_cat <span class="op">=</span> <span class="st">"CHEM"</span>, </span>
 <span>  default_par <span class="op">=</span> <span class="st">"Imaginariol (mmol/L)"</span>, default_main_group <span class="op">=</span> <span class="st">"SEX"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>Which generates the following plot: <img src="images%2Flineplot_ref_line_00.png"></p>
+<p>Which generates the following plot: <img src="images/lineplot_ref_line_00.png"></p>
 </div>
 <div class="section level2">
 <h2 id="grouped-and-ungrouped-reference-values">Grouped and ungrouped reference values<a class="anchor" aria-label="anchor" href="#grouped-and-ungrouped-reference-values"></a>
@@ -196,7 +196,7 @@ values:</p>
 <code class="sourceCode R"><span><span class="fu">dv.explorer.parameter</span><span class="fu">::</span><span class="fu"><a href="../reference/mod_lineplot.html">mod_lineplot</a></span><span class="op">(</span></span>
 <span>  <span class="va">...</span>, default_main_group <span class="op">=</span> <span class="st">"SEX"</span>, ref_line_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A1LO"</span>, <span class="st">"A1HI"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>Which produces: <img src="images%2Flineplot_ref_line_01.png">
+<p>Which produces: <img src="images/lineplot_ref_line_01.png">
 Examining this plot, we can see the three distinct reference values
 available in the original <code>bm</code> dataset. There is one
 <code>A1HI</code> value common to our two subjects. It’s indicated with
@@ -220,7 +220,7 @@ the grouping legend:</p>
 <code class="sourceCode R"><span><span class="fu">dv.explorer.parameter</span><span class="fu">::</span><span class="fu"><a href="../reference/mod_lineplot.html">mod_lineplot</a></span><span class="op">(</span></span>
 <span>  <span class="va">...</span>, default_main_group <span class="op">=</span> <span class="st">"COUNTRY"</span>, ref_line_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"A1LO"</span>, <span class="st">"A1HI"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p><img src="images%2Flineplot_ref_line_02.png"></p>
+<p><img src="images/lineplot_ref_line_02.png"></p>
 <p>This plot is still factually correct in the sense that the color of
 each <code>AVAL</code> line is color-matched with the <code>A1LO</code>
 value that shares the same row in the <code>lb</code> dataset.</p>
@@ -236,7 +236,7 @@ value that shares the same row in the <code>lb</code> dataset.</p>
 <p>In this case, <code>mod_lineplot</code> can’t use color to pair the
 <code>A1LO</code> reference lines to the <code>AVAL</code> lines, so the
 reference lines are omitted:</p>
-<p><img src="images%2Flineplot_ref_line_03.png"></p>
+<p><img src="images/lineplot_ref_line_03.png"></p>
 <p>Notice, however, that the <code>A1HI</code> value still applies to
 both black <code>AVAL</code> lines, so it is kept.</p>
 </div>
@@ -248,11 +248,11 @@ of whether they can be represented truthfully under some particular data
 grouping. To do that, users can override the built-in reference line
 filter by checking the “Show all reference values” option under the
 “Settings” drop-down menu.</p>
-<p><img src="images%2Flineplot_ref_line_04.png"></p>
+<p><img src="images/lineplot_ref_line_04.png"></p>
 <p>If we do that, all unique reference values are shown. The legend
 entries are also modified to point out the non-standard nature of the
 plot.</p>
-<p><img src="images%2Flineplot_ref_line_05.png"></p>
+<p><img src="images/lineplot_ref_line_05.png"></p>
 </div>
 <div class="section level2">
 <h2 id="requirements-for-reference-values">Requirements for reference values<a class="anchor" aria-label="anchor" href="#requirements-for-reference-values"></a>
@@ -267,7 +267,7 @@ the dataset</li>
 <p>If one of these conditions is not met during module start-up,
 <code>mod_lineplot</code> will produce a suitable error message, such
 as:</p>
-<p><img src="images%2Flineplot_ref_line_06.png"></p>
+<p><img src="images/lineplot_ref_line_06.png"></p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
@@ -280,7 +280,7 @@ as:</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.1.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
 </div>
 
     </footer>
