@@ -1662,6 +1662,26 @@ lineplot_server <- function(id,
   shiny::moduleServer(id, module)
 }
 
+
+# Checks if ref line variables have a label attribute and their class status is not tagged as "labelled"
+# and if so it tags their class status as "labelled"
+ensure_labelled_class <- function(dataset, ref_line_vars) {
+  for (var_name in ref_line_vars) {
+    if (var_name %in% names(dataset)) {
+      var <- dataset[[var_name]]
+      lbl <- attr(var, "label", exact = TRUE)
+      has_labelled_class <- "labelled" %in% class(var)
+
+      if (!is.null(lbl) && nchar(lbl) > 0 && !has_labelled_class) {
+        class(var) <- c("labelled", class(var))
+        dataset[[var_name]] <- var
+      }
+    }
+  }
+  dataset
+}
+
+
 #' Line plot module
 #'
 #' Display line plots of raw or summary data over time. Summaries include measures of central tendency
@@ -1726,9 +1746,16 @@ mod_lineplot <- function(module_id,
         on_sbj_click_fun <- function() afmm[["utils"]][["switch2mod"]](receiver_id)
       }
 
+      # wrapping bm_dataset to check and ensure class attribute or ref line variables is set to "labelled"
+      bm_dataset_wrapped <- shiny::reactive({
+        ds <- afmm[["filtered_dataset"]]()[[bm_dataset_name]]
+        ds <- ensure_labelled_class(ds, ref_line_vars)
+        ds
+      })
+
       lineplot_server(
         id = module_id,
-        bm_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[bm_dataset_name]]),
+        bm_dataset = bm_dataset_wrapped,
         group_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[group_dataset_name]]),
         on_sbj_click = on_sbj_click_fun,
         summary_fns = summary_fns,
