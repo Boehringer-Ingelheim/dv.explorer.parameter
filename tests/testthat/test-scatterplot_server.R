@@ -7,7 +7,7 @@ test_that("scatterplot_server prints message for 0-row bm_dataset", {
   # reduce number of rows in the input group data to 1
   group_dataset <- data$sl[1, ]
 
-  testServer(
+  shiny::testServer(
     app = scatterplot_server,
     args = list(
       bm_dataset    = reactive(bm_dataset),
