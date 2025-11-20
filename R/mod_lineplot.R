@@ -1030,7 +1030,11 @@ lineplot_server <- function(id,
         c(CNT$SBJ, CNT$CAT, CNT$PAR, CNT$VIS),
         c(VAR$SBJ, VAR$CAT, VAR$PAR, visit_var)
       )
-      bm_dataset_with_internal_names <- rename_with_list(bm_dataset(), rename_list)
+
+      bm_temp <-bm_dataset()
+      bm_dataset_updated <- ensure_labelled_class( bm_temp, ref_line_vars)
+      bm_dataset_with_internal_names <- rename_with_list(bm_dataset_updated, rename_list)
+
       df <- data_subset()
       show_all_ref_vals <- isTRUE(input[[LP_ID$SHOW_ALL_REFERENCE_VALUES]])
 
@@ -1746,16 +1750,9 @@ mod_lineplot <- function(module_id,
         on_sbj_click_fun <- function() afmm[["utils"]][["switch2mod"]](receiver_id)
       }
 
-      # wrapping bm_dataset to check and ensure class attribute or ref line variables is set to "labelled"
-      bm_dataset_wrapped <- shiny::reactive({
-        ds <- afmm[["filtered_dataset"]]()[[bm_dataset_name]]
-        ds <- ensure_labelled_class(ds, ref_line_vars)
-        ds
-      })
-
       lineplot_server(
         id = module_id,
-        bm_dataset = bm_dataset_wrapped,
+        bm_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[bm_dataset_name]]),
         group_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[group_dataset_name]]),
         on_sbj_click = on_sbj_click_fun,
         summary_fns = summary_fns,
