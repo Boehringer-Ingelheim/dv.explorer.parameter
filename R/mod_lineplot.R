@@ -1031,8 +1031,8 @@ lineplot_server <- function(id,
         c(VAR$SBJ, VAR$CAT, VAR$PAR, visit_var)
       )
 
-      bm_temp <-bm_dataset()
-      bm_dataset_updated <- ensure_labelled_class( bm_temp, ref_line_vars)
+      bm_temp <- bm_dataset()
+      bm_dataset_updated <- ensure_labelled_class(bm_temp, ref_line_vars)
       bm_dataset_with_internal_names <- rename_with_list(bm_dataset_updated, rename_list)
 
       df <- data_subset()
