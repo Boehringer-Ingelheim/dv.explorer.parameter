@@ -1,7 +1,7 @@
 # dv.explorer.parameter 0.1.9-9000
 
 * lineplot:
-    * Added a function that ensures the indicated ref line variables in the input data table are of "labelled" class when a label is assigned to them.
+    * Applied a fix to ensure that if the indicated ref line variables in the input data table have labels attached to them, then these labels are used in the plot's legend
 
 # dv.explorer.parameter 0.1.9
 

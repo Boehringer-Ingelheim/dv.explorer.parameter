@@ -1030,18 +1030,15 @@ lineplot_server <- function(id,
         c(CNT$SBJ, CNT$CAT, CNT$PAR, CNT$VIS),
         c(VAR$SBJ, VAR$CAT, VAR$PAR, visit_var)
       )
-
-      bm_temp <- bm_dataset()
-      bm_dataset_updated <- ensure_labelled_class(bm_temp, ref_line_vars)
-      bm_dataset_with_internal_names <- rename_with_list(bm_dataset_updated, rename_list)
-
+      bm_dataset_with_internal_names <- rename_with_list(bm_dataset(), rename_list)
       df <- data_subset()
       show_all_ref_vals <- isTRUE(input[[LP_ID$SHOW_ALL_REFERENCE_VALUES]])
-
       res <- shiny::maskReactiveContext({
         df <- append_extra_vars(df, bm_dataset_with_internal_names, ref_line_vars)
         keep_cols <- intersect(c(CNT$PAR, CNT$MAIN_GROUP, ref_line_vars), names(df))
-        df <- unique(df[keep_cols])
+        lbls <- get_lbls_robust(df)
+        df <- unique(df[keep_cols]) # Unique removes labels
+        df <- possibly_set_lbls(df, lbls)
         generate_ref_line_data(df, show_all_ref_vals)
       })
       return(res)
@@ -1665,26 +1662,6 @@ lineplot_server <- function(id,
 
   shiny::moduleServer(id, module)
 }
-
-
-# Checks if ref line variables have a label attribute and their class status is not tagged as "labelled"
-# and if so it tags their class status as "labelled"
-ensure_labelled_class <- function(dataset, ref_line_vars) {
-  for (var_name in ref_line_vars) {
-    if (var_name %in% names(dataset)) {
-      var <- dataset[[var_name]]
-      lbl <- attr(var, "label", exact = TRUE)
-      has_labelled_class <- "labelled" %in% class(var)
-
-      if (!is.null(lbl) && nchar(lbl) > 0 && !has_labelled_class) {
-        class(var) <- c("labelled", class(var))
-        dataset[[var_name]] <- var
-      }
-    }
-  }
-  dataset
-}
-
 
 #' Line plot module
 #'
