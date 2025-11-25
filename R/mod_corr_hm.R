@@ -752,15 +752,7 @@ corr_hm_server <- function(id,
         )
       }
 
-      # shiny::validate(
-      #   shiny::need(
-      #     nrow(df) > 0,
-      #     #checkmate::test_data_frame(df, min.rows = 1),
-      #     "No rows returned by selection"
-      #   )
-      # )
-
-      svg_string <- scatter_plot(df, x_var, y_var)
+       svg_string <- scatter_plot(df, x_var, y_var)
 
       shiny::HTML(svg_string)
     })
