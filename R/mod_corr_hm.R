@@ -538,7 +538,7 @@ corr_hm_server <- function(id,
       {
         # TODO: Remove once dataset checks are in place
         ac <- checkmate::makeAssertCollection()
-        checkmate::assert_data_frame(bm_dataset(), min.rows = 1, .var.name = ns("bm_dataset"), add = ac)
+        checkmate::assert_data_frame(bm_dataset(), .var.name = ns("bm_dataset"))
         checkmate::assert_names(
           names(bm_dataset()),
           type = "unique",
@@ -548,9 +548,14 @@ corr_hm_server <- function(id,
           .var.name = ns("bm_dataset"),
           add = ac
         )
-        shiny::req(ac$isEmpty())
-
         checkmate::reportAssertions(ac)
+
+        shiny::validate(
+          shiny::need(
+            nrow(bm_dataset()) > 0,
+            "Parameter dataset has 0 rows"
+          )
+        )
 
         bm_dataset()
       },
@@ -747,13 +752,13 @@ corr_hm_server <- function(id,
         )
       }
 
-
-      shiny::validate(
-        shiny::need(
-          checkmate::test_data_frame(df, min.rows = 1),
-          "No rows returned by selection"
-        )
-      )
+      # shiny::validate(
+      #   shiny::need(
+      #     nrow(df) > 0,
+      #     #checkmate::test_data_frame(df, min.rows = 1),
+      #     "No rows returned by selection"
+      #   )
+      # )
 
       svg_string <- scatter_plot(df, x_var, y_var)
 
@@ -860,7 +865,7 @@ ch_subset_data <- function(sel, cat_col, par_col, val_col, vis_col,
   )
 
   shiny::validate(
-    need_rows(res)
+   need_rows(res)
   )
 
   res[[CNT$PAR]] <- paste_par_vis(res[[CNT$PAR]], res[[CNT$VIS]])
