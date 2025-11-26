@@ -1,3 +1,8 @@
+# dv.explorer.parameter 0.1.9-9001
+
+* boxplot, lineplot, scatter plot, scatter plot matrix, correlation heatmap, waterfall plus heatmap, roc :
+    * Added tests for each module, to ensure an appropriate messages is displayed, when a dataset is filtered to zero records using the global filter. 
+
 # dv.explorer.parameter 0.1.9
 
 * boxplot, lineplot, scatter plot, scatter plot matrix, correlation heatmap, waterfall plus heatmap :
