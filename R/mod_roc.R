@@ -407,6 +407,11 @@ roc_UI <- function(id) {
 #'
 #' Columns from `pred_dataset`,`resp_dataset` that correspond to values of the parameters
 #'
+#' @param quantile_type `[integer(1)]`
+#'
+#' Quantile algorithm type passed to \code{\link[stats]{quantile}}
+#' (an integer between 1 and 9, default 7).
+#'
 #' @param subjid_var `[character(1)]`
 #'
 #' Column corresponding to subject ID
@@ -431,6 +436,7 @@ roc_server <- function(id,
                        resp_value_vars = c("CHG1", "CHG2"),
                        resp_visit_var = "AVISIT",
                        subjid_var = "USUBJID",
+                       quantile_type = quantile_type,
                        compute_roc_fn = compute_roc_data,
                        compute_metric_fn = compute_metric_data) {
   ac <- checkmate::makeAssertCollection()
@@ -525,14 +531,14 @@ roc_server <- function(id,
 
         if (nrow(resp_dataset()) > 0) {
 
-        unique_par_names <- resp_dataset() |>
-          dplyr::distinct(dplyr::across(c(VAR$RESP$CAT, VAR$RESP$PAR))) |>
-          dplyr::group_by(dplyr::across(c(VAR$RESP$PAR))) |>
-          dplyr::tally() |>
-          dplyr::pull(.data[["n"]]) |>
-          max() |>
-          (function(x) x == 1)()
-        checkmate::assert_true(unique_par_names, .var.name = paste_ctxt(resp_dataset))
+          unique_par_names <- resp_dataset() |>
+            dplyr::distinct(dplyr::across(c(VAR$RESP$CAT, VAR$RESP$PAR))) |>
+            dplyr::group_by(dplyr::across(c(VAR$RESP$PAR))) |>
+            dplyr::tally() |>
+            dplyr::pull(.data[["n"]]) |>
+            max() |>
+            (function(x) x == 1)()
+          checkmate::assert_true(unique_par_names, .var.name = paste_ctxt(resp_dataset))
         }
 
         checkmate::assert_factor(resp_dataset()[[VAR$SBJ]], add = ac, .var.name = paste_ctxt(resp_dataset))
@@ -558,14 +564,14 @@ roc_server <- function(id,
           must.include = c(VAR$PRED$CAT, VAR$PRED$PAR, VAR$SBJ, VAR$PRED$VIS), .var.name = paste_ctxt(pred_dataset)
         )
         if (nrow(pred_dataset()) > 0) {
-        unique_par_names <- pred_dataset() |>
-          dplyr::distinct(dplyr::across(c(VAR$PRED$CAT, VAR$PRED$PAR))) |>
-          dplyr::group_by(dplyr::across(c(VAR$PRED$PAR))) |>
-          dplyr::tally() |>
-          dplyr::pull(.data[["n"]]) |>
-          max() |>
-          (function(x) x == 1)()
-        checkmate::assert_true(unique_par_names, .var.name = paste_ctxt(pred_dataset))
+          unique_par_names <- pred_dataset() |>
+            dplyr::distinct(dplyr::across(c(VAR$PRED$CAT, VAR$PRED$PAR))) |>
+            dplyr::group_by(dplyr::across(c(VAR$PRED$PAR))) |>
+            dplyr::tally() |>
+            dplyr::pull(.data[["n"]]) |>
+            max() |>
+            (function(x) x == 1)()
+          checkmate::assert_true(unique_par_names, .var.name = paste_ctxt(pred_dataset))
         }
         checkmate::assert_factor(pred_dataset()[[VAR$SBJ]], add = ac, .var.name = paste_ctxt(pred_dataset))
         checkmate::reportAssertions(ac)
@@ -869,6 +875,7 @@ roc_server <- function(id,
     output_arguments[[ROC_ID$ROC$RAINCLOUD_PLOT]] <- shiny::reactive(
       list(
         ds = data_subset(),
+        quantile_type = quantile_type,
         param_as_cols = v_input_invert_row_col(),
         fig_size = v_input_fig_size()
       )
@@ -1062,6 +1069,7 @@ mod_roc <- function(
     resp_value_vars = c("CHG1", "CHG2"),
     resp_visit_var = "AVISIT",
     subjid_var = "USUBJID",
+    quantile_type = 7L,
     compute_roc_fn = compute_roc_data,
     compute_metric_fn = compute_metric_data) {
   mod <- list(
@@ -1082,6 +1090,7 @@ mod_roc <- function(
         resp_value_vars = resp_value_vars,
         resp_visit_var = resp_visit_var,
         subjid_var = subjid_var,
+        quantile_type = quantile_type,
         compute_roc_fn = compute_roc_fn,
         compute_metric_fn = compute_metric_fn
       )
@@ -1108,6 +1117,7 @@ mod_roc_API_docs <- list(
   resp_value_vars = "",
   resp_visit_var = "",
   subjid_var = "",
+  quantile_type = "",
   compute_roc_fn = "",
   compute_metric_fn = ""
 )
@@ -1126,6 +1136,7 @@ mod_roc_API_spec <- TC$group(
   resp_value_vars = TC$col("resp_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("one_or_more"),
   resp_visit_var = TC$col("resp_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())),
   subjid_var = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("subjid_var", "map_character_to_factor"),
+  quantile_type = TC$integer(min = 1, max = 9),
   compute_roc_fn = TC$fn(arg_count = 4) |> TC$flag("optional"),
   compute_metric_fn = TC$fn(arg_count = 2) |> TC$flag("optional")
 ) |> TC$attach_docs(mod_roc_API_docs)
@@ -1133,7 +1144,7 @@ mod_roc_API_spec <- TC$group(
 check_mod_roc <- function(
     afmm, datasets, module_id, pred_dataset_name, resp_dataset_name, group_dataset_name, pred_cat_var,
     pred_par_var, pred_value_vars, pred_visit_var, resp_cat_var, resp_par_var, resp_value_vars,
-    resp_visit_var, subjid_var, compute_roc_fn, compute_metric_fn) {
+    resp_visit_var, subjid_var, quantile_type, compute_roc_fn, compute_metric_fn) {
   warn <- CM$container()
   err <- CM$container()
 
@@ -1142,7 +1153,7 @@ check_mod_roc <- function(
   OK <- check_mod_roc_auto(
     afmm, datasets, module_id, pred_dataset_name, resp_dataset_name, group_dataset_name, pred_cat_var,
     pred_par_var, pred_value_vars, pred_visit_var, resp_cat_var, resp_par_var, resp_value_vars,
-    resp_visit_var, subjid_var, compute_roc_fn, compute_metric_fn, warn, err
+    resp_visit_var, subjid_var, quantile_type, compute_roc_fn, compute_metric_fn, warn, err
   )
 
   # Checks that API spec does not (yet?) capture
@@ -1547,7 +1558,7 @@ roc_subset_data <- function(pred_cat,
       # This is a very unlikely case, and now that these functions uses internal names can probably be eliminated
       shiny::need(
         checkmate::test_names(names(joint_data),
-          disjunct.from = group_col
+                              disjunct.from = group_col
         ),
         ROC_MSG$ROC$VALIDATE$GROUP_COL_REPEATED
       )
@@ -1902,7 +1913,12 @@ get_histo_data <- function(ds) {
 #' `r doc_templates()[["subset_data_return"]]`
 #'
 #' @param ds `[data.frame()]`
+#'
 #' A dataframe
+#'
+#' @param quantile_type `[integer(1)]`
+#'
+#' Quantile algorithm type (an integer between 1 and 9, default 7).
 #'
 #' @return
 #'
@@ -1911,7 +1927,7 @@ get_histo_data <- function(ds) {
 #'
 #' @keywords internal
 #'
-get_quantile_data <- function(ds) {
+get_quantile_data <- function(ds, quantile_type = quantile_type) {
   is_grouped <- CNT_ROC$GRP %in% names(ds)
   grp_var <- if (is_grouped) c(CNT_ROC$PPAR, CNT_ROC$GRP, CNT_ROC$RVAL) else c(CNT_ROC$PPAR, CNT_ROC$RVAL)
   ds <- dplyr::group_by(ds, dplyr::across(dplyr::all_of(grp_var)))
@@ -1921,7 +1937,7 @@ get_quantile_data <- function(ds) {
     q = {
       probs <- c(.05, .25, .50, .75, .95)
       n_probs <- c("q05", "q25", "q50", "q75", "q95")
-      q <- stats::quantile(.data[[CNT_ROC$PVAL]], probs = probs)
+      q <- stats::quantile(.data[[CNT_ROC$PVAL]], probs = probs, type = quantile_type)
       q <- stats::setNames(q, n_probs)
       q <- as.list(q)
       tibble::as_tibble(q)
@@ -3714,10 +3730,10 @@ get_gt_summary_table <- function(ds, rounder = function(x) round(x, digits = 2),
   }
 
   wide_ds <- tidyr::pivot_wider(ds,
-    names_glue = glue::glue("{{{CNT_ROC$OC_TITLE}}}{CNT_VAL$ASCII_DELIM}{{.value}}"),
-    names_from = CNT_ROC$OC_TITLE,
-    values_from = c("Sensitivity", "Sensitivity_95", "Specificity", "Specificity_95", "Threshold"),
-    values_fn = list
+                                names_glue = glue::glue("{{{CNT_ROC$OC_TITLE}}}{CNT_VAL$ASCII_DELIM}{{.value}}"),
+                                names_from = CNT_ROC$OC_TITLE,
+                                values_from = c("Sensitivity", "Sensitivity_95", "Specificity", "Specificity_95", "Threshold"),
+                                values_fn = list
   )
 
   if (sort_alph) {
@@ -3827,26 +3843,26 @@ get_gt_summary_table <- function(ds, rounder = function(x) round(x, digits = 2),
   )
   t <- gt::opt_table_lines(t, extent = c("none"))
   t <- gt::tab_options(t,
-    row_group.as_column = TRUE,
-    column_labels.border.bottom.style = "solid",
-    column_labels.border.bottom.width = gt::px(1),
-    column_labels.border.bottom.color = "#E0E0E0",
-    table_body.border.bottom.style = "solid"
+                       row_group.as_column = TRUE,
+                       column_labels.border.bottom.style = "solid",
+                       column_labels.border.bottom.width = gt::px(1),
+                       column_labels.border.bottom.color = "#E0E0E0",
+                       table_body.border.bottom.style = "solid"
   )
 
   t <- gt::tab_style(t,
-    style = list(gt::cell_text(font = c("Garamond", gt::default_fonts()), style = "italic")),
-    locations = list(
-      locations = gt::cells_stub(rows = TRUE)
-    )
+                     style = list(gt::cell_text(font = c("Garamond", gt::default_fonts()), style = "italic")),
+                     locations = list(
+                       locations = gt::cells_stub(rows = TRUE)
+                     )
   )
 
   # Lines
   t <- gt::tab_style(t,
-    style = list(gt::cell_borders(sides = "bottom", color = "#E0E0E0")),
-    locations = list(
-      gt::cells_column_labels()
-    )
+                     style = list(gt::cell_borders(sides = "bottom", color = "#E0E0E0")),
+                     locations = list(
+                       gt::cells_column_labels()
+                     )
   )
 
   t <- gt::opt_css(
@@ -3898,10 +3914,10 @@ get_histo_plot_output <- function(ds, param_as_cols, fig_size) {
 }
 
 #' @describeIn composed Raincloud plot
-get_raincloud_output <- function(ds, param_as_cols, fig_size) {
+get_raincloud_output <- function(ds, param_as_cols, fig_size, quantile_type = quantile_type) {
   get_raincloud_spec(
     area_ds = get_dens_data(ds),
-    quantile_ds = get_quantile_data(ds),
+    quantile_ds = get_quantile_data(ds, quantile_type),
     point_ds = ds,
     param_as_cols = param_as_cols,
     fig_size = fig_size
@@ -4009,7 +4025,7 @@ assert_compute_roc_data <- function(r, with_ci) {
   checkmate::assert_data_frame(r[[CNT_ROC$ROC_CURVE]])
   roc_min_names <- c(CNT_ROC$SENS, CNT_ROC$SPEC, CNT_ROC$THR, CNT_ROC$AUC)
   checkmate::assert_subset(roc_min_names, names(r[[CNT_ROC$ROC_CURVE]]),
-    .var.name = glue::glue("names(r[[\"{CNT_ROC$ROC_CURVE}\"]])")
+                           .var.name = glue::glue("names(r[[\"{CNT_ROC$ROC_CURVE}\"]])")
   )
   checkmate::assert_numeric(r[[CNT_ROC$ROC_CURVE]][[CNT_ROC$SENS]])
   checkmate::assert_numeric(r[[CNT_ROC$ROC_CURVE]][[CNT_ROC$SPEC]])
@@ -4025,7 +4041,7 @@ assert_compute_roc_data <- function(r, with_ci) {
     CNT_ROC$OC_U_SPEC, CNT_ROC$OC_L_SPEC, CNT_ROC$OC_U_SENS, CNT_ROC$OC_L_SENS
   )
   checkmate::assert_subset(oc_min_names, names(r[[CNT_ROC$ROC_OC]]),
-    .var.name = glue::glue("names(r[[\"{CNT_ROC$ROC_OC}\"]])")
+                           .var.name = glue::glue("names(r[[\"{CNT_ROC$ROC_OC}\"]])")
   )
   checkmate::assert_numeric(r[[CNT_ROC$ROC_OC]][[CNT_ROC$OC_SENS]])
   checkmate::assert_numeric(r[[CNT_ROC$ROC_OC]][[CNT_ROC$OC_SPEC]])
@@ -4043,7 +4059,7 @@ assert_compute_roc_data <- function(r, with_ci) {
       CNT_ROC$CI_U_SPEC, CNT_ROC$CI_L_SENS, CNT_ROC$CI_U_SENS, CNT_ROC$THR
     )
     checkmate::assert_subset(ci_min_names, names(r[["ci_se_sp"]]),
-      .var.name = glue::glue("names(r[[\"{CNT_ROC$ROC_CI}\"]])")
+                             .var.name = glue::glue("names(r[[\"{CNT_ROC$ROC_CI}\"]])")
     )
     checkmate::assert_numeric(r[[CNT_ROC$ROC_CI]][[CNT_ROC$CI_SENS]])
     checkmate::assert_numeric(r[[CNT_ROC$ROC_CI]][[CNT_ROC$CI_SPEC]])
@@ -4164,11 +4180,11 @@ compute_roc_data <- function(predictor,
   if (do_bootstrap && length(thr_ci_points) > 0) { # Check that there is at least one point
 
     roc_ci_se_sp <- pROC::ci.thresholds(roc,
-      thresholds = thr_ci_points,
-      conf.level = conf_level,
-      direction = direction,
-      levels = this_levels,
-      progress = "none"
+                                        thresholds = thr_ci_points,
+                                        conf.level = conf_level,
+                                        direction = direction,
+                                        levels = this_levels,
+                                        progress = "none"
     )
 
     ci_se_sp <- tibble::tibble(

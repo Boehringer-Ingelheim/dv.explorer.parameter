@@ -107,18 +107,8 @@ Decimal values on this table are rounded (mathematical, round-to-even) to four d
 # Creating a correlation heatmap application
 
 ```{r, eval=FALSE}
-adbm_dataset <- dplyr::mutate(
-  dv.explorer.parameter:::safety_data()[["bm"]],
-  USUBJID = factor(USUBJID),
-  PARCAT1 = factor(PARCAT1),
-  PARAM = factor(PARAM),
-  AVISIT = factor(AVISIT)
-)
-
-adsl_dataset <- dplyr::mutate(
-  dv.explorer.parameter:::safety_data()[["sl"]],
-  USUBJID = factor(USUBJID)
-)
+aadBM_dataset <- dv.explorer.parameter:::safety_data()[["bm"]]
+adSL_dataset <- dv.explorer.parameter:::safety_data()[["sl"]]
 
 dv.manager::run_app(
   data = list("DS" = list(adbm = adbm_dataset, adsl = adsl_dataset)),

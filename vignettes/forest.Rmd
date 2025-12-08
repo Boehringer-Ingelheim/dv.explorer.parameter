@@ -74,7 +74,7 @@ The `r forest_call` module presents mandatory and optional function arguments to
     on the dataset, while `numeric_factor_functions` needs for one of them to be categorical and encoded as `factor`.
 
 
-Refer to `r forest_call` for the complete list of arguments and their description.
+Refer to `r forest_call`` for the complete list of arguments and their description.
 
 # Input menus
 
@@ -103,18 +103,8 @@ the data. Controls embedded in the table headings allow arbitrary reorderings of
 # Creating a forest plot application
 
 ```{r, eval=FALSE}
-adbm_dataset <- dplyr::mutate(
-  dv.explorer.parameter:::safety_data()[["bm"]],
-  USUBJID = factor(USUBJID),
-  PARCAT1 = factor(PARCAT1),
-  PARAM = factor(PARAM),
-  AVISIT = factor(AVISIT)
-)
-
-adsl_dataset <- dplyr::mutate(
-  dv.explorer.parameter:::safety_data()[["sl"]],
-  USUBJID = factor(USUBJID)
-)
+adbm_dataset <- dv.explorer.parameter:::safety_data()[["bm"]]
+adsl_dataset <- dv.explorer.parameter:::safety_data()[["sl"]]
 
 fp_numeric_numeric_functions <- list(
   "Pearson Correlation" = dv.explorer.parameter::pearson_correlation,
