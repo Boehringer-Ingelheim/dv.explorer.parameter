@@ -1,3 +1,8 @@
+# dv.explorer.parameter 0.1.9-9002
+
+* lineplot:
+    * Applied a fix to ensure that if the indicated ref line variables in the input data table have labels attached to them, then these labels are used in the plot's legend
+
 # dv.explorer.parameter 0.1.9-9001
 
 * boxplot, lineplot, scatter plot, scatter plot matrix, correlation heatmap, waterfall plus heatmap, roc :
