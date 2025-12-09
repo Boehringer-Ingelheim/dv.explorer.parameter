@@ -1927,7 +1927,7 @@ get_histo_data <- function(ds) {
 #'
 #' @keywords internal
 #'
-get_quantile_data <- function(ds, quantile_type = quantile_type) {
+get_quantile_data <- function(ds, quantile_type) {
   is_grouped <- CNT_ROC$GRP %in% names(ds)
   grp_var <- if (is_grouped) c(CNT_ROC$PPAR, CNT_ROC$GRP, CNT_ROC$RVAL) else c(CNT_ROC$PPAR, CNT_ROC$RVAL)
   ds <- dplyr::group_by(ds, dplyr::across(dplyr::all_of(grp_var)))
@@ -3914,10 +3914,10 @@ get_histo_plot_output <- function(ds, param_as_cols, fig_size) {
 }
 
 #' @describeIn composed Raincloud plot
-get_raincloud_output <- function(ds, param_as_cols, fig_size, quantile_type = quantile_type) {
+get_raincloud_output <- function(ds, param_as_cols, fig_size, quantile_type) {
   get_raincloud_spec(
     area_ds = get_dens_data(ds),
-    quantile_ds = get_quantile_data(ds, quantile_type),
+    quantile_ds = get_quantile_data(ds, quantile_type = quantile_type),
     point_ds = ds,
     param_as_cols = param_as_cols,
     fig_size = fig_size

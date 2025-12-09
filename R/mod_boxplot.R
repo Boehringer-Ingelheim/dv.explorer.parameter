@@ -1278,7 +1278,7 @@ bp_count_table <- function(ds) {
 #'   A data frame with the summary statistics.
 #'
 #' @keywords internal
-bp_summary_table <- function(ds, quantile_type = quantile_type) {
+bp_summary_table <- function(ds, quantile_type) {
   group_by <- setdiff(names(ds), c(CNT$SBJ, CNT$VAL))
 
   ds |>
@@ -1431,8 +1431,8 @@ bp_get_count_output <- function(ds) {
 
 #' @rdname boxplot_composed
 #' @inheritParams bp_summary_table
-bp_get_summary_output <- function(ds, quantile_type = quantile_type) {
-  summary <- bp_summary_table(ds, quantile_type)
+bp_get_summary_output <- function(ds, quantile_type) {
+  summary <- bp_summary_table(ds, quantile_type = quantile_type)
   summary <- possibly_set_lbls(summary, get_lbls_robust(ds))
   summary <- DT::datatable(summary, colnames = as.character(get_lbls_robust(summary)))
   summary <- DT::formatRound(summary, c("Mean", "SD", "Min", "Q1", "Median", "Q3", "Max"), digits = 2)
