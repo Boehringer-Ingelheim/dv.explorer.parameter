@@ -436,7 +436,7 @@ roc_server <- function(id,
                        resp_value_vars = c("CHG1", "CHG2"),
                        resp_visit_var = "AVISIT",
                        subjid_var = "USUBJID",
-                       quantile_type = quantile_type,
+                       quantile_type = 7L,
                        compute_roc_fn = compute_roc_data,
                        compute_metric_fn = compute_metric_data) {
   ac <- checkmate::makeAssertCollection()
@@ -1069,7 +1069,7 @@ mod_roc <- function(
     resp_value_vars = c("CHG1", "CHG2"),
     resp_visit_var = "AVISIT",
     subjid_var = "USUBJID",
-    quantile_type = 7L,
+    quantile_type = 7,
     compute_roc_fn = compute_roc_data,
     compute_metric_fn = compute_metric_data) {
   mod <- list(
