@@ -1,3 +1,11 @@
+# dv.explorer.parameter 0.1.9-9003
+
+* boxplot, roc:
+    * Add quantile_type to the mod signature enabling app creators to select the quantile calculation algorithm of choice 
+    * Update existing test, and add additional tests using the quantile_type argument
+* boxplot, line plot, scatter plot, scatter plot matrix, correlation heatmap, waterfall plus heatmap, forest plot:
+    * removed unnecessary transformation of variables to factors in the documentation examples
+
 # dv.explorer.parameter 0.1.9-9002
 
 * lineplot:
