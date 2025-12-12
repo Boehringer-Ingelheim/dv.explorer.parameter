@@ -555,7 +555,6 @@ applicable module arguments.
 adbm_dataset <- dv.explorer.parameter:::safety_data()[["bm"]]
 adsl_dataset <- dv.explorer.parameter:::safety_data()[["sl"]]
   
-  dplyr::mutate(USUBJID = factor(USUBJID))
 module_list <- list(
   "WFPHM" = dv.explorer.parameter::mod_wfphm(
     module_id = "wfphm",

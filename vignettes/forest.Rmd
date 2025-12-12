@@ -74,7 +74,7 @@ The `r forest_call` module presents mandatory and optional function arguments to
     on the dataset, while `numeric_factor_functions` needs for one of them to be categorical and encoded as `factor`.
 
 
-Refer to `r forest_call`` for the complete list of arguments and their description.
+Refer to `r forest_call` for the complete list of arguments and their description.
 
 # Input menus
 

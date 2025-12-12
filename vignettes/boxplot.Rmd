@@ -118,8 +118,8 @@ A table containing a set of statistical tests comparing the means of different g
 # Creating a boxplot application
 
 ```{r, eval=FALSE}
-adBM_dataset <- dv.explorer.parameter:::safety_data()[["bm"]]
-adSL_dataset <- dv.explorer.parameter:::safety_data()[["sl"]]
+adbm_dataset <- dv.explorer.parameter:::safety_data()[["bm"]]
+adsl_dataset <- dv.explorer.parameter:::safety_data()[["sl"]]
 
 dv.manager::run_app(
   data = list(dummy = list(adbm = adbm_dataset, adsl = adsl_dataset)),
