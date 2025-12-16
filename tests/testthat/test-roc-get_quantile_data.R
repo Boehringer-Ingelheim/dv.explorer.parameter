@@ -103,11 +103,8 @@ test_that("function is applied per parameter and group" |>
     p3_g1_B
   )
 
-  get_quantile_data(ds, quantile_type = 7
-  ) %>%
-    expect_identical(
-      expected_ds
-    )
+  get_quantile_data(ds, quantile_type = 7) %>%
+    expect_identical(expected_ds)
 })
 
 test_that("function is applied per parameter and group. No grouping." |>

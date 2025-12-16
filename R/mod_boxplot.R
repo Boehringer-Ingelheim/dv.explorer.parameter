@@ -473,27 +473,31 @@ boxplot_server <- function(id,
     param_iv <- shinyvalidate::InputValidator$new()
     param_iv$add_rule(
       get_id(inputs[[BP$ID$PAR]])[["cat"]],
-      sv_not_empty(inputs[[BP$ID$PAR]][["cat"]],
-                   msg = BP$MSG$VALIDATE$NO_CAT_SEL
+      sv_not_empty(
+        inputs[[BP$ID$PAR]][["cat"]],
+        msg = BP$MSG$VALIDATE$NO_CAT_SEL
       )
     )
 
     param_iv$add_rule(
       get_id(inputs[[BP$ID$PAR]])[["par"]],
-      sv_not_empty(inputs[[BP$ID$PAR]][["par"]],
-                   msg = BP$MSG$VALIDATE$NO_PAR_SEL
+      sv_not_empty(
+        inputs[[BP$ID$PAR]][["par"]],
+        msg = BP$MSG$VALIDATE$NO_PAR_SEL
       )
     )
     param_iv$add_rule(
       get_id(inputs[[BP$ID$PAR_VISIT]]),
-      sv_not_empty(inputs[[BP$ID$PAR_VISIT]],
-                   msg = BP$MSG$VALIDATE$NO_VISIT_SEL
+      sv_not_empty(
+        inputs[[BP$ID$PAR_VISIT]],
+        msg = BP$MSG$VALIDATE$NO_VISIT_SEL
       )
     )
     param_iv$add_rule(
       get_id(inputs[[BP$ID$PAR_VALUE]]),
-      sv_not_empty(inputs[[BP$ID$PAR_VALUE]],
-                   msg = BP$MSG$VALIDATE$NO_VALUE_SEL
+      sv_not_empty(
+        inputs[[BP$ID$PAR_VALUE]],
+        msg = BP$MSG$VALIDATE$NO_VALUE_SEL
       )
     )
     param_iv$enable()
@@ -501,20 +505,23 @@ boxplot_server <- function(id,
     group_iv <- shinyvalidate::InputValidator$new()
     group_iv$add_rule(
       get_id(inputs[[BP$ID$MAIN_GRP]]),
-      sv_not_empty(inputs[[BP$ID$MAIN_GRP]],
-                   msg = BP$MSG$VALIDATE$NO_MAIN_GROUP_SEL
+      sv_not_empty(
+        inputs[[BP$ID$MAIN_GRP]],
+        msg = BP$MSG$VALIDATE$NO_MAIN_GROUP_SEL
       )
     )
     group_iv$add_rule(
       get_id(inputs[[BP$ID$SUB_GRP]]),
-      sv_not_empty(inputs[[BP$ID$SUB_GRP]],
-                   msg = BP$MSG$VALIDATE$NO_SUB_GROUP_SEL
+      sv_not_empty(
+        inputs[[BP$ID$SUB_GRP]],
+        msg = BP$MSG$VALIDATE$NO_SUB_GROUP_SEL
       )
     )
     group_iv$add_rule(
       get_id(inputs[[BP$ID$PAGE_GRP]]),
-      sv_not_empty(inputs[[BP$ID$PAGE_GRP]],
-                   msg = BP$MSG$VALIDATE$NO_PAGE_GROUP_SEL
+      sv_not_empty(
+        inputs[[BP$ID$PAGE_GRP]],
+        msg = BP$MSG$VALIDATE$NO_PAGE_GROUP_SEL
       )
     )
     group_iv$enable()
@@ -1329,11 +1336,12 @@ bp_significance_table <- function(ds) {
 
   comb <- utils::combn(unique(ds[[CNT$MAIN_GROUP]]), 2)
   t_test <- function(x) {
-    d <- tidyr::pivot_wider(x,
-                            id_cols = -dplyr::all_of(CNT$SBJ),
-                            names_from = CNT$MAIN_GROUP,
-                            values_from = CNT$VAL,
-                            values_fn = list
+    d <- tidyr::pivot_wider(
+      x,
+      id_cols = -dplyr::all_of(CNT$SBJ),
+      names_from = CNT$MAIN_GROUP,
+      values_from = CNT$VAL,
+      values_fn = list
     )
     purrr::map(seq_len(ncol(comb)), function(ci) {
       g1 <- comb[1, ci]

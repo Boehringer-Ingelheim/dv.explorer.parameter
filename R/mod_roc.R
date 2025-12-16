@@ -1557,8 +1557,9 @@ roc_subset_data <- function(pred_cat,
       ),
       # This is a very unlikely case, and now that these functions uses internal names can probably be eliminated
       shiny::need(
-        checkmate::test_names(names(joint_data),
-                              disjunct.from = group_col
+        checkmate::test_names(
+          names(joint_data),
+          disjunct.from = group_col
         ),
         ROC_MSG$ROC$VALIDATE$GROUP_COL_REPEATED
       )
@@ -3729,11 +3730,12 @@ get_gt_summary_table <- function(ds, rounder = function(x) round(x, digits = 2),
     )
   }
 
-  wide_ds <- tidyr::pivot_wider(ds,
-                                names_glue = glue::glue("{{{CNT_ROC$OC_TITLE}}}{CNT_VAL$ASCII_DELIM}{{.value}}"),
-                                names_from = CNT_ROC$OC_TITLE,
-                                values_from = c("Sensitivity", "Sensitivity_95", "Specificity", "Specificity_95", "Threshold"),
-                                values_fn = list
+  wide_ds <- tidyr::pivot_wider(
+    ds,
+    names_glue = glue::glue("{{{CNT_ROC$OC_TITLE}}}{CNT_VAL$ASCII_DELIM}{{.value}}"),
+    names_from = CNT_ROC$OC_TITLE,
+    values_from = c("Sensitivity", "Sensitivity_95", "Specificity", "Specificity_95", "Threshold"),
+    values_fn = list
   )
 
   if (sort_alph) {
@@ -3842,27 +3844,26 @@ get_gt_summary_table <- function(ds, rounder = function(x) round(x, digits = 2),
     source_note = gt::md("Color scale domain ranges from the maximum to the minimum AUC value in the table")
   )
   t <- gt::opt_table_lines(t, extent = c("none"))
-  t <- gt::tab_options(t,
-                       row_group.as_column = TRUE,
-                       column_labels.border.bottom.style = "solid",
-                       column_labels.border.bottom.width = gt::px(1),
-                       column_labels.border.bottom.color = "#E0E0E0",
-                       table_body.border.bottom.style = "solid"
+  t <- gt::tab_options(
+    t,
+    row_group.as_column = TRUE,
+    column_labels.border.bottom.style = "solid",
+    column_labels.border.bottom.width = gt::px(1),
+    column_labels.border.bottom.color = "#E0E0E0",
+    table_body.border.bottom.style = "solid"
   )
 
-  t <- gt::tab_style(t,
-                     style = list(gt::cell_text(font = c("Garamond", gt::default_fonts()), style = "italic")),
-                     locations = list(
-                       locations = gt::cells_stub(rows = TRUE)
-                     )
+  t <- gt::tab_style(
+    t,
+    style = list(gt::cell_text(font = c("Garamond", gt::default_fonts()), style = "italic")),
+    locations = list(locations = gt::cells_stub(rows = TRUE))
   )
 
   # Lines
-  t <- gt::tab_style(t,
-                     style = list(gt::cell_borders(sides = "bottom", color = "#E0E0E0")),
-                     locations = list(
-                       gt::cells_column_labels()
-                     )
+  t <- gt::tab_style(
+    t,
+    style = list(gt::cell_borders(sides = "bottom", color = "#E0E0E0")),
+    locations = list(gt::cells_column_labels())
   )
 
   t <- gt::opt_css(
@@ -4024,8 +4025,9 @@ assert_compute_roc_data <- function(r, with_ci) {
   # roc data.frame
   checkmate::assert_data_frame(r[[CNT_ROC$ROC_CURVE]])
   roc_min_names <- c(CNT_ROC$SENS, CNT_ROC$SPEC, CNT_ROC$THR, CNT_ROC$AUC)
-  checkmate::assert_subset(roc_min_names, names(r[[CNT_ROC$ROC_CURVE]]),
-                           .var.name = glue::glue("names(r[[\"{CNT_ROC$ROC_CURVE}\"]])")
+  checkmate::assert_subset(
+    roc_min_names, names(r[[CNT_ROC$ROC_CURVE]]),
+    .var.name = glue::glue("names(r[[\"{CNT_ROC$ROC_CURVE}\"]])")
   )
   checkmate::assert_numeric(r[[CNT_ROC$ROC_CURVE]][[CNT_ROC$SENS]])
   checkmate::assert_numeric(r[[CNT_ROC$ROC_CURVE]][[CNT_ROC$SPEC]])
@@ -4040,8 +4042,9 @@ assert_compute_roc_data <- function(r, with_ci) {
     CNT_ROC$OC_TITLE, CNT_ROC$OC_SENS, CNT_ROC$OC_SPEC, CNT_ROC$OC_THR,
     CNT_ROC$OC_U_SPEC, CNT_ROC$OC_L_SPEC, CNT_ROC$OC_U_SENS, CNT_ROC$OC_L_SENS
   )
-  checkmate::assert_subset(oc_min_names, names(r[[CNT_ROC$ROC_OC]]),
-                           .var.name = glue::glue("names(r[[\"{CNT_ROC$ROC_OC}\"]])")
+  checkmate::assert_subset(
+    oc_min_names, names(r[[CNT_ROC$ROC_OC]]),
+    .var.name = glue::glue("names(r[[\"{CNT_ROC$ROC_OC}\"]])")
   )
   checkmate::assert_numeric(r[[CNT_ROC$ROC_OC]][[CNT_ROC$OC_SENS]])
   checkmate::assert_numeric(r[[CNT_ROC$ROC_OC]][[CNT_ROC$OC_SPEC]])
@@ -4058,8 +4061,9 @@ assert_compute_roc_data <- function(r, with_ci) {
       CNT_ROC$CI_SENS, CNT_ROC$CI_SPEC, CNT_ROC$CI_L_SPEC,
       CNT_ROC$CI_U_SPEC, CNT_ROC$CI_L_SENS, CNT_ROC$CI_U_SENS, CNT_ROC$THR
     )
-    checkmate::assert_subset(ci_min_names, names(r[["ci_se_sp"]]),
-                             .var.name = glue::glue("names(r[[\"{CNT_ROC$ROC_CI}\"]])")
+    checkmate::assert_subset(
+      ci_min_names, names(r[["ci_se_sp"]]),
+      .var.name = glue::glue("names(r[[\"{CNT_ROC$ROC_CI}\"]])")
     )
     checkmate::assert_numeric(r[[CNT_ROC$ROC_CI]][[CNT_ROC$CI_SENS]])
     checkmate::assert_numeric(r[[CNT_ROC$ROC_CI]][[CNT_ROC$CI_SPEC]])
@@ -4179,12 +4183,13 @@ compute_roc_data <- function(predictor,
 
   if (do_bootstrap && length(thr_ci_points) > 0) { # Check that there is at least one point
 
-    roc_ci_se_sp <- pROC::ci.thresholds(roc,
-                                        thresholds = thr_ci_points,
-                                        conf.level = conf_level,
-                                        direction = direction,
-                                        levels = this_levels,
-                                        progress = "none"
+    roc_ci_se_sp <- pROC::ci.thresholds(
+      roc,
+      thresholds = thr_ci_points,
+      conf.level = conf_level,
+      direction = direction,
+      levels = this_levels,
+      progress = "none"
     )
 
     ci_se_sp <- tibble::tibble(
