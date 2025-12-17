@@ -1279,7 +1279,7 @@ bp_count_table <- function(ds) {
 #'
 #' @param quantile_type `[integer(1)]`
 #'
-#' Quantile algorithm type (an integer between 1 and 9, default 7).
+#' Quantile algorithm type (an integer between 1 and 9).
 #'
 #' @return `data.frame()`
 #'   A data frame with the summary statistics.
