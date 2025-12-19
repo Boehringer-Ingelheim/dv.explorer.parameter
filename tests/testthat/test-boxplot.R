@@ -370,7 +370,7 @@ test_that("bp_summary_table calculates summary statistics correctly", {
   expect_equal(actual_output, expected_output)
 })
 
-test_that("bp_summary_table calculates summary statistics correctly using a different algorith", {
+test_that("bp_summary_table calculates summary statistics correctly using a different algorithm", {
   pa_val <- c(1:4, NA)
   pb_val <- c(6:9)
 
