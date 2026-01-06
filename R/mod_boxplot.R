@@ -872,7 +872,7 @@ mod_boxplot_API_spec <- TC$group(
   visit_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())) |> TC$flag("map_character_to_factor"),
   anlfl_vars = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("zero_or_more", "optional"),
   subjid_var = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("subjid_var", "map_character_to_factor"),
-  quantile_type = TC$integer(min = 1, max = 9),
+  quantile_type = TC$integer(min = 1, max = 9) |> TC$flag("manual_check"),
   default_cat = TC$choice_from_col_contents("cat_var") |> TC$flag("zero_or_more", "optional"),
   default_par = TC$choice_from_col_contents("par_var") |> TC$flag("zero_or_more", "optional"),
   default_visit = TC$choice_from_col_contents("visit_var") |> TC$flag("optional"),

@@ -1136,7 +1136,7 @@ mod_roc_API_spec <- TC$group(
   resp_value_vars = TC$col("resp_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("one_or_more"),
   resp_visit_var = TC$col("resp_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())),
   subjid_var = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("subjid_var", "map_character_to_factor"),
-  quantile_type = TC$integer(min = 1, max = 9),
+  quantile_type = TC$integer(min = 1, max = 9) |> TC$flag("manual_check"),
   compute_roc_fn = TC$fn(arg_count = 4) |> TC$flag("optional"),
   compute_metric_fn = TC$fn(arg_count = 2) |> TC$flag("optional")
 ) |> TC$attach_docs(mod_roc_API_docs)
@@ -1157,6 +1157,16 @@ check_mod_roc <- function(
   )
 
   # Checks that API spec does not (yet?) capture
+
+  #Check that `quantile_type` is an integer scalar
+  CM$assert(
+    container = err,
+    cond = checkmate::test_integerish(quantile_type, len = 1, any.missing = FALSE, null.ok = FALSE),
+    msg = sprintf(
+      "The value assigned to `quantile_type` is of type %s, but should be a non-missing integer scalar.",
+      typeof(quantile_type)
+    )
+  )
 
   # #ouhigo
   if (OK[["subjid_var"]] && OK[["pred_cat_var"]] && OK[["pred_par_var"]] && OK[["pred_visit_var"]]) {
