@@ -1158,14 +1158,11 @@ check_mod_roc <- function(
 
   # Checks that API spec does not (yet?) capture
 
-  #Check that `quantile_type` is an integer scalar
+  # Check that `quantile_type` is an integer scalar
   CM$assert(
     container = err,
-    cond = checkmate::test_integerish(quantile_type, len = 1, any.missing = FALSE, null.ok = FALSE),
-    msg = sprintf(
-      "The value assigned to `quantile_type` is of type %s, but should be a non-missing integer scalar.",
-      typeof(quantile_type)
-    )
+    cond = checkmate::test_integerish(quantile_type, lower = 1, upper = 9, len = 1, any.missing = FALSE, null.ok = FALSE),
+    msg = "The value assigned to `quantile_type` must be a non-missing integer scalar between 1 and 9."
   )
 
   # #ouhigo
