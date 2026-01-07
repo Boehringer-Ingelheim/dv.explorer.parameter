@@ -231,6 +231,11 @@ boxplot_UI <- function(id) { # nolint
 #'
 #' Columns from `bm_dataset` that correspond to analysis flags
 #'
+#' @param quantile_type `[integer(1)]`
+#'
+#' Quantile algorithm type passed to \code{\link[stats]{quantile}}
+#' (an integer between 1 and 9, default 7).
+#'
 #' @param subjid_var `[character(1)]`
 #'
 #' Column corresponding to subject ID
@@ -256,6 +261,7 @@ boxplot_server <- function(id,
                            visit_var = "AVISIT",
                            anlfl_vars = NULL,
                            subjid_var = "USUBJID",
+                           quantile_type = 7L,
                            default_cat = NULL,
                            default_par = NULL,
                            default_visit = NULL,
@@ -354,7 +360,7 @@ boxplot_server <- function(id,
           unique_par_names <- unique_par_names == 1
           checkmate::assert_true(unique_par_names, .var.name = ns("bm_dataset"))
         }
-        
+
         checkmate::assert_factor(bm_dataset()[[VAR$SBJ]], .var.name = ns("bm_dataset"))
 
         checkmate::reportAssertions(ac)
@@ -467,26 +473,30 @@ boxplot_server <- function(id,
     param_iv <- shinyvalidate::InputValidator$new()
     param_iv$add_rule(
       get_id(inputs[[BP$ID$PAR]])[["cat"]],
-      sv_not_empty(inputs[[BP$ID$PAR]][["cat"]],
+      sv_not_empty(
+        inputs[[BP$ID$PAR]][["cat"]],
         msg = BP$MSG$VALIDATE$NO_CAT_SEL
       )
     )
 
     param_iv$add_rule(
       get_id(inputs[[BP$ID$PAR]])[["par"]],
-      sv_not_empty(inputs[[BP$ID$PAR]][["par"]],
+      sv_not_empty(
+        inputs[[BP$ID$PAR]][["par"]],
         msg = BP$MSG$VALIDATE$NO_PAR_SEL
       )
     )
     param_iv$add_rule(
       get_id(inputs[[BP$ID$PAR_VISIT]]),
-      sv_not_empty(inputs[[BP$ID$PAR_VISIT]],
+      sv_not_empty(
+        inputs[[BP$ID$PAR_VISIT]],
         msg = BP$MSG$VALIDATE$NO_VISIT_SEL
       )
     )
     param_iv$add_rule(
       get_id(inputs[[BP$ID$PAR_VALUE]]),
-      sv_not_empty(inputs[[BP$ID$PAR_VALUE]],
+      sv_not_empty(
+        inputs[[BP$ID$PAR_VALUE]],
         msg = BP$MSG$VALIDATE$NO_VALUE_SEL
       )
     )
@@ -495,19 +505,22 @@ boxplot_server <- function(id,
     group_iv <- shinyvalidate::InputValidator$new()
     group_iv$add_rule(
       get_id(inputs[[BP$ID$MAIN_GRP]]),
-      sv_not_empty(inputs[[BP$ID$MAIN_GRP]],
+      sv_not_empty(
+        inputs[[BP$ID$MAIN_GRP]],
         msg = BP$MSG$VALIDATE$NO_MAIN_GROUP_SEL
       )
     )
     group_iv$add_rule(
       get_id(inputs[[BP$ID$SUB_GRP]]),
-      sv_not_empty(inputs[[BP$ID$SUB_GRP]],
+      sv_not_empty(
+        inputs[[BP$ID$SUB_GRP]],
         msg = BP$MSG$VALIDATE$NO_SUB_GROUP_SEL
       )
     )
     group_iv$add_rule(
       get_id(inputs[[BP$ID$PAGE_GRP]]),
-      sv_not_empty(inputs[[BP$ID$PAGE_GRP]],
+      sv_not_empty(
+        inputs[[BP$ID$PAGE_GRP]],
         msg = BP$MSG$VALIDATE$NO_PAGE_GROUP_SEL
       )
     )
@@ -661,7 +674,8 @@ boxplot_server <- function(id,
     # summary table
     output_arguments[[BP$ID$TABLE_SUMMARY]] <- shiny::reactive(
       list(
-        ds = data_subset()
+        ds = data_subset(),
+        quantile_type = quantile_type
       )
     )
     output[[BP$ID$TABLE_SUMMARY]] <- DT::renderDT({
@@ -781,6 +795,7 @@ mod_boxplot <- function(module_id,
                         visit_var = "AVISIT",
                         anlfl_vars = NULL,
                         subjid_var = "SUBJID",
+                        quantile_type = 7L,
                         default_cat = NULL,
                         default_par = NULL,
                         default_visit = NULL,
@@ -809,6 +824,7 @@ mod_boxplot <- function(module_id,
           on_sbj_click = on_sbj_click_fun,
           cat_var = cat_var, par_var = par_var, value_vars = value_vars, visit_var = visit_var,
           anlfl_vars = anlfl_vars, subjid_var = subjid_var,
+          quantile_type = quantile_type,
           default_cat = default_cat, default_par = default_par, default_visit = default_visit,
           default_value = default_value, default_main_group = default_main_group, default_sub_group = default_sub_group,
           default_page_group = default_page_group
@@ -834,6 +850,7 @@ mod_boxplot_API_docs <- list(
   visit_var = "",
   anlfl_vars = "",
   subjid_var = "",
+  quantile_type = "",
   default_cat = "",
   default_par = "",
   default_visit = "",
@@ -855,6 +872,7 @@ mod_boxplot_API_spec <- TC$group(
   visit_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())) |> TC$flag("map_character_to_factor"),
   anlfl_vars = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("zero_or_more", "optional"),
   subjid_var = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("subjid_var", "map_character_to_factor"),
+  quantile_type = TC$integer(min = 1, max = 9) |> TC$flag("manual_check"),
   default_cat = TC$choice_from_col_contents("cat_var") |> TC$flag("zero_or_more", "optional"),
   default_par = TC$choice_from_col_contents("par_var") |> TC$flag("zero_or_more", "optional"),
   default_visit = TC$choice_from_col_contents("visit_var") |> TC$flag("optional"),
@@ -868,7 +886,7 @@ mod_boxplot_API_spec <- TC$group(
 
 check_mod_boxplot <- function(
     afmm, datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id,
-    cat_var, par_var, value_vars, visit_var, anlfl_vars, subjid_var,
+    cat_var, par_var, value_vars, visit_var, anlfl_vars, subjid_var, quantile_type,
     default_cat, default_par, default_visit, default_value, default_main_group,
     default_sub_group, default_page_group, server_wrapper_func) {
   warn <- CM$container()
@@ -878,12 +896,20 @@ check_mod_boxplot <- function(
   # Something along the lines of OK <- CM$check_API(mod_corr_hm_API_spec, args = match.call(), warn, err)
   OK <- check_mod_boxplot_auto(
     afmm, datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id,
-    cat_var, par_var, value_vars, visit_var, anlfl_vars, subjid_var,
+    cat_var, par_var, value_vars, visit_var, anlfl_vars, subjid_var, quantile_type,
     default_cat, default_par, default_visit, default_value, default_main_group,
     default_sub_group, default_page_group, server_wrapper_func, warn, err
   )
 
   # Checks that API spec does not (yet?) capture
+
+  # Check that `quantile_type` is an integer scalar
+  CM$assert(
+    container = err,
+    cond = checkmate::test_integerish(quantile_type, lower = 1, upper = 9, len = 1, any.missing = FALSE, null.ok = FALSE),
+    msg = "The value assigned to `quantile_type` must be a non-missing integer scalar between 1 and 9."
+  )
+
   #ahwopu
   if (OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] && OK[["visit_var"]] && OK[["anlfl_vars"]]) {
 
@@ -1259,11 +1285,15 @@ bp_count_table <- function(ds) {
 #' @param ds `data.frame()`
 #'   A data frame to perform the summary over.
 #'
+#' @param quantile_type `[integer(1)]`
+#'
+#' Quantile algorithm type (an integer between 1 and 9).
+#'
 #' @return `data.frame()`
 #'   A data frame with the summary statistics.
 #'
 #' @keywords internal
-bp_summary_table <- function(ds) {
+bp_summary_table <- function(ds, quantile_type) {
   group_by <- setdiff(names(ds), c(CNT$SBJ, CNT$VAL))
 
   ds |>
@@ -1273,9 +1303,9 @@ bp_summary_table <- function(ds) {
       Mean = mean(.data[[CNT$VAL]], na.rm = TRUE),
       SD = stats::sd(.data[[CNT$VAL]], na.rm = TRUE),
       Min = min(.data[[CNT$VAL]], na.rm = TRUE),
-      Q1 = stats::quantile(.data[[CNT$VAL]], probs = .25, na.rm = TRUE),
+      Q1 = stats::quantile(.data[[CNT$VAL]], probs = .25, na.rm = TRUE, type = quantile_type),
       Median = stats::median(.data[[CNT$VAL]], na.rm = TRUE),
-      Q3 = stats::quantile(.data[[CNT$VAL]], probs = .75, na.rm = TRUE),
+      Q3 = stats::quantile(.data[[CNT$VAL]], probs = .75, na.rm = TRUE, type = quantile_type),
       Max = max(.data[[CNT$VAL]], na.rm = TRUE),
       "NA Values" = sum(is.na(.data[[CNT$VAL]]))
     ) |>
@@ -1314,7 +1344,8 @@ bp_significance_table <- function(ds) {
 
   comb <- utils::combn(unique(ds[[CNT$MAIN_GROUP]]), 2)
   t_test <- function(x) {
-    d <- tidyr::pivot_wider(x,
+    d <- tidyr::pivot_wider(
+      x,
       id_cols = -dplyr::all_of(CNT$SBJ),
       names_from = CNT$MAIN_GROUP,
       values_from = CNT$VAL,
@@ -1416,8 +1447,8 @@ bp_get_count_output <- function(ds) {
 
 #' @rdname boxplot_composed
 #' @inheritParams bp_summary_table
-bp_get_summary_output <- function(ds) {
-  summary <- bp_summary_table(ds)
+bp_get_summary_output <- function(ds, quantile_type) {
+  summary <- bp_summary_table(ds, quantile_type = quantile_type)
   summary <- possibly_set_lbls(summary, get_lbls_robust(ds))
   summary <- DT::datatable(summary, colnames = as.character(get_lbls_robust(summary)))
   summary <- DT::formatRound(summary, c("Mean", "SD", "Min", "Q1", "Median", "Q3", "Max"), digits = 2)

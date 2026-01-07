@@ -353,16 +353,43 @@ test_that("bp_summary_table calculates summary statistics correctly", {
     value = c(pa_val, pb_val)
   )
 
-  actual_output <- bp_summary_table(df)
+  actual_output <- bp_summary_table(df, quantile_type = 7)
   expected_output <- tibble::tibble(
     parameter = c("PA", "PB"),
     N = c(5, 4),
     Mean = c(mean(pa_val, na.rm = TRUE), mean(pb_val, na.rm = TRUE)),
     SD = c(sd(pa_val, na.rm = TRUE), sd(pb_val, na.rm = TRUE)),
     Min = c(min(pa_val, na.rm = TRUE), min(pb_val, na.rm = TRUE)),
-    Q1 = c(stats::quantile(pa_val, probs = .25, na.rm = TRUE), stats::quantile(pb_val, probs = .25, na.rm = TRUE)),
+    Q1 = c(stats::quantile(pa_val, probs = .25, na.rm = TRUE, type = 7), stats::quantile(pb_val, probs = .25, na.rm = TRUE, type = 7)),
     Median = c(median(pa_val, na.rm = TRUE), median(pb_val, na.rm = TRUE)),
-    Q3 = c(stats::quantile(pa_val, probs = .75, na.rm = TRUE), stats::quantile(pb_val, probs = .75, na.rm = TRUE)),
+    Q3 = c(stats::quantile(pa_val, probs = .75, na.rm = TRUE, type = 7), stats::quantile(pb_val, probs = .75, na.rm = TRUE, type = 7)),
+    Max = c(max(pa_val, na.rm = TRUE), max(pb_val, na.rm = TRUE)),
+    "NA Values" = c(1, 0)
+  )
+
+  expect_equal(actual_output, expected_output)
+})
+
+test_that("bp_summary_table calculates summary statistics correctly using a different algorithm", {
+  pa_val <- c(1:4, NA)
+  pb_val <- c(6:9)
+
+  df <- data.frame(
+    parameter = c(rep("PA", 5), rep("PB", 4)),
+    subject_id = 1,
+    value = c(pa_val, pb_val)
+  )
+
+  actual_output <- bp_summary_table(df, quantile_type = 2)
+  expected_output <- tibble::tibble(
+    parameter = c("PA", "PB"),
+    N = c(5, 4),
+    Mean = c(mean(pa_val, na.rm = TRUE), mean(pb_val, na.rm = TRUE)),
+    SD = c(sd(pa_val, na.rm = TRUE), sd(pb_val, na.rm = TRUE)),
+    Min = c(min(pa_val, na.rm = TRUE), min(pb_val, na.rm = TRUE)),
+    Q1 = c(stats::quantile(pa_val, probs = .25, na.rm = TRUE, type = 2), stats::quantile(pb_val, probs = .25, na.rm = TRUE, type = 2)),
+    Median = c(median(pa_val, na.rm = TRUE), median(pb_val, na.rm = TRUE)),
+    Q3 = c(stats::quantile(pa_val, probs = .75, na.rm = TRUE, type = 2), stats::quantile(pb_val, probs = .75, na.rm = TRUE, type = 2)),
     Max = c(max(pa_val, na.rm = TRUE), max(pb_val, na.rm = TRUE)),
     "NA Values" = c(1, 0)
   )
