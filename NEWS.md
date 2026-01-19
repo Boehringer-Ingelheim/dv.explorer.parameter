@@ -1,3 +1,7 @@
+# dv.explorer.parameter 0.1.9-9004
+
+* Adds support for bs5
+
 # dv.explorer.parameter 0.1.9
 
 * boxplot, lineplot, scatter plot, scatter plot matrix, correlation heatmap, waterfall plus heatmap :
