@@ -78,6 +78,7 @@ TC <- local({ # _T_ype C_hecks
         "named",                      # elements of targetted argument must be named
         "map_character_to_factor",    # the target TC$col() will be transformed to factor prior to reaching the module
         "ignore",                     # argument should be ignored by Dressing Room, for now
+        "manual_check",               # CM$generate_check_functions will not generate an automated check for this element# argument should be ignored by Dressing Room, for now
         # domain-specific flags
         "subject_level_dataset_name", # indicates dataset with one row per subject
         "subjid_var"                  # indicates unique subject identifier column on dataset pointed at by subject_level_dataset_name
@@ -180,7 +181,7 @@ TC <- local({ # _T_ype C_hecks
       docs[[1]] <- NULL
 
       if (length(api$elements) != length(docs)) {
-        stop(sprintf("api and docs are of different lengths (%d and %d)", length(api$elements), length(docs)))
+        stop(sprintf("api and docs are of different lengths (%d and %d)", length(api), length(docs)))
       } else if (!identical(names(api$elements), names(docs))) {
         stop(sprintf(
           "api and docs have different names (%s and %s)",

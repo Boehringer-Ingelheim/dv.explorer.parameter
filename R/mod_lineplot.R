@@ -1037,7 +1037,9 @@ lineplot_server <- function(id,
       res <- shiny::maskReactiveContext({
         df <- append_extra_vars(df, bm_dataset_with_internal_names, ref_line_vars)
         keep_cols <- intersect(c(CNT$PAR, CNT$MAIN_GROUP, ref_line_vars), names(df))
-        df <- unique(df[keep_cols])
+        lbls <- get_lbls_robust(df)
+        df <- unique(df[keep_cols]) # Unique removes labels
+        df <- possibly_set_lbls(df, lbls)
         generate_ref_line_data(df, show_all_ref_vals)
       })
       return(res)

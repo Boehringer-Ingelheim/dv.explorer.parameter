@@ -2,6 +2,24 @@
 
 * Adds support for bs5
 
+# dv.explorer.parameter 0.1.9-9003
+
+* boxplot, roc:
+    * Add quantile_type to the mod signature enabling app creators to select the quantile calculation algorithm of choice 
+    * Update existing test, and add additional tests using the quantile_type argument
+* boxplot, line plot, scatter plot, scatter plot matrix, correlation heatmap, waterfall plus heatmap, forest plot:
+    * removed unnecessary transformation of variables to factors in the documentation examples
+
+# dv.explorer.parameter 0.1.9-9002
+
+* lineplot:
+    * Applied a fix to ensure that if the indicated ref line variables in the input data table have labels attached to them, then these labels are used in the plot's legend
+
+# dv.explorer.parameter 0.1.9-9001
+
+* boxplot, lineplot, scatter plot, scatter plot matrix, correlation heatmap, waterfall plus heatmap, roc :
+    * Added tests for each module, to ensure an appropriate messages is displayed, when a dataset is filtered to zero records using the global filter. 
+
 # dv.explorer.parameter 0.1.9
 
 * boxplot, lineplot, scatter plot, scatter plot matrix, correlation heatmap, waterfall plus heatmap :
