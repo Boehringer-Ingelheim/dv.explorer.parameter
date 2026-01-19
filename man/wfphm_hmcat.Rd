@@ -2,7 +2,21 @@
 % Please edit documentation in R/mod_wfphm.R
 \name{wfphm_hmcat}
 \alias{wfphm_hmcat}
+\alias{wfphm_hmcat_UI}
+\alias{wfphm_hmcat_server}
 \title{Categorical heatmap component of WFPHM}
+\usage{
+wfphm_hmcat_UI(id)
+
+wfphm_hmcat_server(
+  id,
+  dataset,
+  subjid_var,
+  sorted_x,
+  cat_palette = list(),
+  margin
+)
+}
 \arguments{
 \item{id}{Shiny ID \verb{[character(1)]}}
 
@@ -49,6 +63,13 @@ A list with one entry:
 \description{
 Presents a heatmap plot for categorical variables
 }
+\section{Functions}{
+\itemize{
+\item \code{wfphm_hmcat_UI()}: UI
+
+\item \code{wfphm_hmcat_server()}: Server
+
+}}
 \section{Data subsetting:}{
 \itemize{
 \item Allows selecting several columns from all factor or character columns, from now on \strong{category_selection}.
@@ -84,4 +105,5 @@ Then a call to \link{heatmap_D3} is done with the following arguments:
 }
 }
 
+\keyword{developers}
 \keyword{internal}

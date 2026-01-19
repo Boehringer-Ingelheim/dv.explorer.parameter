@@ -8,8 +8,10 @@ mock_app_lineplot <- function(dry_run = FALSE,
                               update_query_string = TRUE,
                               srv_defaults = list(),
                               ui_defaults = list(),
-                              data = test_data()) {
-  bm_dataset <- shiny::reactive({
+                              data = test_data(anlfl_flags = anlfl_flags),
+                              anlfl_flags = FALSE
+                             ) {
+    bm_dataset <- shiny::reactive({
     data[["bm"]]
   })
   group_dataset <- shiny::reactive({
@@ -23,6 +25,12 @@ mock_app_lineplot <- function(dry_run = FALSE,
     ui_defaults
   )
 
+  if (anlfl_flags) {
+    anlfl_vars <- c("ANLFL1", "ANLFL2")
+  } else {
+    anlfl_vars <- NULL
+  }
+
   srv_params <- c(
     list(
       id = "not_ebas",
@@ -32,7 +40,8 @@ mock_app_lineplot <- function(dry_run = FALSE,
       cat_var = "PARCAT",
       par_var = "PARAM",
       visit_vars = c("VISIT", "VISIT2"),
-      value_vars = c("VALUE1", "VALUE2", "VALUE3")
+      value_vars = c("VALUE1", "VALUE2", "VALUE3"),
+      anlfl_vars = anlfl_vars
     ),
     srv_defaults
   )
@@ -50,11 +59,12 @@ mock_app_lineplot <- function(dry_run = FALSE,
   )
 }
 
-mock_app_lineplot_user_fn <- function(in_fluid = TRUE, defaults = list()) {
+mock_app_lineplot_user_fn <- function(in_fluid = TRUE, defaults = list(), anlfl_flags = FALSE) {
   container <- if (in_fluid) shiny::fluidPage else shiny::tagList
 
-  bm_dataset <- test_data()[["bm"]]
-  group_dataset <- test_data()[["sl"]]
+  data <- test_data(anlfl_flags = anlfl_flags)
+  bm_dataset <- data[["bm"]]
+  group_dataset <- data[["sl"]]
 
 
   geometric_mean <- function(x) {
@@ -90,6 +100,12 @@ mock_app_lineplot_user_fn <- function(in_fluid = TRUE, defaults = list()) {
     y_prefix = "(gMean fold change - 1)*100%"
   )
 
+  if (anlfl_flags) {
+    anlfl_vars <- c("ANLFL1", "ANLFL2")
+  } else {
+    anlfl_vars <- NULL
+  }
+
   shiny::shinyApp(
     ui = function() {
       container(
@@ -120,17 +136,27 @@ mock_app_lineplot_user_fn <- function(in_fluid = TRUE, defaults = list()) {
         subjid_var = "SUBJID",
         cat_var = "PARCAT",
         visit_vars = c("VISIT", "VISIT2"),
-        additional_listing_vars = c("CONT1", "CAT2")
+        additional_listing_vars = c("CONT1", "CAT2"),
+        anlfl_vars = anlfl_vars
       )
     },
     enableBookmarking = "url"
   )
 }
 
-mock_app_lineplot_mm <- function() {
+mock_app_lineplot_mm <- function(anlfl_flags = FALSE) {
   if (!requireNamespace("dv.manager")) {
     stop("Install dv.manager")
   }
+
+  data <- test_data(anlfl_flags = anlfl_flags)
+
+  if (anlfl_flags) {
+    anlfl_vars <- c("ANLFL1", "ANLFL2")
+  } else {
+    anlfl_vars <- NULL
+  }
+
   module_list <- list(
     "lineplot" = dv.explorer.parameter::mod_lineplot(
       module_id = "lineplot",
@@ -139,15 +165,13 @@ mock_app_lineplot_mm <- function() {
       visit_vars = "VISIT",
       value_vars = c("VALUE1", "VALUE2"),
       subjid_var = "SUBJID",
-      cat_var = "PARCAT"
+      cat_var = "PARCAT",
+      anlfl_vars = anlfl_vars
     )
   )
 
-  bm_dataset <- test_data()[["bm"]]
-  group_dataset <- test_data()[["sl"]]
-
   dv.manager::run_app(
-    data = list("DS" = list(bm = bm_dataset, sl = group_dataset)),
+    data = list("DS" = list(bm = data[["bm"]], sl = data[["sl"]])),
     module_list = module_list,
     filter_data = "sl",
     filter_key = "SUBJID"

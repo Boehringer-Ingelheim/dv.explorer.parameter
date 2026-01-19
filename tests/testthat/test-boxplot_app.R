@@ -14,7 +14,8 @@ ID <- poc( # nolint
     SGRP = tns(BP$ID$SUB_GRP, "val"),
     PGRP = tns(BP$ID$PAGE_GRP, "val"),
     VCHECK = tns(BP$ID$VIOLIN_CHECK),
-    SPCHECK = tns(BP$ID$SHOW_POINTS_CHECK)
+    SPCHECK = tns(BP$ID$SHOW_POINTS_CHECK),
+    ANLFL = tns(BP$ID$ANLFL_FILTER, "val")
   ),
   OUTPUT = poc(
     CHART = tns(BP$ID$CHART),
@@ -336,3 +337,42 @@ test_that("default values are set", {
   expect_equal(input_values[[ID$INPUT$SGRP]], srv_defaults[["default_sub_group"]])
   expect_equal(input_values[[ID$INPUT$PGRP]], srv_defaults[["default_page_group"]])
 })
+
+
+test_that("default values are set including analysis flag variables", {
+  testthat::skip_if_not(run_shiny_tests)
+  fail_if_app_not_started()
+  skip_if_suspect_check()
+
+  srv_defaults <- list(
+    default_cat = "PARCAT2",
+    default_par = c("PARAM22", "PARAM23"),
+    default_visit = "VISIT2",
+    default_value = "VALUE2",
+    default_main_group = "CAT1",
+    default_sub_group = "CAT2",
+    default_page_group = "CAT3"
+  )
+
+  app <- start_app_driver(
+    rlang::quo(
+      dv.explorer.parameter::mock_app_boxplot(
+        srv_defaults = !!srv_defaults,
+        anlfl_flags = TRUE
+      )
+    )
+  )
+
+  app$wait_for_idle()
+
+  input_values <- app$get_values()[["input"]]
+  expect_equal(input_values[[ID$INPUT$CAT]], srv_defaults[["default_cat"]])
+  expect_equal(input_values[[ID$INPUT$PAR]], srv_defaults[["default_par"]])
+  expect_equal(input_values[[ID$INPUT$VIS]], srv_defaults[["default_visit"]])
+  expect_equal(input_values[[ID$INPUT$VAL]], srv_defaults[["default_value"]])
+  expect_equal(input_values[[ID$INPUT$MGRP]], srv_defaults[["default_main_group"]])
+  expect_equal(input_values[[ID$INPUT$SGRP]], srv_defaults[["default_sub_group"]])
+  expect_equal(input_values[[ID$INPUT$PGRP]], srv_defaults[["default_page_group"]])
+  expect_equal(input_values[[ID$INPUT$ANLFL]], "ANLFL1")
+})
+

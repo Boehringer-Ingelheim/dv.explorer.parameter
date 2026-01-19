@@ -80,7 +80,7 @@ TC <- local({ # _T_ype C_hecks
         "ignore",                     # argument should be ignored by Dressing Room, for now
         # domain-specific flags
         "subject_level_dataset_name", # indicates dataset with one row per subject
-        "subjid_var"                  # indicates unique subject identifier column on dataset pointed at by subject_level_dataset_name 
+        "subjid_var"                  # indicates unique subject identifier column on dataset pointed at by subject_level_dataset_name
       )
     )
     if (length(unknown_flags)) browser()
@@ -180,7 +180,7 @@ TC <- local({ # _T_ype C_hecks
       docs[[1]] <- NULL
 
       if (length(api$elements) != length(docs)) {
-        stop(sprintf("api and docs are of different lengths (%d and %d)", length(api), length(docs)))
+        stop(sprintf("api and docs are of different lengths (%d and %d)", length(api$elements), length(docs)))
       } else if (!identical(names(api$elements), names(docs))) {
         stop(sprintf(
           "api and docs have different names (%s and %s)",

@@ -2,8 +2,17 @@
 % Please edit documentation in R/mod_corr_hm.R
 \name{mod_corr_hm}
 \alias{mod_corr_hm}
+\alias{corr_hm_UI}
 \title{Correlation Heatmap module}
 \usage{
+corr_hm_UI(
+  id,
+  default_cat = NULL,
+  default_par = NULL,
+  default_visit = NULL,
+  default_corr_method = NULL
+)
+
 mod_corr_hm(
   module_id,
   bm_dataset_name,
@@ -11,6 +20,7 @@ mod_corr_hm(
   cat_var = "PARCAT",
   par_var = "PARAM",
   visit_var = "AVISIT",
+  anlfl_vars = NULL,
   value_vars = "AVAL",
   default_cat = NULL,
   default_par = NULL,
@@ -19,6 +29,18 @@ mod_corr_hm(
 )
 }
 \arguments{
+\item{id}{\verb{[character(1)]}}
+
+\item{default_cat}{Default selected categories}
+
+\item{default_par}{Default selected parameters}
+
+\item{default_visit}{Default selected visits}
+
+\item{default_corr_method}{Default correlation method \verb{[character(1)]}
+
+Shiny ID}
+
 \item{module_id}{Shiny ID \verb{[character(1)]}
 
 Module identifier}
@@ -35,15 +57,13 @@ Column corresponding to the subject ID}
 
 Columns from \code{bm_dataset} that correspond to the parameter category, parameter and visit}
 
+\item{anlfl_vars}{\verb{[character(n)]}
+
+Columns from \code{bm_dataset} that correspond to analysis flags}
+
 \item{value_vars}{\verb{[character(n)]}
 
 Columns from \code{bm_dataset} that correspond to values of the parameters}
-
-\item{default_cat}{Default selected categories}
-
-\item{default_par}{Default selected parameters}
-
-\item{default_visit}{Default selected visits}
 
 \item{default_value}{\verb{[character(1)|NULL]}
 
@@ -53,4 +73,10 @@ Default values for the selectors}
 Display a heatmap of correlation coefficients (Pearson, Spearman) along with confidence intervals
 and p-values between dataset parameters over a single visit.
 }
+\section{Functions}{
+\itemize{
+\item \code{corr_hm_UI()}: UI
+
+}}
+\keyword{developers}
 \keyword{main}

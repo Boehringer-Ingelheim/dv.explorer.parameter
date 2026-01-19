@@ -2,7 +2,23 @@
 % Please edit documentation in R/mod_wfphm.R
 \name{wfphm_wf}
 \alias{wfphm_wf}
+\alias{wfphm_wf_UI}
 \title{Waterfall component of WFPHM}
+\usage{
+wfphm_wf(
+  id,
+  dataset,
+  cat_var,
+  par_var,
+  visit_var,
+  subjid_var,
+  value_vars,
+  bar_group_palette,
+  margin
+)
+
+wfphm_wf_UI(id)
+}
 \arguments{
 \item{id}{Shiny ID \verb{[character(1)]}}
 
@@ -50,6 +66,8 @@ A list with two entries:
 }
 \description{
 Waterfall component of WFPHM
+
+Waterfall UI function
 }
 \details{
 Data subsetting:
@@ -152,4 +170,10 @@ Then a call to \link{bar_D3} is done with the following arguments:
 }
 }
 }
+\section{Functions}{
+\itemize{
+\item \code{wfphm_wf_UI()}: UI
+
+}}
+\keyword{developers}
 \keyword{internal}

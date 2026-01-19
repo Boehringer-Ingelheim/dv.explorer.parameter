@@ -20,7 +20,8 @@ ID <- poc( # nolint
       VIS = tns(SP$ID$Y$PAR_VISIT, "val")
     ),
     GRP = tns(SP$ID$GRP, "val"),
-    COLOR = tns(SP$ID$COLOR, "val")
+    COLOR = tns(SP$ID$COLOR, "val"),
+    ANLFL = tns(BP$ID$ANLFL_FILTER, "val")
   ),
   OUTPUT = poc(
     CHART = tns(SP$ID$CHART),
@@ -235,5 +236,50 @@ test_that("default values are set", {
   expect_equal(input_values[[ID$INPUT$Y$VAL]], srv_defaults[["default_y_value"]])
   expect_equal(input_values[[ID$INPUT$GRP]], srv_defaults[["default_group"]])
   expect_equal(input_values[[ID$INPUT$COLOR]], srv_defaults[["default_color"]])
+})
+
+
+
+test_that("default values are set including analysis flag variables", {
+  testthat::skip_if_not(run_shiny_tests)
+  fail_if_app_not_started()
+  skip_if_suspect_check()
+
+  srv_defaults <- list(
+    default_x_cat = "PARCAT2",
+    default_x_par = "PARAM22",
+    default_x_visit = "VISIT2",
+    default_x_value = "VALUE2",
+    default_y_cat = "PARCAT3",
+    default_y_par = "PARAM32",
+    default_y_visit = "VISIT3",
+    default_y_value = "VALUE3",
+    default_group = "CAT2",
+    default_color = "CAT3"
+  )
+
+  app <- start_app_driver(
+    rlang::quo(
+      dv.explorer.parameter::mock_app_scatterplot(
+        srv_defaults = !!srv_defaults,
+        anlfl_flags = TRUE
+      )
+    )
+  )
+
+  app$wait_for_idle()
+
+  input_values <- app$get_values()[["input"]]
+  expect_equal(input_values[[ID$INPUT$X$CAT]], srv_defaults[["default_x_cat"]])
+  expect_equal(input_values[[ID$INPUT$X$PAR]], srv_defaults[["default_x_par"]])
+  expect_equal(input_values[[ID$INPUT$X$VIS]], srv_defaults[["default_x_visit"]])
+  expect_equal(input_values[[ID$INPUT$X$VAL]], srv_defaults[["default_x_value"]])
+  expect_equal(input_values[[ID$INPUT$Y$CAT]], srv_defaults[["default_y_cat"]])
+  expect_equal(input_values[[ID$INPUT$Y$PAR]], srv_defaults[["default_y_par"]])
+  expect_equal(input_values[[ID$INPUT$Y$VIS]], srv_defaults[["default_y_visit"]])
+  expect_equal(input_values[[ID$INPUT$Y$VAL]], srv_defaults[["default_y_value"]])
+  expect_equal(input_values[[ID$INPUT$GRP]], srv_defaults[["default_group"]])
+  expect_equal(input_values[[ID$INPUT$COLOR]], srv_defaults[["default_color"]])
+  expect_equal(input_values[[ID$INPUT$ANLFL]], "ANLFL1")
 })
 # nolint end

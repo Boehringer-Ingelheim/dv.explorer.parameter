@@ -5,8 +5,9 @@
 mock_app_scatterplot <- function(dry_run = FALSE,
                                  update_query_string = TRUE,
                                  srv_defaults = list(),
-                                 ui_defaults = list()) {
-  data <- test_data()
+                                 ui_defaults = list(),
+                                 anlfl_flags = FALSE) {
+  data <- test_data(anlfl_flags = anlfl_flags)
   bm_dataset <- shiny::reactive({
     data[["bm"]]
   })
@@ -22,6 +23,12 @@ mock_app_scatterplot <- function(dry_run = FALSE,
     ui_defaults
   )
 
+  if (anlfl_flags) {
+    anlfl_vars <- c("ANLFL1", "ANLFL2")
+  } else {
+    anlfl_vars <- NULL
+  }
+
   srv_params <- c(
     list(
       id = "not_ebas",
@@ -31,7 +38,8 @@ mock_app_scatterplot <- function(dry_run = FALSE,
       cat_var = "PARCAT",
       par_var = "PARAM",
       visit_var = "VISIT",
-      value_vars = c("VALUE1", "VALUE2", "VALUE3")
+      value_vars = c("VALUE1", "VALUE2", "VALUE3"),
+      anlfl_vars = anlfl_vars
     ),
     srv_defaults
   )
@@ -49,12 +57,19 @@ mock_app_scatterplot <- function(dry_run = FALSE,
   )
 }
 
-mock_app_scatterplot_mm <- function(in_fluid = TRUE, defaults = list(), update_query_string = TRUE) {
+mock_app_scatterplot_mm <- function(in_fluid = TRUE, defaults = list(), update_query_string = TRUE, anlfl_flags = FALSE) {
   if (!requireNamespace("dv.manager")) {
     stop("Install dv.manager")
   }
 
-  data <- test_data()
+  data <- test_data(anlfl_flags = anlfl_flags)
+
+  if (anlfl_flags) {
+    anlfl_vars <- c("ANLFL1", "ANLFL2")
+  } else {
+    anlfl_vars <- NULL
+  }
+
   dv.manager::run_app(
     data = list(dummy = list(bm = data[["bm"]], adsl = data[["sl"]])),
     module_list = list(
@@ -65,7 +80,8 @@ mock_app_scatterplot_mm <- function(in_fluid = TRUE, defaults = list(), update_q
         visit_var = "VISIT",
         value_vars = c("VALUE1", "VALUE2"),
         subjid_var = "SUBJID",
-        cat_var = "PARCAT"
+        cat_var = "PARCAT",
+        anlfl_vars = anlfl_vars
       )
     ),
     filter_data = "adsl",

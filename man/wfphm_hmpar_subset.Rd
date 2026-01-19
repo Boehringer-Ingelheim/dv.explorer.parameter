@@ -16,7 +16,8 @@ wfphm_hmpar_subset(
   subjid_var,
   sorted_x,
   out_criteria,
-  scale
+  scale,
+  anlfl_col = NULL
 )
 }
 \arguments{

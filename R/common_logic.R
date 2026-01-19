@@ -31,9 +31,10 @@
 #'
 #' Values from `vis_col` to be subset
 #'
-#' @param subj_col,par_col,cat_col,vis_col `[character(1)]`
+#' @param subj_col,par_col,cat_col,vis_col,anlfl_col `[character(1)]`
 #'
-#' Column for subject id, category, parameter and visit. All specified columns must be factors
+#' Column for subject id, category, parameter, visit and analysis flag. All
+#' specified columns must be factors. Analysis flag is optional.
 #'
 #' @return
 #'
@@ -47,13 +48,18 @@
 #' - When the same parameter is repeated across different categories an error is raised
 #'
 #' @keywords data, internal
-
+#'
 subset_bds_param <- function(ds, par, par_col, cat, cat_col,
-                             val_col, vis, vis_col, subj_col) {
+                             val_col, vis, vis_col, subj_col,
+                             anlfl_col = NULL) {
   # Check types
   ac <- checkmate::makeAssertCollection()
   checkmate::qassert(ds, "d")
-  checkmate::assert_subset(c(par_col, cat_col, val_col, vis_col, subj_col), names(ds))
+  required_cols <- c(par_col, cat_col, val_col, vis_col, subj_col)
+  if (!is.null(anlfl_col)) {
+    required_cols <- c(required_cols, anlfl_col)
+  }
+  checkmate::assert_subset(required_cols, names(ds))
   checkmate::reportAssertions(ac)
 
   ac <- checkmate::makeAssertCollection()
@@ -65,6 +71,10 @@ subset_bds_param <- function(ds, par, par_col, cat, cat_col,
   checkmate::qassert(ds[[par_col]], "f")
   checkmate::qassert(ds[[cat_col]], "f")
   checkmate::qassert(ds[[vis_col]], "f")
+  if (!is.null(anlfl_col) && anlfl_col %in% names(ds)) {
+    checkmate::qassert(anlfl_col, "S1")
+    checkmate::qassert(ds[[anlfl_col]], "f")
+  }
   checkmate::reportAssertions(ac)
 
   selected_cols <- character(0)
@@ -74,7 +84,14 @@ subset_bds_param <- function(ds, par, par_col, cat, cat_col,
   selected_cols[[CNT$VIS]] <- vis_col
   selected_cols[[CNT$VAL]] <- val_col
 
+  if (!is.null(anlfl_col)) {
+    selected_cols[[CNT$ANLFL]] <- anlfl_col
+  }
+
   mask <- ds[[cat_col]] %in% cat & ds[[par_col]] %in% par & ds[[vis_col]] %in% vis
+  if (!is.null(anlfl_col) && anlfl_col %in% names(ds)) {
+    mask <- mask & ds[[anlfl_col]] %in% "Y"
+  }
   subset_ds <- ds[mask, selected_cols]
   colnames(subset_ds) <- names(selected_cols)
 
@@ -250,7 +267,7 @@ need_one_cat_per_var <- function(..., msg) {
 # Force factors from the beginning if they are not factors
 as_factor_if_not_factor <- function(x) {
   if (!is.factor(x)) {
-    log_inform("Cohercing to factor")
+    log_inform("Cohercing to factor", level = "inform")
     as.factor(x)
   } else {
     x

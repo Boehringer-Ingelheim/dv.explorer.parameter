@@ -4,6 +4,7 @@ CNT <- poc( # nolint
   SBJ = "subject_id",
   CAT = "category",
   PAR = "parameter",
+  ANLFL = "analysis_flag",
   VIS = "visit",
   VAL = "value",
   VAR = "variable",

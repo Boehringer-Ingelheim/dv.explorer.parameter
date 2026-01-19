@@ -491,7 +491,7 @@ roc_server <- function(id,
     v_group_dataset <- shiny::reactive(
       {
         ac <- checkmate::makeAssertCollection()
-        checkmate::assert_data_frame(group_dataset(), min.rows = 1, .var.name = paste_ctxt(group_dataset))
+        checkmate::assert_data_frame(group_dataset(), .var.name = paste_ctxt(group_dataset))
         checkmate::assert_names(
           names(group_dataset()),
           type = "unique",
@@ -499,6 +499,12 @@ roc_server <- function(id,
         )
         checkmate::assert_factor(group_dataset()[[VAR$SBJ]], add = ac, .var.name = paste_ctxt(group_dataset))
         checkmate::reportAssertions(ac)
+        shiny::validate(
+          shiny::need(
+            nrow(group_dataset()) > 0,
+            "Group dataset has 0 rows"
+          )
+        )
         group_dataset()
       },
       label = ns(" v_group_dataset")
@@ -507,7 +513,7 @@ roc_server <- function(id,
     v_resp_dataset <- shiny::reactive(
       {
         ac <- checkmate::makeAssertCollection()
-        checkmate::assert_data_frame(resp_dataset(), min.rows = 1, .var.name = paste_ctxt(resp_dataset))
+        checkmate::assert_data_frame(resp_dataset(), .var.name = paste_ctxt(resp_dataset))
         checkmate::assert_names(
           names(resp_dataset()),
           type = "unique",
@@ -516,6 +522,9 @@ roc_server <- function(id,
           ),
           .var.name = paste_ctxt(resp_dataset)
         )
+
+        if (nrow(resp_dataset()) > 0) {
+
         unique_par_names <- resp_dataset() |>
           dplyr::distinct(dplyr::across(c(VAR$RESP$CAT, VAR$RESP$PAR))) |>
           dplyr::group_by(dplyr::across(c(VAR$RESP$PAR))) |>
@@ -523,10 +532,17 @@ roc_server <- function(id,
           dplyr::pull(.data[["n"]]) |>
           max() |>
           (function(x) x == 1)()
-
         checkmate::assert_true(unique_par_names, .var.name = paste_ctxt(resp_dataset))
+        }
+
         checkmate::assert_factor(resp_dataset()[[VAR$SBJ]], add = ac, .var.name = paste_ctxt(resp_dataset))
         checkmate::reportAssertions(ac)
+        shiny::validate(
+          shiny::need(
+            nrow(resp_dataset()) > 0,
+            "Resp dataset has 0 rows"
+          )
+        )
         resp_dataset()
       },
       label = ns("v_resp_dataset")
@@ -535,12 +551,13 @@ roc_server <- function(id,
     v_pred_dataset <- shiny::reactive(
       {
         ac <- checkmate::makeAssertCollection()
-        checkmate::assert_data_frame(pred_dataset(), min.rows = 1, .var.name = paste_ctxt(pred_dataset))
+        checkmate::assert_data_frame(pred_dataset(), .var.name = paste_ctxt(pred_dataset))
         checkmate::assert_names(
           names(pred_dataset()),
           type = "unique",
           must.include = c(VAR$PRED$CAT, VAR$PRED$PAR, VAR$SBJ, VAR$PRED$VIS), .var.name = paste_ctxt(pred_dataset)
         )
+        if (nrow(pred_dataset()) > 0) {
         unique_par_names <- pred_dataset() |>
           dplyr::distinct(dplyr::across(c(VAR$PRED$CAT, VAR$PRED$PAR))) |>
           dplyr::group_by(dplyr::across(c(VAR$PRED$PAR))) |>
@@ -549,8 +566,15 @@ roc_server <- function(id,
           max() |>
           (function(x) x == 1)()
         checkmate::assert_true(unique_par_names, .var.name = paste_ctxt(pred_dataset))
+        }
         checkmate::assert_factor(pred_dataset()[[VAR$SBJ]], add = ac, .var.name = paste_ctxt(pred_dataset))
         checkmate::reportAssertions(ac)
+        shiny::validate(
+          shiny::need(
+            nrow(pred_dataset()) > 0,
+            "Pred dataset has 0 rows"
+          )
+        )
         pred_dataset()
       },
       label = ns("v_pred_dataset")
@@ -1127,15 +1151,14 @@ check_mod_roc <- function(
   if (OK[["subjid_var"]] && OK[["pred_cat_var"]] && OK[["pred_par_var"]] && OK[["pred_visit_var"]]) {
     CM$check_unique_sub_cat_par_vis(
       datasets, "pred_dataset_name", pred_dataset_name,
-      subjid_var, pred_cat_var, pred_par_var, pred_visit_var,
-      warn, err
+      subjid_var, pred_cat_var, pred_par_var, pred_visit_var, anlfl = NULL, warn = warn, err = err
     )
   }
 
   if (OK[["subjid_var"]] && OK[["resp_cat_var"]] && OK[["resp_par_var"]] && OK[["resp_visit_var"]]) {
     CM$check_unique_sub_cat_par_vis(
       datasets, "resp_dataset_name", resp_dataset_name,
-      subjid_var, resp_cat_var, resp_par_var, resp_visit_var,
+      subjid_var, resp_cat_var, resp_par_var, resp_visit_var, anlfl = NULL,
       warn, err
     )
   }
@@ -1396,7 +1419,7 @@ roc_subset_data <- function(pred_cat,
   # Force factors from the beginning if they are not factors
   as_factor_if_not_factor <- function(x) {
     if (!is.factor(x)) {
-      log_inform("Cohercing to factor")
+      log_inform("Cohercing to factor", level = "inform")
       as.factor(x)
     } else {
       x

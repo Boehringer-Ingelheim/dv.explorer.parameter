@@ -38,10 +38,6 @@ Columns to be subset and renamed.}
 \item{bm_ds, group_ds}{\code{data.frame}
 
 data frames to be used as inputs in \link{subset_bds_param} and \link{subset_adsl}}
-
-\item{subj_col, par_col, cat_col, vis_col}{\verb{[character(1)]}
-
-Column for subject id, category, parameter and visit. All specified columns must be factors}
 }
 \description{
 TODO: Update this roxygen description to match the function
