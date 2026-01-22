@@ -592,8 +592,8 @@ roc_server <- function(id,
     input_roc[[ROC_ID$ROC$GROUP]] <- col_menu_server(
       id = ROC_ID$ROC$GROUP, data = v_group_dataset,
       label = ROC_MSG$ROC$LABEL$GROUP,
-      include_func = function(x) {
-        is.factor(x) || is.character(x)
+      include_func = function(x, name) {
+        (is.factor(x) || is.character(x)) && !identical(name, VAR$SBJ)
       }
     )
 
@@ -3769,7 +3769,13 @@ get_gt_summary_table <- function(ds, rounder = function(x) round(x, digits = 2),
   wide_ds <- dplyr::select(wide_ds, dplyr::any_of(sort_wide_ds_col))
 
   wide_ds <- dplyr::group_by(wide_ds, dplyr::across(c(CNT_ROC$PPAR)))
-  t <- gt::gt(wide_ds, groupname_col = CNT_ROC$PPAR, rowname_col = CNT_ROC$GRP)
+  if (CNT_ROC$GRP %in% names(wide_ds)) {
+    t <- gt::gt(wide_ds, groupname_col = CNT_ROC$PPAR, rowname_col = CNT_ROC$GRP)
+  } else {
+    t <- gt::gt(wide_ds, groupname_col = CNT_ROC$PPAR)
+  }
+
+
   t <- gt::tab_header(t, title = gt::md(paste0("**", response_param, "**")))
   t <- gt::tab_spanner_delim(t, delim = CNT_VAL$ASCII_DELIM)
   t <- purrr::reduce(
