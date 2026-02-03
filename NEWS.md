@@ -1,6 +1,12 @@
-# dv.explorer.parameter 0.1.9-9004
+# dv.explorer.parameter 0.1.9-9005
 
 * Adds support for bs5
+
+# dv.explorer.parameter 0.1.9-9004
+
+* roc:
+    * Fix a bug in the Summary tab, so that the visualisation output is produced both when a grouping variable is selected and when "None" is selected
+    * Ensure that USUBJID is removed from the grouping drop down list in the summary tab, as in spite of it being a factor it doesn't make sense to group the visualisation output by USUBJID 
 
 # dv.explorer.parameter 0.1.9-9003
 
