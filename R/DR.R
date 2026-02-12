@@ -90,9 +90,9 @@ DR <- local({ # _D_ressing _R_oom
   explorer_ui <- function() {
     panel <- function(...) {
       shiny::div(
-        class = "panel panel-default",
+        class = "card",
         style = "background-color:#eff7ff;",
-        shiny::div(class = "panel-body", style = "padding-bottom:0.5rem;", ...)
+        shiny::div(class = "card-body", style = "padding-bottom:0.5rem;", ...)
       )
     }
 
