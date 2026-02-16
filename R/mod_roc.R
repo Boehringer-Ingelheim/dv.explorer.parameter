@@ -1782,16 +1782,39 @@ get_roc_data <- function(ds, compute_fn, ci_points, do_bootstrap) {
 #'
 #' @keywords internal
 #'
+
 get_explore_roc_data <- function(ds) {
-  # Some AUCS are below .% or similar and the youden fails or similar
   prev_labels <- get_lbls(ds)
-  dplyr::select(ds, -dplyr::all_of(c(CNT_ROC$SENS, CNT_ROC$SPEC, CNT_ROC$THR))) |>
-    dplyr::distinct() |>
+
+  ds2 <- ds |>
+    dplyr::select(-dplyr::all_of(c(CNT_ROC$SENS, CNT_ROC$SPEC, CNT_ROC$THR))) |>
+    dplyr::distinct()
+
+  # Separate rows with and without a valid AUC
+  with_auc <- ds2 |>
+    dplyr::filter(purrr::map_int(.data[[CNT_ROC$AUC]], length) > 0)
+
+  without_auc <- ds2 |>
+    dplyr::filter(purrr::map_int(.data[[CNT_ROC$AUC]], length) == 0)
+
+  # Compute CI and AUC only for rows with a valid AUC
+  with_auc <- with_auc |>
     dplyr::mutate(
       !!CNT_ROC$L_AUC := purrr::map_dbl(.data[[CNT_ROC$AUC]], ~ .x[1]),
       !!CNT_ROC$U_AUC := purrr::map_dbl(.data[[CNT_ROC$AUC]], ~ .x[3]),
-      !!CNT_ROC$AUC := purrr::map_dbl(.data[[CNT_ROC$AUC]], ~ .x[2])
-    ) |>
+      !!CNT_ROC$AUC   := purrr::map_dbl(.data[[CNT_ROC$AUC]], ~ .x[2])
+    )
+
+  # For rows without a valid AUC, set CI and AUC to NA
+  without_auc <- without_auc |>
+    dplyr::mutate(
+      !!CNT_ROC$L_AUC := NA,
+      !!CNT_ROC$U_AUC := NA,
+      !!CNT_ROC$AUC   := NA
+    )
+
+  # Combine back and restore labels
+  dplyr::bind_rows(with_auc, without_auc) |>
     set_lbls(prev_labels)
 }
 
