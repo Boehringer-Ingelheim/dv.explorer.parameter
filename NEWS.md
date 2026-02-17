@@ -1,3 +1,8 @@
+# dv.explorer.parameter 0.1.9-9006
+
+* roc:
+    * Fix a bug in the Summary tab, so that the visualisation output is produced even when there are combinations of predictor and response where the response has only one value throughout. In this case ROC can not be calculated but the entry is presented in the plot with blank ROC. 
+
 # dv.explorer.parameter 0.1.9-9005
 
 * Adds support for bs5
