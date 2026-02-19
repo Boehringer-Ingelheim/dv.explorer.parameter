@@ -1,3 +1,12 @@
+# dv.explorer.parameter 0.1.9-9007
+
+* All modules where applicable:
+    * Update screenshots in vignettes to reflect to the dv.manager update
+    * Update val_report_child.Rmd according to the update made in dv.templates
+    
+  * wfph:
+    * Removed nonGxP notification   
+
 # dv.explorer.parameter 0.1.9-9006
 
 * roc:
