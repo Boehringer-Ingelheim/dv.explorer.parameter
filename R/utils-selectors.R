@@ -62,8 +62,8 @@ parameter_server <- function(id, data,
       )
     })
 
-    shiny::observeEvent(try(data()), {
-      shiny::req(checkmate::test_data_frame(try(data()), min.rows = 1))
+    shiny::observeEvent(try(data(), silent = TRUE), {
+      shiny::req(checkmate::test_data_frame(try(data(), silent = TRUE), min.rows = 1))
       choices <- levels(droplevels(data()[[cat_var]]))
       if (is_not_null(default_cat) && !checkmate::test_subset(default_cat, choices)) {
         log_warn(ssub("`DEFAULT` not found in `SET` for selector `ID`",
@@ -81,7 +81,7 @@ parameter_server <- function(id, data,
     })
 
     shiny::observeEvent(v_cat_val(), {
-      shiny::req(checkmate::test_data_frame(try(data()), min.rows = 1))
+      shiny::req(checkmate::test_data_frame(try(data(), silent = TRUE), min.rows = 1))
       if (!test_empty(v_cat_val())) {
         f_data <- dplyr::filter(data(), .data[[cat_var]] %in% v_cat_val())
         choices <- levels(droplevels(f_data)[[par_var]])

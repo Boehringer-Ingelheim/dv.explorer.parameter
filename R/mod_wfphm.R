@@ -2336,7 +2336,7 @@ wfphm_server <- function(id,
             if_not_null(hmcont[["margin"]](), hmcont[["margin"]](), dm_list),
             if_not_null(hmpar[["margin"]](), hmpar[["margin"]](), dm_list)
           )
-          rlang::inform(paste(purrr::pmap(l, max)), class = "debug")
+          log_inform(paste(purrr::pmap(l, max)), class = "debug")
           purrr::pmap_dbl(l, max)
         },
         label = ns(" max_margin")
