@@ -1,7 +1,7 @@
 # dv.explorer.parameter 0.1.9-9007
 
 * All modules where applicable:
-    * Update screenshots in vignettes to reflect to the dv.manager update
+    * Update screenshots in vignettes to reflect the dv.manager update
     * Update QC report according to the updated template
     
   * wfph:
