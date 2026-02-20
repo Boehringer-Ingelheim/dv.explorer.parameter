@@ -156,9 +156,6 @@ wfphm <- list(
         x_sorted = "
             all submodules share the same x-axis order defined by waterfall and they are vertically-aligned
             ",
-        non_gxp_notification = "
-            this module shall show a notification that it is a nonGxP module
-        ",
         chart_download = "
             this module shall allow downloading the created charts
         "

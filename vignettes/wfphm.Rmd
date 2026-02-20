@@ -208,17 +208,18 @@ contents and how they relate to the dataset.
 
 This plot shows a bar chart representing the value of a variable per
 subject in the adbm dataset in descending order, at a particular visit.
-The variable shown in the plot is selected from the waterfall menu option.
+The variable shown in the plot is selected from the waterfall menu
+option.
 
 ### Plotting parameters
 
 The [ADaM Basic Data Structure (BDS) using
 PARAMCD](https://www.cdisc.org/kb/examples/adam-basic-data-structure-bds-using-paramcd-80288192)
 is used to store parameter values for a given subject across several
-visits. Any of these parameters can be selected to be plotted in
-the waterfall.
+visits. Any of these parameters can be selected to be plotted in the
+waterfall.
 
-:::::: {style="display: flex;"}
+:::::::: {style="display: flex;"}
 <div>
 
 ![](images/wf_cat_param.png){width="75%"}
@@ -243,14 +244,12 @@ the waterfall.
 
 </div>
 
-
 <div>
 
 ![](images/wf_grouping_param.png){width="75%"}
 
 </div>
-
-::::::
+::::::::
 
 Dropdown menus for this plot are filled up the following way:
 
@@ -273,18 +272,15 @@ According to the selections made in the screenshot:
     -   as listed in the *AVAL* column
     -   for the visit *V1*
     -   for each participant
--   Each bar is colored and labelled
-    according to the *SUBJID*
--   A gray line is shown for participant 3 value because that particular
-    *Parameter*, *Visit*, *Value* combination is missing (there is a issue here as
-    currently the line is not grey but yellow!)
+-   Each bar is colored and labelled according to the *SUBJID*
 
 ![](images/wf_app_param.png){width="100%"}
 
 ### Plotting demographic baseline information
 
-It is also possible to plot subject level / demographic data. To do so 
-the *"Display demographic baseline information"* check box in the menu should be checked.
+It is also possible to plot subject level / demographic data. To do so
+the *"Display demographic baseline information"* check box in the menu
+should be checked.
 
 ::::: {style="display: flex;"}
 <div>
@@ -509,14 +505,12 @@ dv.manager::run_app(
 
 ![](images/hmpar_transformation_custom.png){width="25%"}
 
-
 ## Download chart menu
 
-The download chart menu allows to save a configuration of visualisations to your local environment, as a .png or .svg file. 
-
+The download chart menu allows to save a configuration of visualisations
+to your local environment, as a .png or .svg file.
 
 ![](images/download_chart.png){width="100%"}
-
 
 ## Using column labels in the menus
 
