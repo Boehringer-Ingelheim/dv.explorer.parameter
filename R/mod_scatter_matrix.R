@@ -9,7 +9,6 @@ SPM <- poc( # nolint
     ANLFL_FILTER = "anlfl_filter",
     GRP_BUTTON = "grp_button",
     MAIN_GRP = "main_grp",
-    OTHER_BUTTON = "other_button",
     CHART = "chart",
     TAB_TABLES = "tab_tables",
     TABLE_LISTING = "table_listing",
@@ -34,7 +33,6 @@ SPM <- poc( # nolint
       MAIN_GRP = "Group",
       SUB_GRP = "Subgroup",
       PAGE_GRP = "Page Group",
-      OTHER_BUTTON = "Other",
       TABLE_LISTING = "Data Listing",
       TABLE_COUNT = "Data Count",
       TABLE_SUMMARY = "Data Summary",
@@ -102,15 +100,10 @@ scatterplotmatrix_UI <- function(id) { # nolint
     col_menu_UI(id = ns(SPM$ID$MAIN_GRP))
   )
 
-  other_menu <- drop_menu_helper(
-    ns(SPM$ID$OTHER_BUTTON), SPM$MSG$LABEL$OTHER_BUTTON
-  )
-
   top_menu <- shiny::tagList(
     add_top_menu_dependency(),
     parameter_menu,
-    group_menu,
-    other_menu
+    group_menu
   )
 
   # Charts and tables ----
