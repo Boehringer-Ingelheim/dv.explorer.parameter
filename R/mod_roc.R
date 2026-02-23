@@ -1603,7 +1603,7 @@ roc_subset_data <- function(pred_cat,
   diff_rows <- nrow(joint_data) - nrow(clean_data)
 
   if (diff_rows > 0) {
-    rlang::warn(ROC_MSG$ROC$VALIDATE$N_SUBJECT_EMPTY_RESPONSES(diff_rows))
+    log_warn(ROC_MSG$ROC$VALIDATE$N_SUBJECT_EMPTY_RESPONSES(diff_rows))
     if (shiny::isRunning()) {
       shiny::showNotification(ROC_MSG$ROC$VALIDATE$N_SUBJECT_EMPTY_RESPONSES(diff_rows), type = "warning")
     }

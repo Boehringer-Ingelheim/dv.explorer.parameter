@@ -1,3 +1,7 @@
+# dv.explorer.parameter 0.1.9-9008
+
+Clear errors from the log
+
 # dv.explorer.parameter 0.1.9-9007
 
 * All modules where applicable:
@@ -6,6 +10,7 @@
     
   * wfph:
     * Removed nonGxP notification   
+
 
 # dv.explorer.parameter 0.1.9-9006
 
