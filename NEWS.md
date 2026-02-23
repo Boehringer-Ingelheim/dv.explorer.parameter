@@ -1,3 +1,7 @@
+# dv.explorer.parameter 0.1.9-9009
+
+Remove other menu from scatterplot matrix
+
 # dv.explorer.parameter 0.1.9-9008
 
 Clear errors from the log
