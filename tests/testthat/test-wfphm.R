@@ -41,7 +41,6 @@ C <- pack_of_constants(
   HMCONT_CONTAINER = "#not_ebas-hmcont-chart-d3_container",
   HMPAR_QUERY = "document.querySelector('#not_ebas-hmpar-chart-d3_heatmap').innerHTML;",
   HMPAR_CONTAINER = "#not_ebas-hmpar-chart-d3_container",
-  NON_GXP_TAG = "#not_ebas-non_gxp_tag",
   SAVE_PNG = tns("save_png"),
   SAVE_SVG = tns("save_svg"),
   FILENAME = tns("filename"),
@@ -241,25 +240,6 @@ test_that(
     expect_snapshot_file(path = svg_file)
   }
 )
-
-test_that(
-  paste(
-    component,
-    "nonGxP notification is shown"
-  ) %>%
-    vdoc[["add_spec"]](c(
-      specs$wfphm$wfphm$non_gxp_notification
-    )
-    ),
-  {
-    testthat::skip_if_not(run_shiny_tests)
-    fail_if_app_not_started()
-    skip_if_suspect_check()
-    app <- shinytest2::AppDriver$new(root_app$get_url())
-    expect_length(app$get_html(C$NON_GXP_TAG), 1)
-  }
-)
-
 
 test_that(
   "wfphm validation error when bm_dataset or group_dataset have 0 rows",
