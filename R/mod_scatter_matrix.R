@@ -471,13 +471,19 @@ scatterplotmatrix_server <- function(id,
     output_arguments <- list()
 
     # scatter plot matrix ----
-    output_arguments[[SPM$ID$CHART]] <- shiny::reactive(
+    output_arguments[[SPM$ID$CHART]] <- list(arguments = list(), render = NA)
+    output_arguments[[SPM$ID$CHART]][["arguments"]] <- shiny::reactive(
       list(
         ds = data_subset()
       )
     )
+    
+    if(is_shiny_test_mode()) {
+      output_arguments[[SPM$ID$CHART]][["render"]] <- shiny::reactive({do.call(get_scatterplotmatrix_output, output_arguments[[SPM$ID$CHART]][["arguments"]]())})
+    }
+
     output[[SPM$ID$CHART]] <- shiny::renderPlot({
-      do.call(get_scatterplotmatrix_output, output_arguments[[SPM$ID$CHART]]())
+      do.call(get_scatterplotmatrix_output, output_arguments[[SPM$ID$CHART]][["arguments"]]())
     })
 
     # debug tab ----
@@ -498,7 +504,7 @@ scatterplotmatrix_server <- function(id,
 
     # test values ----
     shiny::exportTestValues(
-      data_subset = data_subset()
+      output_arguments = output_arguments
     )
 
     # return ----
