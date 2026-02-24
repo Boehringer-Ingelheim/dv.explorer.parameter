@@ -29,16 +29,13 @@ ID <- poc( # nolint
 root_app <- start_app_driver(dv.explorer.parameter::mock_app_corr_hm())
 on.exit(if ("stop" %in% names(root_app)) root_app$stop())
 
-fail_if_app_not_started <- function() {
-  if (is.null(root_app)) rlang::abort("App could not be started")
+if (is.null(root_app)) {
+  rlang::abort("App could not be started")
 }
 
-test_that("correlation chart is included according to selection" |>
-  vdoc[["add_spec"]](c(specs$corr_hm_module$correlation_chart, specs$corr_hm_module$composition)), {
-  testthat::skip_if_not(run_shiny_tests)
-  fail_if_app_not_started()
-  skip_if_suspect_check()
+skip_if_not_running_shiny_tests()
 
+local({
   app <- shinytest2::AppDriver$new(root_app$get_url())
 
   inputs <- list()
@@ -56,63 +53,60 @@ test_that("correlation chart is included according to selection" |>
   app$set_inputs(!!!inputs2)
   app$wait_for_idle()
 
-  chart <- app$get_html(paste0("#", ID$OUTPUT$CHART))
-  expect_snapshot(chart, cran = TRUE)
-  listing_contents <- app$get_value(export = tns("listing_contents"))
-  expect_snapshot(listing_contents, cran = TRUE)
+  # Set up the clicks for the app so tables have content
+
+  # get bounding box function
+
+  click <- list(x = 1, y = 2)
+  app$set_inputs(!!ID$INPUT$CLICK := click, allow_no_input_binding_ = TRUE)
+
+  exported <- app$get_values(export = TRUE)[["export"]]
+
+  test_that(
+    "correlation chart is included according to selection" |>
+      vdoc[["add_spec"]](c(specs$corr_hm_module$correlation_chart, specs$corr_hm_module$composition)),
+    {
+      chart_args <- shiny::isolate(exported[["not_ebas-chart-output_arguments"]][[HM2SVG$CHART]][["arguments"]]())
+      chart_args <- chart_args[!names(chart_args) %in% c("ns", "pal_fun")]
+      expect_snapshot(chart_args, cran = TRUE)
+      chart_html <- app$get_html(paste0("#", ID$OUTPUT$CHART))
+      expect_true(grepl("^<div id=\"not_ebas-chart-chart\"", chart_html))
+    }
+  )
+
+    test_that(
+      "table is included according to selection" |>
+        vdoc[["add_spec"]](c(specs$corr_hm_module$correlation_chart, specs$corr_hm_module$composition)),
+      {
+        listing_args <- shiny::isolate(exported[["not_ebas-output_arguments"]][[CH_ID$TABLE_CORRELATION_LISTING]][[
+          "arguments"
+        ]]())
+        expect_snapshot(listing_args, cran = TRUE)
+        listing_html <- app$get_html(paste0("#", ID$OUTPUT$TABLES$CORRELATION_LISTING))
+        expect_true(grepl("^<div class=\"datatables", listing_html))
+      }
+    )
+
+  test_that(
+    "scatter chart appears according to click" |>
+      vdoc[["add_spec"]](c(specs$corr_hm_module$scatter_chart, specs$corr_hm_module$composition)),
+    {
+      scatter_args <- shiny::isolate(exported[["not_ebas-output_arguments"]][[CH_ID$SCATTER]][[
+        "arguments"
+      ]]())
+      expect_snapshot(scatter_args, cran = TRUE)
+
+      scatter_html <- app$get_value(output = ID$OUTPUT$SCATTER)[["html"]]
+      expect_true(grepl("^<svg", scatter_html))      
+    }
+  )
 })
-
-# Set up the clicks for the app so tables have content
-
-# get bounding box function
-
-# Clicks are sometimes reset.
-# Reason is unknown.
-# It seems to reset randomly after other actions happen mainly setting the other click or taking snapshots
-# It must be set and checked one after the other.
-
-test_that(
-  "scatter chart appears according to click" |>
-    vdoc[["add_spec"]](c(specs$corr_hm_module$scatter_chart, specs$corr_hm_module$composition)),
-  {
-    testthat::skip_if_not(run_shiny_tests)
-    fail_if_app_not_started()
-    skip_if_suspect_check()
-
-    app <- shinytest2::AppDriver$new(root_app$get_url())
-
-    inputs <- list()
-    inputs[[ID$INPUT$CAT]] <- "PARCAT2"
-    inputs[[ID$INPUT$VAL]] <- "VALUE2"
-    inputs[[ID$INPUT$VIS]] <- "VISIT2"
-    inputs[[ID$INPUT$CORR]] <- "Spearman"
-
-    # Set in two steps because a prior selector is required
-    inputs2 <- list()
-    inputs2[[ID$INPUT$PAR]] <- c("PARAM22", "PARAM23")
-
-    app$set_inputs(!!!inputs)
-    app$wait_for_idle()
-    app$set_inputs(!!!inputs2)
-    app$wait_for_idle()
-
-    click <- list(x = 1, y = 2)
-
-    app$set_inputs(!!ID$INPUT$CLICK := click, allow_no_input_binding_ = TRUE)
-    app$wait_for_idle()
-    chart <- app$get_value(output = ID$OUTPUT$SCATTER)
-
-    expect_snapshot(chart, cran = TRUE)
-  }
-)
 
 test_that("bookmark is restored. Clicks are excluded" |>
   vdoc[["add_spec"]](c(specs$corr_hm_module$bookmark)), {
   # Lots of out of memory warnings because the bookmark is too long. Repair, leave, or keep?
-  testthat::skip_if_not(run_shiny_tests)
-  fail_if_app_not_started()
-  skip_if_suspect_check()
-
+  skip_if_not_running_shiny_tests()
+  
   app <- shinytest2::AppDriver$new(root_app$get_url())
 
   inputs <- list()
@@ -133,7 +127,7 @@ test_that("bookmark is restored. Clicks are excluded" |>
   # URL is automatically updated with the bookmarked URL
   bmk_url <- app$get_js("window.location.href")
 
-  bookmark_app <- shinytest2::AppDriver$new(bmk_url)
+  bookmark_app <- suppressWarnings(shinytest2::AppDriver$new(bmk_url))
   bookmark_app$wait_for_idle()
   app_input_values <- app$get_values()[["input"]]
   bmk_input_values <- bookmark_app$get_values()[["input"]]
@@ -141,10 +135,8 @@ test_that("bookmark is restored. Clicks are excluded" |>
 })
 
 test_that("default values are set", {
-  testthat::skip_if_not(run_shiny_tests)
-  fail_if_app_not_started()
-  skip_if_suspect_check()
-
+  skip_if_not_running_shiny_tests()
+  
   ui_defaults <- list(
     default_corr_method = "spearman",
     default_cat = "PARCAT2",
@@ -178,10 +170,8 @@ test_that("default values are set", {
 
 
 test_that("default values are set including analysis flag variables", {
-  testthat::skip_if_not(run_shiny_tests)
-  fail_if_app_not_started()
-  skip_if_suspect_check()
-
+  skip_if_not_running_shiny_tests()
+  
   ui_defaults <- list(
     default_corr_method = "spearman",
     default_cat = "PARCAT2",
