@@ -12,7 +12,7 @@ test_that(
     axis_config <- c(x_min = -1, x_max = 1, ref_line_x = 0, tick_count = 5) |> type("axis_config")
 
     svg <- dv.explorer.parameter:::gen_svg(output_size, df, table_row_order, axis_config)
-    expect_snapshot(svg)
+    expect_snapshot(svg, cran = TRUE)
   }
 )
 
@@ -44,12 +44,12 @@ test_that(
     label <- "label" |> type("S")
 
     table <- gen_result_table_fun(ds, sl, fun, label) # no warning
-    expect_snapshot(table)
+    expect_snapshot(table, cran = TRUE)
 
     ds <- ds[-c(4), ]
     sl <- sl[-c(4), ]
     table <- gen_result_table_fun(ds, sl, fun, label) # standard deviation is zero warning
-    expect_snapshot(table)
+    expect_snapshot(table, cran = TRUE)
   }
 )
 
