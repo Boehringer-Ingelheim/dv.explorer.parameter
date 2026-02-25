@@ -73,12 +73,6 @@ str_to_hash <- function(object) {
   Vectorize(digest::digest, vectorize.args = "object", USE.NAMES = FALSE)(object, algo = "murmur32", serialize = FALSE)
 }
 
-is_validation_error <- function(x) {
-  defused_x <- rlang::enquo(x)
-  tried_x <- try(rlang::eval_tidy(defused_x), silent = TRUE)
-  inherits(attr(tried_x, "condition"), "validation")
-}
-
 decorate_cnd <- function(fn, prefix) {
   function(...) {
     withCallingHandlers(

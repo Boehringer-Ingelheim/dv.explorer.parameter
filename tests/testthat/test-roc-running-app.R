@@ -1,9 +1,15 @@
 # nolint start
-# TODO: Refactor according to:
-# https://rstudio.github.io/shinytest2/articles/robust.html#assert-as-little-unnecessary-information
-# TODO: A failure to start the app will delete all snapshots as they are never declared
+    # TODO: Refactor according to:
+    # https://rstudio.github.io/shinytest2/articles/robust.html#assert-as-little-unnecessary-information
+    # TODO: A failure to start the app will delete all snapshots as they are never declared
 
+    expect_table <- function(x) {      
+      expect_true(grepl("<table", app$get_html(paste0("#", x))))
+    }
 
+expect_svg <- function(x) {
+  expect_true(grepl("<svg", app$get_html(paste0("#", x))))
+}
 
 ID <- poc(
   PRED = poc(
@@ -28,14 +34,24 @@ ID <- poc(
     PANEL = "roc-chart_panel"
   ),
   OUTPUT = poc(
-    INFO_PANEL = "roc-info_panel" %>% structure(tab = NULL),
-    ROC_PLOT = "roc-vega_roc_plot" %>% structure(tab = "ROC"),
-    HISTO_PLOT = "roc-vega_histo_plot" %>% structure(tab = "Histogram"),
-    DENS_PLOT = "roc-vega_density_plot" %>% structure(tab = "Density"),
-    RAINCLOUD_PLOT = "roc-raincloud_plot" %>% structure(tab = "Raincloud"),
-    METRICS_PLOT = "roc-metrics_plot" %>% structure(tab = "Metrics"),
-    EXPLORE_ROC_PLOT = "roc-explore_roc_plot" %>% structure(tab = "Explore ROC"),
-    GT_SUMMARY_TABLE = "roc-gt_summary_table" %>% structure(tab = "Summary")
+    INFO_PANEL = "roc-info_panel" %>% structure(tab = NULL, expect = expect_table),
+    ROC_PLOT = "roc-vega_roc_plot" %>% structure(tab = "ROC", expect = expect_svg),
+    HISTO_PLOT = "roc-vega_histo_plot" %>% structure(tab = "Histogram", expect = expect_svg),
+    DENS_PLOT = "roc-vega_density_plot" %>% structure(tab = "Density", expect = expect_svg),
+    RAINCLOUD_PLOT = "roc-raincloud_plot" %>% structure(tab = "Raincloud", expect = expect_svg),
+    METRICS_PLOT = "roc-metrics_plot" %>% structure(tab = "Metrics", expect = expect_svg),
+    EXPLORE_ROC_PLOT = "roc-explore_roc_plot" %>% structure(tab = "Explore ROC", expect = expect_svg),
+    GT_SUMMARY_TABLE = "roc-gt_summary_table" %>% structure(tab = "Summary", expect = expect_table)
+  ),
+  UNAME_OUTPUT = poc(
+    INFO_PANEL = "info_panel",
+    ROC_PLOT = "vega_roc_plot",
+    HISTO_PLOT = "vega_histo_plot",
+    DENS_PLOT = "vega_density_plot",
+    RAINCLOUD_PLOT = "raincloud_plot",
+    METRICS_PLOT = "metrics_plot",
+    EXPLORE_ROC_PLOT = "explore_roc_plot",
+    GT_SUMMARY_TABLE = "gt_summary_table"
   )
 )
 
@@ -60,21 +76,18 @@ inputs2 <- rlang::list2(
   !!ID$RESP$PAR := c("BinA1")
 )
 app <- start_app_driver(dv.explorer.parameter:::roc_test_app())
-fail_if_app_not_started <- function() {
-  if (is.null(app)) rlang::abort("App could not be started")
-}
 
-fail_if_app_not_started()
+if (is.null(app)) rlang::abort("App could not be started")
 
 app$set_inputs(!!!inputs)
 app$set_inputs(!!!inputs2)
 
 app$wait_for_idle()
 
+exported <- app$get_value(export = "roc-output_arguments")
+
 test_that("only and all listed outputs are present", {
-  testthat::skip_if_not(run_shiny_tests)
-  fail_if_app_not_started()
-  skip_if_suspect_check()
+  skip_if_not_running_shiny_tests()
 
   outputs <- unlist(app$get_js("$('.shiny-html-output').map(function(_, x) { return x.id; }).get();"))
   checkmate::expect_subset(as.character(ID$OUTPUT), outputs)
@@ -87,30 +100,21 @@ test_that("charts are created" |>
       specs$roc$outputs$info_panel
     )
   ), {
-  # Announce snapshots so they are not removed when skipping
-  purrr::walk(
-    as.character(ID$OUTPUT), function(o) {
-      announce_snapshot_file(name = paste0(o, ".json"))
-      announce_snapshot_file(name = paste0(o, "_.png"))
-    }
-  )
 
-  # We skip after snapshots are announced otherwise snapshots are removed when the test is skipped
-  testthat::skip_if_not(run_shiny_tests)
-  fail_if_app_not_started()
-  skip_if_suspect_check()
-
-  # If the charts are shown then it can be inferred that inputs are correctly connected, otherwise it should be a bug-driven approach
+    skip_if_not_running_shiny_tests()
 
   for (o_n in names(ID$OUTPUT)) {
     o <- ID$OUTPUT[[o_n]]
+    uo <- ID$UNAME_OUTPUT[[o_n]]
+    expect_snapshot(shiny::isolate(exported[[uo]]()), cran = TRUE)
+
     t <- attr(o, "tab")
-    if (!is.null(t)) suppressMessages(app$set_inputs(!!!rlang::list2(!!ID$MISC$PANEL := t)))
+    exp <- attr(o, "expect")
+    if (!is.null(t)) suppressMessages(app$set_inputs(!!!rlang::list2(!!ID$MISC$PANEL := t)))    
     app$wait_for_idle()
-    app$expect_values(output = o, name = o)
-    ##############################################################
+    exp(o)
   }
-})
+  })
 
 test_that("charts are created. Ungrouped" |>
   vdoc[["add_spec"]](
@@ -119,31 +123,19 @@ test_that("charts are created. Ungrouped" |>
       specs$roc$outputs$info_panel
     )
   ), {
-  # Announce snapshots so they are not removed when skipping
-  purrr::walk(
-    as.character(ID$OUTPUT), function(o) {
-      o_ungrouped <- paste0("ungrouped_", o)
-      announce_snapshot_file(name = paste0(o_ungrouped, ".json"))
-      announce_snapshot_file(name = paste0(o_ungrouped, "_.png"))
-    }
-  )
-
-  # We skip after snapshots are announced otherwise snapshots are removed when the test is skipped
-  testthat::skip_if_not(run_shiny_tests)
-  fail_if_app_not_started()
-  skip_if_suspect_check()
-
-  app$set_inputs(!!!rlang::list2(!!ID$MISC$GRP := "None"))
-
-  # If the charts are shown then it can be inferred that inputs are correctly connected, otherwise it should be a bug-driven approach
+    skip_if_not_running_shiny_tests()
   for (o_n in names(ID$OUTPUT)) {
     o <- ID$OUTPUT[[o_n]]
-    o_ungrouped <- paste0("ungrouped_", o)
+    uo <- ID$UNAME_OUTPUT[[o_n]]
+    expect_snapshot(shiny::isolate(exported[[uo]]()), cran = TRUE)
+
     t <- attr(o, "tab")
-    if (!is.null(t)) suppressMessages(app$set_inputs(!!!rlang::list2(!!ID$MISC$PANEL := t)))
+    exp <- attr(o, "expect")
+    if (!is.null(t)) {
+      suppressMessages(app$set_inputs(!!!rlang::list2(!!ID$MISC$PANEL := t)))
+    }
     app$wait_for_idle()
-    app$expect_values(output = o, name = o_ungrouped)
-    ###############################################
+    exp(o)
   }
 })
 
@@ -153,21 +145,15 @@ test_that("Bookmark test" |>
       specs$roc$bookmark
     )
   ), {
-  n <- "bmk"
-  announce_snapshot_file(name = paste0(n, ".json"))
-  announce_snapshot_file(name = paste0(n, "_.png"))
+  skip_if_not_running_shiny_tests()  
 
-  testthat::skip_if_not(run_shiny_tests)
-  fail_if_app_not_started()
-  skip_if_suspect_check()
-
-  url <- paste0(
-    app$get_url(),
-    "?_inputs_&roc-pred_button_dropmenu=false&roc-resp_button_dropmenu=false&roc-other_button_dropmenu=false&roc-chart_panel=%22ROC%22&roc-pred_button=5&roc-resp_button=2&roc-other_button=3&roc-x_col_metrics=%22norm_rank%22&roc-invert_row_col=false&roc-sort_auc=false&roc-gt_summary_table_alph=false&roc-explore_roc_alph=false&roc-ci_spec_points=%22.25%3B.50%3B.75%22&roc-ci_raw_points=%22%22&roc-fig_size=%22200%22&roc-resp_value-val=%22CHG1%22&roc-pred_value-val=%22AVAL%22&roc-resp_visit-val=%22V2%22&roc-pred_visit-val=%22V1%22&roc-resp_par-par_val=%22BinA1%22&roc-resp_par-cat_val=%22BinA%22&roc-pred_par-par_val=%22A1%22&roc-pred_par-cat_val=%22A%22&roc-group-val=%22COUNTRY%22"
-  )
-  bmk_app <- shinytest2::AppDriver$new(url)
-  bmk_app$wait_for_idle()
-
-  bmk_app$expect_values(output = ID$OUTPUT$ROC_PLOT, name = n)
-})
+# URL is automatically updated with the bookmarked URL
+  bmk_url <- app$get_js("window.location.href")
+    
+  bookmark_app <- suppressWarnings(shinytest2::AppDriver$new(bmk_url))
+  bookmark_app$wait_for_idle()
+  app_input_values <- app$get_values()[["input"]]
+  bmk_input_values <- bookmark_app$get_values()[["input"]]
+  expect_identical(app_input_values, bmk_input_values)
+  })
 # nolint end
