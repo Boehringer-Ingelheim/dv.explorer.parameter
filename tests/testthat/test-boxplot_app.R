@@ -129,7 +129,7 @@ local({
       )
       # Ignoring title_data on purpose it should be tested somewhere else
       exported <- shiny::isolate(exported_test_values[[BP$ID$CHART]][["arguments"]]())
-      
+      exported[["title_data"]] <- NULL
       expect_identical(exported, expected)
 
       plot <- app$get_value(output = ID$OUTPUT$CHART)
