@@ -106,6 +106,8 @@ test_that("charts are created" |>
   for (o_n in names(ID$OUTPUT)) {
     o <- ID$OUTPUT[[o_n]]
     uo <- ID$UNAME_OUTPUT[[o_n]]
+    # METRICS PLOT test is sensitive to being loaded or byte-compiled. When byte compiled piped functions are inlined.
+    # The snapshot correspond to the byte compiled version
     expect_snapshot(shiny::isolate(exported[[uo]]()), cran = TRUE)
 
     t <- attr(o, "tab")
