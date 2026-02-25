@@ -213,48 +213,24 @@
       [1] "norm_rank"
       
       $compute_metric_fn
-      function(predictor, response) {
-        cds <- as.data.frame(
-          precrec::evalmod(
-            scores = as.numeric(predictor),
-            labels = as.character(response),
-            mode = "basic"
-          )
-        ) |>
-          dplyr::select(-.data[["dsid"]], -.data[["modname"]]) |>
-          dplyr::rename(norm_rank = .data[["x"]]) |>
-          tidyr::pivot_wider(values_from = "y", names_from = "type") |>
-          dplyr::mutate(
-            norm_score = {
+      function (predictor, response) 
+      {
+          cds <- dplyr::ungroup(tidyr::pivot_longer(dplyr::mutate(tidyr::pivot_wider(dplyr::rename(dplyr::select(as.data.frame(precrec::evalmod(scores = as.numeric(predictor), 
+              labels = as.character(response), mode = "basic")), -.data[["dsid"]], 
+              -.data[["modname"]]), norm_rank = .data[["x"]]), values_from = "y", 
+              names_from = "type"), norm_score = {
               val <- .data[["score"]]
               min_val <- min(val, na.rm = TRUE)
               max_val <- max(val, na.rm = TRUE)
-              (val - min_val) / (max_val - min_val)
-            }
-          ) |>
-          tidyr::pivot_longer(
-            cols = -dplyr::all_of(c("norm_rank", "score", "norm_score")),
-            names_to = "type",
-            values_to = "y"
-          ) |>
-          dplyr::ungroup()
-      
-        limits <- list(
-          accuracy = c(0, 1),
-          label = c(-1, 1),
-          error = c(0, 1),
-          specificity = c(0, 1),
-          sensitivity = c(0, 1),
-          precision = c(0, 1),
-          mcc = c(-1, 1),
-          fscore = c(0, 1)
-        )
-      
-        structure(
-          cds,
-          limits = limits
-        )
+              (val - min_val)/(max_val - min_val)
+          }), cols = -dplyr::all_of(c("norm_rank", "score", "norm_score")), 
+              names_to = "type", values_to = "y"))
+          limits <- list(accuracy = c(0, 1), label = c(-1, 1), error = c(0, 
+              1), specificity = c(0, 1), sensitivity = c(0, 1), precision = c(0, 
+              1), mcc = c(-1, 1), fscore = c(0, 1))
+          structure(cds, limits = limits)
       }
+      <bytecode: RANDOM VALUE - NO SNAPSHOT>
       <environment: namespace:dv.explorer.parameter>
       
 
@@ -580,48 +556,24 @@
       [1] "norm_rank"
       
       $compute_metric_fn
-      function(predictor, response) {
-        cds <- as.data.frame(
-          precrec::evalmod(
-            scores = as.numeric(predictor),
-            labels = as.character(response),
-            mode = "basic"
-          )
-        ) |>
-          dplyr::select(-.data[["dsid"]], -.data[["modname"]]) |>
-          dplyr::rename(norm_rank = .data[["x"]]) |>
-          tidyr::pivot_wider(values_from = "y", names_from = "type") |>
-          dplyr::mutate(
-            norm_score = {
+      function (predictor, response) 
+      {
+          cds <- dplyr::ungroup(tidyr::pivot_longer(dplyr::mutate(tidyr::pivot_wider(dplyr::rename(dplyr::select(as.data.frame(precrec::evalmod(scores = as.numeric(predictor), 
+              labels = as.character(response), mode = "basic")), -.data[["dsid"]], 
+              -.data[["modname"]]), norm_rank = .data[["x"]]), values_from = "y", 
+              names_from = "type"), norm_score = {
               val <- .data[["score"]]
               min_val <- min(val, na.rm = TRUE)
               max_val <- max(val, na.rm = TRUE)
-              (val - min_val) / (max_val - min_val)
-            }
-          ) |>
-          tidyr::pivot_longer(
-            cols = -dplyr::all_of(c("norm_rank", "score", "norm_score")),
-            names_to = "type",
-            values_to = "y"
-          ) |>
-          dplyr::ungroup()
-      
-        limits <- list(
-          accuracy = c(0, 1),
-          label = c(-1, 1),
-          error = c(0, 1),
-          specificity = c(0, 1),
-          sensitivity = c(0, 1),
-          precision = c(0, 1),
-          mcc = c(-1, 1),
-          fscore = c(0, 1)
-        )
-      
-        structure(
-          cds,
-          limits = limits
-        )
+              (val - min_val)/(max_val - min_val)
+          }), cols = -dplyr::all_of(c("norm_rank", "score", "norm_score")), 
+              names_to = "type", values_to = "y"))
+          limits <- list(accuracy = c(0, 1), label = c(-1, 1), error = c(0, 
+              1), specificity = c(0, 1), sensitivity = c(0, 1), precision = c(0, 
+              1), mcc = c(-1, 1), fscore = c(0, 1))
+          structure(cds, limits = limits)
       }
+      <bytecode: RANDOM VALUE - NO SNAPSHOT>
       <environment: namespace:dv.explorer.parameter>
       
 
