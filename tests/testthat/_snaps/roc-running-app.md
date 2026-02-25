@@ -1,4 +1,4 @@
-# charts are created__spec_ids{roc$composition;roc$outputs$info_panel}
+# charts are created INFO_PANEL__spec_ids{roc$composition;roc$outputs$info_panel}
 
     Code
       shiny::isolate(exported[[uo]]())
@@ -21,7 +21,7 @@
       # i 2 more variables: response_value <fct>, group <fct>
       
 
----
+# charts are created ROC_PLOT__spec_ids{roc$composition;roc$outputs$info_panel}
 
     Code
       shiny::isolate(exported[[uo]]())
@@ -91,7 +91,7 @@
       [1] TRUE
       
 
----
+# charts are created HISTO_PLOT__spec_ids{roc$composition;roc$outputs$info_panel}
 
     Code
       shiny::isolate(exported[[uo]]())
@@ -120,7 +120,7 @@
       [1] 200
       
 
----
+# charts are created DENS_PLOT__spec_ids{roc$composition;roc$outputs$info_panel}
 
     Code
       shiny::isolate(exported[[uo]]())
@@ -149,7 +149,7 @@
       [1] 200
       
 
----
+# charts are created RAINCLOUD_PLOT__spec_ids{roc$composition;roc$outputs$info_panel}
 
     Code
       shiny::isolate(exported[[uo]]())
@@ -181,7 +181,7 @@
       [1] 200
       
 
----
+# charts are created METRICS_PLOT__spec_ids{roc$composition;roc$outputs$info_panel}
 
     Code
       shiny::isolate(exported[[uo]]())
@@ -213,28 +213,52 @@
       [1] "norm_rank"
       
       $compute_metric_fn
-      function (predictor, response) 
-      {
-          cds <- dplyr::ungroup(tidyr::pivot_longer(dplyr::mutate(tidyr::pivot_wider(dplyr::rename(dplyr::select(as.data.frame(precrec::evalmod(scores = as.numeric(predictor), 
-              labels = as.character(response), mode = "basic")), -.data[["dsid"]], 
-              -.data[["modname"]]), norm_rank = .data[["x"]]), values_from = "y", 
-              names_from = "type"), norm_score = {
+      function(predictor, response) {
+        cds <- as.data.frame(
+          precrec::evalmod(
+            scores = as.numeric(predictor),
+            labels = as.character(response),
+            mode = "basic"
+          )
+        ) |>
+          dplyr::select(-.data[["dsid"]], -.data[["modname"]]) |>
+          dplyr::rename(norm_rank = .data[["x"]]) |>
+          tidyr::pivot_wider(values_from = "y", names_from = "type") |>
+          dplyr::mutate(
+            norm_score = {
               val <- .data[["score"]]
               min_val <- min(val, na.rm = TRUE)
               max_val <- max(val, na.rm = TRUE)
-              (val - min_val)/(max_val - min_val)
-          }), cols = -dplyr::all_of(c("norm_rank", "score", "norm_score")), 
-              names_to = "type", values_to = "y"))
-          limits <- list(accuracy = c(0, 1), label = c(-1, 1), error = c(0, 
-              1), specificity = c(0, 1), sensitivity = c(0, 1), precision = c(0, 
-              1), mcc = c(-1, 1), fscore = c(0, 1))
-          structure(cds, limits = limits)
+              (val - min_val) / (max_val - min_val)
+            }
+          ) |>
+          tidyr::pivot_longer(
+            cols = -dplyr::all_of(c("norm_rank", "score", "norm_score")),
+            names_to = "type",
+            values_to = "y"
+          ) |>
+          dplyr::ungroup()
+      
+        limits <- list(
+          accuracy = c(0, 1),
+          label = c(-1, 1),
+          error = c(0, 1),
+          specificity = c(0, 1),
+          sensitivity = c(0, 1),
+          precision = c(0, 1),
+          mcc = c(-1, 1),
+          fscore = c(0, 1)
+        )
+      
+        structure(
+          cds,
+          limits = limits
+        )
       }
-      <bytecode: 0x558502d1aca8>
       <environment: namespace:dv.explorer.parameter>
       
 
----
+# charts are created EXPLORE_ROC_PLOT__spec_ids{roc$composition;roc$outputs$info_panel}
 
     Code
       shiny::isolate(exported[[uo]]())
@@ -277,7 +301,7 @@
       [1] FALSE
       
 
----
+# charts are created GT_SUMMARY_TABLE__spec_ids{roc$composition;roc$outputs$info_panel}
 
     Code
       shiny::isolate(exported[[uo]]())
@@ -341,7 +365,7 @@
       [1] FALSE
       
 
-# charts are created. Ungrouped__spec_ids{roc$composition;roc$outputs$info_panel}
+# charts are created. Ungrouped INFO_PANEL__spec_ids{roc$composition;roc$outputs$info_panel}
 
     Code
       shiny::isolate(exported[[uo]]())
@@ -364,7 +388,7 @@
       # i 2 more variables: response_value <fct>, group <fct>
       
 
----
+# charts are created. Ungrouped ROC_PLOT__spec_ids{roc$composition;roc$outputs$info_panel}
 
     Code
       shiny::isolate(exported[[uo]]())
@@ -434,7 +458,7 @@
       [1] TRUE
       
 
----
+# charts are created. Ungrouped HISTO_PLOT__spec_ids{roc$composition;roc$outputs$info_panel}
 
     Code
       shiny::isolate(exported[[uo]]())
@@ -463,7 +487,7 @@
       [1] 200
       
 
----
+# charts are created. Ungrouped DENS_PLOT__spec_ids{roc$composition;roc$outputs$info_panel}
 
     Code
       shiny::isolate(exported[[uo]]())
@@ -492,7 +516,7 @@
       [1] 200
       
 
----
+# charts are created. Ungrouped RAINCLOUD_PLOT__spec_ids{roc$composition;roc$outputs$info_panel}
 
     Code
       shiny::isolate(exported[[uo]]())
@@ -524,7 +548,7 @@
       [1] 200
       
 
----
+# charts are created. Ungrouped METRICS_PLOT__spec_ids{roc$composition;roc$outputs$info_panel}
 
     Code
       shiny::isolate(exported[[uo]]())
@@ -556,28 +580,52 @@
       [1] "norm_rank"
       
       $compute_metric_fn
-      function (predictor, response) 
-      {
-          cds <- dplyr::ungroup(tidyr::pivot_longer(dplyr::mutate(tidyr::pivot_wider(dplyr::rename(dplyr::select(as.data.frame(precrec::evalmod(scores = as.numeric(predictor), 
-              labels = as.character(response), mode = "basic")), -.data[["dsid"]], 
-              -.data[["modname"]]), norm_rank = .data[["x"]]), values_from = "y", 
-              names_from = "type"), norm_score = {
+      function(predictor, response) {
+        cds <- as.data.frame(
+          precrec::evalmod(
+            scores = as.numeric(predictor),
+            labels = as.character(response),
+            mode = "basic"
+          )
+        ) |>
+          dplyr::select(-.data[["dsid"]], -.data[["modname"]]) |>
+          dplyr::rename(norm_rank = .data[["x"]]) |>
+          tidyr::pivot_wider(values_from = "y", names_from = "type") |>
+          dplyr::mutate(
+            norm_score = {
               val <- .data[["score"]]
               min_val <- min(val, na.rm = TRUE)
               max_val <- max(val, na.rm = TRUE)
-              (val - min_val)/(max_val - min_val)
-          }), cols = -dplyr::all_of(c("norm_rank", "score", "norm_score")), 
-              names_to = "type", values_to = "y"))
-          limits <- list(accuracy = c(0, 1), label = c(-1, 1), error = c(0, 
-              1), specificity = c(0, 1), sensitivity = c(0, 1), precision = c(0, 
-              1), mcc = c(-1, 1), fscore = c(0, 1))
-          structure(cds, limits = limits)
+              (val - min_val) / (max_val - min_val)
+            }
+          ) |>
+          tidyr::pivot_longer(
+            cols = -dplyr::all_of(c("norm_rank", "score", "norm_score")),
+            names_to = "type",
+            values_to = "y"
+          ) |>
+          dplyr::ungroup()
+      
+        limits <- list(
+          accuracy = c(0, 1),
+          label = c(-1, 1),
+          error = c(0, 1),
+          specificity = c(0, 1),
+          sensitivity = c(0, 1),
+          precision = c(0, 1),
+          mcc = c(-1, 1),
+          fscore = c(0, 1)
+        )
+      
+        structure(
+          cds,
+          limits = limits
+        )
       }
-      <bytecode: 0x558502d1aca8>
       <environment: namespace:dv.explorer.parameter>
       
 
----
+# charts are created. Ungrouped EXPLORE_ROC_PLOT__spec_ids{roc$composition;roc$outputs$info_panel}
 
     Code
       shiny::isolate(exported[[uo]]())
@@ -607,7 +655,7 @@
       [1] FALSE
       
 
----
+# charts are created. Ungrouped GT_SUMMARY_TABLE__spec_ids{roc$composition;roc$outputs$info_panel}
 
     Code
       shiny::isolate(exported[[uo]]())

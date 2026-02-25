@@ -93,43 +93,27 @@ test_that("only and all listed outputs are present", {
   checkmate::expect_subset(as.character(ID$OUTPUT), outputs)
 })
 
-test_that("charts are created" |>
-  vdoc[["add_spec"]](
-    c(
-      specs$roc$composition,
-      specs$roc$outputs$info_panel
-    )
-  ), {
 
-    skip_if_not_running_shiny_tests()
+local({
 
   for (o_n in names(ID$OUTPUT)) {
     o <- ID$OUTPUT[[o_n]]
     uo <- ID$UNAME_OUTPUT[[o_n]]
+    test_that(
+    paste("charts are created", o_n) |>
+      vdoc[["add_spec"]](
+        c(
+          specs$roc$composition,
+          specs$roc$outputs$info_panel
+        )
+      ),
+    {
     # METRICS PLOT test is sensitive to being loaded or byte-compiled. When byte compiled piped functions are inlined.
     # The snapshot correspond to the byte compiled version
-    expect_snapshot(shiny::isolate(exported[[uo]]()), cran = TRUE)
-
-    t <- attr(o, "tab")
-    exp <- attr(o, "expect")
-    if (!is.null(t)) suppressMessages(app$set_inputs(!!!rlang::list2(!!ID$MISC$PANEL := t)))    
-    app$wait_for_idle()
-    exp(o)
-  }
-  })
-
-test_that("charts are created. Ungrouped" |>
-  vdoc[["add_spec"]](
-    c(
-      specs$roc$composition,
-      specs$roc$outputs$info_panel
-    )
-  ), {
-    skip_if_not_running_shiny_tests()
-  for (o_n in names(ID$OUTPUT)) {
-    o <- ID$OUTPUT[[o_n]]
-    uo <- ID$UNAME_OUTPUT[[o_n]]
-    expect_snapshot(shiny::isolate(exported[[uo]]()), cran = TRUE)
+    expect_snapshot(shiny::isolate(exported[[uo]]()), cran = TRUE, transform = function(x) {
+      is_bytecode <- grepl("bytecode", x)
+      ifelse(is_bytecode, "<bytecode: RANDOM VALUE - NO SNAPSHOT>", x)
+    })
 
     t <- attr(o, "tab")
     exp <- attr(o, "expect")
@@ -138,6 +122,55 @@ test_that("charts are created. Ungrouped" |>
     }
     app$wait_for_idle()
     exp(o)
+  })
+}
+
+})
+
+local({
+  inputs <- rlang::list2(    
+    !!ID$MISC$GRP := c("None")
+  )
+
+  app$set_inputs(!!!inputs)
+  app$wait_for_idle()
+
+  on.exit({
+    inputs <- rlang::list2(
+      !!ID$MISC$GRP := c("ARM")
+    )
+    app$set_inputs(!!!inputs)
+    app$wait_for_idle()
+  }, add = TRUE)
+
+  for (o_n in names(ID$OUTPUT)) {
+    o <- ID$OUTPUT[[o_n]]
+    uo <- ID$UNAME_OUTPUT[[o_n]]
+    test_that(
+      paste("charts are created. Ungrouped", o_n) |>
+        vdoc[["add_spec"]](
+          c(
+            specs$roc$composition,
+            specs$roc$outputs$info_panel
+          )
+        ),
+      {
+        # METRICS PLOT test is sensitive to being loaded or byte-compiled. When byte compiled piped functions are inlined.
+    # The snapshot correspond to the byte compiled version
+    expect_snapshot(shiny::isolate(exported[[uo]]()), cran = TRUE, transform = function(x) {
+      is_bytecode <- grepl("bytecode", x)
+      ifelse(is_bytecode, "<bytecode: RANDOM VALUE - NO SNAPSHOT>", x)
+    })
+
+        t <- attr(o, "tab")
+        exp <- attr(o, "expect")
+        if (!is.null(t)) {
+          suppressMessages(app$set_inputs(!!!rlang::list2(!!ID$MISC$PANEL := t)))
+        }
+        app$wait_for_idle()
+        exp(o)
+      }
+    )
   }
 })
 
