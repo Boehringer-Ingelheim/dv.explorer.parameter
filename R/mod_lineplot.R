@@ -1086,22 +1086,38 @@ lineplot_server <- function(id,
       res
     }
 
+    chart_arguments <- shiny::reactive({
+      list(
+        ds = plot_data(),
+        ref_line_data = ref_line_data(),
+        last_selection = last_selection(),
+        alpha = input[[LP_ID$TWEAK_TRANSPARENCY]],
+        visit_col = input_lp[[LP_ID$PAR_VISIT_COL]](),
+        y_axis_projection = input[[LP_ID$TWEAK_Y_AXIS_PROJECTION]]
+      )
+    })
+
     output[[LP_ID$CHART]] <- shiny::renderPlot({
-      ds <- plot_data()
-      ref_line_data <- ref_line_data()
-      alpha <- input[[LP_ID$TWEAK_TRANSPARENCY]]
-      selected_points <- last_selection()[["points"]]
+      r_chart_arguments <- chart_arguments()
+      ds <- r_chart_arguments[["ds"]]
+      ref_line_data <- r_chart_arguments[["ref_line_data"]]
+      alpha <- r_chart_arguments[["alpha"]]
+      selected_points <- r_chart_arguments[["last_selection"]][["points"]]
+      visit_col <- r_chart_arguments[["visit_col"]]
+      last_visit_col <- r_chart_arguments[["last_selection"]][["visit_col"]]
+      y_axis_projection <- r_chart_arguments[["y_axis_projection"]]
+
       if (
         !setequal(names(ds), names(selected_points)) ||
-          !identical(last_selection()[["visit_col"]], input_lp[[LP_ID$PAR_VISIT_COL]]())
+          !identical(last_visit_col, visit_col)
       ) {
         selected_points <- data.frame() # selection was made based on different, incompatible plot data
       }
 
       ds[[LP_ID$LINE_HIGHLIGHT_MASK]] <- lp_selected_line_mask(ds, selected_points)
 
-      should_log_project <- identical(input[[LP_ID$TWEAK_Y_AXIS_PROJECTION]], "Logarithmic")
-      time_var_is_cdisc <- (input_lp[[LP_ID$PAR_VISIT_COL]]() %in% VAR$VIS_CDISC)
+      should_log_project <- identical(y_axis_projection, "Logarithmic")
+      time_var_is_cdisc <- (visit_col %in% VAR$VIS_CDISC)
 
       plot <- shiny::maskReactiveContext(
         lineplot_chart(
@@ -1548,6 +1564,7 @@ lineplot_server <- function(id,
     })
 
     output[[LP_ID$SUBJECT_LISTING]] <- DT::renderDT({
+      shiny::req(subject_listing_contents())
       DT::datatable(
         subject_listing_contents(),
         escape = FALSE,
@@ -1606,6 +1623,7 @@ lineplot_server <- function(id,
       res
     })
     output[[LP_ID$COUNT_LISTING]] <- DT::renderDT({
+      shiny::req(count_listing_contents())
       group_text <- compute_group_text(
         group_dataset(), input_lp[[LP_ID$MAIN_GRP]](), input_lp[[LP_ID$SUB_GRP]]()
       )
@@ -1643,6 +1661,7 @@ lineplot_server <- function(id,
     }
 
     shiny::exportTestValues(
+      chart_arguments = chart_arguments,
       subject_listing_contents = subject_listing_contents() |> encode_df_for_export(),
       summary_listing_contents = lp_summary_listing(last_selection()[["points"]]) |> encode_df_for_export(),
       count_listing_contents = count_listing_contents() |> encode_df_for_export(),
