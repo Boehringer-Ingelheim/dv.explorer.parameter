@@ -58,9 +58,9 @@ test_that(
     )
     ),
   {
-    testthat::skip_if_not(run_shiny_tests)
+    skip_if_not_running_shiny_tests()
     fail_if_app_not_started()
-    skip_if_suspect_check()
+    
     app <- shinytest2::AppDriver$new(root_app$get_url())
     app$set_inputs(
       !!C$CAT := "CAT1",
@@ -118,9 +118,9 @@ test_that(
     )
     ),
   {
-    testthat::skip_if_not(run_shiny_tests)
+    skip_if_not_running_shiny_tests()
     fail_if_app_not_started()
-    skip_if_suspect_check()
+    
 
     app <- shinytest2::AppDriver$new(app_anlfl$get_url())
 
@@ -174,9 +174,9 @@ test_that(
     )
     ),
   {
-    testthat::skip_if_not(run_shiny_tests)
+    skip_if_not_running_shiny_tests()
     fail_if_app_not_started()
-    skip_if_suspect_check()
+    
     app <- shinytest2::AppDriver$new(root_app$get_url())
     app$set_inputs(
       !!C$CAT := "CAT1", # nolint
@@ -240,6 +240,25 @@ test_that(
     expect_snapshot_file(path = svg_file)
   }
 )
+
+test_that(
+  paste(
+    component,
+    "nonGxP notification is shown"
+  ) %>%
+    vdoc[["add_spec"]](c(
+      specs$wfphm$wfphm$non_gxp_notification
+    )
+    ),
+  {
+    skip_if_not_running_shiny_tests()
+    fail_if_app_not_started()
+    
+    app <- shinytest2::AppDriver$new(root_app$get_url())
+    expect_length(app$get_html(C$NON_GXP_TAG), 1)
+  }
+)
+
 
 test_that(
   "wfphm validation error when bm_dataset or group_dataset have 0 rows",

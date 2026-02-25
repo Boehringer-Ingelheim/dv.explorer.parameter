@@ -173,9 +173,9 @@ local({
         )
       ),
     {
-      testthat::skip_if_not(run_shiny_tests)
+      skip_if_not_running_shiny_tests()
       fail_if_app_not_started()
-      skip_if_suspect_check()
+      
       expect_r2d3_svg(app, list(list(svg = C$SVG_JS_QUERY, container = C$CONTAINER, n = 1)))
     }
   )
@@ -183,9 +183,9 @@ local({
   test_that(
     "wfphm-hmcat returns margin list",
     {
-      testthat::skip_if_not(run_shiny_tests)
+      skip_if_not_running_shiny_tests()
       fail_if_app_not_started()
-      skip_if_suspect_check()
+      
       x <- app$get_values()
       margin <- shiny::isolate(x[["export"]][[tns("r")]][["margin"]]())
       expect_true(setequal(names(margin), c("top", "bottom", "left", "right")))

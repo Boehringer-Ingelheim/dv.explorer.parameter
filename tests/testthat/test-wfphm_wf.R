@@ -299,9 +299,9 @@ test_that(
     )
     ),
   {
-    testthat::skip_if_not(run_shiny_tests)
+    skip_if_not_running_shiny_tests()
     fail_if_app_not_started()
-    skip_if_suspect_check()
+    
 
     app <- shinytest2::AppDriver$new(root_app$get_url())
     app$set_inputs(!!C$CHECK := TRUE)
@@ -327,9 +327,9 @@ test_that(
     )
     ),
   {
-    testthat::skip_if_not(run_shiny_tests)
+    skip_if_not_running_shiny_tests()
     fail_if_app_not_started()
-    skip_if_suspect_check()
+    
 
     app <- shinytest2::AppDriver$new(root_app$get_url())
     app$set_inputs(!!C$CHECK := FALSE)
@@ -358,18 +358,18 @@ local({
   app$wait_for_idle()
 
   test_that("wfphm_wf returns a margin list", {
-    testthat::skip_if_not(run_shiny_tests)
+    skip_if_not_running_shiny_tests()
     fail_if_app_not_started()
-    skip_if_suspect_check()
+    
     x <- app$get_values()
     margin <- shiny::isolate(x[["export"]][[tns("r")]][["margin"]]())
     expect_true(setequal(names(margin), c("top", "bottom", "left", "right")))
   })
 
   test_that("wfphm_wf returns a sorting for the x axis", {
-    testthat::skip_if_not(run_shiny_tests)
+    skip_if_not_running_shiny_tests()
     fail_if_app_not_started()
-    skip_if_suspect_check()
+    
     x <- app$get_values()
     sorted_x <- shiny::isolate(x[["export"]][[tns("r")]][["sorted_x"]]())
     expect_identical(sorted_x, c("2", "1", "3"))
