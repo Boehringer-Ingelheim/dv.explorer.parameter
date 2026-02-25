@@ -33,10 +33,14 @@
 ---
 
     Code
-      shiny::isolate(exported_test_values[[SP$ID$TABLE_REGRESSION]]$render())[["x"]][[
-        "data"]]
+      unstable_to_zero <- shiny::isolate(exported_test_values[[SP$ID$
+      TABLE_REGRESSION]]$render())[["x"]][["data"]]
+      unstable_to_zero[["std.error"]] <- 0
+      unstable_to_zero[["statistic"]] <- 0
+      unstable_to_zero[["p.value"]] <- 0
+      unstable_to_zero
     Output
-                 term estimate    std.error    statistic       p.value
-      1 1 (Intercept)      170 9.306698e-13 1.826642e+14 7.177411e-247
-      2 2     x_value        1 2.732853e-15 3.659180e+14 2.659619e-252
+                 term estimate std.error statistic p.value
+      1 1 (Intercept)      170         0         0       0
+      2 2     x_value        1         0         0       0
 

@@ -135,8 +135,22 @@ local({
         shiny::isolate(exported_test_values[[SP$ID$TABLE_CORRELATION]]$render())[["x"]][["data"]],
         cran = TRUE
       )
+      
+      # Test against hardcoded values otherwise we get rounding error due to collinear values
+      # We just set all unstable values to 0, stats are tested in another file
+      unstable_to_zero <- shiny::isolate(exported_test_values[[SP$ID$TABLE_REGRESSION]]$render())[["x"]][["data"]]
+      unstable_to_zero[["std.error"]] <- 0
+      unstable_to_zero[["statistic"]] <- 0
+      unstable_to_zero[["p.value"]] <- 0
+      
       expect_snapshot(
-        shiny::isolate(exported_test_values[[SP$ID$TABLE_REGRESSION]]$render())[["x"]][["data"]],
+        {
+          unstable_to_zero <- shiny::isolate(exported_test_values[[SP$ID$TABLE_REGRESSION]]$render())[["x"]][["data"]]
+          unstable_to_zero[["std.error"]] <- 0
+          unstable_to_zero[["statistic"]] <- 0
+          unstable_to_zero[["p.value"]] <- 0
+          unstable_to_zero
+        },
         cran = TRUE
       )
     }
