@@ -350,12 +350,12 @@ lineplot_chart <- function(data, title = NULL, ref_line_data = NULL, log_project
       if (n > 1) {
         # `n` colors + black
         hues <- seq(15, 375, length = n)
-        res <- c(hcl(h = hues, l = 65, c = 100)[1:n - 1], "#000000")
+        res <- c(grDevices::hcl(h = hues, l = 65, c = 100)[1:n - 1], "#000000")
       }
       # https://web.archive.org/web/20250130090454/https://ggplot2.tidyverse.org/reference/scale_manual.html says
       # "It's recommended to use a named vector"
       # (miguel) I can confirm that the colors sometimes come out wrong when there is a large level count (255).
-      res <- setNames(res, lev)
+      res <- stats::setNames(res, lev)
       return(res)
     }
 
@@ -1931,8 +1931,11 @@ check_mod_lineplot <- function(
               "Notice the blank value in the resulting output:",
               "<pre>%s</pre>"
             ),
-            visit_var, bm_dataset_name, bm_dataset_name, visit_var,
-            paste(capture.output(unique(ds[[visit_var]])), collapse = "\n")
+            visit_var,
+            bm_dataset_name,
+            bm_dataset_name,
+            visit_var,
+            paste(utils::capture.output(unique(ds[[visit_var]])), collapse = "\n")
           )
         )
       } else if (is.numeric(vals)) {
@@ -1947,8 +1950,11 @@ check_mod_lineplot <- function(
               "Notice the offending value in the resulting output:",
               "<pre>%s</pre>"
             ),
-            visit_var, bm_dataset_name, bm_dataset_name, visit_var,
-            paste(capture.output(unique(ds[[visit_var]])), collapse = "\n")
+            visit_var,
+            bm_dataset_name,
+            bm_dataset_name,
+            visit_var,
+            paste(utils::capture.output(unique(ds[[visit_var]])), collapse = "\n")
           )
         )
       }
@@ -1983,7 +1989,10 @@ check_mod_lineplot <- function(
             "You can either remove the `<b>%s</b>` variable from the `ref_line_vars` parameter or preprocess the",
             "dataset to avoid this issue."
           ),
-          ref_line_var, bm_dataset_name, paste(capture.output(dup_df), collapse = "\n"), ref_line_var
+          ref_line_var,
+          bm_dataset_name,
+          paste(utils::capture.output(dup_df), collapse = "\n"),
+          ref_line_var
         )
       )
     }
