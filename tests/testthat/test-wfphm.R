@@ -243,9 +243,18 @@ test_that(
       retry <- retry - 1
     }
 
-    expect_true(file_found)
-    expect_snapshot_file(path = png_file)
-    expect_snapshot_file(path = svg_file)
+    # Require variants a the rendering differ between platforms
+    if (identical(Sys.getenv("GITHUB_ACTIONS"), "true")) {
+      variant <- "GH"
+    } else {
+      variant <- "int"
+    }
+
+    expect_true(file_found)    
+    expect_snapshot_file(path = png_file, variant = variant)
+    # Viewport is incorrectly sized when reviewing the snapshot in the shinytest2 review tool
+    # but if viewed in an external viewer the file is complete
+    expect_snapshot_file(path = svg_file, variant = variant)
   }
 )
 
