@@ -218,6 +218,10 @@ test_that("default values are set", {
     )
   )
 
+  if (is.null(app)) {
+    rlang::abort("App could not be started")
+  }
+
   app$wait_for_idle()
 
   input_values <- app$get_values()[["input"]]
