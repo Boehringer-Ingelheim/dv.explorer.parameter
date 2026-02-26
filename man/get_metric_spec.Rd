@@ -28,7 +28,7 @@ A vector as specified in the input section}
 Column for the x axis of the graph}
 }
 \value{
-A \link{vegawidget} specification
+A \link[vegawidget:vegawidget]{vegawidget::vegawidget} specification
 }
 \description{
 The chart consists of a faceted set of line and point charts.

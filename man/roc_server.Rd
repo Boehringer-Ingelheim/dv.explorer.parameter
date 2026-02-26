@@ -19,6 +19,7 @@ roc_server(
   resp_value_vars = c("CHG1", "CHG2"),
   resp_visit_var = "AVISIT",
   subjid_var = "USUBJID",
+  quantile_type = 7L,
   compute_roc_fn = compute_roc_data,
   compute_metric_fn = compute_metric_data
 )
@@ -45,6 +46,11 @@ Columns from \code{pred_dataset},\code{resp_dataset} that correspond to values o
 \item{subjid_var}{\verb{[character(1)]}
 
 Column corresponding to subject ID}
+
+\item{quantile_type}{\verb{[integer(1)]}
+
+Quantile algorithm type passed to \code{\link[stats]{quantile}}
+(an integer between 1 and 9, default 7).}
 
 \item{compute_roc_fn, compute_metric_fn}{\verb{[function()]}
 

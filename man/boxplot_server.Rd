@@ -15,6 +15,7 @@ boxplot_server(
   visit_var = "AVISIT",
   anlfl_vars = NULL,
   subjid_var = "USUBJID",
+  quantile_type = 7L,
   default_cat = NULL,
   default_par = NULL,
   default_visit = NULL,
@@ -52,6 +53,11 @@ Columns from \code{bm_dataset} that correspond to analysis flags}
 \item{subjid_var}{\verb{[character(1)]}
 
 Column corresponding to subject ID}
+
+\item{quantile_type}{\verb{[integer(1)]}
+
+Quantile algorithm type passed to \code{\link[stats]{quantile}}
+(an integer between 1 and 9, default 7).}
 
 \item{default_cat, default_par, default_visit, default_value, default_main_group, default_sub_group, default_page_group}{\verb{[character(1)|NULL]}
 
