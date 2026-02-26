@@ -687,7 +687,7 @@ scatterplot_server <- function(id,
       )
     )
 
-    if(is_shiny_test_mode()) {
+    if (is_shiny_test_mode()) {
       output_arguments[[SP$ID$CHART]][["render"]] <- shiny::reactive({
         do.call(sp_get_scatterplot_output, output_arguments[[SP$ID$CHART]][["arguments"]]())
       })
