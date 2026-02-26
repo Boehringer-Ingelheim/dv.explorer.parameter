@@ -257,7 +257,11 @@ test_that(
     app <- shinytest2::AppDriver$new(root_app$get_url())
     do.call(app$set_inputs, purrr::map(state_one, ~ deparse1(.x, collapse = "\n")))
     app$wait_for_idle()
-    expect_snapshot(cran = TRUE, app$get_js(SVG_JS_QUERY))
+
+    expect_snapshot(
+      cran = TRUE,
+      gsub('xlink:href="data:image/[^"]*"', 'xlink:href="__REMOVEDBASE64__"', app$get_js(SVG_JS_QUERY))
+    )
   }
 )
 

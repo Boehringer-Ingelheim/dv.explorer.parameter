@@ -151,6 +151,14 @@ test_that(
       )
     }
 
+    # In specific environments the margin calculation operation is really slow so we wait 10s or until the value is ready
+    for (i in 1:10) {
+      if (shiny::isolate(exported_values[["not_ebas-hmcat_args"]]$margin())[["right"]] == 30) {
+        break
+      }
+      Sys.sleep(1)
+    }
+
     expect_snapshot(cran = TRUE, exported_values[["not_ebas-wf_args"]] |> resolve_reactive())
     expect_snapshot(cran = TRUE, exported_values[["not_ebas-hmcat_args"]] |> resolve_reactive())
     expect_snapshot(cran = TRUE, exported_values[["not_ebas-hmcont_args"]] |> resolve_reactive())
