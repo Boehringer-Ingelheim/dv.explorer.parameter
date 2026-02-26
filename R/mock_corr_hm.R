@@ -23,7 +23,7 @@ mock_app_corr_hm <- function(dry_run = FALSE, update_query_string = TRUE, srv_de
       data$bm,
       !(as.numeric(as.character(.data[["SUBJID"]])) >= 16 &
         as.numeric(as.character(.data[["SUBJID"]])) <= 20 &
-        data[["ANLFL1"]] == "Y")
+        .data[["ANLFL1"]] == "Y")
     )
 
     anlfl_vars <- c("ANLFL1", "ANLFL2")
