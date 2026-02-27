@@ -478,8 +478,10 @@ scatterplotmatrix_server <- function(id,
       )
     )
     
-    if(is_shiny_test_mode()) {
-      output_arguments[[SPM$ID$CHART]][["render"]] <- shiny::reactive({do.call(get_scatterplotmatrix_output, output_arguments[[SPM$ID$CHART]][["arguments"]]())})
+    if (is_shiny_test_mode()) {
+      output_arguments[[SPM$ID$CHART]][["render"]] <- shiny::reactive({
+        do.call(get_scatterplotmatrix_output, output_arguments[[SPM$ID$CHART]][["arguments"]]())
+      })
     }
 
     output[[SPM$ID$CHART]] <- shiny::renderPlot({

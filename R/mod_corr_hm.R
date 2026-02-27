@@ -497,7 +497,7 @@ scatter_plot <- function(df, x_var, y_var) {
         res
       }
 
-get_listing_content <- function(ds, corr_data, method){
+get_listing_content <- function(ds, corr_data, method) {
   
   z_label <- ch_label_for_method(method)
 
