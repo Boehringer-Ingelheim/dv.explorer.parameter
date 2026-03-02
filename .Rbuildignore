@@ -8,3 +8,6 @@
 .lintr
 inst/validation/results/.gitempty
 ^.*\.Rproj$
+.github
+.git-blame-ignore-revs
+

@@ -948,13 +948,15 @@ roc_server <- function(id,
       do.call(get_gt_summary_output, output_arguments[[ROC_ID$ROC$GT_SUMMARY_TABLE]]())
     })
 
-    # info panel
-    # NOT USING DO.CALL STRATEGY
+    # info panel    
+    output_arguments[[ROC_ID$ROC$INFO_PANEL]] <- shiny::reactive({
+      list(
+        ds = try(data_subset(), silent = TRUE)
+      )
+    })
     output[[ROC_ID$ROC$INFO_PANEL]] <- shiny::renderUI({
-      # do.call does resolve the reactive and possible errors cannot be captured inside ROC_ID$ROC$INFO_PANEL
-      # For now it will be called without using the output arguments, but maybe the problem is capturing an error
-      # inside get_info_panel_output
-      get_info_panel_output(ds = data_subset())
+      # Mind try in arguments
+      do.call(get_info_panel_output, output_arguments[[ROC_ID$ROC$INFO_PANEL]]())
     })
 
     # debug tab
@@ -3983,7 +3985,7 @@ get_gt_summary_output <- function(ds_list, sort_alph) {
 
 #' @describeIn composed Info Panel
 get_info_panel_output <- function(ds) {
-  info_content <- if (is_validation_error(ds)) {
+  info_content <- if (inherits(ds, "try-error")) {
     "Incomplete or incorrect selection"
   } else {
     # Because of the upper is_validation_error the promise is interrupted and throws a warning. Seems to be irrelevant.
@@ -4809,6 +4811,12 @@ roc_test_app <- function(dataset) {
   }
 
   server <- function(input, output, session) {
+    shiny::observe({
+      shiny::reactiveValuesToList(input)
+      session$doBookmark()
+    })
+    
+    shiny::onBookmarked(shiny::updateQueryString)
     roc_server(
       id = "roc",
       pred_dataset = shiny::reactive(test_roc_data()[["adbm"]]),
@@ -4817,13 +4825,11 @@ roc_test_app <- function(dataset) {
     )
   }
 
-  structure(
-    shiny::shinyApp(
-      ui = ui,
-      server = server,
-      enableBookmarking = "url"
-    ),
-    version = "Shiny Day"
+  
+  shiny::shinyApp(
+    ui = ui,
+    server = server,
+    enableBookmarking = "url"
   )
 }
 

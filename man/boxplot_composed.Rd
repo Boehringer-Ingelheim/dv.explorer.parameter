@@ -18,7 +18,7 @@ bp_get_single_listings_output(ds, closest_point, input_id)
 
 bp_get_count_output(ds)
 
-bp_get_summary_output(ds)
+bp_get_summary_output(ds, quantile_type)
 
 bp_get_significance_output(ds)
 }
@@ -40,6 +40,10 @@ Shows individual points in the boxplot chart}
 Shows a title summarising parameter values.}
 
 \item{input_id}{Shiny ID for the single listing button}
+
+\item{quantile_type}{\verb{[integer(1)]}
+
+Quantile algorithm type (an integer between 1 and 9).}
 }
 \description{
 This is a set of \emph{glue} functions that in most cases follow the pattern

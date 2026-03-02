@@ -32,16 +32,15 @@ ID <- poc(
 root_app <- start_app_driver(dv.explorer.parameter::mock_app_lineplot())
 
 on.exit(if ("stop" %in% names(root_app)) root_app$stop())
-
-fail_if_app_not_started <- function() {
-  if (is.null(root_app)) rlang::abort("App could not be started")
+ if (is.null(root_app)) {
+  rlang::abort("App could not be started")
 }
 
 test_that("lineplot chart is included according to selection" |>
   vdoc[["add_spec"]](c(specs$lineplot_module$composition, specs$lineplot_module$lineplot_chart, specs$lineplot_module$grouping, specs$lineplot_module$summarizing)), {
-  testthat::skip_if_not(run_shiny_tests)
-  fail_if_app_not_started()
-  skip_if_suspect_check()
+  skip_if_not_running_shiny_tests()
+  
+  
 
   app <- shinytest2::AppDriver$new(root_app$get_url())
 
@@ -65,10 +64,13 @@ test_that("lineplot chart is included according to selection" |>
   app$wait_for_idle()
   app$set_inputs(!!!inputs2)
   app$wait_for_idle()
-
-  chart_html <- app$get_html(paste0("#", ID$OUTPUT$CHART))
-  expect_snapshot(chart_html, cran = TRUE)
-})
+    
+  chart_arguments <- shiny::isolate(app$get_value(export = tns("chart_arguments"))())
+  expect_snapshot(chart_arguments, cran = TRUE)
+  
+  plot <- app$get_value(output = ID$OUTPUT$CHART)
+  expect_true("src" %in% names(plot))  
+  })
 
 # Set up the clicks for the app so tables have content
 
@@ -86,9 +88,9 @@ test_that("listing/count tables appears according to click" |>
     specs$lineplot_module$summary_listing,
     specs$lineplot_module$data_count
   )), {
-  testthat::skip_if_not(run_shiny_tests)
-  fail_if_app_not_started()
-  skip_if_suspect_check()
+  skip_if_not_running_shiny_tests()
+  
+  
 
   app <- shinytest2::AppDriver$new(root_app$get_url())
 
@@ -144,9 +146,9 @@ test_that("listing/count table appears according to brush" |>
     specs$lineplot_module$summary_listing,
     specs$lineplot_module$data_count
   )), {
-  testthat::skip_if_not(run_shiny_tests)
-  fail_if_app_not_started()
-  skip_if_suspect_check()
+  skip_if_not_running_shiny_tests()
+  
+  
 
   app <- shinytest2::AppDriver$new(root_app$get_url())
 
@@ -196,9 +198,9 @@ test_that("listing/count table appears according to brush" |>
 
 test_that("bookmark is restored. Clicks are excluded" |>
   vdoc[["add_spec"]](c(specs$lineplot_module$bookmark)), {
-  testthat::skip_if_not(run_shiny_tests)
-  fail_if_app_not_started()
-  skip_if_suspect_check()
+  skip_if_not_running_shiny_tests()
+  
+  
 
   app <- shinytest2::AppDriver$new(root_app$get_url())
 
@@ -226,7 +228,7 @@ test_that("bookmark is restored. Clicks are excluded" |>
   # URL is automatically updated with the bookmarked URL
   bmk_url <- app$get_js("window.location.href")
 
-  bookmark_app <- shinytest2::AppDriver$new(bmk_url)
+  bookmark_app <- suppressWarnings(shinytest2::AppDriver$new(bmk_url))
   bookmark_app$wait_for_idle()
   app_input_values <- app$get_values()[["input"]]
   bmk_input_values <- bookmark_app$get_values()[["input"]]
@@ -234,9 +236,9 @@ test_that("bookmark is restored. Clicks are excluded" |>
 })
 
 test_that("default values are set", {
-  testthat::skip_if_not(run_shiny_tests)
-  fail_if_app_not_started()
-  skip_if_suspect_check()
+  skip_if_not_running_shiny_tests()
+  
+  
 
   srv_defaults <- list(
     default_centrality_fn = "Mean",
@@ -275,9 +277,9 @@ test_that("default values are set", {
 
 
 test_that("default values are set including analysis flag variables", {
-  testthat::skip_if_not(run_shiny_tests)
-  fail_if_app_not_started()
-  skip_if_suspect_check()
+  skip_if_not_running_shiny_tests()
+  
+  
 
   srv_defaults <- list(
     default_centrality_fn = "Mean",
@@ -318,8 +320,8 @@ test_that("default values are set including analysis flag variables", {
 
 test_that("module tolerates the absence of visit-dependent data", {
   # TODO(miguel): Test the parameter selector under R/utils-selector.R instead/on top of this
-  testthat::skip_if_not(run_shiny_tests)
-  skip_if_suspect_check()
+  skip_if_not_running_shiny_tests()
+  
   data <- dv.explorer.parameter:::test_data()
   data[["bm"]] <- data[["bm"]][0, ] # zero rows, equivalent to dv.filtering everything out
   app <- start_app_driver(rlang::quo(dv.explorer.parameter::mock_app_lineplot(data = data)))

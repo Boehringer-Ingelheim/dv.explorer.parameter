@@ -251,13 +251,17 @@ get_rect_center <- function(app) {
 test_that(
   paste(component, "should show a heatmap with all the components when correct input is passed (continuous Z) (snapshot)"),
   {
-    testthat::skip_if_not(run_shiny_tests)
+    skip_if_not_running_shiny_tests()
     fail_if_app_not_started()
-    skip_if_suspect_check()
+    
     app <- shinytest2::AppDriver$new(root_app$get_url())
     do.call(app$set_inputs, purrr::map(state_one, ~ deparse1(.x, collapse = "\n")))
     app$wait_for_idle()
-    expect_snapshot(cran = TRUE, app$get_js(SVG_JS_QUERY))
+
+    expect_snapshot(
+      cran = TRUE,
+      gsub('xlink:href="data:image/[^"]*"', 'xlink:href="__REMOVEDBASE64__"', app$get_js(SVG_JS_QUERY))
+    )
   }
 )
 
@@ -267,9 +271,9 @@ test_that(
     "should show a heatmap with all the components when correct input is passed (categorical Z) (snapshot)"
   ),
   {
-    testthat::skip_if_not(run_shiny_tests)
+    skip_if_not_running_shiny_tests()
     fail_if_app_not_started()
-    skip_if_suspect_check()
+    
     app <- shinytest2::AppDriver$new(root_app$get_url())
     do.call(app$set_inputs, purrr::map(state_three, ~ deparse1(.x, collapse = "\n")))
     app$wait_for_idle()
@@ -280,9 +284,9 @@ test_that(
 test_that(
   paste(component, "should not have duplicated elements when we redraw the image"),
   {
-    testthat::skip_if_not(run_shiny_tests)
+    skip_if_not_running_shiny_tests()
     fail_if_app_not_started()
-    skip_if_suspect_check()
+    
 
     # We check that the returned svgs are the same when switching between states, this implies no duplicated
     # elements appear when the svg is redrawn. If any duplicated element appear there would be differences between
@@ -310,9 +314,9 @@ test_that(
 test_that(
   paste(component, "should not include titles when there is no data label"),
   {
-    testthat::skip_if_not(run_shiny_tests)
+    skip_if_not_running_shiny_tests()
     fail_if_app_not_started()
-    skip_if_suspect_check()
+    
     app <- shinytest2::AppDriver$new(root_app$get_url())
     do.call(app$set_inputs, purrr::map(state_one, ~ deparse1(.x, collapse = "\n")))
     app$wait_for_idle()
@@ -355,9 +359,9 @@ test_that(
 test_that(
   paste(component, "should not include axis when the parameter is null"),
   {
-    testthat::skip_if_not(run_shiny_tests)
+    skip_if_not_running_shiny_tests()
     fail_if_app_not_started()
-    skip_if_suspect_check()
+    
     app <- shinytest2::AppDriver$new(root_app$get_url())
     do.call(app$set_inputs, purrr::map(state_one, ~ deparse1(.x, collapse = "\n")))
     app$wait_for_idle()
@@ -426,9 +430,9 @@ test_that(
     # Keep in mind that the app uses the margins passed as options and not the requested ones
     # This means that when viewing the app the titles and axis appear cut, but here we are testing
     # what the module request as minimum margins, not the actual margins.
-    testthat::skip_if_not(run_shiny_tests)
+    skip_if_not_running_shiny_tests()
     fail_if_app_not_started()
-    skip_if_suspect_check()
+    
     app <- shinytest2::AppDriver$new(root_app$get_url())
 
     do.call(app$set_inputs, purrr::map(state_one, ~ deparse1(.x, collapse = "\n")))
@@ -456,9 +460,9 @@ test_that(
      and hide it when it moves out"
   ),
   {
-    testthat::skip_if_not(run_shiny_tests)
+    skip_if_not_running_shiny_tests()
     fail_if_app_not_started()
-    skip_if_suspect_check()
+    
 
 
     app <- shinytest2::AppDriver$new(root_app$get_url())
@@ -507,9 +511,9 @@ test_that(
     "should allow customizing the tooltip message"
   ),
   {
-    testthat::skip_if_not(run_shiny_tests)
+    skip_if_not_running_shiny_tests()
     fail_if_app_not_started()
-    skip_if_suspect_check()
+    
     app <- shinytest2::AppDriver$new(root_app$get_url())
     ch <- app$get_chromote_session()
     do.call(app$set_inputs, purrr::map(state_one, ~ deparse1(.x, collapse = "\n")))
@@ -540,9 +544,9 @@ test_that(
 test_that(
   paste(component, "should accept colors and NAs in the color column"),
   {
-    testthat::skip_if_not(run_shiny_tests)
+    skip_if_not_running_shiny_tests()
     fail_if_app_not_started()
-    skip_if_suspect_check()
+    
     app <- shinytest2::AppDriver$new(root_app$get_url())
     do.call(app$set_inputs, purrr::map(state_one, ~ deparse1(.x, collapse = "\n")))
     app$wait_for_idle()
@@ -563,7 +567,10 @@ test_that(
 
     do.call(app$set_inputs, purrr::map(state, ~ deparse1(.x, collapse = "\n")))
     app$wait_for_idle()
-    expect_snapshot(cran = TRUE, app$get_js(SVG_JS_QUERY))
+    expect_snapshot(
+      cran = TRUE,
+      gsub('xlink:href="data:image/[^"]*"', 'xlink:href="__REMOVEDBASE64__"', app$get_js(SVG_JS_QUERY))
+    )
   }
 )
 
@@ -598,9 +605,9 @@ test_that(
       msg_func = "(d)=>`X: ${d.x}<br>Y: ${d.y}<br>Z:${d.z}`"
     )
 
-    testthat::skip_if_not(run_shiny_tests)
+    skip_if_not_running_shiny_tests()
     fail_if_app_not_started()
-    skip_if_suspect_check()
+    
     app <- shinytest2::AppDriver$new(root_app$get_url())
     do.call(app$set_inputs, purrr::map(state, ~ deparse1(.x, collapse = "\n")))
     app$wait_for_idle()

@@ -54,7 +54,7 @@ check_selected_choices <- function(selected, choices, inputId) { # nolint
   if (length(base::intersect(choices, selected)) != base::length(selected)) {
     sel_str <- paste(selected, collapse = ",")
     cho_str <- paste(choices, collapse = ",")
-    rlang::warn(
+    log_warn(
       paste0(
         inputId, "selected [", sel_str, "] is not contained in choices [", cho_str, "]"
       )
@@ -71,12 +71,6 @@ check_selected_choices <- function(selected, choices, inputId) { # nolint
 
 str_to_hash <- function(object) {
   Vectorize(digest::digest, vectorize.args = "object", USE.NAMES = FALSE)(object, algo = "murmur32", serialize = FALSE)
-}
-
-is_validation_error <- function(x) {
-  defused_x <- rlang::enquo(x)
-  tried_x <- try(rlang::eval_tidy(defused_x), silent = TRUE)
-  inherits(attr(tried_x, "condition"), "validation")
 }
 
 decorate_cnd <- function(fn, prefix) {
@@ -220,4 +214,8 @@ prefix_repeat_parameters <- function(dataset, cat_var, par_var) {
   }
   dataset[mask, par_var] <- paste0(dataset[[cat_var]][mask], "-", dataset[[par_var]][mask])
   return(dataset)
+}
+
+is_shiny_test_mode <- function() {
+  isTRUE(getOption("shiny.testmode"))
 }

@@ -320,7 +320,8 @@ boxplot_server <- function(id,
         checkmate::assert_names(
           names(group_dataset()),
           type = "unique",
-          must.include = c(VAR$SBJ), .var.name = ns("group_dataset")
+          must.include = c(VAR$SBJ),
+          .var.name = ns("group_dataset")
         )
         checkmate::assert_factor(group_dataset()[[VAR$SBJ]], add = ac, .var.name = ns("group_dataset"))
         checkmate::reportAssertions(ac)
@@ -344,7 +345,11 @@ boxplot_server <- function(id,
           names(bm_dataset()),
           type = "unique",
           must.include = c(
-            VAR$CAT, VAR$PAR, VAR$SBJ, VAR$VIS, VAR$VAL
+            VAR$CAT,
+            VAR$PAR,
+            VAR$SBJ,
+            VAR$VIS,
+            VAR$VAL
           ),
           .var.name = ns("bm_dataset")
         )
@@ -381,25 +386,31 @@ boxplot_server <- function(id,
 
     inputs <- list()
     inputs[[BP$ID$MAIN_GRP]] <- col_menu_server(
-      id = BP$ID$MAIN_GRP, data = v_group_dataset,
+      id = BP$ID$MAIN_GRP,
+      data = v_group_dataset,
       label = "Select a grouping variable",
       include_func = function(x) {
         is.factor(x) || is.character(x)
-      }, default = default_main_group
+      },
+      default = default_main_group
     )
     inputs[[BP$ID$SUB_GRP]] <- col_menu_server(
-      id = BP$ID$SUB_GRP, data = v_group_dataset,
+      id = BP$ID$SUB_GRP,
+      data = v_group_dataset,
       label = "Select a sub grouping variable",
       include_func = function(x) {
         is.factor(x) || is.character(x)
-      }, default = default_sub_group
+      },
+      default = default_sub_group
     )
     inputs[[BP$ID$PAGE_GRP]] <- col_menu_server(
-      id = BP$ID$PAGE_GRP, data = v_group_dataset,
+      id = BP$ID$PAGE_GRP,
+      data = v_group_dataset,
       label = "Select a page grouping variable",
       include_func = function(x) {
         is.factor(x) || is.character(x)
-      }, default = default_page_group
+      },
+      default = default_page_group
     )
     inputs[[BP$ID$PAR]] <- parameter_server(
       id = BP$ID$PAR,
@@ -422,7 +433,9 @@ boxplot_server <- function(id,
       label = BP$MSG$LABEL$PAR_VALUE,
       include_func = function(val, name) {
         name %in% VAR$VAL
-      }, include_none = FALSE, default = default_value
+      },
+      include_none = FALSE,
+      default = default_value
     )
 
     # analysis flag filter input
@@ -432,7 +445,8 @@ boxplot_server <- function(id,
         data = v_bm_dataset,
         label = BP$MSG$LABEL$ANLFL_FILTER,
         include_func = function(x, name) name %in% anlfl_vars,
-        include_none = FALSE, default = anlfl_vars[1]
+        include_none = FALSE,
+        default = anlfl_vars[1]
       )
     }
 
@@ -558,7 +572,9 @@ boxplot_server <- function(id,
         )
 
         subset_inputs <- c(BP$ID$PAR, BP$ID$PAR_VISIT, BP$ID$PAR_VALUE, BP$ID$MAIN_GRP, BP$ID$SUB_GRP, BP$ID$PAGE_GRP)
-        if (!is.null(inputs[[BP$ID$ANLFL_FILTER]])) subset_inputs <- c(subset_inputs, BP$ID$ANLFL_FILTER)
+        if (!is.null(inputs[[BP$ID$ANLFL_FILTER]])) {
+          subset_inputs <- c(subset_inputs, BP$ID$ANLFL_FILTER)
+        }
 
         resolve_reactives <- function(x) {
           if (is.list(x)) {
@@ -569,7 +585,8 @@ boxplot_server <- function(id,
         resolve_reactives(inputs[subset_inputs])
       },
       label = ns("inputs")
-    ) |> shiny::debounce(BP$VAL$SUBSET_DEBOUNCE_TIME)
+    ) |>
+      shiny::debounce(BP$VAL$SUBSET_DEBOUNCE_TIME)
 
     v_input_closest_to_click <- shiny::reactive({
       bp_get_closest_single_click(data_subset(), inputs[[BP$ID$CHART_CLICK]]())
@@ -608,7 +625,6 @@ boxplot_server <- function(id,
       )
     })
 
-
     bp_title_data <- shiny::reactive({
       l_inputs <- v_input_subset()
       list(
@@ -625,7 +641,8 @@ boxplot_server <- function(id,
     output_arguments <- list()
 
     # box plot ----
-    output_arguments[[BP$ID$CHART]] <- shiny::reactive(
+    output_arguments[[BP$ID$CHART]] <- list(arguments = list(), render = NA)
+    output_arguments[[BP$ID$CHART]][["arguments"]] <- shiny::reactive(
       list(
         ds = data_subset(),
         violin = inputs[[BP$ID$VIOLIN_CHECK]](),
@@ -634,75 +651,119 @@ boxplot_server <- function(id,
         title_data = bp_title_data()
       )
     )
+
+    if (is_shiny_test_mode()) {
+      output_arguments[[BP$ID$CHART]][["render"]] <- shiny::reactive(
+        do.call(bp_get_boxplot_output, output_arguments[[BP$ID$CHART]][["arguments"]]())
+      )
+    }
+
     output[[BP$ID$CHART]] <- shiny::renderPlot({
-      do.call(bp_get_boxplot_output, output_arguments[[BP$ID$CHART]]())
+      do.call(bp_get_boxplot_output, output_arguments[[BP$ID$CHART]][["arguments"]]())
     })
 
     # listings table ----
-    output_arguments[[BP$ID$TABLE_LISTING]] <- shiny::reactive(
+    output_arguments[[BP$ID$TABLE_LISTING]] <- list(arguments = list(), render = NA)
+    output_arguments[[BP$ID$TABLE_LISTING]][["arguments"]] <- shiny::reactive(
       list(
         closest_point = v_input_closest_to_click(),
         ds = data_subset()
       )
     )
+
+    if (is_shiny_test_mode()) {
+      output_arguments[[BP$ID$TABLE_LISTING]][["render"]] <- shiny::reactive({
+        do.call(bp_get_listings_output, output_arguments[[BP$ID$TABLE_LISTING]][["arguments"]]())
+      })
+    }
+
     output[[BP$ID$TABLE_LISTING]] <- DT::renderDT({
-      do.call(bp_get_listings_output, output_arguments[[BP$ID$TABLE_LISTING]]())
+      do.call(bp_get_listings_output, output_arguments[[BP$ID$TABLE_LISTING]][["arguments"]]())
     })
 
     # single listings table ----
-    output_arguments[[BP$ID$TABLE_SINGLE_LISTING]] <- shiny::reactive(
+    output_arguments[[BP$ID$TABLE_SINGLE_LISTING]] <- list(arguments = list(), render = NA)
+    output_arguments[[BP$ID$TABLE_SINGLE_LISTING]][["arguments"]] <- shiny::reactive(
       list(
         closest_point = v_input_closest_to_dclick(),
         ds = data_subset(),
         input_id = session[["ns"]]("BOTON")
       )
     )
+
+    if (is_shiny_test_mode()) {
+      output_arguments[[BP$ID$TABLE_SINGLE_LISTING]][["render"]] <- shiny::reactive(
+        do.call(bp_get_single_listings_output, output_arguments[[BP$ID$TABLE_SINGLE_LISTING]][["arguments"]]())
+      )
+    }
+
     output[[BP$ID$TABLE_SINGLE_LISTING]] <- DT::renderDT({
-      do.call(bp_get_single_listings_output, output_arguments[[BP$ID$TABLE_SINGLE_LISTING]]())
+      do.call(bp_get_single_listings_output, output_arguments[[BP$ID$TABLE_SINGLE_LISTING]][["arguments"]]())
     })
 
     # count table
-    output_arguments[[BP$ID$TABLE_COUNT]] <- shiny::reactive(
+    output_arguments[[BP$ID$TABLE_COUNT]] <- list(arguments = list(), render = NA)
+    output_arguments[[BP$ID$TABLE_COUNT]][["arguments"]] <- shiny::reactive(
       list(
         ds = data_subset()
       )
     )
+    if (is_shiny_test_mode()) {
+       output_arguments[[BP$ID$TABLE_COUNT]][["render"]] <- shiny::reactive({
+        do.call(bp_get_count_output, output_arguments[[BP$ID$TABLE_COUNT]][["arguments"]]())
+      })
+    }
     output[[BP$ID$TABLE_COUNT]] <- DT::renderDT({
-      do.call(bp_get_count_output, output_arguments[[BP$ID$TABLE_COUNT]]())
+      do.call(bp_get_count_output, output_arguments[[BP$ID$TABLE_COUNT]][["arguments"]]())
     })
 
     # summary table
-    output_arguments[[BP$ID$TABLE_SUMMARY]] <- shiny::reactive(
+    output_arguments[[BP$ID$TABLE_SUMMARY]] <- list(arguments = list(), render = NA)
+    output_arguments[[BP$ID$TABLE_SUMMARY]][["arguments"]] <- shiny::reactive(
       list(
         ds = data_subset(),
         quantile_type = quantile_type
       )
     )
+    if (is_shiny_test_mode()) {
+       output_arguments[[BP$ID$TABLE_SUMMARY]][["render"]] <- shiny::reactive({
+        do.call(bp_get_summary_output, output_arguments[[BP$ID$TABLE_SUMMARY]][["arguments"]]())
+      })
+    }
     output[[BP$ID$TABLE_SUMMARY]] <- DT::renderDT({
-      do.call(bp_get_summary_output, output_arguments[[BP$ID$TABLE_SUMMARY]]())
+      do.call(bp_get_summary_output, output_arguments[[BP$ID$TABLE_SUMMARY]][["arguments"]]())
     })
 
     # significance table
-    output_arguments[[BP$ID$TABLE_SIGNIFICANCE]] <- shiny::reactive(
+    output_arguments[[BP$ID$TABLE_SIGNIFICANCE]] <- list(arguments = list(), render = NA)
+    output_arguments[[BP$ID$TABLE_SIGNIFICANCE]][["arguments"]] <- shiny::reactive(
       list(
         ds = data_subset()
       )
     )
+    if (is_shiny_test_mode()) {
+       output_arguments[[BP$ID$TABLE_SIGNIFICANCE]][["render"]] <- shiny::reactive({
+        do.call(bp_get_significance_output, output_arguments[[BP$ID$TABLE_SIGNIFICANCE]][["arguments"]]())
+      })
+    }
     output[[BP$ID$TABLE_SIGNIFICANCE]] <- DT::renderDT({
-      do.call(bp_get_significance_output, output_arguments[[BP$ID$TABLE_SIGNIFICANCE]]())
+      do.call(bp_get_significance_output, output_arguments[[BP$ID$TABLE_SIGNIFICANCE]][["arguments"]]())
     })
 
     # state store
 
-    loaded_state <- store_server("store", shiny::reactive({
-      resolve_reactives <- function(x) {
-        if (is.list(x)) {
-          return(purrr::map(x, resolve_reactives))
+    loaded_state <- store_server(
+      "store",
+      shiny::reactive({
+        resolve_reactives <- function(x) {
+          if (is.list(x)) {
+            return(purrr::map(x, resolve_reactives))
+          }
+          x()
         }
-        x()
-      }
-      purrr::possibly(resolve_reactives, otherwise = NULL)(inputs)
-    }))
+        purrr::possibly(resolve_reactives, otherwise = NULL)(inputs)
+      })
+    )
 
     shiny::observeEvent(loaded_state(), {
       get_update(inputs[[BP$ID$MAIN_GRP]])[["val"]](selected = loaded_state()[[BP$ID$MAIN_GRP]])
@@ -736,7 +797,7 @@ boxplot_server <- function(id,
 
     # test values
     shiny::exportTestValues(
-      data_subset = data_subset()
+      output_arguments = output_arguments
     )
 
     # return

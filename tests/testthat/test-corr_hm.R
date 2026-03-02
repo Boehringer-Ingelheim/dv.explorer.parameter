@@ -106,9 +106,3 @@ test_that("ch_listings_table returns unique combinations of heatmap data and sum
   testthat::expect_equal(res[["N"]], 3)
 })
 
-test_that(
-  "bookmarks are restored correctly",
-  {
-    skip("This is a self-imposed requirement and its testing is somewhat involved. Punting on it for the first release")
-  }
-)

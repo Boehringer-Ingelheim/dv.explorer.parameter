@@ -76,7 +76,7 @@ it_selection_to_label <- function(sel, max_char) {
   label
 }
 
-it_error_highlight <- function(s) paste0('<span style="color:#a94442;font-style: italic;" >', s, "</span>")
+it_error_highlight <- function(s) shiny::HTML(paste0('<span style="color:#a94442;font-style: italic;" >', s, "</span>"))
 
 it_relabel_button <- function(id,
                               is_valid = shiny::reactive(TRUE),

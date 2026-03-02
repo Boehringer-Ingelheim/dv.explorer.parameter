@@ -299,9 +299,9 @@ test_that(
     )
     ),
   {
-    testthat::skip_if_not(run_shiny_tests)
+    skip_if_not_running_shiny_tests()
     fail_if_app_not_started()
-    skip_if_suspect_check()
+    
 
     app <- shinytest2::AppDriver$new(root_app$get_url())
     app$set_inputs(!!C$CHECK := TRUE)
@@ -311,6 +311,15 @@ test_that(
     expect_r2d3_svg(app, list(list(svg = C$SVG_JS_QUERY, container = C$CONTAINER, n = 1)))
   }
 )
+
+set_input_if_required <- function(app, input_id, value) {
+  current_value <- app$get_value(input = input_id)
+  if(current_value!=value) {
+    args <- list(value)
+    args <- stats::setNames(args, input_id)
+    do.call(app$set_inputs, args)
+  }
+}
 
 test_that(
   "wfphm_wf presents a plot when using a parameter variable from bm dataset"
@@ -327,49 +336,48 @@ test_that(
     )
     ),
   {
-    testthat::skip_if_not(run_shiny_tests)
+    skip_if_not_running_shiny_tests()
     fail_if_app_not_started()
-    skip_if_suspect_check()
+    
 
     app <- shinytest2::AppDriver$new(root_app$get_url())
-    app$set_inputs(!!C$CHECK := FALSE)
-    app$set_inputs(!!C$CAT := "C")
+    
+    set_input_if_required(app, C$CHECK, FALSE)
+    set_input_if_required(app, C$CAT, "C")
     app$wait_for_idle()
-    app$set_inputs(!!C$PAR := "A")
-    app$set_inputs(!!C$VALUE := "NUMERIC")
-    app$set_inputs(!!C$GROUP := "GROUP1")
-    app$set_inputs(!!C$VISIT := "A")
-    app$wait_for_idle()
-    app$wait_for_idle()
+    set_input_if_required(app, C$PAR, "A")
+    set_input_if_required(app, C$VALUE, "NUMERIC")
+    set_input_if_required(app, C$GROUP, "GROUP1")
+    set_input_if_required(app, C$VISIT, "A")
+    app$wait_for_idle()    
     expect_r2d3_svg(app, list(list(svg = C$SVG_JS_QUERY, container = C$CONTAINER, n = 1)))
   }
 )
 
 local({
   app <- shinytest2::AppDriver$new(root_app$get_url())
-  app$set_inputs(!!C$CHECK := FALSE)
-  app$set_inputs(!!C$CAT := "C")
+  set_input_if_required(app, C$CHECK, FALSE)
+  set_input_if_required(app, C$CAT, "C")
   app$wait_for_idle()
-  app$set_inputs(!!C$PAR := "A")
-  app$set_inputs(!!C$VALUE := "NUMERIC")
-  app$set_inputs(!!C$GROUP := "GROUP1")
-  app$set_inputs(!!C$VISIT := "A")
-  app$wait_for_idle()
+  set_input_if_required(app, C$PAR, "A")
+  set_input_if_required(app, C$VALUE, "NUMERIC")
+  set_input_if_required(app, C$GROUP, "GROUP1")
+  set_input_if_required(app, C$VISIT, "A")
   app$wait_for_idle()
 
   test_that("wfphm_wf returns a margin list", {
-    testthat::skip_if_not(run_shiny_tests)
+    skip_if_not_running_shiny_tests()
     fail_if_app_not_started()
-    skip_if_suspect_check()
+
     x <- app$get_values()
     margin <- shiny::isolate(x[["export"]][[tns("r")]][["margin"]]())
     expect_true(setequal(names(margin), c("top", "bottom", "left", "right")))
   })
 
   test_that("wfphm_wf returns a sorting for the x axis", {
-    testthat::skip_if_not(run_shiny_tests)
+    skip_if_not_running_shiny_tests()
     fail_if_app_not_started()
-    skip_if_suspect_check()
+
     x <- app$get_values()
     sorted_x <- shiny::isolate(x[["export"]][[tns("r")]][["sorted_x"]]())
     expect_identical(sorted_x, c("2", "1", "3"))

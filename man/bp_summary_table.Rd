@@ -4,11 +4,15 @@
 \alias{bp_summary_table}
 \title{Calculates a set of summary statistics grouped by all variables except \code{subject_id} and \code{value}}
 \usage{
-bp_summary_table(ds)
+bp_summary_table(ds, quantile_type)
 }
 \arguments{
 \item{ds}{\code{data.frame()}
 A data frame to perform the summary over.}
+
+\item{quantile_type}{\verb{[integer(1)]}
+
+Quantile algorithm type (an integer between 1 and 9).}
 }
 \value{
 \code{data.frame()}

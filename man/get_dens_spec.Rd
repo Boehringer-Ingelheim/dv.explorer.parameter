@@ -20,7 +20,7 @@ Charts are faceted using parameters as columns.}
 Size in pixels for each of the charts in the facet}
 }
 \value{
-A \link{vegawidget} specification
+A \link[vegawidget:vegawidget]{vegawidget::vegawidget} specification
 }
 \description{
 The chart consists of a faceted set of ROC curves plotting probability density curves for the values of

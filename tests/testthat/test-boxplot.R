@@ -191,40 +191,40 @@ test_that("bp_subset_data errors when the returned dataset has 0 rows", {
   )
 })
 
-test_that("bp_subset_data errors when bm_ds and group_ds share column names after selection", {
-  skip("This case is untestable it seems impossible for both ds to have conflicting names as they renamed internally")
+# test_that("bp_subset_data errors when bm_ds and group_ds share column names after selection", {
+#   skip("This case is untestable it seems impossible for both ds to have conflicting names as they renamed internally")
 
-  bm_df <- tibble::tibble(
-    sbj = factor(c(1)),
-    COMMON = factor(c("A")),
-    par = factor(c("B")),
-    vis = factor(c("V1")),
-    val = 1
-  )
+#   bm_df <- tibble::tibble(
+#     sbj = factor(c(1)),
+#     COMMON = factor(c("A")),
+#     par = factor(c("B")),
+#     vis = factor(c("V1")),
+#     val = 1
+#   )
 
-  grp_df <- tibble::tibble(
-    sbj = factor(c(1)),
-    COMMON = 1
-  )
+#   grp_df <- tibble::tibble(
+#     sbj = factor(c(1)),
+#     COMMON = 1
+#   )
 
-  expect_error(
-    bp_subset_data(
-      cat = "A",
-      cat_col = "COMMON",
-      par = "B",
-      par_col = "par",
-      vis = "V1",
-      vis_col = "vis",
-      val_col = "val",
-      group_vect = stats::setNames("COMMON", CNT$MAIN_GROUP),
-      bm_ds = bm_df,
-      group_ds = grp_df,
-      subj_col = "sbj"
-    ),
-    regexp = CMN$MSG$VALIDATE$GROUP_COL_REPEATED,
-    fixed = TRUE
-  )
-})
+#   expect_error(
+#     bp_subset_data(
+#       cat = "A",
+#       cat_col = "COMMON",
+#       par = "B",
+#       par_col = "par",
+#       vis = "V1",
+#       vis_col = "vis",
+#       val_col = "val",
+#       group_vect = stats::setNames("COMMON", CNT$MAIN_GROUP),
+#       bm_ds = bm_df,
+#       group_ds = grp_df,
+#       subj_col = "sbj"
+#     ),
+#     regexp = CMN$MSG$VALIDATE$GROUP_COL_REPEATED,
+#     fixed = TRUE
+#   )
+# })
 
 test_that("bp_subset_data errors when group_vect names are not a subset of CNT$MAIN/SUB/PAGE_GROUP", {
   bm_df <- tibble::tibble(
@@ -425,14 +425,14 @@ test_that("bp_significance_table calculate t.tests correctly", {
 
 # bp_get_closest_gen_click ----
 
-test_that("bp_get_closest_gen_click", {
-  skip("Not thouroughly tested as it is yet to be decided if ggplot will be used")
-})
+# test_that("bp_get_closest_gen_click", {
+#   skip("Not thouroughly tested as it is yet to be decided if ggplot will be used")
+# })
 
-test_that("bp_get_closest_single_click", {
-  skip("Not thouroughly tested as it is yet to be decided if ggplot will be used")
-})
+# test_that("bp_get_closest_single_click", {
+#   skip("Not thouroughly tested as it is yet to be decided if ggplot will be used")
+# })
 
-test_that("bp_get_closest_double_click", {
-  skip("Not thouroughly tested as it is yet to be decided if ggplot will be used")
-})
+# test_that("bp_get_closest_double_click", {
+#   skip("Not thouroughly tested as it is yet to be decided if ggplot will be used")
+# })

@@ -58,9 +58,9 @@ test_that(
     )
     ),
   {
-    testthat::skip_if_not(run_shiny_tests)
+    skip_if_not_running_shiny_tests()
     fail_if_app_not_started()
-    skip_if_suspect_check()
+    
     app <- shinytest2::AppDriver$new(root_app$get_url())
     app$set_inputs(
       !!C$CAT := "CAT1",
@@ -118,9 +118,9 @@ test_that(
     )
     ),
   {
-    testthat::skip_if_not(run_shiny_tests)
+    skip_if_not_running_shiny_tests()
     fail_if_app_not_started()
-    skip_if_suspect_check()
+    
 
     app <- shinytest2::AppDriver$new(app_anlfl$get_url())
 
@@ -151,6 +151,14 @@ test_that(
       )
     }
 
+    # In specific environments the margin calculation operation is really slow so we wait 10s or until the value is ready
+    for (i in 1:10) {
+      if (shiny::isolate(app$get_value(export = "not_ebas-hmcat_args")[["margin"]]())[["right"]] ==30) {
+        break
+      }
+      Sys.sleep(1)
+    }
+
     expect_snapshot(cran = TRUE, exported_values[["not_ebas-wf_args"]] |> resolve_reactive())
     expect_snapshot(cran = TRUE, exported_values[["not_ebas-hmcat_args"]] |> resolve_reactive())
     expect_snapshot(cran = TRUE, exported_values[["not_ebas-hmcont_args"]] |> resolve_reactive())
@@ -174,9 +182,9 @@ test_that(
     )
     ),
   {
-    testthat::skip_if_not(run_shiny_tests)
+    skip_if_not_running_shiny_tests()
     fail_if_app_not_started()
-    skip_if_suspect_check()
+    
     app <- shinytest2::AppDriver$new(root_app$get_url())
     app$set_inputs(
       !!C$CAT := "CAT1", # nolint
@@ -235,9 +243,18 @@ test_that(
       retry <- retry - 1
     }
 
-    expect_true(file_found)
-    expect_snapshot_file(path = png_file)
-    expect_snapshot_file(path = svg_file)
+    # Require variants a the rendering differ between platforms
+    if (identical(Sys.getenv("GITHUB_ACTIONS"), "true")) {
+      variant <- "GH"
+    } else {
+      variant <- "int"
+    }
+
+    expect_true(file_found)    
+    expect_snapshot_file(path = png_file, variant = variant)
+    # Viewport is incorrectly sized when reviewing the snapshot in the shinytest2 review tool
+    # but if viewed in an external viewer the file is complete
+    expect_snapshot_file(path = svg_file, variant = variant)
   }
 )
 
