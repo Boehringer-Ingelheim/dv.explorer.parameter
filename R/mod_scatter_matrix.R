@@ -477,7 +477,7 @@ scatterplotmatrix_server <- function(id,
         ds = data_subset()
       )
     )
-    
+
     if (is_shiny_test_mode()) {
       output_arguments[[SPM$ID$CHART]][["render"]] <- shiny::reactive({
         do.call(get_scatterplotmatrix_output, output_arguments[[SPM$ID$CHART]][["arguments"]]())
@@ -786,7 +786,7 @@ spm_subset_data <- function(cat,
 
 scatterplotmatrix_chart <- function(ds) {
   is_main_grouped <- CNT$MAIN_GROUP %in% names(ds)
-  val_cols <- setdiff(names(ds), c(CNT$MAIN_GROUP, CNT$VIS))
+  val_cols <- setdiff(names(ds), c(CNT$MAIN_GROUP, CNT$VIS, CNT$ANLFL))
 
   if (is_main_grouped) {
     mapping <- ggplot2::aes(color = .data[[CNT$MAIN_GROUP]], fill = .data[[CNT$MAIN_GROUP]])
