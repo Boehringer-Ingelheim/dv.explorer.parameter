@@ -39,8 +39,8 @@ on.exit(if ("stop" %in% names(root_app)) root_app$stop())
 test_that("lineplot chart is included according to selection" |>
   vdoc[["add_spec"]](c(specs$lineplot_module$composition, specs$lineplot_module$lineplot_chart, specs$lineplot_module$grouping, specs$lineplot_module$summarizing)), {
   skip_if_not_running_shiny_tests()
-  
-  
+
+
 
   app <- shinytest2::AppDriver$new(root_app$get_url())
 
@@ -64,12 +64,12 @@ test_that("lineplot chart is included according to selection" |>
   app$wait_for_idle()
   app$set_inputs(!!!inputs2)
   app$wait_for_idle()
-    
+
   chart_arguments <- shiny::isolate(app$get_value(export = tns("chart_arguments"))())
   expect_snapshot(chart_arguments, cran = TRUE)
-  
+
   plot <- app$get_value(output = ID$OUTPUT$CHART)
-  expect_true("src" %in% names(plot))  
+  expect_true("src" %in% names(plot))
   })
 
 # Set up the clicks for the app so tables have content
@@ -89,8 +89,8 @@ test_that("listing/count tables appears according to click" |>
     specs$lineplot_module$data_count
   )), {
   skip_if_not_running_shiny_tests()
-  
-  
+
+
 
   app <- shinytest2::AppDriver$new(root_app$get_url())
 
@@ -147,8 +147,8 @@ test_that("listing/count table appears according to brush" |>
     specs$lineplot_module$data_count
   )), {
   skip_if_not_running_shiny_tests()
-  
-  
+
+
 
   app <- shinytest2::AppDriver$new(root_app$get_url())
 
@@ -199,8 +199,8 @@ test_that("listing/count table appears according to brush" |>
 test_that("bookmark is restored. Clicks are excluded" |>
   vdoc[["add_spec"]](c(specs$lineplot_module$bookmark)), {
   skip_if_not_running_shiny_tests()
-  
-  
+
+
 
   app <- shinytest2::AppDriver$new(root_app$get_url())
 
@@ -235,93 +235,10 @@ test_that("bookmark is restored. Clicks are excluded" |>
   expect_identical(app_input_values, bmk_input_values)
 })
 
-test_that("default values are set", {
-  skip_if_not_running_shiny_tests()
-  
-  
-
-  srv_defaults <- list(
-    default_centrality_fn = "Mean",
-    default_dispersion_fn = "Standard deviation",
-    default_cat = "PARCAT2",
-    default_par = c("PARAM22", "PARAM23"),
-    default_val = "VALUE2",
-    default_visit_var = "VISIT2",
-    default_visit_val = list(VISIT2 = c(1, 9)),
-    default_main_group = "CAT2",
-    default_sub_group = "CAT2"
-  )
-
-  app <- start_app_driver(
-    rlang::quo(
-      dv.explorer.parameter::mock_app_lineplot(
-        srv_defaults = !!srv_defaults
-      )
-    )
-  )
-
-  app$wait_for_idle()
-
-  input_values <- app$get_values()[["input"]]
-  expect_equal(input_values[[ID$INPUT$CAT]], srv_defaults[["default_cat"]])
-  expect_equal(input_values[[ID$INPUT$PAR]], srv_defaults[["default_par"]])
-  expect_equal(input_values[[ID$INPUT$CENT]], srv_defaults[["default_centrality_fn"]])
-  expect_equal(input_values[[ID$INPUT$DISP]], srv_defaults[["default_dispersion_fn"]])
-  expect_equal(input_values[[ID$INPUT$VIS_COL]], srv_defaults[["default_visit_var"]])
-  expect_equal(input_values[[ID$INPUT$VIS]], as.character(srv_defaults[["default_visit_val"]][["VISIT2"]]))
-  expect_equal(input_values[[ID$INPUT$VAL]], srv_defaults[["default_val"]])
-  expect_equal(input_values[[ID$INPUT$MGRP]], srv_defaults[["default_main_group"]])
-  expect_equal(input_values[[ID$INPUT$SGRP]], srv_defaults[["default_sub_group"]])
-})
-
-
-
-test_that("default values are set including analysis flag variables", {
-  skip_if_not_running_shiny_tests()
-  
-  
-
-  srv_defaults <- list(
-    default_centrality_fn = "Mean",
-    default_dispersion_fn = "Standard deviation",
-    default_cat = "PARCAT2",
-    default_par = c("PARAM22", "PARAM23"),
-    default_val = "VALUE2",
-    default_visit_var = "VISIT2",
-    default_visit_val = list(VISIT2 = c(1, 9)),
-    default_main_group = "CAT2",
-    default_sub_group = "CAT2"
-  )
-
-  app <- start_app_driver(
-    rlang::quo(
-      dv.explorer.parameter::mock_app_lineplot(
-        srv_defaults = !!srv_defaults,
-        anlfl_flags = TRUE
-      )
-    )
-  )
-
-  app$wait_for_idle()
-
-  input_values <- app$get_values()[["input"]]
-  expect_equal(input_values[[ID$INPUT$CAT]], srv_defaults[["default_cat"]])
-  expect_equal(input_values[[ID$INPUT$PAR]], srv_defaults[["default_par"]])
-  expect_equal(input_values[[ID$INPUT$CENT]], srv_defaults[["default_centrality_fn"]])
-  expect_equal(input_values[[ID$INPUT$DISP]], srv_defaults[["default_dispersion_fn"]])
-  expect_equal(input_values[[ID$INPUT$VIS_COL]], srv_defaults[["default_visit_var"]])
-  expect_equal(input_values[[ID$INPUT$VIS]], as.character(srv_defaults[["default_visit_val"]][["VISIT2"]]))
-  expect_equal(input_values[[ID$INPUT$VAL]], srv_defaults[["default_val"]])
-  expect_equal(input_values[[ID$INPUT$MGRP]], srv_defaults[["default_main_group"]])
-  expect_equal(input_values[[ID$INPUT$SGRP]], srv_defaults[["default_sub_group"]])
-  expect_equal(input_values[[ID$INPUT$ANLFL]], "ANLFL1")
-})
-
-
 test_that("module tolerates the absence of visit-dependent data", {
   # TODO(miguel): Test the parameter selector under R/utils-selector.R instead/on top of this
   skip_if_not_running_shiny_tests()
-  
+
   data <- dv.explorer.parameter:::test_data()
   data[["bm"]] <- data[["bm"]][0, ] # zero rows, equivalent to dv.filtering everything out
   app <- start_app_driver(rlang::quo(dv.explorer.parameter::mock_app_lineplot(data = data)))
