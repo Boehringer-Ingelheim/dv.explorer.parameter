@@ -1,3 +1,8 @@
+# dv.explorer.parameter 0.1.9-9011
+
+* scatterplot matrix
+    * Fix issue of plotting analysis flag in the matrix in addition to user selected parameters
+
 # dv.explorer.parameter 0.1.9-9010
 
 Refactor tests
