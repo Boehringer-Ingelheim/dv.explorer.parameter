@@ -152,7 +152,6 @@ test_that(
     }
 
     # In specific environments the margin calculation operation is really slow so we wait 10s or until the value is ready
-    browser()
     for (i in 1:10) {
       if (shiny::isolate(app$get_value(export = "not_ebas-hmcat_args")[["margin"]]())[["right"]] ==30) {
         break
