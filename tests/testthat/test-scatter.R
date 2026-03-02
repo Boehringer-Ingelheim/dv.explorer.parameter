@@ -212,9 +212,9 @@ test_that("sp_subset_data errors when the returned dataset has 0 rows", {
   )
 })
 
-test_that("sp_subset_data errors when bm_ds and group_ds share column names after selection", {
-  skip("This case is untestable it seems impossible for both ds to have conflicting names as they renamed internally")
-})
+# test_that("sp_subset_data errors when bm_ds and group_ds share column names after selection", {
+#   skip("This case is untestable it seems impossible for both ds to have conflicting names as they renamed internally")
+# })
 
 test_that("sp_subset_data errors when group_vect names are not a subset of CNT$MAIN/SUB_GROUP", {
   bm_df <- tibble::tibble(

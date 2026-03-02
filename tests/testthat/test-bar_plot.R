@@ -540,19 +540,19 @@ shiny_test <- {
     }
   )
 
-  test_that(
-    paste(
-      component,
-      "test_y_baseline NOT DONE"
-    ),
-    {
-      skip("Base line != 0 not implemented")
+  # test_that(
+  #   paste(
+  #     component,
+  #     "test_y_baseline NOT DONE"
+  #   ),
+  #   {
+  #     skip("Base line != 0 not implemented")
 
-      skip_if_not_running_shiny_tests()
-      fail_if_app_not_started()
+  #     skip_if_not_running_shiny_tests()
+  #     fail_if_app_not_started()
       
-    }
-  )
+  #   }
+  # )
 }
 
 # argument_testing <- {
