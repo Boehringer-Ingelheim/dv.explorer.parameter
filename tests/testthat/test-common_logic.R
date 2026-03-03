@@ -210,77 +210,77 @@ test_that("subset_bds_param subsets errors when parameters are repeated across c
   )
 })
 
-test_that("subset_bds_param subsets renames repeated parameters", {
-  testthat::skip("This behavior is not implemented until required")
+# test_that("subset_bds_param subsets renames repeated parameters", {
+#   testthat::skip("This behavior is not implemented until required")
 
-  bm_df <- tibble::as_tibble(expand.grid(
-    cat = factor(c("CA", "CB", "CC")),
-    par = factor(c("P1", "P2", "P3")),
-    vis = factor(c("V1", "V2", "V3")),
-    sbj = factor(1:2)
-  ))
-  # Remove parameter added by expand.grid
-  attr(bm_df, "out.attrs") <- NULL # nolint
+#   bm_df <- tibble::as_tibble(expand.grid(
+#     cat = factor(c("CA", "CB", "CC")),
+#     par = factor(c("P1", "P2", "P3")),
+#     vis = factor(c("V1", "V2", "V3")),
+#     sbj = factor(1:2)
+#   ))
+#   # Remove parameter added by expand.grid
+#   attr(bm_df, "out.attrs") <- NULL # nolint
 
-  bm_df[["val"]] <- paste0(
-    bm_df[["cat"]],
-    "-",
-    bm_df[["par"]],
-    "-",
-    bm_df[["sbj"]],
-    "-",
-    bm_df[["vis"]]
-  )
+#   bm_df[["val"]] <- paste0(
+#     bm_df[["cat"]],
+#     "-",
+#     bm_df[["par"]],
+#     "-",
+#     bm_df[["sbj"]],
+#     "-",
+#     bm_df[["vis"]]
+#   )
 
-  label_list <- list(
-    cat = "CAT",
-    par = "PAR",
-    vis = "VIS",
-    sbj = "SBJ",
-    val = "VAL"
-  )
+#   label_list <- list(
+#     cat = "CAT",
+#     par = "PAR",
+#     vis = "VIS",
+#     sbj = "SBJ",
+#     val = "VAL"
+#   )
 
-  bm_df <- set_lbls(bm_df, label_list)
+#   bm_df <- set_lbls(bm_df, label_list)
 
-  actual_output <- subset_bds_param(
-    cat = c("CA", "CB"),
-    cat_col = "cat",
-    par = c("P3", "P1"),
-    par_col = "par",
-    val_col = "val",
-    vis = c("V1"),
-    vis_col = "vis",
-    ds = bm_df,
-    subj_col = "sbj"
-  )
+#   actual_output <- subset_bds_param(
+#     cat = c("CA", "CB"),
+#     cat_col = "cat",
+#     par = c("P3", "P1"),
+#     par_col = "par",
+#     val_col = "val",
+#     vis = c("V1"),
+#     vis_col = "vis",
+#     ds = bm_df,
+#     subj_col = "sbj"
+#   )
 
-  expected_label_list <- label_list
-  names(expected_label_list) <- c(CNT$CAT, CNT$PAR, CNT$VIS, CNT$SBJ, CNT$VAL)
+#   expected_label_list <- label_list
+#   names(expected_label_list) <- c(CNT$CAT, CNT$PAR, CNT$VIS, CNT$SBJ, CNT$VAL)
 
 
-  # Fix levels
-  expected_output <- data.frame(row.names = 1:8)
-  expected_output[[CNT$SBJ]] <- factor(c(1, 1, 1, 1, 2, 2, 2, 2))
-  expected_output[[CNT$CAT]] <- factor(c("CA", "CB", "CA", "CB", "CA", "CB", "CA", "CB"), levels = c("CA", "CB", "CC"))
-  expected_output[[CNT$PAR]] <- factor(c("CA-P1", "CB-P1", "CA-P3", "CB-P3", "CA-P1", "CB-P1", "CA-P3", "CB-P3"),
-    levels = c("CA-P1", "CA-P3", "CB-P1", "CB-P3")
-  )
-  expected_output[[CNT$VIS]] <- factor(c("V1", "V1", "V1", "V1", "V1", "V1", "V1", "V1"), levels = c("V1", "V2", "V3"))
-  expected_output[[CNT$VAL]] <- paste0(
-    expected_output[[CNT$PAR]],
-    "-",
-    expected_output[[CNT$SBJ]],
-    "-",
-    expected_output[[CNT$VIS]]
-  )
+#   # Fix levels
+#   expected_output <- data.frame(row.names = 1:8)
+#   expected_output[[CNT$SBJ]] <- factor(c(1, 1, 1, 1, 2, 2, 2, 2))
+#   expected_output[[CNT$CAT]] <- factor(c("CA", "CB", "CA", "CB", "CA", "CB", "CA", "CB"), levels = c("CA", "CB", "CC"))
+#   expected_output[[CNT$PAR]] <- factor(c("CA-P1", "CB-P1", "CA-P3", "CB-P3", "CA-P1", "CB-P1", "CA-P3", "CB-P3"),
+#     levels = c("CA-P1", "CA-P3", "CB-P1", "CB-P3")
+#   )
+#   expected_output[[CNT$VIS]] <- factor(c("V1", "V1", "V1", "V1", "V1", "V1", "V1", "V1"), levels = c("V1", "V2", "V3"))
+#   expected_output[[CNT$VAL]] <- paste0(
+#     expected_output[[CNT$PAR]],
+#     "-",
+#     expected_output[[CNT$SBJ]],
+#     "-",
+#     expected_output[[CNT$VIS]]
+#   )
 
-  expected_output <- tibble::as_tibble(expected_output, rownames = NULL)
+#   expected_output <- tibble::as_tibble(expected_output, rownames = NULL)
 
-  expected_output <- set_lbls(expected_output, expected_label_list)
-  attr(expected_output, "parameter_renamed") <- TRUE
+#   expected_output <- set_lbls(expected_output, expected_label_list)
+#   attr(expected_output, "parameter_renamed") <- TRUE
 
-  expect_equal(actual_output, expected_output)
-})
+#   expect_equal(actual_output, expected_output)
+# })
 
 # subset_group ----
 
