@@ -1,7 +1,7 @@
 Package: dv.explorer.parameter
 Type: Package
 Title: Parameter exploration modules
-Version: 0.1.9-9011
+Version: 0.1.9-9012
 Authors@R: c(
         person("Boehringer-Ingelheim Pharma GmbH & Co.KG", role = c("cph", "fnd")),
         person(given = "Luis", family = "Moris Fernandez", role = c("aut", "cre"), email = "luis.moris.fernandez@gmail.com"),
@@ -26,4 +26,4 @@ Imports: shiny (>= 1.7.1), dplyr (>= 1.0.7), broom (>= 0.7.9), ggplot2
         vegawidget, pROC, gt, utils, precrec, glue, dv.manager (>= 2.2.0)
 Depends: R (>= 4.1.0)
 VignetteBuilder: knitr
-Remotes: boehringer-ingelheim/dv.manager@test
+Remotes: boehringer-ingelheim/dv.manager

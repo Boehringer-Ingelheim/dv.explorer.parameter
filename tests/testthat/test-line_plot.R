@@ -138,9 +138,9 @@ test_that("transparency slider controls the transparency level in the color of b
   vdiffr::expect_doppelganger(title = "patient-selection-tvs", fig = test_plot_tvs)
 })
 
-test_that(
-  "centrality and dispersion calculations are correct",
-  {
-    skip("The module will eventually offload stats calculation to user-provided routines")
-  }
-)
+# test_that(
+#   "centrality and dispersion calculations are correct",
+#   {
+#     skip("The module will eventually offload stats calculation to user-provided routines")
+#   }
+# )
