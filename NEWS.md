@@ -1,66 +1,18 @@
-# dv.explorer.parameter 0.1.9-9012
+# dv.explorer.parameter 0.2.0
 
-Refactor tests
+* Bug Fixes
 
-# dv.explorer.parameter 0.1.9-9011
+    * Scatterplot matrix: Fixed an issue where the analysis flag was plotted in the matrix alongside user-selected parameters
+    * ROC:
+        *Fixed an issue in the Summary tab where visualisation output was not produced for predictor/response combinations where the response has only one value; these are now included in the plot with a blank ROC entry
+        * Fixed an issue in the Summary tab where visualisation output was not produced when no grouping variable was selected
+    * Line plot: Fixed an issue where labels attached to reference line variables were not used in the plot legend
 
-* scatterplot matrix
-    * Fix issue of plotting analysis flag in the matrix in addition to user selected parameters
+* Improvements
 
-# dv.explorer.parameter 0.1.9-9010
-
-Refactor tests
-
-# dv.explorer.parameter 0.1.9-9009
-
-Remove other menu from scatterplot matrix
-
-# dv.explorer.parameter 0.1.9-9008
-
-Clear errors from the log
-
-# dv.explorer.parameter 0.1.9-9007
-
-* All modules where applicable:
-    * Update screenshots in vignettes to reflect the dv.manager update
-    * Update QC report according to the updated template
-    
-  * wfph:
-    * Removed nonGxP notification   
-
-
-# dv.explorer.parameter 0.1.9-9006
-
-* roc:
-    * Fix a bug in the Summary tab, so that the visualisation output is produced even when there are combinations of predictor and response where the response has only one value throughout. In this case ROC can not be calculated but the entry is presented in the plot with blank ROC. 
-
-# dv.explorer.parameter 0.1.9-9005
-
-* Adds support for bs5
-
-# dv.explorer.parameter 0.1.9-9004
-
-* roc:
-    * Fix a bug in the Summary tab, so that the visualisation output is produced both when a grouping variable is selected and when "None" is selected
-    * Ensure that USUBJID is removed from the grouping drop down list in the summary tab, as in spite of it being a factor it doesn't make sense to group the visualisation output by USUBJID 
-
-# dv.explorer.parameter 0.1.9-9003
-
-* boxplot, roc:
-    * Add quantile_type to the mod signature enabling app creators to select the quantile calculation algorithm of choice 
-    * Update existing test, and add additional tests using the quantile_type argument
-* boxplot, line plot, scatter plot, scatter plot matrix, correlation heatmap, waterfall plus heatmap, forest plot:
-    * removed unnecessary transformation of variables to factors in the documentation examples
-
-# dv.explorer.parameter 0.1.9-9002
-
-* lineplot:
-    * Applied a fix to ensure that if the indicated ref line variables in the input data table have labels attached to them, then these labels are used in the plot's legend
-
-# dv.explorer.parameter 0.1.9-9001
-
-* boxplot, lineplot, scatter plot, scatter plot matrix, correlation heatmap, waterfall plus heatmap, roc :
-    * Added tests for each module, to ensure an appropriate messages is displayed, when a dataset is filtered to zero records using the global filter. 
+* Added Bootstrap 5 support
+* ROC: USUBJID is now excluded from the grouping dropdown in the Summary tab
+* Boxplot, ROC: Added quantile_type to the mod signature, allowing app creators to select their preferred quantile calculation algorithm
 
 # dv.explorer.parameter 0.1.9
 
