@@ -1,0 +1,135 @@
+# Changelog
+
+## dv.explorer.parameter 0.2.0
+
+- Bug Fixes
+
+  - Scatterplot matrix: Fixed an issue where the analysis flag was
+    plotted in the matrix alongside user-selected parameters
+  - ROC: \*Fixed an issue in the Summary tab where visualisation output
+    was not produced for predictor/response combinations where the
+    response has only one value; these are now included in the plot with
+    a blank ROC entry
+    - Fixed an issue in the Summary tab where visualisation output was
+      not produced when no grouping variable was selected
+  - Line plot: Fixed an issue where labels attached to reference line
+    variables were not used in the plot legend
+
+- Improvements
+
+- Added Bootstrap 5 support
+
+- ROC: USUBJID is now excluded from the grouping dropdown in the Summary
+  tab
+
+- Boxplot, ROC: Added quantile_type to the mod signature, allowing app
+  creators to select their preferred quantile calculation algorithm
+
+## dv.explorer.parameter 0.1.9
+
+- boxplot, lineplot, scatter plot, scatter plot matrix, correlation
+  heatmap, waterfall plus heatmap :
+  - Added the option to filter the input dataset based on Y/N flag
+    variables that exist in it.
+- boxplot:
+  - `mod_boxplot_papo` was already deprecated and now it has been
+    completely removed
+
+## dv.explorer.parameter 0.1.8
+
+- lineplot:
+  - Enhanced line plot visibility for user selected subjects
+
+## dv.explorer.parameter 0.1.6
+
+- All modules:
+  - Accept character() input for subject, category and parameter
+    data.frame columns.
+  - Reduce `value_vars` default values to “AVAL”.
+  - Improved error message when parameter names reoccur across
+    categories and new helper function to address that situation.
+  - De-export label helpers to avoid symbol overwritting warning for app
+    creators that load package through `library`.
+- wfphm:
+  - Waterfall group menu does no longer include `character` variables.
+- lineplot:
+  - Improved display of simultaneous reference values.
+- boxplot:
+  - `mod_boxplot_papo` is deprecated and `mod_boxplot` can be used in
+    its place.
+  - Data count table headers are now shown correctly.
+
+## dv.explorer.parameter 0.1.1
+
+- boxplot:
+  - Provide a checkbox under the “Other” UI menu to log-project the Y
+    axis.
+- lineplot:
+  - Warn app creators against non-finite values in numeric visits.
+
+## dv.explorer.parameter 0.1.0
+
+- boxplot, correlation heatmap, forest plot, roc, scatter plot, scatter
+  plot matrix, waterfall plus heatmap:
+  - Remove support for data dispatchers.
+  - Provide early feedback of module misconfiguration.
+
+## dv.explorer.parameter 0.0.14
+
+- lineplot, boxplot:
+  - Use dv.manager’s switch2mod instead of deprecated switch2.
+
+## dv.explorer.parameter 0.0.13
+
+- lineplot, boxplot:
+  - Make receiver_id accept module identifiers instead of labels.
+
+## dv.explorer.parameter 0.0.12
+
+- lineplot:
+  - Prevent spurious reactive update.
+
+## dv.explorer.parameter 0.0.11
+
+- lineplot:
+  - Per-column default visit values. Breaking change, as it changes the
+    expected type of `default_visit_val`.
+  - Fixes order of x-axis visit ticks for continuous variables.
+
+## dv.explorer.parameter 0.0.10
+
+- lineplot hotfix:
+  - Prevent suspendWhenHidden of dynamic UI.
+
+## dv.explorer.parameter 0.0.9
+
+- lineplot:
+  - Y axis log projection menu option.
+  - New `cdisc_visit_vars` parameter that accounts for missing Study Day
+    0 in CDISC datasets.
+  - New `default_transparency_value` parameter.
+  - Remove support for data dispatchers in favor of dataset names.
+
+## dv.explorer.parameter 0.0.8
+
+- WFPHM:
+  - Fixes the error in conditional panels that prevented conditional
+    panels in other modules to work properly.
+
+## dv.explorer.parameter 0.0.7
+
+- Lineplot:
+  - Fix overlap of plot and data listings.
+
+## dv.explorer.parameter 0.0.6
+
+- Lineplot:
+  - Prevent false-positive opaque error message at module startup.
+- Correlation heatmap:
+  - Provide clear error message when handed records with identical
+    subject IDs, category, parameter and visit values.
+
+## dv.explorer.parameter 0.0.5
+
+- First Github release
+- Renamed to dv.explorer.parameter

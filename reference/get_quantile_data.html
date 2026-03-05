@@ -11,7 +11,7 @@ that is the output of roc_subset_data()."></head><body>
 
     <a class="navbar-brand me-2" href="../index.html">dv.explorer.parameter</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.9-9001</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -59,7 +59,7 @@ that is the output of <code><a href="roc_subset_data.html">roc_subset_data()</a>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">get_quantile_data</span><span class="op">(</span><span class="va">ds</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">get_quantile_data</span><span class="op">(</span><span class="va">ds</span>, <span class="va">quantile_type</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -67,8 +67,13 @@ that is the output of <code><a href="roc_subset_data.html">roc_subset_data()</a>
 
 
 <dl><dt id="arg-ds">ds<a class="anchor" aria-label="anchor" href="#arg-ds"></a></dt>
-<dd><p><code>[data.frame()]</code>
-A dataframe</p></dd>
+<dd><p><code>[data.frame()]</code></p>
+<p>A dataframe</p></dd>
+
+
+<dt id="arg-quantile-type">quantile_type<a class="anchor" aria-label="anchor" href="#arg-quantile-type"></a></dt>
+<dd><p><code>[integer(1)]</code></p>
+<p>Quantile algorithm type (an integer between 1 and 9).</p></dd>
 
 </dl></div>
     <div class="section level2">
@@ -103,7 +108,7 @@ A dataframe</p></dd>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

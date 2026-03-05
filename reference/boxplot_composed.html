@@ -9,7 +9,7 @@ of receiving data, calculating data in an independent/several independent functi
 
     <a class="navbar-brand me-2" href="../index.html">dv.explorer.parameter</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.9-9001</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -64,7 +64,7 @@ of receiving data, calculating data in an independent/several independent functi
 <span></span>
 <span><span class="fu">bp_get_count_output</span><span class="op">(</span><span class="va">ds</span><span class="op">)</span></span>
 <span></span>
-<span><span class="fu">bp_get_summary_output</span><span class="op">(</span><span class="va">ds</span><span class="op">)</span></span>
+<span><span class="fu">bp_get_summary_output</span><span class="op">(</span><span class="va">ds</span>, <span class="va">quantile_type</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu">bp_get_significance_output</span><span class="op">(</span><span class="va">ds</span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -96,6 +96,11 @@ of receiving data, calculating data in an independent/several independent functi
 <dt id="arg-input-id">input_id<a class="anchor" aria-label="anchor" href="#arg-input-id"></a></dt>
 <dd><p>Shiny ID for the single listing button</p></dd>
 
+
+<dt id="arg-quantile-type">quantile_type<a class="anchor" aria-label="anchor" href="#arg-quantile-type"></a></dt>
+<dd><p><code>[integer(1)]</code></p>
+<p>Quantile algorithm type (an integer between 1 and 9).</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
@@ -112,7 +117,7 @@ of receiving data, calculating data in an independent/several independent functi
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

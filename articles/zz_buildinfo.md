@@ -1,0 +1,432 @@
+# Build Info
+
+Build date: 2026-03-05 14:08:22
+
+``` r
+
+sessionInfo()
+#> R version 4.5.2 (2025-10-31)
+#> Platform: x86_64-pc-linux-gnu
+#> Running under: Ubuntu 22.04.5 LTS
+#> 
+#> Matrix products: default
+#> BLAS:   /usr/lib/x86_64-linux-gnu/openblas-pthread/libblas.so.3 
+#> LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.20.so;  LAPACK version 3.10.0
+#> 
+#> locale:
+#>  [1] LC_CTYPE=en_US.UTF-8       LC_NUMERIC=C              
+#>  [3] LC_TIME=en_US.UTF-8        LC_COLLATE=en_US.UTF-8    
+#>  [5] LC_MONETARY=en_US.UTF-8    LC_MESSAGES=en_US.UTF-8   
+#>  [7] LC_PAPER=en_US.UTF-8       LC_NAME=C                 
+#>  [9] LC_ADDRESS=C               LC_TELEPHONE=C            
+#> [11] LC_MEASUREMENT=en_US.UTF-8 LC_IDENTIFICATION=C       
+#> 
+#> time zone: Etc/UTC
+#> tzcode source: system (glibc)
+#> 
+#> attached base packages:
+#> [1] stats     graphics  grDevices utils     datasets  methods   base     
+#> 
+#> loaded via a namespace (and not attached):
+#>  [1] digest_0.6.39     desc_1.4.3        R6_2.6.1          fastmap_1.2.0    
+#>  [5] xfun_0.54         cachem_1.1.0      knitr_1.50        htmltools_0.5.8.1
+#>  [9] rmarkdown_2.30    lifecycle_1.0.4   cli_3.6.5         sass_0.4.10      
+#> [13] pkgdown_2.2.0     textshaping_1.0.4 jquerylib_0.1.4   systemfonts_1.3.1
+#> [17] compiler_4.5.2    tools_4.5.2       ragg_1.5.0        bslib_0.9.0      
+#> [21] evaluate_1.0.5    yaml_2.3.11       jsonlite_2.0.0    rlang_1.1.6      
+#> [25] fs_1.6.6          htmlwidgets_1.6.4
+```
+
+``` r
+
+knitr::kable(as.data.frame(installed.packages(), row.names = FALSE)[c("Package", "Version")])
+```
+
+| Package               | Version    |
+|:----------------------|:-----------|
+| dv.explorer.parameter | 0.2.0      |
+| abind                 | 1.4-8      |
+| askpass               | 1.2.1      |
+| assertthat            | 0.2.1      |
+| attachment            | 0.4.5      |
+| attempt               | 0.3.1      |
+| AzureAuth             | 1.3.3      |
+| AzureGraph            | 1.3.5      |
+| AzureRMR              | 2.4.5      |
+| backports             | 1.5.0      |
+| base64enc             | 0.1-3      |
+| bigD                  | 0.3.1      |
+| Biobase               | 2.70.0     |
+| BiocBaseUtils         | 1.12.0     |
+| BiocGenerics          | 0.56.0     |
+| BiocManager           | 1.30.27    |
+| bit                   | 4.6.0      |
+| bit64                 | 4.6.0-1    |
+| bitops                | 1.0-9      |
+| bookdown              | 0.45       |
+| brew                  | 1.0-10     |
+| brio                  | 1.1.5      |
+| broom                 | 1.0.10     |
+| bsicons               | 0.1.2      |
+| bslib                 | 0.9.0      |
+| cachem                | 1.1.0      |
+| callr                 | 3.7.6      |
+| car                   | 3.1-3      |
+| carData               | 3.0-5      |
+| cards                 | 0.7.0      |
+| cardx                 | 0.3.0      |
+| caTools               | 1.18.3     |
+| cellranger            | 1.1.0      |
+| checkmate             | 2.3.3      |
+| chromote              | 0.5.1      |
+| cleanrmd              | 0.1.1      |
+| cli                   | 3.6.5      |
+| clipr                 | 0.8.0      |
+| colorspace            | 2.1-2      |
+| colourpicker          | 1.3.0      |
+| commonmark            | 2.0.0      |
+| config                | 0.3.2      |
+| confintr              | 1.0.2      |
+| covr                  | 3.6.5      |
+| cowplot               | 1.2.0      |
+| cranlogs              | 2.1.1      |
+| crayon                | 1.5.3      |
+| credentials           | 2.0.3      |
+| crosstalk             | 1.2.2      |
+| curl                  | 7.0.0      |
+| cyclocomp             | 1.1.1      |
+| data.table            | 1.17.8     |
+| debugme               | 1.2.0      |
+| DelayedArray          | 0.36.0     |
+| Deriv                 | 4.2.0      |
+| desc                  | 1.4.3      |
+| deSolve               | 1.40       |
+| devtools              | 2.4.6      |
+| diffdf                | 1.1.2      |
+| diffobj               | 0.3.6      |
+| diffviewer            | 0.1.2      |
+| digest                | 0.6.39     |
+| doBy                  | 4.7.0      |
+| dockerfiler           | 0.2.5      |
+| docopt                | 0.7.2      |
+| downlit               | 0.4.5      |
+| dplyr                 | 1.1.4      |
+| DT                    | 0.34.0     |
+| dv.manager            | 3.0.0      |
+| dygraphs              | 1.1.1.6    |
+| ellipsis              | 0.3.2      |
+| emmeans               | 2.0.0      |
+| estimability          | 1.5.1      |
+| evaluate              | 1.0.5      |
+| fansi                 | 1.0.7      |
+| farver                | 2.1.2      |
+| fastmap               | 1.2.0      |
+| flextable             | 0.9.10     |
+| foghorn               | 1.6.1      |
+| fontawesome           | 0.5.3      |
+| fontBitstreamVera     | 0.1.1      |
+| fontLiberation        | 0.1.0      |
+| fontquiver            | 0.2.1      |
+| forcats               | 1.0.1      |
+| foreach               | 1.5.2      |
+| formatters            | 0.5.11     |
+| Formula               | 1.2-5      |
+| formula.tools         | 1.7.1      |
+| fs                    | 1.6.6      |
+| future                | 1.68.0     |
+| gargle                | 1.6.0      |
+| gdtools               | 0.4.4      |
+| geeasy                | 0.1.3      |
+| geeM                  | 0.10.1     |
+| geepack               | 1.3.13     |
+| generics              | 0.1.4      |
+| GenomicRanges         | 1.62.1     |
+| gert                  | 2.2.0      |
+| GGally                | 2.4.0      |
+| ggExtra               | 0.11.0     |
+| ggformula             | 1.0.0      |
+| ggiraph               | 0.9.2      |
+| ggplot2               | 4.0.1      |
+| ggpmisc               | 0.6.3      |
+| ggpp                  | 0.5.9      |
+| ggrepel               | 0.9.6      |
+| ggridges              | 0.5.7      |
+| ggstats               | 0.11.0     |
+| gh                    | 1.5.0      |
+| gitcreds              | 0.1.2      |
+| glmnet                | 4.1-10     |
+| globals               | 0.18.0     |
+| glue                  | 1.8.0      |
+| gmailr                | 2.0.0      |
+| goftest               | 1.2-3      |
+| golem                 | 0.5.1      |
+| gridExtra             | 2.3        |
+| gt                    | 1.1.0      |
+| gtable                | 0.3.6      |
+| gtsummary             | 2.4.0      |
+| haven                 | 2.5.5      |
+| here                  | 1.0.2      |
+| highr                 | 0.11       |
+| Hmisc                 | 5.2-4      |
+| hms                   | 1.1.4      |
+| htmlTable             | 2.4.3      |
+| htmltools             | 0.5.8.1    |
+| htmlwidgets           | 1.6.4      |
+| httpuv                | 1.6.16     |
+| httr                  | 1.4.7      |
+| httr2                 | 1.2.1      |
+| hunspell              | 3.0.6      |
+| ini                   | 0.3.1      |
+| IRanges               | 2.44.0     |
+| isoband               | 0.2.7      |
+| iterators             | 1.0.14     |
+| jose                  | 1.2.1      |
+| jquerylib             | 0.1.4      |
+| jsonlite              | 2.0.0      |
+| jsonvalidate          | 1.5.0      |
+| juicyjuice            | 0.1.0      |
+| katex                 | 1.5.0      |
+| kernlab               | 0.9-33     |
+| kinship2              | 1.9.6.2    |
+| knitr                 | 1.50       |
+| labeling              | 0.4.3      |
+| labelled              | 2.16.0     |
+| later                 | 1.4.4      |
+| lazyeval              | 0.2.2      |
+| learnr                | 0.11.6     |
+| lifecycle             | 1.0.4      |
+| lintr                 | 3.3.0-1    |
+| listenv               | 0.10.0     |
+| litedown              | 0.8        |
+| littler               | 0.3.21     |
+| lme4                  | 1.1-37     |
+| lmodel2               | 1.7-4      |
+| logger                | 0.4.1      |
+| lubridate             | 1.9.4      |
+| lzstring              | 0.2.0      |
+| magick                | 2.9.0      |
+| magrittr              | 2.0.4      |
+| markdown              | 2.0        |
+| MatrixGenerics        | 1.22.0     |
+| MatrixModels          | 0.5-4      |
+| matrixStats           | 1.5.0      |
+| memoise               | 2.0.1      |
+| MESS                  | 0.6.0      |
+| metacore              | 0.2.1      |
+| metatools             | 0.2.0      |
+| microbenchmark        | 1.5.0      |
+| mime                  | 0.13       |
+| miniUI                | 0.1.2      |
+| minqa                 | 1.2.8      |
+| mixtools              | 2.0.0.1    |
+| mmrm                  | 0.3.15     |
+| mockery               | 0.4.5      |
+| modelr                | 0.1.11     |
+| mosaicCore            | 0.9.5      |
+| multcomp              | 1.4-29     |
+| multcompView          | 0.1-10     |
+| MultiAssayExperiment  | 1.36.1     |
+| mvtnorm               | 1.3-3      |
+| nestcolor             | 0.1.3      |
+| nloptr                | 2.2.1      |
+| numDeriv              | 2016.8-1.1 |
+| officer               | 0.7.1      |
+| openssl               | 2.3.4      |
+| openxlsx              | 4.2.8.1    |
+| operator.tools        | 1.6.3      |
+| otel                  | 0.2.0      |
+| packrat               | 0.9.3      |
+| pak                   | 0.9.1      |
+| parallelly            | 1.45.1     |
+| parsedate             | 1.3.2      |
+| patchwork             | 1.3.2      |
+| patrick               | 0.3.0      |
+| pbkrtest              | 0.5.5      |
+| pharmaverseadam       | 1.2.0      |
+| pillar                | 1.11.1     |
+| pingr                 | 2.0.5      |
+| pkgbuild              | 1.4.8      |
+| pkgconfig             | 2.0.3      |
+| pkgdown               | 2.2.0      |
+| pkgload               | 1.4.1      |
+| PKI                   | 0.1-15     |
+| plotly                | 4.11.0     |
+| plyr                  | 1.8.9      |
+| png                   | 0.1-8      |
+| polynom               | 1.4-1      |
+| praise                | 1.0.0      |
+| precrec               | 0.14.5     |
+| prettyunits           | 1.2.0      |
+| pROC                  | 1.19.0.1   |
+| processx              | 3.8.6      |
+| profvis               | 0.4.0      |
+| progress              | 1.2.3      |
+| promises              | 1.5.0      |
+| ps                    | 1.9.1      |
+| purrr                 | 1.2.0      |
+| quadprog              | 1.5-8      |
+| quantreg              | 6.1        |
+| quarto                | 1.5.1      |
+| R.cache               | 0.17.0     |
+| R.methodsS3           | 1.8.2      |
+| R.oo                  | 1.27.1     |
+| R.utils               | 2.13.0     |
+| r2d3                  | 0.2.6      |
+| R6                    | 2.6.1      |
+| ragg                  | 1.5.0      |
+| random.cdisc.data     | 0.3.16     |
+| rappdirs              | 0.3.3      |
+| rbibutils             | 2.4        |
+| rcmdcheck             | 1.4.0      |
+| RColorBrewer          | 1.1-3      |
+| Rcpp                  | 1.1.0      |
+| RcppTOML              | 0.2.3      |
+| Rdpack                | 2.6.4      |
+| reactable             | 0.4.5      |
+| reactR                | 0.6.1      |
+| readr                 | 2.1.6      |
+| readxl                | 1.4.5      |
+| reformulas            | 0.4.2      |
+| rematch               | 2.0.0      |
+| rematch2              | 2.1.2      |
+| remotes               | 2.5.0      |
+| renv                  | 1.1.5      |
+| rex                   | 1.2.1      |
+| rhub                  | 2.0.1      |
+| rlang                 | 1.1.6      |
+| rlistings             | 0.2.12     |
+| rmarkdown             | 2.30       |
+| roxy.shinylive        | 1.0.0      |
+| roxygen2              | 7.3.3      |
+| rprojroot             | 2.1.1      |
+| rsconnect             | 1.6.2      |
+| rstudioapi            | 0.17.1     |
+| rsvg                  | 2.7.0      |
+| rtables               | 0.6.14     |
+| rtables.officer       | 0.1.1      |
+| rticles               | 0.27       |
+| rversions             | 3.0.0      |
+| rvest                 | 1.0.5      |
+| S4Arrays              | 1.10.1     |
+| S4Vectors             | 0.48.0     |
+| S7                    | 0.2.1      |
+| safetyData            | 1.0.0      |
+| sandwich              | 3.1-1      |
+| sass                  | 0.4.10     |
+| scales                | 1.4.0      |
+| segmented             | 2.1-4      |
+| selectr               | 0.5-0      |
+| Seqinfo               | 1.0.0      |
+| sessioninfo           | 1.2.3      |
+| shape                 | 1.4.6.1    |
+| shiny                 | 1.11.1     |
+| shinyAce              | 0.4.4      |
+| shinybusy             | 0.3.3      |
+| shinycssloaders       | 1.1.0      |
+| shinydisconnect       | 0.1.1      |
+| shinyFeedback         | 0.4.0      |
+| shinyjs               | 2.1.0      |
+| shinymeta             | 0.2.1      |
+| shinytest             | 1.6.1      |
+| shinytest2            | 0.4.1      |
+| shinyTree             | 0.3.1      |
+| shinyvalidate         | 0.1.3      |
+| shinyWidgets          | 0.9.0      |
+| showimage             | 1.0.0      |
+| snowflakeauth         | 0.2.0      |
+| sortable              | 0.5.0      |
+| sourcetools           | 0.1.7-1    |
+| sparkline             | 2.0        |
+| SparseArray           | 1.10.8     |
+| SparseM               | 1.84-2     |
+| spelling              | 2.3.2      |
+| splus2R               | 1.3-5      |
+| stringi               | 1.8.7      |
+| stringr               | 1.6.0      |
+| styler                | 1.11.0     |
+| SummarizedExperiment  | 1.40.0     |
+| svglite               | 2.2.2      |
+| sys                   | 3.4.3      |
+| systemfonts           | 1.3.1      |
+| teal                  | 1.1.0      |
+| teal.code             | 0.7.0      |
+| teal.data             | 0.8.0      |
+| teal.logger           | 0.4.0      |
+| teal.modules.clinical | 0.11.1     |
+| teal.modules.general  | 0.5.1      |
+| teal.reporter         | 0.6.0      |
+| teal.slice            | 0.7.0      |
+| teal.transform        | 0.7.0      |
+| teal.widgets          | 0.5.0      |
+| tern                  | 0.9.9      |
+| tern.gee              | 0.1.5      |
+| tern.mmrm             | 0.3.3      |
+| testit                | 0.13       |
+| testthat              | 3.3.1      |
+| textshaping           | 1.0.4      |
+| TH.data               | 1.1-5      |
+| tibble                | 3.3.0      |
+| tidyr                 | 1.3.1      |
+| tidyselect            | 1.2.1      |
+| timechange            | 0.3.0      |
+| tinytex               | 0.58       |
+| TMB                   | 1.9.18     |
+| tufte                 | 0.14.0     |
+| tzdb                  | 0.5.0      |
+| urlchecker            | 1.0.1      |
+| usethis               | 3.2.1      |
+| utf8                  | 1.2.6      |
+| uuid                  | 1.2-1      |
+| V8                    | 8.0.1      |
+| vctrs                 | 0.6.5      |
+| vdiffr                | 1.0.8      |
+| vegawidget            | 0.5.0      |
+| viridisLite           | 0.4.2      |
+| vistime               | 1.2.4      |
+| vroom                 | 1.6.7      |
+| waldo                 | 0.6.2      |
+| webdriver             | 1.0.6      |
+| webfakes              | 1.4.0      |
+| websocket             | 1.4.4      |
+| whisker               | 0.4.1      |
+| whoami                | 1.3.0      |
+| withr                 | 3.0.2      |
+| xfun                  | 0.54       |
+| xml2                  | 1.5.1      |
+| xmlparsedata          | 1.0.5      |
+| xopen                 | 1.0.1      |
+| xtable                | 1.8-4      |
+| xts                   | 0.14.1     |
+| XVector               | 0.50.0     |
+| yaml                  | 2.3.11     |
+| zip                   | 2.3.3      |
+| zoo                   | 1.8-14     |
+| base                  | 4.5.2      |
+| boot                  | 1.3-32     |
+| class                 | 7.3-23     |
+| cluster               | 2.1.8.1    |
+| codetools             | 0.2-20     |
+| compiler              | 4.5.2      |
+| datasets              | 4.5.2      |
+| foreign               | 0.8-90     |
+| graphics              | 4.5.2      |
+| grDevices             | 4.5.2      |
+| grid                  | 4.5.2      |
+| KernSmooth            | 2.23-26    |
+| lattice               | 0.22-7     |
+| MASS                  | 7.3-65     |
+| Matrix                | 1.7-4      |
+| methods               | 4.5.2      |
+| mgcv                  | 1.9-3      |
+| nlme                  | 3.1-168    |
+| nnet                  | 7.3-20     |
+| parallel              | 4.5.2      |
+| rpart                 | 4.1.24     |
+| spatial               | 7.3-18     |
+| splines               | 4.5.2      |
+| stats                 | 4.5.2      |
+| stats4                | 4.5.2      |
+| survival              | 3.8-3      |
+| tcltk                 | 4.5.2      |
+| tools                 | 4.5.2      |
+| utils                 | 4.5.2      |

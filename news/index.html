@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">dv.explorer.parameter</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.9-9001</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -47,10 +47,19 @@
     </div>
 
     <div class="section level2">
-<h2 class="pkg-version" data-toc-text="0.1.9-9001" id="dvexplorerparameter-019-9001">dv.explorer.parameter 0.1.9-9001<a class="anchor" aria-label="anchor" href="#dvexplorerparameter-019-9001"></a></h2>
-<ul><li>boxplot, lineplot, scatter plot, scatter plot matrix, correlation heatmap, waterfall plus heatmap, roc :
-<ul><li>Added tests for each module, to ensure an appropriate messages is displayed, when a dataset is filtered to zero records using the global filter.</li>
+<h2 class="pkg-version" data-toc-text="0.2.0" id="dvexplorerparameter-020">dv.explorer.parameter 0.2.0<a class="anchor" aria-label="anchor" href="#dvexplorerparameter-020"></a></h2>
+<ul><li>
+<p>Bug Fixes</p>
+<ul><li>Scatterplot matrix: Fixed an issue where the analysis flag was plotted in the matrix alongside user-selected parameters</li>
+<li>ROC: *Fixed an issue in the Summary tab where visualisation output was not produced for predictor/response combinations where the response has only one value; these are now included in the plot with a blank ROC entry
+<ul><li>Fixed an issue in the Summary tab where visualisation output was not produced when no grouping variable was selected</li>
 </ul></li>
+<li>Line plot: Fixed an issue where labels attached to reference line variables were not used in the plot legend</li>
+</ul></li>
+<li><p>Improvements</p></li>
+<li><p>Added Bootstrap 5 support</p></li>
+<li><p>ROC: USUBJID is now excluded from the grouping dropdown in the Summary tab</p></li>
+<li><p>Boxplot, ROC: Added quantile_type to the mod signature, allowing app creators to select their preferred quantile calculation algorithm</p></li>
 </ul></div>
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.1.9" id="dvexplorerparameter-019">dv.explorer.parameter 0.1.9<a class="anchor" aria-label="anchor" href="#dvexplorerparameter-019"></a></h2>
@@ -179,7 +188,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

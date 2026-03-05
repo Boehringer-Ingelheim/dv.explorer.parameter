@@ -87,7 +87,7 @@ It expects to contain, at least, subjid_var
 
     <a class="navbar-brand me-2" href="../index.html">dv.explorer.parameter</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.9-9001</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -188,6 +188,7 @@ one record per subject</p>
 <span>  resp_value_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"CHG1"</span>, <span class="st">"CHG2"</span><span class="op">)</span>,</span>
 <span>  resp_visit_var <span class="op">=</span> <span class="st">"AVISIT"</span>,</span>
 <span>  subjid_var <span class="op">=</span> <span class="st">"USUBJID"</span>,</span>
+<span>  quantile_type <span class="op">=</span> <span class="fl">7L</span>,</span>
 <span>  compute_roc_fn <span class="op">=</span> <span class="va">compute_roc_data</span>,</span>
 <span>  compute_metric_fn <span class="op">=</span> <span class="va">compute_metric_data</span></span>
 <span><span class="op">)</span></span></code></pre></div>
@@ -226,6 +227,12 @@ one record per subject</p>
 <p>Column corresponding to subject ID</p></dd>
 
 
+<dt id="arg-quantile-type">quantile_type<a class="anchor" aria-label="anchor" href="#arg-quantile-type"></a></dt>
+<dd><p><code>[integer(1)]</code></p>
+<p>Quantile algorithm type passed to <code><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></code>
+(an integer between 1 and 9, default 7).</p></dd>
+
+
 <dt id="arg-compute-roc-fn-compute-metric-fn">compute_roc_fn, compute_metric_fn<a class="anchor" aria-label="anchor" href="#arg-compute-roc-fn-compute-metric-fn"></a></dt>
 <dd><p><code>[function()]</code></p>
 <p>Functions used to compute the ROC and metric analysis, please view the corresponding vignette for more details.</p></dd>
@@ -241,7 +248,7 @@ one record per subject</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer></div>

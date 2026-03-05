@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">dv.explorer.parameter</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.1.9-9001</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -222,16 +222,8 @@ different groups.</p>
 <h2 id="creating-a-boxplot-application">Creating a boxplot application<a class="anchor" aria-label="anchor" href="#creating-a-boxplot-application"></a>
 </h2>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">adbm_dataset</span> <span class="op">&lt;-</span> <span class="fu">dv.explorer.parameter</span><span class="fu">:::</span><span class="fu">safety_data</span><span class="op">(</span><span class="op">)</span><span class="op">[[</span><span class="st">"bm"</span><span class="op">]</span><span class="op">]</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span></span>
-<span>    USUBJID <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">USUBJID</span><span class="op">)</span>,</span>
-<span>    PARCAT1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">PARCAT1</span><span class="op">)</span>,</span>
-<span>    PARAM <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">PARAM</span><span class="op">)</span>,</span>
-<span>    AVISIT <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">AVISIT</span><span class="op">)</span></span>
-<span>  <span class="op">)</span></span>
-<span></span>
-<span><span class="va">adsl_dataset</span> <span class="op">&lt;-</span> <span class="fu">dv.explorer.parameter</span><span class="fu">:::</span><span class="fu">safety_data</span><span class="op">(</span><span class="op">)</span><span class="op">[[</span><span class="st">"sl"</span><span class="op">]</span><span class="op">]</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>USUBJID <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">USUBJID</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">adbm_dataset</span> <span class="op">&lt;-</span> <span class="fu">dv.explorer.parameter</span><span class="fu">:::</span><span class="fu">safety_data</span><span class="op">(</span><span class="op">)</span><span class="op">[[</span><span class="st">"bm"</span><span class="op">]</span><span class="op">]</span></span>
+<span><span class="va">adsl_dataset</span> <span class="op">&lt;-</span> <span class="fu">dv.explorer.parameter</span><span class="fu">:::</span><span class="fu">safety_data</span><span class="op">(</span><span class="op">)</span><span class="op">[[</span><span class="st">"sl"</span><span class="op">]</span><span class="op">]</span></span>
 <span></span>
 <span><span class="fu">dv.manager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/dv.manager/man/run_app.html" class="external-link">run_app</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>dummy <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>adbm <span class="op">=</span> <span class="va">adbm_dataset</span>, adsl <span class="op">=</span> <span class="va">adsl_dataset</span><span class="op">)</span><span class="op">)</span>,</span>
@@ -269,7 +261,7 @@ pressed.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.1.2.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
 </div>
 
     </footer>
