@@ -4,9 +4,9 @@
 
 # dv.explorer.parameter::mod_boxplot
 check_mod_boxplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id,
-    cat_var, par_var, value_vars, visit_var, anlfl_vars, subjid_var, default_cat, default_par, default_visit,
-    default_value, default_main_group, default_sub_group, default_page_group, server_wrapper_func, warn,
-    err) {
+    cat_var, par_var, value_vars, visit_var, anlfl_vars, subjid_var, quantile_type, default_cat, default_par,
+    default_visit, default_value, default_main_group, default_sub_group, default_page_group, server_wrapper_func,
+    warn, err) {
     OK <- logical(0)
     used_dataset_names <- new.env(parent = emptyenv())
     OK[["module_id"]] <- CM$check_module_id("module_id", module_id, warn, err)
@@ -44,6 +44,9 @@ check_mod_boxplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, g
     flags <- list(subjid_var = TRUE, map_character_to_factor = TRUE)
     OK[["subjid_var"]] <- OK[["group_dataset_name"]] && CM$check_dataset_colum_name("subjid_var", subjid_var,
         subkind, flags, group_dataset_name, datasets[[group_dataset_name]], warn, err)
+    "NOTE: quantile_type (integer) has no associated automated checks"
+    "      The expectation is that it either does not require them or that"
+    "      the caller of this function has written manual checks near the call site."
     flags <- list(zero_or_more = TRUE, optional = TRUE)
     OK[["default_cat"]] <- OK[["cat_var"]] && CM$check_choice_from_col_contents("default_cat", default_cat,
         flags, "bm_dataset_name", datasets[[bm_dataset_name]], cat_var, warn, err)
@@ -317,7 +320,7 @@ check_mod_lineplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, 
 # dv.explorer.parameter::mod_roc
 check_mod_roc_auto <- function(afmm, datasets, module_id, pred_dataset_name, resp_dataset_name, group_dataset_name,
     pred_cat_var, pred_par_var, pred_value_vars, pred_visit_var, resp_cat_var, resp_par_var, resp_value_vars,
-    resp_visit_var, subjid_var, compute_roc_fn, compute_metric_fn, warn, err) {
+    resp_visit_var, subjid_var, quantile_type, compute_roc_fn, compute_metric_fn, warn, err) {
     OK <- logical(0)
     used_dataset_names <- new.env(parent = emptyenv())
     OK[["module_id"]] <- CM$check_module_id("module_id", module_id, warn, err)
@@ -368,6 +371,9 @@ check_mod_roc_auto <- function(afmm, datasets, module_id, pred_dataset_name, res
     flags <- list(subjid_var = TRUE, map_character_to_factor = TRUE)
     OK[["subjid_var"]] <- OK[["group_dataset_name"]] && CM$check_dataset_colum_name("subjid_var", subjid_var,
         subkind, flags, group_dataset_name, datasets[[group_dataset_name]], warn, err)
+    "NOTE: quantile_type (integer) has no associated automated checks"
+    "      The expectation is that it either does not require them or that"
+    "      the caller of this function has written manual checks near the call site."
     flags <- list(optional = TRUE)
     OK[["compute_roc_fn"]] <- CM$check_function("compute_roc_fn", compute_roc_fn, 4, flags, warn, err)
     flags <- list(optional = TRUE)

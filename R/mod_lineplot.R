@@ -350,12 +350,12 @@ lineplot_chart <- function(data, title = NULL, ref_line_data = NULL, log_project
       if (n > 1) {
         # `n` colors + black
         hues <- seq(15, 375, length = n)
-        res <- c(hcl(h = hues, l = 65, c = 100)[1:n - 1], "#000000")
+        res <- c(grDevices::hcl(h = hues, l = 65, c = 100)[1:n - 1], "#000000")
       }
       # https://web.archive.org/web/20250130090454/https://ggplot2.tidyverse.org/reference/scale_manual.html says
       # "It's recommended to use a named vector"
       # (miguel) I can confirm that the colors sometimes come out wrong when there is a large level count (255).
-      res <- setNames(res, lev)
+      res <- stats::setNames(res, lev)
       return(res)
     }
 
@@ -1037,7 +1037,9 @@ lineplot_server <- function(id,
       res <- shiny::maskReactiveContext({
         df <- append_extra_vars(df, bm_dataset_with_internal_names, ref_line_vars)
         keep_cols <- intersect(c(CNT$PAR, CNT$MAIN_GROUP, ref_line_vars), names(df))
-        df <- unique(df[keep_cols])
+        lbls <- get_lbls_robust(df)
+        df <- unique(df[keep_cols]) # Unique removes labels
+        df <- possibly_set_lbls(df, lbls)
         generate_ref_line_data(df, show_all_ref_vals)
       })
       return(res)
@@ -1084,22 +1086,38 @@ lineplot_server <- function(id,
       res
     }
 
+    chart_arguments <- shiny::reactive({
+      list(
+        ds = plot_data(),
+        ref_line_data = ref_line_data(),
+        last_selection = last_selection(),
+        alpha = input[[LP_ID$TWEAK_TRANSPARENCY]],
+        visit_col = input_lp[[LP_ID$PAR_VISIT_COL]](),
+        y_axis_projection = input[[LP_ID$TWEAK_Y_AXIS_PROJECTION]]
+      )
+    })
+
     output[[LP_ID$CHART]] <- shiny::renderPlot({
-      ds <- plot_data()
-      ref_line_data <- ref_line_data()
-      alpha <- input[[LP_ID$TWEAK_TRANSPARENCY]]
-      selected_points <- last_selection()[["points"]]
+      r_chart_arguments <- chart_arguments()
+      ds <- r_chart_arguments[["ds"]]
+      ref_line_data <- r_chart_arguments[["ref_line_data"]]
+      alpha <- r_chart_arguments[["alpha"]]
+      selected_points <- r_chart_arguments[["last_selection"]][["points"]]
+      visit_col <- r_chart_arguments[["visit_col"]]
+      last_visit_col <- r_chart_arguments[["last_selection"]][["visit_col"]]
+      y_axis_projection <- r_chart_arguments[["y_axis_projection"]]
+
       if (
         !setequal(names(ds), names(selected_points)) ||
-          !identical(last_selection()[["visit_col"]], input_lp[[LP_ID$PAR_VISIT_COL]]())
+          !identical(last_visit_col, visit_col)
       ) {
         selected_points <- data.frame() # selection was made based on different, incompatible plot data
       }
 
       ds[[LP_ID$LINE_HIGHLIGHT_MASK]] <- lp_selected_line_mask(ds, selected_points)
 
-      should_log_project <- identical(input[[LP_ID$TWEAK_Y_AXIS_PROJECTION]], "Logarithmic")
-      time_var_is_cdisc <- (input_lp[[LP_ID$PAR_VISIT_COL]]() %in% VAR$VIS_CDISC)
+      should_log_project <- identical(y_axis_projection, "Logarithmic")
+      time_var_is_cdisc <- (visit_col %in% VAR$VIS_CDISC)
 
       plot <- shiny::maskReactiveContext(
         lineplot_chart(
@@ -1546,6 +1564,7 @@ lineplot_server <- function(id,
     })
 
     output[[LP_ID$SUBJECT_LISTING]] <- DT::renderDT({
+      shiny::req(subject_listing_contents())
       DT::datatable(
         subject_listing_contents(),
         escape = FALSE,
@@ -1604,6 +1623,7 @@ lineplot_server <- function(id,
       res
     })
     output[[LP_ID$COUNT_LISTING]] <- DT::renderDT({
+      shiny::req(count_listing_contents())
       group_text <- compute_group_text(
         group_dataset(), input_lp[[LP_ID$MAIN_GRP]](), input_lp[[LP_ID$SUB_GRP]]()
       )
@@ -1641,6 +1661,7 @@ lineplot_server <- function(id,
     }
 
     shiny::exportTestValues(
+      chart_arguments = chart_arguments,
       subject_listing_contents = subject_listing_contents() |> encode_df_for_export(),
       summary_listing_contents = lp_summary_listing(last_selection()[["points"]]) |> encode_df_for_export(),
       count_listing_contents = count_listing_contents() |> encode_df_for_export(),
@@ -1910,8 +1931,11 @@ check_mod_lineplot <- function(
               "Notice the blank value in the resulting output:",
               "<pre>%s</pre>"
             ),
-            visit_var, bm_dataset_name, bm_dataset_name, visit_var,
-            paste(capture.output(unique(ds[[visit_var]])), collapse = "\n")
+            visit_var,
+            bm_dataset_name,
+            bm_dataset_name,
+            visit_var,
+            paste(utils::capture.output(unique(ds[[visit_var]])), collapse = "\n")
           )
         )
       } else if (is.numeric(vals)) {
@@ -1926,8 +1950,11 @@ check_mod_lineplot <- function(
               "Notice the offending value in the resulting output:",
               "<pre>%s</pre>"
             ),
-            visit_var, bm_dataset_name, bm_dataset_name, visit_var,
-            paste(capture.output(unique(ds[[visit_var]])), collapse = "\n")
+            visit_var,
+            bm_dataset_name,
+            bm_dataset_name,
+            visit_var,
+            paste(utils::capture.output(unique(ds[[visit_var]])), collapse = "\n")
           )
         )
       }
@@ -1962,7 +1989,10 @@ check_mod_lineplot <- function(
             "You can either remove the `<b>%s</b>` variable from the `ref_line_vars` parameter or preprocess the",
             "dataset to avoid this issue."
           ),
-          ref_line_var, bm_dataset_name, paste(capture.output(dup_df), collapse = "\n"), ref_line_var
+          ref_line_var,
+          bm_dataset_name,
+          paste(utils::capture.output(dup_df), collapse = "\n"),
+          ref_line_var
         )
       )
     }

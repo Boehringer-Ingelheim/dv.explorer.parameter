@@ -461,6 +461,135 @@ gen_result_table_fun_ <- function(ds, sl, fun, label) {
 }
 gen_result_table_fun <- strict(gen_result_table_fun_)
 
+    compute_data_table_output <- function(ds, ns) {
+      # FIXME: Assumes parameter names are not repeated across categories
+
+      ds[["result-order"]] <- ds[["result"]]
+      ds[["CI_lower_limit-order"]] <- ds[["CI_lower_limit"]]
+      ds[["CI_upper_limit-order"]] <- ds[["CI_upper_limit"]]
+      ds[["p_value-order"]] <- ds[["p_value"]]
+
+      labels <- unname(unlist(get_lbls_robust(ds)))
+
+      th_list <- lapply(labels, htmltools::tags[["th"]])
+
+      ds[["forest"]] <- ""
+      # TODO: namespace and POC #iephan
+      th_list <- append(th_list, list(htmltools::tags[["th"]](id = "id_forest_column", "")))
+
+      # TODO? Simplify custom headers with https://premium.shinyapps.io/CustomDataTableHeaders/
+      container <- htmltools::tags[["table"]](
+        class = "display",
+        style = "white-space:nowrap",
+        htmltools::tags[["thead"]](
+          do.call(htmltools::tags[["tr"]], th_list)
+        )
+      )
+
+      format_number <- function(x, decimal_count) {
+        fmt <- rep(paste0("%.", decimal_count, "f"), length(x))
+        fmt[x > 1e6] <- "%g"
+        sprintf(fmt, x)
+      }
+
+      # TODO? Specify decimal count centrally
+      ds[["result"]][] <- format_number(ds[["result"]], 2)
+      ds[["CI_lower_limit"]][] <- format_number(ds[["CI_lower_limit"]], 2)
+      ds[["CI_upper_limit"]][] <- format_number(ds[["CI_upper_limit"]], 2)
+      ds[["p_value"]][] <- format_number(ds[["p_value"]], 4)
+
+      warning_rows <- !is.na(ds[["warning"]])
+      ds[["result"]][warning_rows] <- paste0(ds[["result"]][warning_rows], " *")
+
+      warning_col_index <- which(names(ds) == "warning") - 1
+
+      format_na_and_warnings <- c(
+        "function(row, data){
+                         for(var i=0; i<data.length; i++){
+                           if(data[i] == 'NA' || data[i] == 'Inf'){
+                             $('td:eq('+i+')', row).html(data[i])
+                               .css({'color': 'rgb(151,151,151)', 'font-style': 'italic'});
+                           }
+                           else if(typeof data[i] === 'string' && data[i].endsWith('*')){
+                             $('td:eq('+i+')', row).html(data[i])
+                               .css({'color': 'rgb(255,50,50)'})
+                               .attr('title', data[WARNING_COL_INDEX]);
+                           }
+                         }
+                       }" |>
+          ssub(WARNING_COL_INDEX = as.character(warning_col_index))
+      )
+
+      colnum <- function(name) which(names(ds) == name) - 1
+
+      res <- DT::datatable(
+        data = ds,
+        escape = FALSE,
+        container = container,
+        rownames = FALSE,
+        options = list(
+          # targets can be expressed as either 0-based indices or strings (https://github.com/rstudio/DT/pull/948)
+          # for the rest of indices, we need to provide 0-based indices
+          columnDefs = list(
+            list(width = "25%", targets = "forest"),
+            list(orderData = colnum("result-order"), targets = "result"),
+            list(orderData = colnum("CI_lower_limit-order"), targets = "CI_lower_limit"),
+            list(orderData = colnum("CI_upper_limit-order"), targets = "CI_upper_limit"),
+            list(orderData = colnum("p_value-order"), targets = "p_value"),
+            list(
+              visible = FALSE,
+              searchable = FALSE,
+              targets = list(
+                "result-order",
+                "CI_lower_limit-order",
+                "CI_upper_limit-order",
+                "p_value-order",
+                "warning"
+              )
+            )
+          ),
+          dom = "t",
+          paging = FALSE,
+          initComplete = DT::JS(
+            'function(setting, json){
+                                  RESIZE_OBSERVER.disconnect();
+                                  let table = document.getElementById("TABLE_LISTING");
+                                  let tbody = table.getElementsByTagName("tbody")[0];
+                                  RESIZE_OBSERVER.observe(tbody);
+                                }' |>
+              ssub(
+                TABLE_LISTING = ns(FP_ID$TABLE_LISTING),
+                RESIZE_OBSERVER = underscore_ns(ns, "resize_observer") # TODO: POC
+              )
+          ),
+          rowCallback = DT::JS(format_na_and_warnings)
+        )
+      )
+      res
+    }
+
+    compute_forest_svg_output <- function(ds, forest_div_size, forest_kind, is_continuous_forest, is_categorical_forest, row_order) {
+      df <- ds
+
+      axis_config <- NULL
+      if (is_continuous_forest) {
+        axis_config <- c(x_min = -1, x_max = 1, ref_line_x = 0, tick_count = 5) |> type("axis_config")
+      } else {
+        stopifnot(is_categorical_forest)
+        axis_config <- c(x_min = 0, x_max = 5, ref_line_x = 1, tick_count = 6) |> type("axis_config")
+      }
+
+      table_row_order <- row_order |>
+        type("sequence_permutation", allow_NULL = TRUE)
+      shiny::req(
+        table_row_order,
+        length(table_row_order) == nrow(df),
+        all(sort(table_row_order) == seq_len(nrow(df)))
+      )
+
+      res <- gen_svg(forest_div_size, df, table_row_order, axis_config)
+      res
+    }
 
 #' Forest plot server function
 #'
@@ -961,104 +1090,27 @@ forest_server <- function(id,
       },
       label = "result_table"
     )
+    
+    output_arguments <- list()
+    output_arguments[[FP_ID$TABLE_LISTING]] <- list(arguments = list(), render = NA)
+    output_arguments[[FP_ID$TABLE_LISTING]][["arguments"]] <- shiny::reactive({
+      list(
+        ds = result_table(),
+        ns = ns
+      )
+    })
+    if (is_shiny_test_mode()) {
+      output_arguments[[FP_ID$TABLE_LISTING]][["render"]] <- shiny::reactive({
+        do.call(compute_data_table_output, output_arguments[[FP_ID$TABLE_LISTING]][["arguments"]]())
+      })      
+    }
+
+
 
     # listings table ----
     output[[FP_ID$TABLE_LISTING]] <- DT::renderDT({
       # FIXME: Assumes parameter names are not repeated across categories
-
-      df <- result_table()
-
-      df[["result-order"]] <- df[["result"]]
-      df[["CI_lower_limit-order"]] <- df[["CI_lower_limit"]]
-      df[["CI_upper_limit-order"]] <- df[["CI_upper_limit"]]
-      df[["p_value-order"]] <- df[["p_value"]]
-
-      labels <- unname(unlist(get_lbls_robust(df)))
-
-      th_list <- lapply(labels, htmltools::tags[["th"]])
-
-      df[["forest"]] <- ""
-      # TODO: namespace and POC #iephan
-      th_list <- append(th_list, list(htmltools::tags[["th"]](id = "id_forest_column", "")))
-
-      # TODO? Simplify custom headers with https://premium.shinyapps.io/CustomDataTableHeaders/
-      container <- htmltools::tags[["table"]](
-        class = "display", style = "white-space:nowrap",
-        htmltools::tags[["thead"]](
-          do.call(htmltools::tags[["tr"]], th_list)
-        )
-      )
-
-      format_number <- function(x, decimal_count) {
-        fmt <- rep(paste0("%.", decimal_count, "f"), length(x))
-        fmt[x > 1e6] <- "%g"
-        sprintf(fmt, x)
-      }
-
-      # TODO? Specify decimal count centrally
-      df[["result"]][] <- format_number(df[["result"]], 2)
-      df[["CI_lower_limit"]][] <- format_number(df[["CI_lower_limit"]], 2)
-      df[["CI_upper_limit"]][] <- format_number(df[["CI_upper_limit"]], 2)
-      df[["p_value"]][] <- format_number(df[["p_value"]], 4)
-
-      warning_rows <- !is.na(df[["warning"]])
-      df[["result"]][warning_rows] <- paste0(df[["result"]][warning_rows], " *")
-
-      warning_col_index <- which(names(df) == "warning") - 1
-
-      format_na_and_warnings <- c("function(row, data){
-                         for(var i=0; i<data.length; i++){
-                           if(data[i] == 'NA' || data[i] == 'Inf'){
-                             $('td:eq('+i+')', row).html(data[i])
-                               .css({'color': 'rgb(151,151,151)', 'font-style': 'italic'});
-                           }
-                           else if(typeof data[i] === 'string' && data[i].endsWith('*')){
-                             $('td:eq('+i+')', row).html(data[i])
-                               .css({'color': 'rgb(255,50,50)'})
-                               .attr('title', data[WARNING_COL_INDEX]);
-                           }
-                         }
-                       }" |> ssub(WARNING_COL_INDEX = as.character(warning_col_index)))
-
-      colnum <- function(name) which(names(df) == name) - 1
-
-      res <- DT::datatable(
-        data = df, escape = FALSE,
-        container = container,
-        rownames = FALSE,
-        options = list(
-          # targets can be expressed as either 0-based indices or strings (https://github.com/rstudio/DT/pull/948)
-          # for the rest of indices, we need to provide 0-based indices
-          columnDefs = list(
-            list(width = "25%", targets = "forest"),
-            list(orderData = colnum("result-order"), targets = "result"),
-            list(orderData = colnum("CI_lower_limit-order"), targets = "CI_lower_limit"),
-            list(orderData = colnum("CI_upper_limit-order"), targets = "CI_upper_limit"),
-            list(orderData = colnum("p_value-order"), targets = "p_value"),
-            list(
-              visible = FALSE, searchable = FALSE,
-              targets = list(
-                "result-order", "CI_lower_limit-order",
-                "CI_upper_limit-order", "p_value-order",
-                "warning"
-              )
-            )
-          ),
-          dom = "t",
-          paging = FALSE,
-          initComplete = DT::JS('function(setting, json){
-                                  RESIZE_OBSERVER.disconnect();
-                                  let table = document.getElementById("TABLE_LISTING");
-                                  let tbody = table.getElementsByTagName("tbody")[0];
-                                  RESIZE_OBSERVER.observe(tbody);
-                                }' |> ssub(
-            TABLE_LISTING = ns(FP_ID$TABLE_LISTING),
-            RESIZE_OBSERVER = underscore_ns(ns, "resize_observer") # TODO: POC
-          )),
-          rowCallback = DT::JS(format_na_and_warnings)
-        )
-      )
-      res
+      do.call(compute_data_table_output, output_arguments[[FP_ID$TABLE_LISTING]][["arguments"]]())
     })
 
     forest_div_size <- shiny::reactive({
@@ -1067,32 +1119,29 @@ forest_server <- function(id,
       unlist(res) |> type("size")
     }) |>
       shiny::debounce(millis = 100)
+    
+
+    output_arguments[[FP_ID$FOREST_SVG]] <- list(arguments = list(), render = NA)
+    output_arguments[[FP_ID$FOREST_SVG]][["arguments"]] <- shiny::reactive({
+      list(
+        ds = result_table(),
+        forest_div_size = forest_div_size(),
+        forest_kind = v_input_subset()[[FP_ID$FOREST_KIND]](),
+        is_continuous_forest = is_continuous_forest(v_input_subset()[[FP_ID$FOREST_KIND]]()),
+        is_categorical_forest = is_categorical_forest(v_input_subset()[[FP_ID$FOREST_KIND]]()),
+        row_order = input[[paste0(FP_ID$TABLE_LISTING, "_rows_current")]]
+      )
+    })
+    if (is_shiny_test_mode()) {
+      output_arguments[[FP_ID$FOREST_SVG]][["render"]] <- shiny::reactive({
+        do.call(compute_forest_svg_output, output_arguments[[FP_ID$FOREST_SVG]][["arguments"]]())
+      })
+    }
+
+
 
     output[[FP_ID$FOREST_SVG]] <- shiny::renderUI({
-      forest_div_size <- forest_div_size()
-      shiny::req(forest_div_size)
-
-      df <- result_table()
-      forest_kind <- v_input_subset()[[FP_ID$FOREST_KIND]]()
-
-      axis_config <- NULL
-      if (is_continuous_forest(forest_kind)) {
-        axis_config <- c(x_min = -1, x_max = 1, ref_line_x = 0, tick_count = 5) |> type("axis_config")
-      } else {
-        stopifnot(is_categorical_forest(forest_kind))
-        axis_config <- c(x_min = 0, x_max = 5, ref_line_x = 1, tick_count = 6) |> type("axis_config")
-      }
-
-      table_row_order <- input[[paste0(FP_ID$TABLE_LISTING, "_rows_current")]] |> type("sequence_permutation",
-        allow_NULL = TRUE
-      )
-      shiny::req(
-        table_row_order, length(table_row_order) == nrow(df),
-        all(sort(table_row_order) == seq_len(nrow(df)))
-      )
-
-      res <- gen_svg(forest_div_size, df, table_row_order, axis_config)
-      res
+      do.call(compute_forest_svg_output, output_arguments[[FP_ID$FOREST_SVG]][["arguments"]]())      
     })
 
     # debug tab ----
@@ -1113,7 +1162,7 @@ forest_server <- function(id,
 
     # test values ----
     shiny::exportTestValues(
-      data_subset = data_subset()
+      output_arguments = output_arguments
     )
 
     # return ----

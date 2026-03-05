@@ -12,7 +12,7 @@ HM2SVG_UI <- function(id) { # nolint
 #' Plot the contents of a dataframe as a heatmap, with optional legends, palette and alignment margins. None of
 #' the parameters are reactive
 #'
-#' @param data data to plot. It expects the following format:
+#' @param ds data to plot. It expects the following format:
 #'             - columns names are `x`, `y`, `z` and, optionally, `label`
 #'             - both `x` and `y` columns are factors
 #'             - There is one entry for each combination of "x" and "y" present in the dataset.
@@ -37,7 +37,8 @@ HM2SVG_UI <- function(id) { # nolint
 #' @param ns namespace to apply to the click events
 #'
 #' @keywords internal
-HM2SVG_plot <- function(data, x_desc, y_desc, z_desc, pal_fun, palette, ns) { # nolint
+HM2SVG_plot <- function(ds, x_desc, y_desc, z_desc, pal_fun, palette, ns) { # nolint
+  data <- ds
   # TODO: default palette?
   lev <- levels(data[["x"]])
   n <- length(lev)
@@ -287,8 +288,9 @@ HM2SVG_server <- function(id, data, x_desc = "S", y_desc = "W", z_desc = "E", pa
       return(pal_fun)
     })
 
-    output[[HM2SVG$CHART]] <- shiny::renderUI({
-      data <- data()
+    output_arguments <- list()
+    output_arguments[[HM2SVG$CHART]] <- list(arguments = list(), render = NA)
+    output_arguments[[HM2SVG$CHART]][["arguments"]] <- shiny::reactive({
 
       x_desc <- resolve_or_return(x_desc)
       y_desc <- resolve_or_return(y_desc)
@@ -303,9 +305,25 @@ HM2SVG_server <- function(id, data, x_desc = "S", y_desc = "W", z_desc = "E", pa
         shiny::need(is.null(z_desc) || z_desc == "E", paste0("z_desc==", z_desc, " not implemented"))
       )
 
-      svg_string <- HM2SVG_plot(data, x_desc, y_desc, z_desc, pal_fun = pal_fun(), palette = palette, ns = ns)
+      list(
+        ds = data,
+        x_desc = x_desc,
+        y_desc = y_desc,
+        pal_fun = pal_fun(),
+        palette = palette,        
+        ns = ns
+      )
+    })
 
-      shiny::HTML(svg_string)
+    if (is_shiny_test_mode()) {
+      output_arguments[[HM2SVG$CHART]][["render"]] <- shiny::reactive({
+        shiny::HTML(do.call(HM2SVG_plot, output_arguments[[HM2SVG$CHART]][["arguments"]]()))
+      })
+    }
+
+    
+    output[[HM2SVG$CHART]] <- shiny::renderUI({
+      shiny::HTML(do.call(HM2SVG_plot, output_arguments[[HM2SVG$CHART]][["arguments"]]()))
     })
 
     click <- shiny::reactive({
@@ -320,6 +338,10 @@ HM2SVG_server <- function(id, data, x_desc = "S", y_desc = "W", z_desc = "E", pa
       res <- list(x = x_levels[[coordinfo$x]], y = y_levels[[coordinfo$y]])
       return(res)
     })
+
+    shiny::exportTestValues(
+      output_arguments = output_arguments
+    )
 
     return(click)
   })

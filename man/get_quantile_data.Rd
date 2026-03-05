@@ -4,11 +4,16 @@
 \alias{get_quantile_data}
 \title{Calculate quantiles per group}
 \usage{
-get_quantile_data(ds)
+get_quantile_data(ds, quantile_type)
 }
 \arguments{
 \item{ds}{\verb{[data.frame()]}
+
 A dataframe}
+
+\item{quantile_type}{\verb{[integer(1)]}
+
+Quantile algorithm type (an integer between 1 and 9).}
 }
 \value{
 \verb{[data.frame()]}

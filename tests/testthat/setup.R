@@ -10,18 +10,24 @@ vdoc <- local({
 specs <- vdoc[["specs"]]
 #  validation (F)
 
-run_shiny_tests <- !isFALSE(as.logical(Sys.getenv("SKIP_SHINY_TESTS")))
-suspect_check <- any(names(Sys.getenv()) == "_R_CHECK_CRAN_INCOMING_")
+if(
+  !isTRUE(as.logical(Sys.getenv("CI"))) &&
+  !isTRUE(as.logical(Sys.getenv("LOCAL_SHINY_TESTS")))
+  ) {
+    warning("Attempting to run local tests without 'LOCAL_SHINY_TESTS' option")
+  }
 
-skip_if_not_running_shiny_tests <- function() testthat::skip_if_not(run_shiny_tests, message = "Skip tests")
-skip_if_suspect_check <- function() testthat::skip_if(suspect_check, message = "Suspected check")
+run_shiny_tests <- !isFALSE(as.logical(Sys.getenv("SKIP_SHINY_TESTS")))
+
+skip_if_not_running_shiny_tests <- function() testthat::skip_if_not(run_shiny_tests, message = "Skip tests") # nolint
+
 
 tns_factory <- function(id) function(...) paste0(c(id, as.character(list(...))), collapse = "-")
 
 # `expr` must be a quosure or a regular call, in both cases they must be self-contained as they will be deparsed
 # and run in another process
 start_app_driver <- function(expr, defer = TRUE) {
-  root_app <- if (run_shiny_tests && !suspect_check) {
+  root_app <- if (run_shiny_tests) {
     app_dir <- if (testthat::is_testing()) {
       "app/app.R"
     } else {

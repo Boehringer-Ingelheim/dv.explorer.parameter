@@ -20,7 +20,7 @@ Single parameter function that rounds a numeric vector for rendendering}
 Sort summary table by parameter name}
 }
 \value{
-A \link{vegawidget} specification
+A \link[vegawidget:vegawidget]{vegawidget::vegawidget} specification
 }
 \description{
 The table summarizes the AUC, the optimal cut data, for each parameter and grouping combination

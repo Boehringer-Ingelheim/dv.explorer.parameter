@@ -20,7 +20,7 @@ Size in pixels for the chart}
 Sort chart by parameter name}
 }
 \value{
-A \link{vegawidget} specification
+A \link[vegawidget:vegawidget]{vegawidget::vegawidget} specification
 }
 \description{
 The chart consists of a set of points with confidence intervals representing the AUC and its confidence interval.

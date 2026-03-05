@@ -240,9 +240,9 @@ shiny_test <- {
       )
       ),
     {
-      testthat::skip_if_not(run_shiny_tests)
+      skip_if_not_running_shiny_tests()
       fail_if_app_not_started()
-      skip_if_suspect_check()
+      
       app <- shinytest2::AppDriver$new(root_app$get_url())
       do.call(app$set_inputs, purrr::map(state_one, ~ deparse1(.x, collapse = "\n")))
       app$wait_for_idle()
@@ -253,9 +253,9 @@ shiny_test <- {
   test_that(
     paste(component, "should not have duplicated elements when we redraw the image"),
     {
-      testthat::skip_if_not(run_shiny_tests)
+      skip_if_not_running_shiny_tests()
       fail_if_app_not_started()
-      skip_if_suspect_check()
+      
 
       # We check that the returned svgs are the same when switching between states, this implies no duplicated
       # elements appear when the svg is redrawn. If any duplicated element appear there would be differences between
@@ -286,9 +286,9 @@ shiny_test <- {
         specs$wfphm$wf$plot_y_axis_label
       )),
     {
-      testthat::skip_if_not(run_shiny_tests)
+      skip_if_not_running_shiny_tests()
       fail_if_app_not_started()
-      skip_if_suspect_check()
+      
       app <- shinytest2::AppDriver$new(root_app$get_url())
       do.call(app$set_inputs, purrr::map(state_one, ~ deparse1(.x, collapse = "\n")))
       app$wait_for_idle()
@@ -328,9 +328,9 @@ shiny_test <- {
   test_that(
     paste(component, "should not include axis when the parameter is null"),
     {
-      testthat::skip_if_not(run_shiny_tests)
+      skip_if_not_running_shiny_tests()
       fail_if_app_not_started()
-      skip_if_suspect_check()
+      
       app <- shinytest2::AppDriver$new(root_app$get_url())
       do.call(app$set_inputs, purrr::map(state_one, ~ deparse1(.x, collapse = "\n")))
       app$wait_for_idle()
@@ -394,9 +394,9 @@ shiny_test <- {
       # This means that when viewing the app the titles and axis appear cut, but here we are testing
       # what the module request as minimum margins, not the actual margins.
 
-      testthat::skip_if_not(run_shiny_tests)
+      skip_if_not_running_shiny_tests()
       fail_if_app_not_started()
-      skip_if_suspect_check()
+      
       app <- shinytest2::AppDriver$new(root_app$get_url())
 
       do.call(app$set_inputs, purrr::map(state_one, ~ deparse1(.x, collapse = "\n")))
@@ -424,9 +424,9 @@ shiny_test <- {
       "3. hide it when it moves out"
     ),
     {
-      testthat::skip_if_not(run_shiny_tests)
+      skip_if_not_running_shiny_tests()
       fail_if_app_not_started()
-      skip_if_suspect_check()
+      
 
       app <- shinytest2::AppDriver$new(root_app$get_url())
       ch <- app$get_chromote_session()
@@ -473,9 +473,9 @@ shiny_test <- {
       "should allow customizing the tooltip message"
     ),
     {
-      testthat::skip_if_not(run_shiny_tests)
+      skip_if_not_running_shiny_tests()
       fail_if_app_not_started()
-      skip_if_suspect_check()
+      
       app <- shinytest2::AppDriver$new(root_app$get_url())
       ch <- app$get_chromote_session()
       do.call(app$set_inputs, purrr::map(state_one, ~ deparse1(.x, collapse = "\n")))
@@ -514,9 +514,9 @@ shiny_test <- {
   test_that(
     paste(component, "should accept colors and NAs in the color column"),
     {
-      testthat::skip_if_not(run_shiny_tests)
+      skip_if_not_running_shiny_tests()
       fail_if_app_not_started()
-      skip_if_suspect_check()
+      
       app <- shinytest2::AppDriver$new(root_app$get_url())
       do.call(app$set_inputs, purrr::map(state_one, ~ deparse1(.x, collapse = "\n")))
       app$wait_for_idle()
@@ -540,19 +540,19 @@ shiny_test <- {
     }
   )
 
-  test_that(
-    paste(
-      component,
-      "test_y_baseline NOT DONE"
-    ),
-    {
-      skip("Base line != 0 not implemented")
+  # test_that(
+  #   paste(
+  #     component,
+  #     "test_y_baseline NOT DONE"
+  #   ),
+  #   {
+  #     skip("Base line != 0 not implemented")
 
-      testthat::skip_if_not(run_shiny_tests)
-      fail_if_app_not_started()
-      skip_if_suspect_check()
-    }
-  )
+  #     skip_if_not_running_shiny_tests()
+  #     fail_if_app_not_started()
+      
+  #   }
+  # )
 }
 
 # argument_testing <- {

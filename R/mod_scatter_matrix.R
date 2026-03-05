@@ -9,7 +9,6 @@ SPM <- poc( # nolint
     ANLFL_FILTER = "anlfl_filter",
     GRP_BUTTON = "grp_button",
     MAIN_GRP = "main_grp",
-    OTHER_BUTTON = "other_button",
     CHART = "chart",
     TAB_TABLES = "tab_tables",
     TABLE_LISTING = "table_listing",
@@ -34,7 +33,6 @@ SPM <- poc( # nolint
       MAIN_GRP = "Group",
       SUB_GRP = "Subgroup",
       PAGE_GRP = "Page Group",
-      OTHER_BUTTON = "Other",
       TABLE_LISTING = "Data Listing",
       TABLE_COUNT = "Data Count",
       TABLE_SUMMARY = "Data Summary",
@@ -102,15 +100,10 @@ scatterplotmatrix_UI <- function(id) { # nolint
     col_menu_UI(id = ns(SPM$ID$MAIN_GRP))
   )
 
-  other_menu <- drop_menu_helper(
-    ns(SPM$ID$OTHER_BUTTON), SPM$MSG$LABEL$OTHER_BUTTON
-  )
-
   top_menu <- shiny::tagList(
     add_top_menu_dependency(),
     parameter_menu,
-    group_menu,
-    other_menu
+    group_menu
   )
 
   # Charts and tables ----
@@ -478,13 +471,21 @@ scatterplotmatrix_server <- function(id,
     output_arguments <- list()
 
     # scatter plot matrix ----
-    output_arguments[[SPM$ID$CHART]] <- shiny::reactive(
+    output_arguments[[SPM$ID$CHART]] <- list(arguments = list(), render = NA)
+    output_arguments[[SPM$ID$CHART]][["arguments"]] <- shiny::reactive(
       list(
         ds = data_subset()
       )
     )
+
+    if (is_shiny_test_mode()) {
+      output_arguments[[SPM$ID$CHART]][["render"]] <- shiny::reactive({
+        do.call(get_scatterplotmatrix_output, output_arguments[[SPM$ID$CHART]][["arguments"]]())
+      })
+    }
+
     output[[SPM$ID$CHART]] <- shiny::renderPlot({
-      do.call(get_scatterplotmatrix_output, output_arguments[[SPM$ID$CHART]]())
+      do.call(get_scatterplotmatrix_output, output_arguments[[SPM$ID$CHART]][["arguments"]]())
     })
 
     # debug tab ----
@@ -505,7 +506,7 @@ scatterplotmatrix_server <- function(id,
 
     # test values ----
     shiny::exportTestValues(
-      data_subset = data_subset()
+      output_arguments = output_arguments
     )
 
     # return ----
@@ -785,7 +786,7 @@ spm_subset_data <- function(cat,
 
 scatterplotmatrix_chart <- function(ds) {
   is_main_grouped <- CNT$MAIN_GROUP %in% names(ds)
-  val_cols <- setdiff(names(ds), c(CNT$MAIN_GROUP, CNT$VIS))
+  val_cols <- setdiff(names(ds), c(CNT$MAIN_GROUP, CNT$VIS, CNT$ANLFL))
 
   if (is_main_grouped) {
     mapping <- ggplot2::aes(color = .data[[CNT$MAIN_GROUP]], fill = .data[[CNT$MAIN_GROUP]])

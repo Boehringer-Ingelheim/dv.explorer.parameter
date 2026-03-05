@@ -19,10 +19,12 @@ mock_app_corr_hm <- function(dry_run = FALSE, update_query_string = TRUE, srv_de
   if (anlfl_flags) {
 
     # modifying the test data to make them asymetric so that there is visible difference in the calculated values between the two analysis flag variables
-    data$bm <-  dplyr::filter(data$bm,
-                      !(as.numeric(as.character(SUBJID)) >= 16 &
-                        as.numeric(as.character(SUBJID)) <= 20 &
-                        ANLFL1 == "Y"))
+    data$bm <- dplyr::filter(
+      data$bm,
+      !(as.numeric(as.character(.data[["SUBJID"]])) >= 16 &
+        as.numeric(as.character(.data[["SUBJID"]])) <= 20 &
+        .data[["ANLFL1"]] == "Y")
+    )
 
     anlfl_vars <- c("ANLFL1", "ANLFL2")
   } else {
@@ -72,9 +74,9 @@ mock_app_correlation_hm_mm <- function(anlfl_flags = FALSE) {
 
     # modifying the test data to make them asymetric so that there is visible difference in the calculated values between the two analysis flag variables
     data$bm <-  dplyr::filter(data$bm,
-                        !(as.numeric(as.character(SUBJID)) >= 16 &
-                          as.numeric(as.character(SUBJID)) <= 20 &
-                          ANLFL1 == "Y"))
+                        !(as.numeric(as.character(.data[["SUBJID"]])) >= 16 &
+                          as.numeric(as.character(.data[["SUBJID"]])) <= 20 &
+                          .data[["ANLFL1"]] == "Y"))
 
     anlfl_vars <- c("ANLFL1", "ANLFL2")
   } else {

@@ -4,10 +4,10 @@
 \alias{HM2SVG_plot}
 \title{svg heatmap plot}
 \usage{
-HM2SVG_plot(data, x_desc, y_desc, z_desc, pal_fun, palette, ns)
+HM2SVG_plot(ds, x_desc, y_desc, z_desc, pal_fun, palette, ns)
 }
 \arguments{
-\item{data}{data to plot. It expects the following format:
+\item{ds}{data to plot. It expects the following format:
 - columns names are \code{x}, \code{y}, \code{z} and, optionally, \code{label}
 - both \code{x} and \code{y} columns are factors
 - There is one entry for each combination of "x" and "y" present in the dataset.

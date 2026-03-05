@@ -39,7 +39,8 @@ mock_app_boxplot <- function(dry_run = FALSE, update_query_string = TRUE, srv_de
       par_var = "PARAM",
       visit_var = "VISIT",
       value_vars = c("VALUE1", "VALUE2", "VALUE3"),
-      anlfl_vars = anlfl_vars
+      anlfl_vars = anlfl_vars,
+      quantile_type = 2L
     ),
     srv_defaults
   )

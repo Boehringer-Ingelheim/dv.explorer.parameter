@@ -678,46 +678,73 @@ scatterplot_server <- function(id,
     output_arguments <- list()
 
     # scatter plot ----
-    output_arguments[[SP$ID$CHART]] <- shiny::reactive(
+    output_arguments[[SP$ID$CHART]] <- list(arguments = list(), render = NA)
+    output_arguments[[SP$ID$CHART]][["arguments"]] <- shiny::reactive(
       list(
         ds = data_subset(),
         xlim = inputs[["x_lim"]](),
         ylim = inputs[["y_lim"]]()
       )
     )
+
+    if (is_shiny_test_mode()) {
+      output_arguments[[SP$ID$CHART]][["render"]] <- shiny::reactive({
+        do.call(sp_get_scatterplot_output, output_arguments[[SP$ID$CHART]][["arguments"]]())
+      })
+    }
     output[[SP$ID$CHART]] <- shiny::renderPlot({
-      do.call(sp_get_scatterplot_output, output_arguments[[SP$ID$CHART]]())
+      do.call(sp_get_scatterplot_output, output_arguments[[SP$ID$CHART]][["arguments"]]())
     })
 
     # listings table ----
-    output_arguments[[SP$ID$TABLE_LISTING]] <- shiny::reactive(
+    output_arguments[[SP$ID$TABLE_LISTING]] <- list(arguments = list(), render = NA)
+    output_arguments[[SP$ID$TABLE_LISTING]][["arguments"]] <- shiny::reactive(
       list(
         ds = data_subset(),
         brush = inputs[[SP$ID$CHART_BRUSH]]()
       )
     )
+    
+    if (is_shiny_test_mode()) {
+      output_arguments[[SP$ID$TABLE_LISTING]][["render"]] <- shiny::reactive({
+        do.call(sp_get_listings_output, output_arguments[[SP$ID$TABLE_LISTING]][["arguments"]]())
+      })
+    }
     output[[SP$ID$TABLE_LISTING]] <- DT::renderDT({
-      do.call(sp_get_listings_output, output_arguments[[SP$ID$TABLE_LISTING]]())
+      do.call(sp_get_listings_output, output_arguments[[SP$ID$TABLE_LISTING]][["arguments"]]())
     })
 
     # regression table ----
-    output_arguments[[SP$ID$TABLE_REGRESSION]] <- shiny::reactive(
+    output_arguments[[SP$ID$TABLE_REGRESSION]] <- list(arguments = list(), render = NA)
+    output_arguments[[SP$ID$TABLE_REGRESSION]][["arguments"]] <- shiny::reactive(
       list(
         lm_ds = lm_cor()[["lm"]]
       )
     )
+    if (is_shiny_test_mode()) {
+      output_arguments[[SP$ID$TABLE_REGRESSION]][["render"]] <- shiny::reactive({
+        do.call(sp_get_regression_output, output_arguments[[SP$ID$TABLE_REGRESSION]][["arguments"]]())
+      })
+    }
     output[[SP$ID$TABLE_REGRESSION]] <- DT::renderDT({
-      do.call(sp_get_regression_output, output_arguments[[SP$ID$TABLE_REGRESSION]]())
+      do.call(sp_get_regression_output, output_arguments[[SP$ID$TABLE_REGRESSION]][["arguments"]]())
     })
 
     # correlation table ----
-    output_arguments[[SP$ID$TABLE_CORRELATION]] <- shiny::reactive(
+    output_arguments[[SP$ID$TABLE_CORRELATION]] <- list(arguments = list(), render = NA)
+    output_arguments[[SP$ID$TABLE_CORRELATION]][["arguments"]] <- shiny::reactive(
       list(
         cor_ds = lm_cor()[["cor"]]
       )
     )
+
+    if (is_shiny_test_mode()) {
+      output_arguments[[SP$ID$TABLE_CORRELATION]][["render"]] <- shiny::reactive({
+        do.call(sp_get_correlation_output, output_arguments[[SP$ID$TABLE_CORRELATION]][["arguments"]]())
+      })
+    }
     output[[SP$ID$TABLE_CORRELATION]] <- DT::renderDT({
-      do.call(sp_get_correlation_output, output_arguments[[SP$ID$TABLE_CORRELATION]]())
+      do.call(sp_get_correlation_output, output_arguments[[SP$ID$TABLE_CORRELATION]][["arguments"]]())
     })
 
     # debug tab ----
@@ -738,7 +765,7 @@ scatterplot_server <- function(id,
 
     # test values ----
     shiny::exportTestValues(
-      data_subset = data_subset()
+      output_arguments = output_arguments
     )
 
     # return ----

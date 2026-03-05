@@ -231,6 +231,11 @@ boxplot_UI <- function(id) { # nolint
 #'
 #' Columns from `bm_dataset` that correspond to analysis flags
 #'
+#' @param quantile_type `[integer(1)]`
+#'
+#' Quantile algorithm type passed to \code{\link[stats]{quantile}}
+#' (an integer between 1 and 9, default 7).
+#'
 #' @param subjid_var `[character(1)]`
 #'
 #' Column corresponding to subject ID
@@ -256,6 +261,7 @@ boxplot_server <- function(id,
                            visit_var = "AVISIT",
                            anlfl_vars = NULL,
                            subjid_var = "USUBJID",
+                           quantile_type = 7L,
                            default_cat = NULL,
                            default_par = NULL,
                            default_visit = NULL,
@@ -314,7 +320,8 @@ boxplot_server <- function(id,
         checkmate::assert_names(
           names(group_dataset()),
           type = "unique",
-          must.include = c(VAR$SBJ), .var.name = ns("group_dataset")
+          must.include = c(VAR$SBJ),
+          .var.name = ns("group_dataset")
         )
         checkmate::assert_factor(group_dataset()[[VAR$SBJ]], add = ac, .var.name = ns("group_dataset"))
         checkmate::reportAssertions(ac)
@@ -338,7 +345,11 @@ boxplot_server <- function(id,
           names(bm_dataset()),
           type = "unique",
           must.include = c(
-            VAR$CAT, VAR$PAR, VAR$SBJ, VAR$VIS, VAR$VAL
+            VAR$CAT,
+            VAR$PAR,
+            VAR$SBJ,
+            VAR$VIS,
+            VAR$VAL
           ),
           .var.name = ns("bm_dataset")
         )
@@ -354,7 +365,7 @@ boxplot_server <- function(id,
           unique_par_names <- unique_par_names == 1
           checkmate::assert_true(unique_par_names, .var.name = ns("bm_dataset"))
         }
-        
+
         checkmate::assert_factor(bm_dataset()[[VAR$SBJ]], .var.name = ns("bm_dataset"))
 
         checkmate::reportAssertions(ac)
@@ -375,25 +386,31 @@ boxplot_server <- function(id,
 
     inputs <- list()
     inputs[[BP$ID$MAIN_GRP]] <- col_menu_server(
-      id = BP$ID$MAIN_GRP, data = v_group_dataset,
+      id = BP$ID$MAIN_GRP,
+      data = v_group_dataset,
       label = "Select a grouping variable",
       include_func = function(x) {
         is.factor(x) || is.character(x)
-      }, default = default_main_group
+      },
+      default = default_main_group
     )
     inputs[[BP$ID$SUB_GRP]] <- col_menu_server(
-      id = BP$ID$SUB_GRP, data = v_group_dataset,
+      id = BP$ID$SUB_GRP,
+      data = v_group_dataset,
       label = "Select a sub grouping variable",
       include_func = function(x) {
         is.factor(x) || is.character(x)
-      }, default = default_sub_group
+      },
+      default = default_sub_group
     )
     inputs[[BP$ID$PAGE_GRP]] <- col_menu_server(
-      id = BP$ID$PAGE_GRP, data = v_group_dataset,
+      id = BP$ID$PAGE_GRP,
+      data = v_group_dataset,
       label = "Select a page grouping variable",
       include_func = function(x) {
         is.factor(x) || is.character(x)
-      }, default = default_page_group
+      },
+      default = default_page_group
     )
     inputs[[BP$ID$PAR]] <- parameter_server(
       id = BP$ID$PAR,
@@ -416,7 +433,9 @@ boxplot_server <- function(id,
       label = BP$MSG$LABEL$PAR_VALUE,
       include_func = function(val, name) {
         name %in% VAR$VAL
-      }, include_none = FALSE, default = default_value
+      },
+      include_none = FALSE,
+      default = default_value
     )
 
     # analysis flag filter input
@@ -426,7 +445,8 @@ boxplot_server <- function(id,
         data = v_bm_dataset,
         label = BP$MSG$LABEL$ANLFL_FILTER,
         include_func = function(x, name) name %in% anlfl_vars,
-        include_none = FALSE, default = anlfl_vars[1]
+        include_none = FALSE,
+        default = anlfl_vars[1]
       )
     }
 
@@ -467,26 +487,30 @@ boxplot_server <- function(id,
     param_iv <- shinyvalidate::InputValidator$new()
     param_iv$add_rule(
       get_id(inputs[[BP$ID$PAR]])[["cat"]],
-      sv_not_empty(inputs[[BP$ID$PAR]][["cat"]],
+      sv_not_empty(
+        inputs[[BP$ID$PAR]][["cat"]],
         msg = BP$MSG$VALIDATE$NO_CAT_SEL
       )
     )
 
     param_iv$add_rule(
       get_id(inputs[[BP$ID$PAR]])[["par"]],
-      sv_not_empty(inputs[[BP$ID$PAR]][["par"]],
+      sv_not_empty(
+        inputs[[BP$ID$PAR]][["par"]],
         msg = BP$MSG$VALIDATE$NO_PAR_SEL
       )
     )
     param_iv$add_rule(
       get_id(inputs[[BP$ID$PAR_VISIT]]),
-      sv_not_empty(inputs[[BP$ID$PAR_VISIT]],
+      sv_not_empty(
+        inputs[[BP$ID$PAR_VISIT]],
         msg = BP$MSG$VALIDATE$NO_VISIT_SEL
       )
     )
     param_iv$add_rule(
       get_id(inputs[[BP$ID$PAR_VALUE]]),
-      sv_not_empty(inputs[[BP$ID$PAR_VALUE]],
+      sv_not_empty(
+        inputs[[BP$ID$PAR_VALUE]],
         msg = BP$MSG$VALIDATE$NO_VALUE_SEL
       )
     )
@@ -495,19 +519,22 @@ boxplot_server <- function(id,
     group_iv <- shinyvalidate::InputValidator$new()
     group_iv$add_rule(
       get_id(inputs[[BP$ID$MAIN_GRP]]),
-      sv_not_empty(inputs[[BP$ID$MAIN_GRP]],
+      sv_not_empty(
+        inputs[[BP$ID$MAIN_GRP]],
         msg = BP$MSG$VALIDATE$NO_MAIN_GROUP_SEL
       )
     )
     group_iv$add_rule(
       get_id(inputs[[BP$ID$SUB_GRP]]),
-      sv_not_empty(inputs[[BP$ID$SUB_GRP]],
+      sv_not_empty(
+        inputs[[BP$ID$SUB_GRP]],
         msg = BP$MSG$VALIDATE$NO_SUB_GROUP_SEL
       )
     )
     group_iv$add_rule(
       get_id(inputs[[BP$ID$PAGE_GRP]]),
-      sv_not_empty(inputs[[BP$ID$PAGE_GRP]],
+      sv_not_empty(
+        inputs[[BP$ID$PAGE_GRP]],
         msg = BP$MSG$VALIDATE$NO_PAGE_GROUP_SEL
       )
     )
@@ -545,7 +572,9 @@ boxplot_server <- function(id,
         )
 
         subset_inputs <- c(BP$ID$PAR, BP$ID$PAR_VISIT, BP$ID$PAR_VALUE, BP$ID$MAIN_GRP, BP$ID$SUB_GRP, BP$ID$PAGE_GRP)
-        if (!is.null(inputs[[BP$ID$ANLFL_FILTER]])) subset_inputs <- c(subset_inputs, BP$ID$ANLFL_FILTER)
+        if (!is.null(inputs[[BP$ID$ANLFL_FILTER]])) {
+          subset_inputs <- c(subset_inputs, BP$ID$ANLFL_FILTER)
+        }
 
         resolve_reactives <- function(x) {
           if (is.list(x)) {
@@ -556,7 +585,8 @@ boxplot_server <- function(id,
         resolve_reactives(inputs[subset_inputs])
       },
       label = ns("inputs")
-    ) |> shiny::debounce(BP$VAL$SUBSET_DEBOUNCE_TIME)
+    ) |>
+      shiny::debounce(BP$VAL$SUBSET_DEBOUNCE_TIME)
 
     v_input_closest_to_click <- shiny::reactive({
       bp_get_closest_single_click(data_subset(), inputs[[BP$ID$CHART_CLICK]]())
@@ -595,7 +625,6 @@ boxplot_server <- function(id,
       )
     })
 
-
     bp_title_data <- shiny::reactive({
       l_inputs <- v_input_subset()
       list(
@@ -612,7 +641,8 @@ boxplot_server <- function(id,
     output_arguments <- list()
 
     # box plot ----
-    output_arguments[[BP$ID$CHART]] <- shiny::reactive(
+    output_arguments[[BP$ID$CHART]] <- list(arguments = list(), render = NA)
+    output_arguments[[BP$ID$CHART]][["arguments"]] <- shiny::reactive(
       list(
         ds = data_subset(),
         violin = inputs[[BP$ID$VIOLIN_CHECK]](),
@@ -621,74 +651,119 @@ boxplot_server <- function(id,
         title_data = bp_title_data()
       )
     )
+
+    if (is_shiny_test_mode()) {
+      output_arguments[[BP$ID$CHART]][["render"]] <- shiny::reactive(
+        do.call(bp_get_boxplot_output, output_arguments[[BP$ID$CHART]][["arguments"]]())
+      )
+    }
+
     output[[BP$ID$CHART]] <- shiny::renderPlot({
-      do.call(bp_get_boxplot_output, output_arguments[[BP$ID$CHART]]())
+      do.call(bp_get_boxplot_output, output_arguments[[BP$ID$CHART]][["arguments"]]())
     })
 
     # listings table ----
-    output_arguments[[BP$ID$TABLE_LISTING]] <- shiny::reactive(
+    output_arguments[[BP$ID$TABLE_LISTING]] <- list(arguments = list(), render = NA)
+    output_arguments[[BP$ID$TABLE_LISTING]][["arguments"]] <- shiny::reactive(
       list(
         closest_point = v_input_closest_to_click(),
         ds = data_subset()
       )
     )
+
+    if (is_shiny_test_mode()) {
+      output_arguments[[BP$ID$TABLE_LISTING]][["render"]] <- shiny::reactive({
+        do.call(bp_get_listings_output, output_arguments[[BP$ID$TABLE_LISTING]][["arguments"]]())
+      })
+    }
+
     output[[BP$ID$TABLE_LISTING]] <- DT::renderDT({
-      do.call(bp_get_listings_output, output_arguments[[BP$ID$TABLE_LISTING]]())
+      do.call(bp_get_listings_output, output_arguments[[BP$ID$TABLE_LISTING]][["arguments"]]())
     })
 
     # single listings table ----
-    output_arguments[[BP$ID$TABLE_SINGLE_LISTING]] <- shiny::reactive(
+    output_arguments[[BP$ID$TABLE_SINGLE_LISTING]] <- list(arguments = list(), render = NA)
+    output_arguments[[BP$ID$TABLE_SINGLE_LISTING]][["arguments"]] <- shiny::reactive(
       list(
         closest_point = v_input_closest_to_dclick(),
         ds = data_subset(),
         input_id = session[["ns"]]("BOTON")
       )
     )
+
+    if (is_shiny_test_mode()) {
+      output_arguments[[BP$ID$TABLE_SINGLE_LISTING]][["render"]] <- shiny::reactive(
+        do.call(bp_get_single_listings_output, output_arguments[[BP$ID$TABLE_SINGLE_LISTING]][["arguments"]]())
+      )
+    }
+
     output[[BP$ID$TABLE_SINGLE_LISTING]] <- DT::renderDT({
-      do.call(bp_get_single_listings_output, output_arguments[[BP$ID$TABLE_SINGLE_LISTING]]())
+      do.call(bp_get_single_listings_output, output_arguments[[BP$ID$TABLE_SINGLE_LISTING]][["arguments"]]())
     })
 
     # count table
-    output_arguments[[BP$ID$TABLE_COUNT]] <- shiny::reactive(
+    output_arguments[[BP$ID$TABLE_COUNT]] <- list(arguments = list(), render = NA)
+    output_arguments[[BP$ID$TABLE_COUNT]][["arguments"]] <- shiny::reactive(
       list(
         ds = data_subset()
       )
     )
+    if (is_shiny_test_mode()) {
+       output_arguments[[BP$ID$TABLE_COUNT]][["render"]] <- shiny::reactive({
+        do.call(bp_get_count_output, output_arguments[[BP$ID$TABLE_COUNT]][["arguments"]]())
+      })
+    }
     output[[BP$ID$TABLE_COUNT]] <- DT::renderDT({
-      do.call(bp_get_count_output, output_arguments[[BP$ID$TABLE_COUNT]]())
+      do.call(bp_get_count_output, output_arguments[[BP$ID$TABLE_COUNT]][["arguments"]]())
     })
 
     # summary table
-    output_arguments[[BP$ID$TABLE_SUMMARY]] <- shiny::reactive(
+    output_arguments[[BP$ID$TABLE_SUMMARY]] <- list(arguments = list(), render = NA)
+    output_arguments[[BP$ID$TABLE_SUMMARY]][["arguments"]] <- shiny::reactive(
       list(
-        ds = data_subset()
+        ds = data_subset(),
+        quantile_type = quantile_type
       )
     )
+    if (is_shiny_test_mode()) {
+       output_arguments[[BP$ID$TABLE_SUMMARY]][["render"]] <- shiny::reactive({
+        do.call(bp_get_summary_output, output_arguments[[BP$ID$TABLE_SUMMARY]][["arguments"]]())
+      })
+    }
     output[[BP$ID$TABLE_SUMMARY]] <- DT::renderDT({
-      do.call(bp_get_summary_output, output_arguments[[BP$ID$TABLE_SUMMARY]]())
+      do.call(bp_get_summary_output, output_arguments[[BP$ID$TABLE_SUMMARY]][["arguments"]]())
     })
 
     # significance table
-    output_arguments[[BP$ID$TABLE_SIGNIFICANCE]] <- shiny::reactive(
+    output_arguments[[BP$ID$TABLE_SIGNIFICANCE]] <- list(arguments = list(), render = NA)
+    output_arguments[[BP$ID$TABLE_SIGNIFICANCE]][["arguments"]] <- shiny::reactive(
       list(
         ds = data_subset()
       )
     )
+    if (is_shiny_test_mode()) {
+       output_arguments[[BP$ID$TABLE_SIGNIFICANCE]][["render"]] <- shiny::reactive({
+        do.call(bp_get_significance_output, output_arguments[[BP$ID$TABLE_SIGNIFICANCE]][["arguments"]]())
+      })
+    }
     output[[BP$ID$TABLE_SIGNIFICANCE]] <- DT::renderDT({
-      do.call(bp_get_significance_output, output_arguments[[BP$ID$TABLE_SIGNIFICANCE]]())
+      do.call(bp_get_significance_output, output_arguments[[BP$ID$TABLE_SIGNIFICANCE]][["arguments"]]())
     })
 
     # state store
 
-    loaded_state <- store_server("store", shiny::reactive({
-      resolve_reactives <- function(x) {
-        if (is.list(x)) {
-          return(purrr::map(x, resolve_reactives))
+    loaded_state <- store_server(
+      "store",
+      shiny::reactive({
+        resolve_reactives <- function(x) {
+          if (is.list(x)) {
+            return(purrr::map(x, resolve_reactives))
+          }
+          x()
         }
-        x()
-      }
-      purrr::possibly(resolve_reactives, otherwise = NULL)(inputs)
-    }))
+        purrr::possibly(resolve_reactives, otherwise = NULL)(inputs)
+      })
+    )
 
     shiny::observeEvent(loaded_state(), {
       get_update(inputs[[BP$ID$MAIN_GRP]])[["val"]](selected = loaded_state()[[BP$ID$MAIN_GRP]])
@@ -722,7 +797,7 @@ boxplot_server <- function(id,
 
     # test values
     shiny::exportTestValues(
-      data_subset = data_subset()
+      output_arguments = output_arguments
     )
 
     # return
@@ -781,6 +856,7 @@ mod_boxplot <- function(module_id,
                         visit_var = "AVISIT",
                         anlfl_vars = NULL,
                         subjid_var = "SUBJID",
+                        quantile_type = 7L,
                         default_cat = NULL,
                         default_par = NULL,
                         default_visit = NULL,
@@ -809,6 +885,7 @@ mod_boxplot <- function(module_id,
           on_sbj_click = on_sbj_click_fun,
           cat_var = cat_var, par_var = par_var, value_vars = value_vars, visit_var = visit_var,
           anlfl_vars = anlfl_vars, subjid_var = subjid_var,
+          quantile_type = quantile_type,
           default_cat = default_cat, default_par = default_par, default_visit = default_visit,
           default_value = default_value, default_main_group = default_main_group, default_sub_group = default_sub_group,
           default_page_group = default_page_group
@@ -834,6 +911,7 @@ mod_boxplot_API_docs <- list(
   visit_var = "",
   anlfl_vars = "",
   subjid_var = "",
+  quantile_type = "",
   default_cat = "",
   default_par = "",
   default_visit = "",
@@ -855,6 +933,7 @@ mod_boxplot_API_spec <- TC$group(
   visit_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())) |> TC$flag("map_character_to_factor"),
   anlfl_vars = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("zero_or_more", "optional"),
   subjid_var = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("subjid_var", "map_character_to_factor"),
+  quantile_type = TC$integer(min = 1, max = 9) |> TC$flag("manual_check"),
   default_cat = TC$choice_from_col_contents("cat_var") |> TC$flag("zero_or_more", "optional"),
   default_par = TC$choice_from_col_contents("par_var") |> TC$flag("zero_or_more", "optional"),
   default_visit = TC$choice_from_col_contents("visit_var") |> TC$flag("optional"),
@@ -868,7 +947,7 @@ mod_boxplot_API_spec <- TC$group(
 
 check_mod_boxplot <- function(
     afmm, datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id,
-    cat_var, par_var, value_vars, visit_var, anlfl_vars, subjid_var,
+    cat_var, par_var, value_vars, visit_var, anlfl_vars, subjid_var, quantile_type,
     default_cat, default_par, default_visit, default_value, default_main_group,
     default_sub_group, default_page_group, server_wrapper_func) {
   warn <- CM$container()
@@ -878,12 +957,20 @@ check_mod_boxplot <- function(
   # Something along the lines of OK <- CM$check_API(mod_corr_hm_API_spec, args = match.call(), warn, err)
   OK <- check_mod_boxplot_auto(
     afmm, datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id,
-    cat_var, par_var, value_vars, visit_var, anlfl_vars, subjid_var,
+    cat_var, par_var, value_vars, visit_var, anlfl_vars, subjid_var, quantile_type,
     default_cat, default_par, default_visit, default_value, default_main_group,
     default_sub_group, default_page_group, server_wrapper_func, warn, err
   )
 
   # Checks that API spec does not (yet?) capture
+
+  # Check that `quantile_type` is an integer scalar
+  CM$assert(
+    container = err,
+    cond = checkmate::test_integerish(quantile_type, lower = 1, upper = 9, len = 1, any.missing = FALSE, null.ok = FALSE),
+    msg = "The value assigned to `quantile_type` must be a non-missing integer scalar between 1 and 9."
+  )
+
   #ahwopu
   if (OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] && OK[["visit_var"]] && OK[["anlfl_vars"]]) {
 
@@ -1259,11 +1346,15 @@ bp_count_table <- function(ds) {
 #' @param ds `data.frame()`
 #'   A data frame to perform the summary over.
 #'
+#' @param quantile_type `[integer(1)]`
+#'
+#' Quantile algorithm type (an integer between 1 and 9).
+#'
 #' @return `data.frame()`
 #'   A data frame with the summary statistics.
 #'
 #' @keywords internal
-bp_summary_table <- function(ds) {
+bp_summary_table <- function(ds, quantile_type) {
   group_by <- setdiff(names(ds), c(CNT$SBJ, CNT$VAL))
 
   ds |>
@@ -1273,9 +1364,9 @@ bp_summary_table <- function(ds) {
       Mean = mean(.data[[CNT$VAL]], na.rm = TRUE),
       SD = stats::sd(.data[[CNT$VAL]], na.rm = TRUE),
       Min = min(.data[[CNT$VAL]], na.rm = TRUE),
-      Q1 = stats::quantile(.data[[CNT$VAL]], probs = .25, na.rm = TRUE),
+      Q1 = stats::quantile(.data[[CNT$VAL]], probs = .25, na.rm = TRUE, type = quantile_type),
       Median = stats::median(.data[[CNT$VAL]], na.rm = TRUE),
-      Q3 = stats::quantile(.data[[CNT$VAL]], probs = .75, na.rm = TRUE),
+      Q3 = stats::quantile(.data[[CNT$VAL]], probs = .75, na.rm = TRUE, type = quantile_type),
       Max = max(.data[[CNT$VAL]], na.rm = TRUE),
       "NA Values" = sum(is.na(.data[[CNT$VAL]]))
     ) |>
@@ -1314,7 +1405,8 @@ bp_significance_table <- function(ds) {
 
   comb <- utils::combn(unique(ds[[CNT$MAIN_GROUP]]), 2)
   t_test <- function(x) {
-    d <- tidyr::pivot_wider(x,
+    d <- tidyr::pivot_wider(
+      x,
       id_cols = -dplyr::all_of(CNT$SBJ),
       names_from = CNT$MAIN_GROUP,
       values_from = CNT$VAL,
@@ -1416,8 +1508,8 @@ bp_get_count_output <- function(ds) {
 
 #' @rdname boxplot_composed
 #' @inheritParams bp_summary_table
-bp_get_summary_output <- function(ds) {
-  summary <- bp_summary_table(ds)
+bp_get_summary_output <- function(ds, quantile_type) {
+  summary <- bp_summary_table(ds, quantile_type = quantile_type)
   summary <- possibly_set_lbls(summary, get_lbls_robust(ds))
   summary <- DT::datatable(summary, colnames = as.character(get_lbls_robust(summary)))
   summary <- DT::formatRound(summary, c("Mean", "SD", "Min", "Q1", "Median", "Q3", "Max"), digits = 2)

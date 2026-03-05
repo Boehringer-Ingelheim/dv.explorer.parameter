@@ -467,6 +467,44 @@ scatter_plot <- function(df, x_var, y_var) {
   return(svg_string)
 }
 
+    get_corr_hm_svg <- function(ds, click) {
+      df <- ds      
+      x_var <- click[["x"]]
+      y_var <- click[["y"]]      
+      df <- df[df[[CNT$PAR]] %in% c(x_var, y_var), ]
+      na_inf_idx <- is.na(df[[CNT$VAL]]) | !is.finite(df[[CNT$VAL]])
+      na_inf_subjects <- levels(droplevels(df[[CNT$SBJ]][na_inf_idx]))
+      df <- df[!df[[CNT$SBJ]] %in% na_inf_subjects, ]
+
+      if (length(na_inf_subjects) > 0) {
+        shiny::showNotification(
+          paste(length(na_inf_subjects), "have been dropped due to NA or Inf values"),
+          type = "warning"
+        )
+      }
+
+      svg_string <- scatter_plot(df, x_var, y_var)
+
+      shiny::HTML(svg_string)
+    }
+
+      ch_label_for_method <- function(method) {
+        if (method == CH_ID$CORR_METHOD_PEARSON) {
+          res <- paste(CH_MSG$LABEL$CORR_METHOD_PEARSON, "c.c.")
+        } else if (method == CH_ID$CORR_METHOD_SPEARMAN) {
+          res <- paste(CH_MSG$LABEL$CORR_METHOD_SPEARMAN, "c.c.")
+        }
+        res
+      }
+
+get_listing_content <- function(ds, corr_data, method) {
+  
+  z_label <- ch_label_for_method(method)
+
+  res <- ch_listings_table(corr_data, ds, z_label)
+  res
+}
+
 
 #' Correlation heatmap server function
 #'
@@ -543,7 +581,11 @@ corr_hm_server <- function(id,
           names(bm_dataset()),
           type = "unique",
           must.include = c(
-            VAR$CAT, VAR$PAR, VAR$SBJ, VAR$VIS, VAR$VAL
+            VAR$CAT,
+            VAR$PAR,
+            VAR$SBJ,
+            VAR$VIS,
+            VAR$VAL
           ),
           .var.name = ns("bm_dataset"),
           add = ac
@@ -569,7 +611,9 @@ corr_hm_server <- function(id,
       label = CH_MSG$LABEL$PAR_VALUE_TRANSFORM,
       include_func = function(val, name) {
         name %in% VAR$VAL
-      }, include_none = FALSE, default = default_value
+      },
+      include_none = FALSE,
+      default = default_value
     )
 
     # analysis flag filter input ----
@@ -585,8 +629,11 @@ corr_hm_server <- function(id,
     }
 
     mpvs <- multi_param_visit_selector_server(
-      CH_ID$MULTI_PAR_VIS, v_ch_dataset,
-      cat_var = VAR$CAT, par_var = VAR$PAR, visit_var = VAR$VIS
+      CH_ID$MULTI_PAR_VIS,
+      v_ch_dataset,
+      cat_var = VAR$CAT,
+      par_var = VAR$PAR,
+      visit_var = VAR$VIS
     )
 
     inputs[[CH_ID$CORR_METHOD]] <- shiny::reactive(input[[CH_ID$CORR_METHOD]])
@@ -627,9 +674,7 @@ corr_hm_server <- function(id,
 
     param_iv$add_rule(
       get_id(inputs[[CH_ID$PAR_VALUE_TRANSFORM]]),
-      sv_not_empty(inputs[[CH_ID$PAR_VALUE_TRANSFORM]],
-        msg = CH_MSG$VALIDATE$NO_VALUE_SEL
-      )
+      sv_not_empty(inputs[[CH_ID$PAR_VALUE_TRANSFORM]], msg = CH_MSG$VALIDATE$NO_VALUE_SEL)
     )
     param_iv$enable()
 
@@ -654,7 +699,7 @@ corr_hm_server <- function(id,
         )
         subset_inputs <- c(CH_ID$PAR_VALUE_TRANSFORM, CH_ID$CORR_METHOD)
 
-        if (!is.null(inputs[[CH_ID$ANLFL_FILTER]]))  {
+        if (!is.null(inputs[[CH_ID$ANLFL_FILTER]])) {
           subset_inputs <- c(subset_inputs, CH_ID$ANLFL_FILTER)
         }
 
@@ -672,7 +717,6 @@ corr_hm_server <- function(id,
     # data reactives ----
 
     data_subset <- shiny::reactive({
-
       res <- ch_subset_data(
         sel = mpvs(),
         cat_col = VAR$CAT,
@@ -693,24 +737,14 @@ corr_hm_server <- function(id,
       res
     })
 
-    # List of output arguments
-    # nolint output_arguments <- list()
-
     # correlation heatmap plot----
 
-    label_for_method <- function(method) {
-      if (method == CH_ID$CORR_METHOD_PEARSON) {
-        res <- paste(CH_MSG$LABEL$CORR_METHOD_PEARSON, "c.c.")
-      } else if (method == CH_ID$CORR_METHOD_SPEARMAN) {
-        res <- paste(CH_MSG$LABEL$CORR_METHOD_SPEARMAN, "c.c.")
-      }
-      res
-    }
+
 
     correlation_data <- shiny::reactive({
       df <- data_subset()
       method <- v_input_subset()[[CH_ID$CORR_METHOD]]
-      z_label <- label_for_method(method)
+      z_label <- ch_label_for_method(method)
 
       corr_fun <- NULL
       if (method == CH_ID$CORR_METHOD_PEARSON) {
@@ -727,39 +761,9 @@ corr_hm_server <- function(id,
       #       if you're interested.
       #       A more dramatic improvement would be to generate the graphic using plain `cor()` and
       #       produce a partial or complete listing using our internal function.
-      apply_correlation_function(df, corr_fun, z_label) |>
+      data <- apply_correlation_function(df, corr_fun, z_label) |>
         set_lbl("y", get_lbl_robust(df, "value"))
-    })
 
-    palette <- pal_div_palette(-1, 0, 1, rev(RColorBrewer::brewer.pal(11, name = "RdBu")))
-
-    v_click_xy <- HM2SVG_server(id = CH_ID$CHART, data = correlation_data, palette = palette)
-
-    output[[CH_ID$SCATTER]] <- shiny::renderUI({
-      click <- v_click_xy()
-      x_var <- click[["x"]]
-      y_var <- click[["y"]]
-      df <- data_subset()
-      df <- df[df[[CNT$PAR]] %in% c(x_var, y_var), ]
-      na_inf_idx <- is.na(df[[CNT$VAL]]) | !is.finite(df[[CNT$VAL]])
-      na_inf_subjects <- levels(droplevels(df[[CNT$SBJ]][na_inf_idx]))
-      df <- df[!df[[CNT$SBJ]] %in% na_inf_subjects, ]
-
-      if (length(na_inf_subjects) > 0) {
-        shiny::showNotification(
-          paste(length(na_inf_subjects), "have been dropped due to NA or Inf values"),
-          type = "warning"
-        )
-      }
-
-       svg_string <- scatter_plot(df, x_var, y_var)
-
-      shiny::HTML(svg_string)
-    })
-
-    # listings/count table ----
-    listing_contents <- shiny::reactive({
-      data <- correlation_data()
       shiny::validate(
         shiny::need(
           nrow(data) > 1,
@@ -767,13 +771,51 @@ corr_hm_server <- function(id,
         )
       )
 
-      ds <- data_subset()
-      method <- v_input_subset()[[CH_ID$CORR_METHOD]]
-      z_label <- label_for_method(method)
-
-      res <- ch_listings_table(data, ds, z_label)
-      res
+      data
     })
+
+    palette <- pal_div_palette(-1, 0, 1, rev(RColorBrewer::brewer.pal(11, name = "RdBu")))
+
+    v_click_xy <- HM2SVG_server(id = CH_ID$CHART, data = correlation_data, palette = palette)
+
+    output_arguments <- list()
+    output_arguments[[CH_ID$SCATTER]] <- list(arguments = list(), render = NA)
+    output_arguments[[CH_ID$SCATTER]][["arguments"]] <- shiny::reactive({
+      list(
+        ds = data_subset(),
+        click =  v_click_xy()
+      )
+    })
+
+    if (is_shiny_test_mode()) {
+      output_arguments[[CH_ID$SCATTER]][["render"]] <- shiny::reactive({
+        do.call(get_corr_hm_svg, output_arguments[[CH_ID$SCATTER]][["arguments"]]())
+      })
+    }
+
+    output[[CH_ID$SCATTER]] <- shiny::renderUI({
+      do.call(get_corr_hm_svg, output_arguments[[CH_ID$SCATTER]][["arguments"]]())
+    })
+
+    # listings/count table ----
+    listing_contents <- shiny::reactive({
+      do.call(get_listing_content, output_arguments[[CH_ID$TABLE_CORRELATION_LISTING]][["arguments"]]())
+    })
+
+    output_arguments[[CH_ID$TABLE_CORRELATION_LISTING]] <- list(arguments = list(), render = NA)
+    output_arguments[[CH_ID$TABLE_CORRELATION_LISTING]][["arguments"]] <- shiny::reactive({
+      list(
+        ds = data_subset(),
+        corr_data = correlation_data(),
+        method = v_input_subset()[[CH_ID$CORR_METHOD]]
+      )
+    })
+
+    if (is_shiny_test_mode()) {
+      output_arguments[[CH_ID$TABLE_CORRELATION_LISTING]][["render"]] <- shiny::reactive({
+        do.call(get_listing_content, output_arguments[[CH_ID$TABLE_CORRELATION_LISTING]][["arguments"]]())
+      })
+    }
 
     output[[CH_ID$TABLE_CORRELATION_LISTING]] <- DT::renderDT(listing_contents())
 
@@ -795,7 +837,7 @@ corr_hm_server <- function(id,
 
     # test values ----
     shiny::exportTestValues(
-      listing_contents = listing_contents()
+      output_arguments = output_arguments
     )
 
     # return ----

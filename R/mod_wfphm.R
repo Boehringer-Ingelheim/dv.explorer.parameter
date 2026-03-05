@@ -37,7 +37,6 @@ WFPHM_ID <- pack_of_constants( # nolint
     HMCAT = "hmcat",
     HMCONT = "hmcont",
     HMPAR = "hmpar",
-    NON_GXP_TAG = "non_gxp_tag",
     CHART_CONTAINER = "chart_container",
     WF_MENU = "wf_menu",
     CC_MENU = "cc_menu",
@@ -2141,7 +2140,6 @@ wfphm_UI <- function(id, tr_choices = names(tr_mapper_def())) { # nolint
     shiny::tagList(
       add_warning_mark_dependency(),
       screenshot_deps(),
-      non_gxp_tag(ns(WFPHM_ID$WFPHM$NON_GXP_TAG)),
       shiny::div(wfphm_menu),
       shiny::div(
         id = ns(WFPHM_ID$WFPHM$CHART_CONTAINER),
@@ -2336,7 +2334,7 @@ wfphm_server <- function(id,
             if_not_null(hmcont[["margin"]](), hmcont[["margin"]](), dm_list),
             if_not_null(hmpar[["margin"]](), hmpar[["margin"]](), dm_list)
           )
-          rlang::inform(paste(purrr::pmap(l, max)), class = "debug")
+          log_inform(paste(purrr::pmap(l, max)), class = "debug")
           purrr::pmap_dbl(l, max)
         },
         label = ns(" max_margin")

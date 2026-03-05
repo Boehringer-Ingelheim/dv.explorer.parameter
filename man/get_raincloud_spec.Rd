@@ -20,7 +20,7 @@ Charts are faceted using parameters as columns.}
 Size in pixels for each of the charts in the facet}
 }
 \value{
-A \link{vegawidget} specification
+A \link[vegawidget:vegawidget]{vegawidget::vegawidget} specification
 }
 \description{
 The chart consists of a faceted set of raincloud. Each facet will be grouped by the value of the response parameter.

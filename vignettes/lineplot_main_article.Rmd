@@ -116,18 +116,8 @@ A table that provides the count of samples per group and time point for the whol
 
 ```{r, eval=FALSE}
 
-adbm_dataset <- dplyr::mutate(
-  dv.explorer.parameter:::safety_data()[["bm"]],
-  USUBJID = factor(USUBJID),
-  PARCAT1 = factor(PARCAT1),
-  PARAM = factor(PARAM),
-  AVISIT = factor(AVISIT)
-)
-
-adsl_dataset <- dplyr::mutate(
-  dv.explorer.parameter:::safety_data()[["sl"]],
-  USUBJID = factor(USUBJID)
-)
+adbm_dataset <- dv.explorer.parameter:::safety_data()[["bm"]]
+adsl_dataset <- dv.explorer.parameter:::safety_data()[["sl"]]
 
 module_list <- list(
   "lineplot" = dv.explorer.parameter::mod_lineplot(

@@ -17,7 +17,7 @@ get_dens_plot_output(ds, param_as_cols, fig_size)
 
 get_histo_plot_output(ds, param_as_cols, fig_size)
 
-get_raincloud_output(ds, param_as_cols, fig_size)
+get_raincloud_output(ds, param_as_cols, fig_size, quantile_type)
 
 get_metrics_output(
   ds,
