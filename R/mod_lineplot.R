@@ -1894,7 +1894,7 @@ check_mod_lineplot <- function(
       if (!is.null(anlfl_vars)) {
         # Check grouping values are unique for specified analysis flags
         for (anlfl_var in anlfl_vars) {
-          CM$check_unique_sub_cat_par_vis(
+          CM_check_unique_sub_cat_par_vis(
             datasets, "bm_dataset_name", bm_dataset_name,
             subjid_var, cat_var, par_var, visit_var, anlfl = anlfl_var,
             warn = warn, err = err
@@ -1902,7 +1902,7 @@ check_mod_lineplot <- function(
         }
       } else {
         # Check grouping values are unique without subsetting on analysis flags
-        CM$check_unique_sub_cat_par_vis(
+        CM_check_unique_sub_cat_par_vis(
           datasets, "bm_dataset_name", bm_dataset_name,
           subjid_var, cat_var, par_var, visit_var,
           warn = warn, err = err

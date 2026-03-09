@@ -629,14 +629,14 @@ check_mod_scatterplotmatrix <- function(
 
     if (!is.null(anlfl_vars)) {
       for (anlfl_var in anlfl_vars) {
-        CM$check_unique_sub_cat_par_vis(
+        CM_check_unique_sub_cat_par_vis(
           datasets, "bm_dataset_name", bm_dataset_name,
           subjid_var, cat_var, par_var, visit_var, anlfl_var,
           warn = warn, err = err
         )
       }
     } else {
-      CM$check_unique_sub_cat_par_vis(
+      CM_check_unique_sub_cat_par_vis(
         datasets, "bm_dataset_name", bm_dataset_name,
         subjid_var, cat_var, par_var, visit_var,
         warn = warn, err = err
