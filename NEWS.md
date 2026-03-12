@@ -1,4 +1,17 @@
+# dv.explorer.parameter 0.2.0-9000
+
+* lineplot:
+    * Fixed mulfunction of highlighting feature when reference lines are plotted 
+
 # dv.explorer.parameter 0.2.0
+
+* Bug Fixes
+
+    * Scatterplot matrix: Fixed an issue where the analysis flag was plotted in the matrix alongside user-selected parameters
+    * ROC:
+        *Fixed an issue in the Summary tab where visualisation output was not produced for predictor/response combinations where the response has only one value; these are now included in the plot with a blank ROC entry
+        * Fixed an issue in the Summary tab where visualisation output was not produced when no grouping variable was selected
+    * Line plot: Fixed an issue where labels attached to reference line variables were not used in the plot legend# dv.explorer.parameter 0.2.0
 
 * Bug Fixes
 
