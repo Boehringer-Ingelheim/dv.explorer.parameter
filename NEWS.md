@@ -1,4 +1,4 @@
-# dv.explorer.parameter 0.2.0-9000
+# dv.explorer.parameter 0.2.1
 
 * lineplot:
     * Fixed malfunction of highlighting feature when reference lines are plotted 
