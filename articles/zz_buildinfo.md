@@ -1,6 +1,6 @@
 # Build Info
 
-Build date: 2026-03-05 14:08:22
+Build date: 2026-03-18 11:57:19
 
 ``` r
 
@@ -44,7 +44,7 @@ knitr::kable(as.data.frame(installed.packages(), row.names = FALSE)[c("Package",
 
 | Package               | Version    |
 |:----------------------|:-----------|
-| dv.explorer.parameter | 0.2.0      |
+| dv.explorer.parameter | 0.2.1      |
 | abind                 | 1.4-8      |
 | askpass               | 1.2.1      |
 | assertthat            | 0.2.1      |

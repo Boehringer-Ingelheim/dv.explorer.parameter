@@ -1,8 +1,8 @@
 # Quality Control
 
-### ✅ dv.explorer.parameter 0.2.0
+### ✅ dv.explorer.parameter 0.2.1
 
-Date: 2026-Mar-05 14:08:10
+Date: 2026-Mar-18 11:57:08
 
 This document provides the Quality Control (QC) report for the R package
 to confirm that it fulfills the criteria required for a “released”
@@ -59,7 +59,7 @@ test execution.
     #>  collate  en_US.UTF-8
     #>  ctype    en_US.UTF-8
     #>  tz       Etc/UTC
-    #>  date     2026-03-05
+    #>  date     2026-03-18
     #>  pandoc   3.9 @ /usr/bin/ (via rmarkdown)
     #>  quarto   1.8.27 @ /usr/local/bin/quarto
     #> 
@@ -104,7 +104,7 @@ test execution.
     #>  xfun          0.54    2025-10-30 [2] RSPM
     #>  yaml          2.3.11  2025-11-28 [2] RSPM
     #> 
-    #>  [1] /tmp/RtmpIVkboT/temp_libpath1ea9af3a11
+    #>  [1] /tmp/Rtmprn9wyA/temp_libpath1ea7b094543
     #>  [2] /usr/local/lib/R/site-library
     #>  [3] /usr/local/lib/R/library
     #> 
