@@ -194,14 +194,14 @@ check_unique_sub_cat_par_vis <- function(datasets, ds_name, ds_value, sub, cat, 
   if (length(anlfl_vars) == 0) {
     # Check grouping values are unique without subsetting on analysis flags
     check_unique_sub_cat_par_vis_(
-      datasets, "bm_dataset_name", ds_name, sub, cat, par, vis, NULL,
+      datasets, ds_name, ds_value, sub, cat, par, vis, NULL,
       warn = warn, err = err
     )
   } else {
     # Check grouping values are unique for specified analysis flags
     for (anlfl_var in anlfl_vars) {
       check_unique_sub_cat_par_vis_(
-        datasets, "bm_dataset_name", ds_name, sub, cat, par, vis, anlfl_var,
+        datasets, ds_name, ds_value, sub, cat, par, vis, anlfl_var,
         warn = warn, err = err
       )
     }
