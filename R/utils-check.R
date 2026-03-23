@@ -197,8 +197,7 @@ check_unique_sub_cat_par_vis <- function(datasets, ds_name, ds_value, sub, cat, 
       subjid_var, cat_var, par_var, visit_var, anlfl_var = NULL,
       warn = warn, err = err
     )
-  }
-  else {
+  } else {
     # Check grouping values are unique for specified analysis flags
     for (anlfl_var in anlfl_vars) {
       check_unique_sub_cat_par_vis_(
