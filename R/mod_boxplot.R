@@ -946,20 +946,58 @@ mod_boxplot_API_spec <- TC$group(
 
 
 check_mod_boxplot <- function(
-    afmm, datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id,
-    cat_var, par_var, value_vars, visit_var, anlfl_vars, subjid_var, quantile_type,
-    default_cat, default_par, default_visit, default_value, default_main_group,
-    default_sub_group, default_page_group, server_wrapper_func) {
+  afmm,
+  datasets,
+  module_id,
+  bm_dataset_name,
+  group_dataset_name,
+  receiver_id,
+  cat_var,
+  par_var,
+  value_vars,
+  visit_var,
+  anlfl_vars,
+  subjid_var,
+  quantile_type,
+  default_cat,
+  default_par,
+  default_visit,
+  default_value,
+  default_main_group,
+  default_sub_group,
+  default_page_group,
+  server_wrapper_func
+) {
+
   warn <- CM$container()
   err <- CM$container()
 
   # TODO: Replace this function with a generic one that performs the checks based on mod_boxplot_API_spec.
   # Something along the lines of OK <- CM$check_API(mod_corr_hm_API_spec, args = match.call(), warn, err)
   OK <- check_mod_boxplot_auto(
-    afmm, datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id,
-    cat_var, par_var, value_vars, visit_var, anlfl_vars, subjid_var, quantile_type,
-    default_cat, default_par, default_visit, default_value, default_main_group,
-    default_sub_group, default_page_group, server_wrapper_func, warn, err
+    afmm,
+    datasets,
+    module_id,
+    bm_dataset_name,
+    group_dataset_name,
+    receiver_id,
+    cat_var,
+    par_var,
+    value_vars,
+    visit_var,
+    anlfl_vars,
+    subjid_var,
+    quantile_type,
+    default_cat,
+    default_par,
+    default_visit,
+    default_value,
+    default_main_group,
+    default_sub_group,
+    default_page_group,
+    server_wrapper_func,
+    warn,
+    err
   )
 
   # Checks that API spec does not (yet?) capture
@@ -967,31 +1005,49 @@ check_mod_boxplot <- function(
   # Check that `quantile_type` is an integer scalar
   CM$assert(
     container = err,
-    cond = checkmate::test_integerish(quantile_type, lower = 1, upper = 9, len = 1, any.missing = FALSE, null.ok = FALSE),
+    cond = checkmate::test_integerish(
+      quantile_type,
+      lower = 1,
+      upper = 9,
+      len = 1,
+      any.missing = FALSE,
+      null.ok = FALSE
+    ),
     msg = "The value assigned to `quantile_type` must be a non-missing integer scalar between 1 and 9."
   )
 
   #ahwopu
   if (OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] && OK[["visit_var"]] && OK[["anlfl_vars"]]) {
-
     if (!is.null(anlfl_vars)) {
       # Check grouping values are unique for specified analysis flags
       for (anlfl_var in anlfl_vars) {
-        CM$check_unique_sub_cat_par_vis(
-          datasets, "bm_dataset_name", bm_dataset_name,
-          subjid_var, cat_var, par_var, visit_var, anlfl_var,
-          warn = warn, err = err
+        CM_check_unique_sub_cat_par_vis(
+          datasets,
+          "bm_dataset_name",
+          bm_dataset_name,
+          subjid_var,
+          cat_var,
+          par_var,
+          visit_var,
+          anlfl_var,
+          warn = warn,
+          err = err
         )
       }
     } else {
       # Check grouping values are unique without subsetting on analysis flags
-      CM$check_unique_sub_cat_par_vis(
-        datasets, "bm_dataset_name", bm_dataset_name,
-        subjid_var, cat_var, par_var, visit_var,
-        warn = warn, err = err
+      CM_check_unique_sub_cat_par_vis(
+        datasets,
+        "bm_dataset_name",
+        bm_dataset_name,
+        subjid_var,
+        cat_var,
+        par_var,
+        visit_var,
+        warn = warn,
+        err = err
       )
     }
-
   }
 
   res <- list(warnings = warn[["messages"]], errors = err[["messages"]])
