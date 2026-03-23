@@ -136,6 +136,7 @@ check_unique_sub_cat_par_vis_ <- function(datasets, ds_name, ds_value, sub, cat,
             rep("Visit:", length(vis))
           )
 
+          supposedly_unique <- dataset[c(sub, cat, par, vis)]
           first_duplicates <- head(supposedly_unique[sub_cat_par_vis_combinations[["dup_mask"]], ], 5)
           names(first_duplicates) <- paste(prefixes, names(first_duplicates))
           dups <- df_to_string(first_duplicates)
@@ -193,16 +194,14 @@ check_unique_sub_cat_par_vis <- function(datasets, ds_name, ds_value, sub, cat, 
   if (length(anlfl_vars) == 0) {
     # Check grouping values are unique without subsetting on analysis flags
     check_unique_sub_cat_par_vis_(
-      datasets, "bm_dataset_name", bm_dataset_name,
-      subjid_var, cat_var, par_var, visit_var, anlfl_var = NULL,
+      datasets, "bm_dataset_name", ds_name, sub, cat, par, vis, NULL,
       warn = warn, err = err
     )
   } else {
     # Check grouping values are unique for specified analysis flags
     for (anlfl_var in anlfl_vars) {
       check_unique_sub_cat_par_vis_(
-        datasets, "bm_dataset_name", bm_dataset_name,
-        subjid_var, cat_var, par_var, visit_var, anlfl_var,
+        datasets, "bm_dataset_name", ds_name, sub, cat, par, vis, anlfl_var,
         warn = warn, err = err
       )
     }
