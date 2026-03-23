@@ -6,7 +6,7 @@ check_unique_cat_par_combinations <- function(dataset, cat_var, par_var) {
   unique_cat_par_combinations <- vctrs::vec_unique(dataset[c(cat_var, par_var)])
   any_dup <- vctrs::vec_duplicate_any(unique_cat_par_combinations[par_var])
 
-  if(any_dup) {
+  if (any_dup) {
     dup_mask <- vctrs::vec_duplicate_id(unique_cat_par_combinations[par_var]) != seq_len(nrow(unique_cat_par_combinations))
   } else {
     dup_mask <- FALSE
