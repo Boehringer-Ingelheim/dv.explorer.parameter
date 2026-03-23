@@ -1,3 +1,7 @@
+# dv.explorer.parameter 0.2.1-9000
+
+- Speed early error feedback
+
 # dv.explorer.parameter 0.2.1
 
 * lineplot:
