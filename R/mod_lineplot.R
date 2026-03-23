@@ -360,7 +360,11 @@ lineplot_chart <- function(data, title = NULL, ref_line_data = NULL, log_project
     }
 
     ref_line_colors <- gg_color_hue(levels(ref_line_data[[1]][[CNT$MAIN_GROUP]]))
-    fig <- fig + ggplot2::scale_color_manual(values = ref_line_colors)
+    merged_palette <- c(color_palette, ref_line_colors)
+    fig <- fig + ggplot2::scale_color_manual(
+      values = merged_palette,
+      breaks = setdiff(names(merged_palette), unselected_color)
+    )
   }
 
   fig <- fig + ggplot2::ggtitle(title)
