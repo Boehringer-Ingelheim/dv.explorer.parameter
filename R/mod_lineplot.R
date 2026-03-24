@@ -1893,27 +1893,13 @@ check_mod_lineplot <- function(
   # Checks that API spec does not (yet?) capture
   if (OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] &&
       OK[["visit_vars"]] && OK[["cdisc_visit_vars"]] && OK[["anlfl_vars"]]) {
-
     for (visit_var in c(visit_vars, cdisc_visit_vars)) {
-      if (!is.null(anlfl_vars)) {
-        # Check grouping values are unique for specified analysis flags
-        for (anlfl_var in anlfl_vars) {
-          CM_check_unique_sub_cat_par_vis(
-            datasets, "bm_dataset_name", bm_dataset_name,
-            subjid_var, cat_var, par_var, visit_var, anlfl = anlfl_var,
-            warn = warn, err = err
-          )
-        }
-      } else {
-        # Check grouping values are unique without subsetting on analysis flags
-        CM_check_unique_sub_cat_par_vis(
-          datasets, "bm_dataset_name", bm_dataset_name,
-          subjid_var, cat_var, par_var, visit_var,
-          warn = warn, err = err
-        )
-      }
+      check_unique_sub_cat_par_vis(
+        datasets, "bm_dataset_name", bm_dataset_name,
+        subjid_var, cat_var, par_var, visit_var, anlfl_vars,
+        warn = warn, err = err
+      )
     }
-
   }
 
   if (OK[["visit_vars"]] && OK[["cdisc_visit_vars"]]) {

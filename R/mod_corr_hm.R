@@ -1022,24 +1022,11 @@ check_mod_corr_hm <- function(
   }
 
   if (OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] && OK[["visit_var"]] && OK[["anlfl_vars"]]) {
-
-    if (!is.null(anlfl_vars)) {
-      # Check grouping values are unique for specified analysis flags
-      for (anlfl_var in anlfl_vars) {
-        CM_check_unique_sub_cat_par_vis(
-          datasets, "bm_dataset_name", bm_dataset_name,
-          subjid_var, cat_var, par_var, visit_var, anlfl_var,
-          warn = warn, err = err
-        )
-      }
-    } else {
-      CM_check_unique_sub_cat_par_vis(
-        datasets, "bm_dataset_name", bm_dataset_name,
-        subjid_var, cat_var, par_var, visit_var,
-        warn = warn, err = err
-      )
-    }
-
+    check_unique_sub_cat_par_vis(
+      datasets, "bm_dataset_name", bm_dataset_name,
+      subjid_var, cat_var, par_var, visit_var, anlfl_vars,
+      warn = warn, err = err
+    )
   }
 
   res <- list(warnings = warn[["messages"]], errors = err[["messages"]])
