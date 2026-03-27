@@ -1,3 +1,7 @@
+# dv.explorer.parameter 0.2.1-9002
+
+- [NOT USER-FACING] Update TC.R and DR.R snippets
+
 # dv.explorer.parameter 0.2.1-9001
 
 - [NOT USER-FACING] Update CM.R snippet
