@@ -35,7 +35,7 @@ check_unique_sub_cat_par_vis_combinations <- function(dataset, sub_var, cat_var,
   )
 }
 
-check_unique_sub_cat_par_vis_ <- function(datasets, ds_name, ds_value, sub, cat, par, vis, anlfl, warn, err) {
+check_unique_sub_cat_par_vis_ <- function(datasets, ds_name, ds_value, sub, cat, par, vis, anlfl, err) {
     ok <- TRUE
     df_to_string <- function(df) {
       names(df) <- sprintf("[%s] ", names(df))
@@ -190,19 +190,19 @@ check_unique_sub_cat_par_vis_ <- function(datasets, ds_name, ds_value, sub, cat,
     return(ok)
 }
 
-check_unique_sub_cat_par_vis <- function(datasets, ds_name, ds_value, sub, cat, par, vis, anlfl_vars, warn, err) {
+check_unique_sub_cat_par_vis <- function(datasets, ds_name, ds_value, sub, cat, par, vis, anlfl_vars, err) {
   if (length(anlfl_vars) == 0) {
     # Check grouping values are unique without subsetting on analysis flags
     check_unique_sub_cat_par_vis_(
       datasets, ds_name, ds_value, sub, cat, par, vis, NULL,
-      warn = warn, err = err
+      err = err
     )
   } else {
     # Check grouping values are unique for specified analysis flags
     for (anlfl_var in anlfl_vars) {
       check_unique_sub_cat_par_vis_(
         datasets, ds_name, ds_value, sub, cat, par, vis, anlfl_var,
-        warn = warn, err = err
+        err = err
       )
     }
   }

@@ -1876,18 +1876,17 @@ check_mod_lineplot <- function(
     default_centrality_fn, default_dispersion_fn, default_cat, default_par,
     default_val, default_visit_var, default_visit_val, default_main_group, default_sub_group,
     default_transparency, default_y_axis_projection) {
-  warn <- CM$container()
   err <- CM$container()
 
   # TODO: Replace this function with a generic one that performs the checks based on mod_corr_hm_API_spec.
-  # Something along the lines of OK <- CM$check_API(mod_corr_hm_API_spec, args = match.call(), warn, err)
+  # Something along the lines of OK <- CM$check_API(mod_corr_hm_API_spec, args = match.call(), err)
 
   OK <- check_mod_lineplot_auto(
     afmm, datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id, summary_fns,
     subjid_var, cat_var, par_var, visit_vars, cdisc_visit_vars, anlfl_vars, value_vars, additional_listing_vars,
     ref_line_vars, default_centrality_fn, default_dispersion_fn, default_cat, default_par, default_val,
     default_visit_var, default_visit_val, default_main_group, default_sub_group, default_transparency,
-    default_y_axis_projection, warn, err
+    default_y_axis_projection, err
   )
 
   # Checks that API spec does not (yet?) capture
@@ -1897,7 +1896,7 @@ check_mod_lineplot <- function(
       check_unique_sub_cat_par_vis(
         datasets, "bm_dataset_name", bm_dataset_name,
         subjid_var, cat_var, par_var, visit_var, anlfl_vars,
-        warn = warn, err = err
+        err = err
       )
     }
   }
@@ -1988,7 +1987,7 @@ check_mod_lineplot <- function(
     }
   }
 
-  res <- list(warnings = warn[["messages"]], errors = err[["messages"]])
+  res <- list(errors = err[["messages"]])
   return(res)
 }
 
@@ -1998,4 +1997,4 @@ dataset_info_lineplot <- function(bm_dataset_name, group_dataset_name, ...) {
   return(list(all = unique(c(bm_dataset_name, group_dataset_name)), subject_level = group_dataset_name))
 }
 
-mod_lineplot <- CM$module(mod_lineplot, check_mod_lineplot, dataset_info_lineplot, map_afmm_mod_lineplot_auto)
+mod_lineplot <- CM$module(mod_lineplot, check_mod_lineplot, dataset_info_lineplot)

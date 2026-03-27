@@ -1,6 +1,10 @@
+# dv.explorer.parameter 0.2.1-9001
+
+- [NOT USER-FACING] Update CM.R snippet
+
 # dv.explorer.parameter 0.2.1-9000
 
-- Speed early error feedback
+- Faster early error feedback
 
 # dv.explorer.parameter 0.2.1
 

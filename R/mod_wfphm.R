@@ -2465,14 +2465,13 @@ check_mod_wfphm <- function(
     afmm, datasets, module_id, bm_dataset_name, group_dataset_name, cat_var, par_var, visit_var, anlfl_vars, subjid_var,
     value_vars, bar_group_palette, cat_palette, tr_mapper, show_x_ticks) {
 
-  warn <- CM$container()
   err <- CM$container()
 
   # TODO: Replace this function with a generic one that performs the checks based on mod_boxplot_API_spec.
-  # Something along the lines of OK <- CM$check_API(mod_corr_hm_API_spec, args = match.call(), warn, err)
+  # Something along the lines of OK <- CM$check_API(mod_corr_hm_API_spec, args = match.call(), err)
   OK <- check_mod_wfphm_auto(
     afmm, datasets, module_id, bm_dataset_name, group_dataset_name, cat_var, par_var, visit_var, anlfl_vars, subjid_var,
-    value_vars, bar_group_palette, cat_palette, tr_mapper, show_x_ticks, warn, err
+    value_vars, bar_group_palette, cat_palette, tr_mapper, show_x_ticks, err
   )
 
   # Checks that API spec does not (yet?) capture
@@ -2482,11 +2481,11 @@ check_mod_wfphm <- function(
     check_unique_sub_cat_par_vis(
       datasets, "bm_dataset_name", bm_dataset_name,
       subjid_var, cat_var, par_var, visit_var, anlfl_vars,
-      warn = warn, err = err
+      err = err
     )
   }
 
-  res <- list(warnings = warn[["messages"]], errors = err[["messages"]])
+  res <- list(errors = err[["messages"]])
   return(res)
 }
 
@@ -2497,4 +2496,4 @@ dataset_info_wfphm <- function(bm_dataset_name, group_dataset_name, ...) {
   return(list(all = unique(c(bm_dataset_name, group_dataset_name)), subject_level = group_dataset_name))
 }
 
-mod_wfphm <- CM$module(mod_wfphm, check_mod_wfphm, dataset_info_wfphm, map_afmm_mod_wfphm_auto)
+mod_wfphm <- CM$module(mod_wfphm, check_mod_wfphm, dataset_info_wfphm)
