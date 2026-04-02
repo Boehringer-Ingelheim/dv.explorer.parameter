@@ -969,11 +969,10 @@ check_mod_boxplot <- function(
   server_wrapper_func
 ) {
 
-  warn <- CM$container()
   err <- CM$container()
 
   # TODO: Replace this function with a generic one that performs the checks based on mod_boxplot_API_spec.
-  # Something along the lines of OK <- CM$check_API(mod_corr_hm_API_spec, args = match.call(), warn, err)
+  # Something along the lines of OK <- CM$check_API(mod_corr_hm_API_spec, args = match.call(), err)
   OK <- check_mod_boxplot_auto(
     afmm,
     datasets,
@@ -996,7 +995,6 @@ check_mod_boxplot <- function(
     default_sub_group,
     default_page_group,
     server_wrapper_func,
-    warn,
     err
   )
 
@@ -1021,11 +1019,11 @@ check_mod_boxplot <- function(
     check_unique_sub_cat_par_vis(
       datasets, "bm_dataset_name", bm_dataset_name,
       subjid_var, cat_var, par_var, visit_var, anlfl_vars,
-      warn = warn, err = err
+      err = err
     )
   }
 
-  res <- list(warnings = warn[["messages"]], errors = err[["messages"]])
+  res <- list(errors = err[["messages"]])
   return(res)
 }
 
@@ -1035,7 +1033,7 @@ dataset_info_boxplot <- function(bm_dataset_name, group_dataset_name, ...) {
   return(list(all = unique(c(bm_dataset_name, group_dataset_name)), subject_level = group_dataset_name))
 }
 
-mod_boxplot <- CM$module(mod_boxplot, check_mod_boxplot, dataset_info_boxplot, map_afmm_mod_boxplot_auto)
+mod_boxplot <- CM$module(mod_boxplot, check_mod_boxplot, dataset_info_boxplot)
 
 
 # Data manipulation

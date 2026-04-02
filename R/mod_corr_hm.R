@@ -1003,16 +1003,15 @@ mod_corr_hm_API_spec <- TC$group(
 check_mod_corr_hm <- function(
     afmm, datasets, module_id, bm_dataset_name, subjid_var, cat_var, par_var, visit_var,
     anlfl_vars, value_vars, default_cat, default_par, default_visit, default_value) {
-  warn <- CM$container()
   err <- CM$container()
 
   # TODO: Replace this function with a generic one that performs the checks based on mod_corr_hm_API_spec.
-  # Something along the lines of OK <- CM$check_API(mod_corr_hm_API_spec, args = match.call(), warn, err)
+  # Something along the lines of OK <- CM$check_API(mod_corr_hm_API_spec, args = match.call(), err)
 
   OK <- check_mod_corr_hm_auto(
     afmm, datasets, module_id, bm_dataset_name, subjid_var, cat_var, par_var, visit_var,
     anlfl_vars, value_vars, default_cat, default_par, default_visit, default_value,
-    warn, err
+    err
   )
 
   # Checks that API spec does not (yet?) capture
@@ -1025,11 +1024,11 @@ check_mod_corr_hm <- function(
     check_unique_sub_cat_par_vis(
       datasets, "bm_dataset_name", bm_dataset_name,
       subjid_var, cat_var, par_var, visit_var, anlfl_vars,
-      warn = warn, err = err
+      err = err
     )
   }
 
-  res <- list(warnings = warn[["messages"]], errors = err[["messages"]])
+  res <- list(errors = err[["messages"]])
   return(res)
 }
 
@@ -1039,4 +1038,4 @@ dataset_info_corr_hm <- function(bm_dataset_name, ...) {
   return(list(all = bm_dataset_name, subject_level = character(0)))
 }
 
-mod_corr_hm <- CM$module(mod_corr_hm, check_mod_corr_hm, dataset_info_corr_hm, map_afmm_mod_corr_hm_auto)
+mod_corr_hm <- CM$module(mod_corr_hm, check_mod_corr_hm, dataset_info_corr_hm)
