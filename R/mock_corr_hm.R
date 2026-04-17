@@ -70,17 +70,12 @@ mock_app_correlation_hm_mm <- function(anlfl_flags = FALSE) {
 
   bm_dataset <- test_data(random_bm_values = TRUE,  anlfl_flags = anlfl_flags)[["bm"]]
 
-  if (anlfl_flags) {
-
-    # modifying the test data to make them asymetric so that there is visible difference in the calculated values between the two analysis flag variables
-    data$bm <-  dplyr::filter(data$bm,
-                        !(as.numeric(as.character(.data[["SUBJID"]])) >= 16 &
-                          as.numeric(as.character(.data[["SUBJID"]])) <= 20 &
-                          .data[["ANLFL1"]] == "Y"))
-
+  anlfl_vars <- NULL
+  if (anlfl_flags) { # drop some observations from ANLFL1
+    subjid_int <- as.integer(bm_dataset[["SUBJID"]])
+    drop_mask <- (16 <= subjid_int & subjid_int <= 20 & bm_dataset[["ANLFL1"]] == "Y")
+    bm_dataset <- bm_dataset[!drop_mask,]
     anlfl_vars <- c("ANLFL1", "ANLFL2")
-  } else {
-    anlfl_vars <- NULL
   }
 
   module_list <- list(
