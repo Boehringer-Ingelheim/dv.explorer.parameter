@@ -5,6 +5,7 @@ BP <- poc( # nolint
     PAR_BUTTON = "par_button",
     PAR = "par",
     PAR_VALUE = "par_value",
+    X_VAR = "x_var",
     PAR_VISIT = "par_visit",
     ANLFL_FILTER = "anlfl_filter",
     PAR_TRANSFORM = "par_transform",
@@ -36,6 +37,7 @@ BP <- poc( # nolint
       PAR = "Parameter",
       CAT = "Category",
       PAR_VALUE = "Value",
+      X_VAR = "Select a variable for x-axis",
       PAR_VISIT = "Visit",
       ANLFL_FILTER = "Analysis Flag Filter",
       PAR_TRANSFORM = "Transform",
@@ -102,13 +104,17 @@ boxplot_UI <- function(id) { # nolint
     ns(BP$ID$PAR_BUTTON), BP$MSG$LABEL$PAR_BUTTON,
     parameter_UI(id = ns(BP$ID$PAR)),
     col_menu_UI(ns(BP$ID$PAR_VALUE)),
+    shiny::selectizeInput(
+      inputId = ns(BP$ID$X_VAR),
+      label = BP$MSG$LABEL$X_VAR,
+      choices = NULL
+    ),
     val_menu_UI(id = ns(BP$ID$PAR_VISIT)),
     col_menu_UI(ns(BP$ID$ANLFL_FILTER))
   )
 
   group_menu <- drop_menu_helper(
     ns(BP$ID$GRP_BUTTON), BP$MSG$LABEL$GRP_BUTTON,
-    col_menu_UI(id = ns(BP$ID$MAIN_GRP)),
     col_menu_UI(id = ns(BP$ID$SUB_GRP)),
     col_menu_UI(id = ns(BP$ID$PAGE_GRP))
   )
@@ -259,6 +265,7 @@ boxplot_server <- function(id,
                            par_var = "PARAM",
                            value_vars = "AVAL",
                            visit_var = "AVISIT",
+                           trt_var = NULL,
                            anlfl_vars = NULL,
                            subjid_var = "USUBJID",
                            quantile_type = 7L,
@@ -385,15 +392,6 @@ boxplot_server <- function(id,
     # input
 
     inputs <- list()
-    inputs[[BP$ID$MAIN_GRP]] <- col_menu_server(
-      id = BP$ID$MAIN_GRP,
-      data = v_group_dataset,
-      label = "Select a grouping variable",
-      include_func = function(x) {
-        is.factor(x) || is.character(x)
-      },
-      default = default_main_group
-    )
     inputs[[BP$ID$SUB_GRP]] <- col_menu_server(
       id = BP$ID$SUB_GRP,
       data = v_group_dataset,
@@ -420,12 +418,21 @@ boxplot_server <- function(id,
       default_cat = default_cat,
       default_par = default_par
     )
+    shiny::updateSelectizeInput(
+      inputId = BP$ID$X_VAR,
+      choices = c(visit_var, trt_var),
+      selected = visit_var
+    )
+    inputs[[BP$ID$X_VAR]] <- reactive(input[[BP$ID$X_VAR]])
     inputs[[BP$ID$PAR_VISIT]] <- val_menu_server(
       id = BP$ID$PAR_VISIT,
-      label = BP$MSG$LABEL$PAR_VISIT,
+      label = "Select values for x-axis",
       data = v_bm_dataset,
-      var = VAR$VIS,
-      default = default_visit
+      var = inputs[[BP$ID$X_VAR]],
+      default = default_visit,
+      multiple = TRUE,
+      all_on_change = TRUE,
+      use_picker = TRUE
     )
     inputs[[BP$ID$PAR_VALUE]] <- col_menu_server(
       id = BP$ID$PAR_VALUE,
@@ -500,13 +507,13 @@ boxplot_server <- function(id,
         msg = BP$MSG$VALIDATE$NO_PAR_SEL
       )
     )
-    param_iv$add_rule(
-      get_id(inputs[[BP$ID$PAR_VISIT]]),
-      sv_not_empty(
-        inputs[[BP$ID$PAR_VISIT]],
-        msg = BP$MSG$VALIDATE$NO_VISIT_SEL
-      )
-    )
+    # param_iv$add_rule(
+    #   get_id(inputs[[BP$ID$PAR_VISIT]]),
+    #   sv_not_empty(
+    #     inputs[[BP$ID$PAR_VISIT]],
+    #     msg = BP$MSG$VALIDATE$NO_VISIT_SEL
+    #   )
+    # )
     param_iv$add_rule(
       get_id(inputs[[BP$ID$PAR_VALUE]]),
       sv_not_empty(
@@ -517,13 +524,6 @@ boxplot_server <- function(id,
     param_iv$enable()
 
     group_iv <- shinyvalidate::InputValidator$new()
-    group_iv$add_rule(
-      get_id(inputs[[BP$ID$MAIN_GRP]]),
-      sv_not_empty(
-        inputs[[BP$ID$MAIN_GRP]],
-        msg = BP$MSG$VALIDATE$NO_MAIN_GROUP_SEL
-      )
-    )
     group_iv$add_rule(
       get_id(inputs[[BP$ID$SUB_GRP]]),
       sv_not_empty(
@@ -571,7 +571,8 @@ boxplot_server <- function(id,
           )
         )
 
-        subset_inputs <- c(BP$ID$PAR, BP$ID$PAR_VISIT, BP$ID$PAR_VALUE, BP$ID$MAIN_GRP, BP$ID$SUB_GRP, BP$ID$PAGE_GRP)
+        subset_inputs <- c(BP$ID$PAR, BP$ID$PAR_VISIT, BP$ID$X_VAR, BP$ID$PAR_VALUE,
+                           BP$ID$SUB_GRP, BP$ID$PAGE_GRP)
         if (!is.null(inputs[[BP$ID$ANLFL_FILTER]])) {
           subset_inputs <- c(subset_inputs, BP$ID$ANLFL_FILTER)
         }
@@ -604,8 +605,8 @@ boxplot_server <- function(id,
       l_inputs <- v_input_subset()
       group_vect <- drop_nones(
         stats::setNames(
-          c(l_inputs[[BP$ID$MAIN_GRP]], l_inputs[[BP$ID$SUB_GRP]], l_inputs[[BP$ID$PAGE_GRP]]),
-          c(CNT$MAIN_GROUP, CNT$SUB_GROUP, CNT$PAGE_GROUP)
+          c(l_inputs[[BP$ID$SUB_GRP]], l_inputs[[BP$ID$PAGE_GRP]]),
+          c(CNT$SUB_GROUP, CNT$PAGE_GROUP)
         )
       )
 
@@ -620,7 +621,7 @@ boxplot_server <- function(id,
         subj_col = VAR$SBJ,
         cat_col = VAR$CAT,
         par_col = VAR$PAR,
-        vis_col = VAR$VIS,
+        vis_col = l_inputs[[BP$ID$X_VAR]],
         anlfl_col = l_inputs[[BP$ID$ANLFL_FILTER]]
       )
     })
@@ -631,7 +632,7 @@ boxplot_server <- function(id,
         par = l_inputs[[BP$ID$PAR]][["par"]],
         par_value = l_inputs[[BP$ID$PAR_VALUE]],
         vis = l_inputs[[BP$ID$PAR_VISIT]],
-        main_grp = l_inputs[[BP$ID$MAIN_GRP]],
+        main_grp = NULL, # l_inputs[[BP$ID$MAIN_GRP]],
         sub_grp = l_inputs[[BP$ID$SUB_GRP]],
         page_grp = l_inputs[[BP$ID$PAGE_GRP]]
       )
@@ -766,7 +767,6 @@ boxplot_server <- function(id,
     )
 
     shiny::observeEvent(loaded_state(), {
-      get_update(inputs[[BP$ID$MAIN_GRP]])[["val"]](selected = loaded_state()[[BP$ID$MAIN_GRP]])
       get_update(inputs[[BP$ID$SUB_GRP]])[["val"]](selected = loaded_state()[[BP$ID$SUB_GRP]])
       get_update(inputs[[BP$ID$PAGE_GRP]])[["val"]](selected = loaded_state()[[BP$ID$PAGE_GRP]])
       get_update(inputs[[BP$ID$PAR]])[["val"]](
@@ -854,6 +854,7 @@ mod_boxplot <- function(module_id,
                         par_var = "PARAM",
                         value_vars = "AVAL",
                         visit_var = "AVISIT",
+                        trt_var = "TRTP",
                         anlfl_vars = NULL,
                         subjid_var = "SUBJID",
                         quantile_type = 7L,
@@ -883,7 +884,8 @@ mod_boxplot <- function(module_id,
           group_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[group_dataset_name]]),
           dataset_name = afmm[["dataset_name"]],
           on_sbj_click = on_sbj_click_fun,
-          cat_var = cat_var, par_var = par_var, value_vars = value_vars, visit_var = visit_var,
+          cat_var = cat_var, par_var = par_var, value_vars = value_vars,
+          visit_var = visit_var, trt_var = trt_var,
           anlfl_vars = anlfl_vars, subjid_var = subjid_var,
           quantile_type = quantile_type,
           default_cat = default_cat, default_par = default_par, default_visit = default_visit,
@@ -1033,7 +1035,7 @@ dataset_info_boxplot <- function(bm_dataset_name, group_dataset_name, ...) {
   return(list(all = unique(c(bm_dataset_name, group_dataset_name)), subject_level = group_dataset_name))
 }
 
-mod_boxplot <- CM$module(mod_boxplot, check_mod_boxplot, dataset_info_boxplot)
+# mod_boxplot <- CM$module(mod_boxplot, check_mod_boxplot, dataset_info_boxplot)
 
 
 # Data manipulation
@@ -1210,6 +1212,9 @@ boxplot_chart <- function(ds, violin, show_points, log_project_y, title_data = N
   is_page_grouped <- CNT$PAGE_GROUP %in% names(ds)
 
   # Define aes
+
+  CNT$MAIN_GROUP <- "visit" # TEMP!!
+  is_main_grouped <- TRUE   # TEMP!!
 
   if (is_main_grouped) {
     aes <- ggplot2::aes(

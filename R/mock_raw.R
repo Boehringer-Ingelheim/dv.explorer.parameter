@@ -49,6 +49,8 @@ test_data <- function(random_bm_values = FALSE, anlfl_flags = FALSE) {
       VISIT2 = factor(.data[["VISIT2"]]) # NOTE(miguel): Remove to make mock process numerical visits
     )
 
+  bm[["TRTP"]] <- paste0("T", as.character(((as.numeric(bm[["SUBJID"]]) + as.numeric(bm[["VISIT"]])) %% 3) + 1))
+
   if (anlfl_flags) {
     bm <- bm |>
       dplyr::mutate(
