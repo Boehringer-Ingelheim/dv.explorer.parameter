@@ -71,7 +71,6 @@ mock_app_boxplot_mm <- function(update_query_string = TRUE, anlfl_flags = FALSE)
 
   data <- test_data(anlfl_flags = anlfl_flags)
 
-
   if (anlfl_flags) {
     anlfl_vars <- c("ANLFL1", "ANLFL2")
   } else {
@@ -86,10 +85,14 @@ mock_app_boxplot_mm <- function(update_query_string = TRUE, anlfl_flags = FALSE)
         bm_dataset_name = "bm",
         group_dataset_name = "adsl",
         visit_var = "VISIT",
+        trt_var = "TRTP",
         value_vars = c("VALUE1", "VALUE2"),
         subjid_var = "SUBJID",
         cat_var = "PARCAT",
-        anlfl_vars = anlfl_vars
+        anlfl_vars = anlfl_vars,
+        default_cat = "PARCAT1",
+        default_par = "PARAM11",
+        default_visit = NULL
       )
     ),
     filter_data = "adsl",
