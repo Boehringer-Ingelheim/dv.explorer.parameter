@@ -433,14 +433,11 @@ boxplot_server <- function(id,
       choices = c(visit_var, trt_var),
       selected = visit_var
     )
-    inputs[[BP$ID$X_VAR]] <- reactive({ input[[BP$ID$X_VAR]] })
+    inputs[[BP$ID$X_VAR]] <- reactive(input[[BP$ID$X_VAR]])
     inputs[[BP$ID$PAR_VISIT]] <- val_menu_server(
       id = BP$ID$PAR_VISIT,
-      #label = BP$MSG$LABEL$PAR_VISIT,
       label = "Select values for x-axis",
       data = v_bm_dataset,
-      #var = VAR$VIS,
-      #var = reactive({ input[[BP$ID$X_VAR]] }),
       var = inputs[[BP$ID$X_VAR]],
       default = default_visit,
       multiple = TRUE,
@@ -630,7 +627,6 @@ boxplot_server <- function(id,
         )
       )
 
-      #browser()
       bp_subset_data(
         cat = l_inputs[[BP$ID$PAR]][["cat"]],
         par = l_inputs[[BP$ID$PAR]][["par"]],
@@ -1167,8 +1163,6 @@ bp_subset_data <- function(cat,
 
   labels <- get_lbls(joint_data)
 
-  #browser()
-
   # Relevel biomarker factors but groups remain untouched
   if (!isTRUE(attr(bm_fragment, "parameter_renamed"))) {
     joint_data[[CNT$PAR]] <- factor(joint_data[[CNT$PAR]], levels = par)
@@ -1238,7 +1232,6 @@ boxplot_chart <- function(ds, violin, show_points, log_project_y, title_data = N
 
   # Define aes
 
-  #browser()
   CNT$MAIN_GROUP <- "visit" # TEMP!!
   is_main_grouped <- TRUE   # TEMP!!
 
