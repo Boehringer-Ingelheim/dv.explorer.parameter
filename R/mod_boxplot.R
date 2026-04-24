@@ -443,7 +443,9 @@ boxplot_server <- function(id,
       #var = reactive({ input[[BP$ID$X_VAR]] }),
       var = inputs[[BP$ID$X_VAR]],
       default = default_visit,
-      multiple = TRUE
+      multiple = TRUE,
+      all_on_change = TRUE,
+      use_picker = TRUE
     )
     inputs[[BP$ID$PAR_VALUE]] <- col_menu_server(
       id = BP$ID$PAR_VALUE,
@@ -1175,7 +1177,7 @@ bp_subset_data <- function(cat,
   if (!is.null(anlfl_col) && CNT$ANLFL %in% names(joint_data)) {
     joint_data[[CNT$ANLFL]] <- factor(joint_data[[CNT$ANLFL]], levels = "Y")
   }
-  if (length(vis) > 0) joint_data[[CNT$VIS]] <- factor(joint_data[[CNT$VIS]], levels = vis)
+  joint_data[[CNT$VIS]] <- factor(joint_data[[CNT$VIS]], levels = vis)
   joint_data[[CNT$SBJ]] <- droplevels(joint_data[[CNT$SBJ]])
 
   # Relabel with labels before releveling

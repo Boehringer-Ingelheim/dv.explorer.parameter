@@ -88,9 +88,6 @@ subset_bds_param <- function(ds, par, par_col, cat, cat_col,
     selected_cols[[CNT$ANLFL]] <- anlfl_col
   }
 
-  #browser()
-  if (length(vis) == 0) vis <- levels(ds[[vis_col]])
-
   mask <- ds[[cat_col]] %in% cat & ds[[par_col]] %in% par & ds[[vis_col]] %in% vis
   if (!is.null(anlfl_col) && anlfl_col %in% names(ds)) {
     mask <- mask & ds[[anlfl_col]] %in% "Y"
