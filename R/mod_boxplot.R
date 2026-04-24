@@ -115,7 +115,6 @@ boxplot_UI <- function(id) { # nolint
 
   group_menu <- drop_menu_helper(
     ns(BP$ID$GRP_BUTTON), BP$MSG$LABEL$GRP_BUTTON,
-    # col_menu_UI(id = ns(BP$ID$MAIN_GRP)),
     col_menu_UI(id = ns(BP$ID$SUB_GRP)),
     col_menu_UI(id = ns(BP$ID$PAGE_GRP))
   )
@@ -393,15 +392,6 @@ boxplot_server <- function(id,
     # input
 
     inputs <- list()
-    # inputs[[BP$ID$MAIN_GRP]] <- col_menu_server(
-    #   id = BP$ID$MAIN_GRP,
-    #   data = v_group_dataset,
-    #   label = "Select a grouping variable",
-    #   include_func = function(x) {
-    #     is.factor(x) || is.character(x)
-    #   },
-    #   default = default_main_group
-    # )
     inputs[[BP$ID$SUB_GRP]] <- col_menu_server(
       id = BP$ID$SUB_GRP,
       data = v_group_dataset,
@@ -534,13 +524,6 @@ boxplot_server <- function(id,
     param_iv$enable()
 
     group_iv <- shinyvalidate::InputValidator$new()
-    # group_iv$add_rule(
-    #   get_id(inputs[[BP$ID$MAIN_GRP]]),
-    #   sv_not_empty(
-    #     inputs[[BP$ID$MAIN_GRP]],
-    #     msg = BP$MSG$VALIDATE$NO_MAIN_GROUP_SEL
-    #   )
-    # )
     group_iv$add_rule(
       get_id(inputs[[BP$ID$SUB_GRP]]),
       sv_not_empty(
@@ -589,7 +572,6 @@ boxplot_server <- function(id,
         )
 
         subset_inputs <- c(BP$ID$PAR, BP$ID$PAR_VISIT, BP$ID$X_VAR, BP$ID$PAR_VALUE,
-                           # BP$ID$MAIN_GRP,
                            BP$ID$SUB_GRP, BP$ID$PAGE_GRP)
         if (!is.null(inputs[[BP$ID$ANLFL_FILTER]])) {
           subset_inputs <- c(subset_inputs, BP$ID$ANLFL_FILTER)
@@ -623,10 +605,8 @@ boxplot_server <- function(id,
       l_inputs <- v_input_subset()
       group_vect <- drop_nones(
         stats::setNames(
-          c(# l_inputs[[BP$ID$MAIN_GRP]],
-            l_inputs[[BP$ID$SUB_GRP]], l_inputs[[BP$ID$PAGE_GRP]]),
-          c(# CNT$MAIN_GROUP,
-            CNT$SUB_GROUP, CNT$PAGE_GROUP)
+          c(l_inputs[[BP$ID$SUB_GRP]], l_inputs[[BP$ID$PAGE_GRP]]),
+          c(CNT$SUB_GROUP, CNT$PAGE_GROUP)
         )
       )
 
@@ -787,7 +767,6 @@ boxplot_server <- function(id,
     )
 
     shiny::observeEvent(loaded_state(), {
-      # get_update(inputs[[BP$ID$MAIN_GRP]])[["val"]](selected = loaded_state()[[BP$ID$MAIN_GRP]])
       get_update(inputs[[BP$ID$SUB_GRP]])[["val"]](selected = loaded_state()[[BP$ID$SUB_GRP]])
       get_update(inputs[[BP$ID$PAGE_GRP]])[["val"]](selected = loaded_state()[[BP$ID$PAGE_GRP]])
       get_update(inputs[[BP$ID$PAR]])[["val"]](
