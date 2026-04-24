@@ -115,7 +115,7 @@ boxplot_UI <- function(id) { # nolint
 
   group_menu <- drop_menu_helper(
     ns(BP$ID$GRP_BUTTON), BP$MSG$LABEL$GRP_BUTTON,
-    #col_menu_UI(id = ns(BP$ID$MAIN_GRP)),
+    # col_menu_UI(id = ns(BP$ID$MAIN_GRP)),
     col_menu_UI(id = ns(BP$ID$SUB_GRP)),
     col_menu_UI(id = ns(BP$ID$PAGE_GRP))
   )
