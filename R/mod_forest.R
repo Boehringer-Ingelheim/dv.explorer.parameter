@@ -8,7 +8,7 @@
 # instead of creating a reactive rat's nest.
 # FIXME: Selecting a category triggers multiple spurious updates
 #        I think that has to do with:
-#        - v_input_subset bundles several inputs: downstream reactives trigger on inputs they don't care
+#        - v_input_subset bundles several inputs: downstream reactives trigger on inputs they don't care about
 #        - interdependent inputs treated separately (e.g. CATEGORICAL_VAL_{A,B} triggering one invalidates
 #        the choices for the other one)
 # FIXME: Faulty bookmarking: The right-most grouping selector is not restored properly, probably
@@ -25,6 +25,13 @@
 #       feature. We will wait for a user requirement.
 # TODO: Remove the function_names from the UI signature and use a renderUI instead?
 
+# TODO:
+#       [X] Use only basic shiny selectors
+#       [X] Remove `type` experiment
+#       [X] See if you can flatten `v_input_subset` without affecting shinyvalidate
+#       [ ] Remove all checks that the EEF already covers
+#       [ ] Review the filtering logic to see if the mask provides some benefit
+
 # FOREST PLOT
 
 FP_ID <- poc(
@@ -32,6 +39,7 @@ FP_ID <- poc(
   GRP_BUTTON = "grp_button",
   CATEGORICAL_VAR_BUTTON = "categorical_var_button",
   PLOT_BUTTON = "plot_button",
+  CAT = "cat",
   PAR = "par",
   PAR_VALUE_TRANSFORM = "par_value",
   PAR_VISIT = "par_visit",
@@ -52,6 +60,7 @@ FP_ID <- poc(
 
 FP_MSG <- poc(
   LABEL = poc(
+    FOREST_KIND = "Kind",
     PAR_BUTTON = "Parameter", # inline selector "these parameters",
     CATEGORICAL_VAR_BUTTON = "these groups",
     PAR = "Parameter",
@@ -59,11 +68,13 @@ FP_MSG <- poc(
     VISIT = "Visit",
     TRANSFORM = "Transform",
     PAR_VALUE_TRANSFORM = "Value and transform",
+    CONT_VAR = "Continuous variable",
+    CATEGORICAL_VAR = "Categorical variable",
     PAR_VISIT = "Visit",
     GRP_BUTTON = "Grouping",
     MAIN_GRP = "Group",
-    CAT_VAL1 = "First value",
-    CAT_VAL2 = "Second value",
+    CATEGORICAL_VAL_A = "First value",
+    CATEGORICAL_VAL_B = "Second value",
     CORR_BUTTON = "Correlation",
     P_VALUE = "p-value (2-sided)",
     CI_MIN = "95% CI (min)",
@@ -92,8 +103,6 @@ FP_MSG <- poc(
     }
   )
 )
-
-
 
 # UI and server functions
 
@@ -151,47 +160,52 @@ forest_UI <- function(id, numeric_numeric_function_names = character(0), numeric
     )
   }
 
-  visit_selector <- val_menu_UI(id = ns(FP_ID$PAR_VISIT))
-
-  parameter_menu_inline <- drop_menu_helper(
-    ns(FP_ID$PAR_BUTTON), FP_MSG$LABEL$PAR_BUTTON,
-    parameter_UI(id = ns(FP_ID$PAR)),
-    col_menu_UI(id = ns(FP_ID$PAR_VALUE_TRANSFORM))
+  forest_kind_selector <- shiny::selectInput(
+    ns(FP_ID$FOREST_KIND), label = FP_MSG$LABEL$FOREST_KIND,
+    choices = c(numeric_numeric_function_names, numeric_factor_function_names),
+    selected = default_function %||% c(numeric_numeric_function_names, numeric_factor_function_names)[[1]]
   )
-  group_selector <- col_menu_UI(id = ns(FP_ID$MAIN_GRP))
 
+  selector <- function(id, multiple) {
+    shiny::selectInput(inputId = ns(FP_ID[[id]]), label = FP_MSG$LABEL[[id]], choices = character(0), multiple = multiple)
+  }
 
-  forest_kind_selector <-
-    shiny::selectInput(
-      ns(FP_ID$FOREST_KIND), NULL,
-      choices = c(numeric_numeric_function_names, numeric_factor_function_names),
-      selected = default_function %||% c(numeric_numeric_function_names, numeric_factor_function_names)[[1]]
-    )
+  category_selector <- selector("CAT", TRUE)
+  parameter_selector <- selector("PAR", TRUE)
+  value_transform_selector <- selector("PAR_VALUE_TRANSFORM", FALSE)
+  cont_var_selector <- selector("CONT_VAR", FALSE)
+  cat_var_selector <- selector("CATEGORICAL_VAR", FALSE)
+  cat_a_selector <- selector("CATEGORICAL_VAL_A", FALSE)
+  cat_b_selector <- selector("CATEGORICAL_VAL_B", FALSE)
+  visit_selector <- selector("PAR_VISIT", FALSE)
+  group_selector <- selector("MAIN_GRP", FALSE)
 
-  cont_var_selector <- shiny::conditionalPanel(
+  conditional_cont_var_selector <- shiny::conditionalPanel(
     condition = ssub(
       '[NUM_NUM_IDS].includes(input["FOREST_KIND_ID"])',
       NUM_NUM_IDS = paste0('"', numeric_numeric_function_names, '"', collapse = ","),
       FOREST_KIND_ID = ns(FP_ID$FOREST_KIND)
     ),
-    # TODO: POC
-    col_menu_UI(id = ns(FP_ID$CONT_VAR))
+    cont_var_selector
   )
 
-  categorical_var_selector <- shiny::conditionalPanel(
+  conditional_cat_var_selector <- shiny::conditionalPanel(
     condition = ssub(
       '[NUM_FAC_IDS].includes(input["FOREST_KIND_ID"])',
       NUM_FAC_IDS = paste0('"', numeric_factor_function_names, '"', collapse = ","),
       FOREST_KIND_ID = ns(FP_ID$FOREST_KIND)
     ),
-    col_menu_UI(id = ns(FP_ID$CATEGORICAL_VAR)),
-    shiny::selectizeInput(inputId = ns(FP_ID$CATEGORICAL_VAL_A), label = FP_MSG$LABEL$CAT_VAL1, choices = NULL),
-    shiny::selectizeInput(inputId = ns(FP_ID$CATEGORICAL_VAL_B), label = FP_MSG$LABEL$CAT_VAL2, choices = NULL)
+    cat_var_selector, cat_a_selector, cat_b_selector
+  )
+
+  parameter_menu_inline <- drop_menu_helper(
+    ns(FP_ID$PAR_BUTTON), FP_MSG$LABEL$PAR_BUTTON,
+    category_selector, parameter_selector, value_transform_selector
   )
 
   cont_cat_menu <- drop_menu_helper( # for traditional menus
     ns(FP_ID$CONT_CAT_VAR_BUTTON), FP_MSG$LABEL$CONT_CAT_VAR_BUTTON,
-    cont_var_selector, categorical_var_selector,
+    conditional_cont_var_selector, conditional_cat_var_selector,
   )
 
   # Charts and tables ----
@@ -203,8 +217,7 @@ forest_UI <- function(id, numeric_numeric_function_names = character(0), numeric
   )
 
   table <- shiny::tagList(
-    table_heading,
-    DT::DTOutput(ns(FP_ID$TABLE_LISTING))
+    table_heading, DT::DTOutput(ns(FP_ID$TABLE_LISTING))
   )
 
   js_resize <- shiny::tags[["script"]]('
@@ -265,7 +278,6 @@ forest_UI <- function(id, numeric_numeric_function_names = character(0), numeric
     shiny::tagList(table_absolute_div, forest_div)
   )
 
-
   # main_ui ----
 
   main_ui <- shiny::tagList(js_resize, table_forest_div)
@@ -277,11 +289,7 @@ forest_UI <- function(id, numeric_numeric_function_names = character(0), numeric
   }
 }
 
-gen_svg_ <- function(output_size, df, table_row_order, axis_config) {
-  check_type(output_size, "size")
-  check_type(df, "result_table")
-  check_type(table_row_order, "sequence_permutation")
-  check_type(axis_config, "axis_config")
+gen_svg <- function(output_size, df, table_row_order, axis_config) {
   checkmate::assert_true(length(table_row_order) == nrow(df))
 
   width <- output_size[["w"]]
@@ -382,17 +390,11 @@ gen_svg_ <- function(output_size, df, table_row_order, axis_config) {
     TREE_STROKE_WIDTH = 0.03 * cell_height
   )
 
-  res <- shiny::HTML(svg) |> type("svg")
+  res <- shiny::HTML(svg)
   res
 }
-gen_svg <- strict(gen_svg_)
 
-gen_result_table_fun_ <- function(ds, sl, fun, label) {
-  check_type(ds, "data_subset")
-  check_type(sl, "sl_df")
-  check_type(fun, "fun")
-  check_type(label, "S")
-
+gen_result_table_fun <- function(ds, sl, fun, label) {
   group_cols <- intersect(c(CNT$CAT, CNT$PAR, CNT$MAIN_GROUP), names(ds))
 
   df <- as.data.frame(table(ds[, group_cols]), responseName = "N", stringsAsFactors = FALSE) |>
@@ -457,139 +459,137 @@ gen_result_table_fun_ <- function(ds, sl, fun, label) {
   attr(df[["p_value"]], "label") <- "P-value"
   attr(df[["warning"]], "label") <- "Warning"
 
-  df |> type("result_table")
+  return(df)
 }
-gen_result_table_fun <- strict(gen_result_table_fun_)
 
-    compute_data_table_output <- function(ds, ns) {
-      # FIXME: Assumes parameter names are not repeated across categories
+compute_data_table_output <- function(ds, ns) {
+  # FIXME: Assumes parameter names are not repeated across categories
 
-      ds[["result-order"]] <- ds[["result"]]
-      ds[["CI_lower_limit-order"]] <- ds[["CI_lower_limit"]]
-      ds[["CI_upper_limit-order"]] <- ds[["CI_upper_limit"]]
-      ds[["p_value-order"]] <- ds[["p_value"]]
+  ds[["result-order"]] <- ds[["result"]]
+  ds[["CI_lower_limit-order"]] <- ds[["CI_lower_limit"]]
+  ds[["CI_upper_limit-order"]] <- ds[["CI_upper_limit"]]
+  ds[["p_value-order"]] <- ds[["p_value"]]
 
-      labels <- unname(unlist(get_lbls_robust(ds)))
+  labels <- unname(unlist(get_lbls_robust(ds)))
 
-      th_list <- lapply(labels, htmltools::tags[["th"]])
+  th_list <- lapply(labels, htmltools::tags[["th"]])
 
-      ds[["forest"]] <- ""
-      # TODO: namespace and POC #iephan
-      th_list <- append(th_list, list(htmltools::tags[["th"]](id = "id_forest_column", "")))
+  ds[["forest"]] <- ""
+  # TODO: namespace and POC #iephan
+  th_list <- append(th_list, list(htmltools::tags[["th"]](id = "id_forest_column", "")))
 
-      # TODO? Simplify custom headers with https://premium.shinyapps.io/CustomDataTableHeaders/
-      container <- htmltools::tags[["table"]](
-        class = "display",
-        style = "white-space:nowrap",
-        htmltools::tags[["thead"]](
-          do.call(htmltools::tags[["tr"]], th_list)
+  # TODO? Simplify custom headers with https://premium.shinyapps.io/CustomDataTableHeaders/
+  container <- htmltools::tags[["table"]](
+    class = "display",
+    style = "white-space:nowrap",
+    htmltools::tags[["thead"]](
+      do.call(htmltools::tags[["tr"]], th_list)
+    )
+  )
+
+  format_number <- function(x, decimal_count) {
+    fmt <- rep(paste0("%.", decimal_count, "f"), length(x))
+    fmt[x > 1e6] <- "%g"
+    sprintf(fmt, x)
+  }
+
+  # TODO? Specify decimal count centrally
+  ds[["result"]][] <- format_number(ds[["result"]], 2)
+  ds[["CI_lower_limit"]][] <- format_number(ds[["CI_lower_limit"]], 2)
+  ds[["CI_upper_limit"]][] <- format_number(ds[["CI_upper_limit"]], 2)
+  ds[["p_value"]][] <- format_number(ds[["p_value"]], 4)
+
+  warning_rows <- !is.na(ds[["warning"]])
+  ds[["result"]][warning_rows] <- paste0(ds[["result"]][warning_rows], " *")
+
+  warning_col_index <- which(names(ds) == "warning") - 1
+
+  format_na_and_warnings <- c(
+    "function(row, data){
+                     for(var i=0; i<data.length; i++){
+                       if(data[i] == 'NA' || data[i] == 'Inf'){
+                         $('td:eq('+i+')', row).html(data[i])
+                           .css({'color': 'rgb(151,151,151)', 'font-style': 'italic'});
+                       }
+                       else if(typeof data[i] === 'string' && data[i].endsWith('*')){
+                         $('td:eq('+i+')', row).html(data[i])
+                           .css({'color': 'rgb(255,50,50)'})
+                           .attr('title', data[WARNING_COL_INDEX]);
+                       }
+                     }
+                   }" |>
+      ssub(WARNING_COL_INDEX = as.character(warning_col_index))
+  )
+
+  colnum <- function(name) which(names(ds) == name) - 1
+
+  res <- DT::datatable(
+    data = ds,
+    escape = FALSE,
+    container = container,
+    rownames = FALSE,
+    options = list(
+      # targets can be expressed as either 0-based indices or strings (https://github.com/rstudio/DT/pull/948)
+      # for the rest of indices, we need to provide 0-based indices
+      columnDefs = list(
+        list(width = "25%", targets = "forest"),
+        list(orderData = colnum("result-order"), targets = "result"),
+        list(orderData = colnum("CI_lower_limit-order"), targets = "CI_lower_limit"),
+        list(orderData = colnum("CI_upper_limit-order"), targets = "CI_upper_limit"),
+        list(orderData = colnum("p_value-order"), targets = "p_value"),
+        list(
+          visible = FALSE,
+          searchable = FALSE,
+          targets = list(
+            "result-order",
+            "CI_lower_limit-order",
+            "CI_upper_limit-order",
+            "p_value-order",
+            "warning"
+          )
         )
-      )
+      ),
+      dom = "t",
+      paging = FALSE,
+      initComplete = DT::JS(
+        'function(setting, json){
+                              RESIZE_OBSERVER.disconnect();
+                              let table = document.getElementById("TABLE_LISTING");
+                              let tbody = table.getElementsByTagName("tbody")[0];
+                              RESIZE_OBSERVER.observe(tbody);
+                            }' |>
+          ssub(
+            TABLE_LISTING = ns(FP_ID$TABLE_LISTING),
+            RESIZE_OBSERVER = underscore_ns(ns, "resize_observer") # TODO: POC
+          )
+      ),
+      rowCallback = DT::JS(format_na_and_warnings)
+    )
+  )
+  res
+}
 
-      format_number <- function(x, decimal_count) {
-        fmt <- rep(paste0("%.", decimal_count, "f"), length(x))
-        fmt[x > 1e6] <- "%g"
-        sprintf(fmt, x)
-      }
+compute_forest_svg_output <- function(ds, forest_div_size, forest_kind, is_continuous_forest, is_categorical_forest, row_order) {
+  df <- ds
 
-      # TODO? Specify decimal count centrally
-      ds[["result"]][] <- format_number(ds[["result"]], 2)
-      ds[["CI_lower_limit"]][] <- format_number(ds[["CI_lower_limit"]], 2)
-      ds[["CI_upper_limit"]][] <- format_number(ds[["CI_upper_limit"]], 2)
-      ds[["p_value"]][] <- format_number(ds[["p_value"]], 4)
+  axis_config <- NULL
+  if (is_continuous_forest) {
+    axis_config <- c(x_min = -1, x_max = 1, ref_line_x = 0, tick_count = 5)
+  } else {
+    stopifnot(is_categorical_forest)
+    axis_config <- c(x_min = 0, x_max = 5, ref_line_x = 1, tick_count = 6)
+  }
 
-      warning_rows <- !is.na(ds[["warning"]])
-      ds[["result"]][warning_rows] <- paste0(ds[["result"]][warning_rows], " *")
+  row_order
+  shiny::req(
+    row_order,
+    length(row_order) == nrow(df),
+    all(sort(row_order) == seq_len(nrow(df)))
+  )
 
-      warning_col_index <- which(names(ds) == "warning") - 1
-
-      format_na_and_warnings <- c(
-        "function(row, data){
-                         for(var i=0; i<data.length; i++){
-                           if(data[i] == 'NA' || data[i] == 'Inf'){
-                             $('td:eq('+i+')', row).html(data[i])
-                               .css({'color': 'rgb(151,151,151)', 'font-style': 'italic'});
-                           }
-                           else if(typeof data[i] === 'string' && data[i].endsWith('*')){
-                             $('td:eq('+i+')', row).html(data[i])
-                               .css({'color': 'rgb(255,50,50)'})
-                               .attr('title', data[WARNING_COL_INDEX]);
-                           }
-                         }
-                       }" |>
-          ssub(WARNING_COL_INDEX = as.character(warning_col_index))
-      )
-
-      colnum <- function(name) which(names(ds) == name) - 1
-
-      res <- DT::datatable(
-        data = ds,
-        escape = FALSE,
-        container = container,
-        rownames = FALSE,
-        options = list(
-          # targets can be expressed as either 0-based indices or strings (https://github.com/rstudio/DT/pull/948)
-          # for the rest of indices, we need to provide 0-based indices
-          columnDefs = list(
-            list(width = "25%", targets = "forest"),
-            list(orderData = colnum("result-order"), targets = "result"),
-            list(orderData = colnum("CI_lower_limit-order"), targets = "CI_lower_limit"),
-            list(orderData = colnum("CI_upper_limit-order"), targets = "CI_upper_limit"),
-            list(orderData = colnum("p_value-order"), targets = "p_value"),
-            list(
-              visible = FALSE,
-              searchable = FALSE,
-              targets = list(
-                "result-order",
-                "CI_lower_limit-order",
-                "CI_upper_limit-order",
-                "p_value-order",
-                "warning"
-              )
-            )
-          ),
-          dom = "t",
-          paging = FALSE,
-          initComplete = DT::JS(
-            'function(setting, json){
-                                  RESIZE_OBSERVER.disconnect();
-                                  let table = document.getElementById("TABLE_LISTING");
-                                  let tbody = table.getElementsByTagName("tbody")[0];
-                                  RESIZE_OBSERVER.observe(tbody);
-                                }' |>
-              ssub(
-                TABLE_LISTING = ns(FP_ID$TABLE_LISTING),
-                RESIZE_OBSERVER = underscore_ns(ns, "resize_observer") # TODO: POC
-              )
-          ),
-          rowCallback = DT::JS(format_na_and_warnings)
-        )
-      )
-      res
-    }
-
-    compute_forest_svg_output <- function(ds, forest_div_size, forest_kind, is_continuous_forest, is_categorical_forest, row_order) {
-      df <- ds
-
-      axis_config <- NULL
-      if (is_continuous_forest) {
-        axis_config <- c(x_min = -1, x_max = 1, ref_line_x = 0, tick_count = 5) |> type("axis_config")
-      } else {
-        stopifnot(is_categorical_forest)
-        axis_config <- c(x_min = 0, x_max = 5, ref_line_x = 1, tick_count = 6) |> type("axis_config")
-      }
-
-      table_row_order <- row_order |>
-        type("sequence_permutation", allow_NULL = TRUE)
-      shiny::req(
-        table_row_order,
-        length(table_row_order) == nrow(df),
-        all(sort(table_row_order) == seq_len(nrow(df)))
-      )
-
-      res <- gen_svg(forest_div_size, df, table_row_order, axis_config)
-      res
-    }
+  res <- gen_svg(forest_div_size, df, row_order, axis_config)
+  res
+}
 
 #' Forest plot server function
 #'
@@ -662,7 +662,7 @@ gen_result_table_fun <- strict(gen_result_table_fun_)
 forest_server <- function(id,
                           bm_dataset,
                           group_dataset,
-                          dataset_name = shiny::reactive(character(0)),
+                          masks,
                           numeric_numeric_functions = list(),
                           numeric_factor_functions = list(),
                           subjid_var = "USUBJID",
@@ -676,10 +676,11 @@ forest_server <- function(id,
                           default_value = NULL,
                           default_var = NULL,
                           default_group = NULL,
+                          default_cont_var = NULL,
                           default_categorical_A = NULL,
                           default_categorical_B = NULL) {
-  numeric_numeric_functions <- numeric_numeric_functions |> type("named_function_list")
-  numeric_factor_functions <- numeric_factor_functions |> type("named_function_list")
+  numeric_numeric_functions <- numeric_numeric_functions
+  numeric_factor_functions <- numeric_factor_functions
   is_continuous_forest <- function(kind) kind %in% names(numeric_numeric_functions)
   is_categorical_forest <- function(kind) kind %in% names(numeric_factor_functions)
 
@@ -695,139 +696,132 @@ forest_server <- function(id,
   module <- function(input, output, session) {
     # sessions ----
     ns <- session[["ns"]]
+    
+    shiny::setBookmarkExclude(c(
+      "table_listing_cell_clicked",
+      "table_listing_rows_current",
+      "table_listing_rows_all",
+      "table_listing_search",
+      "table_listing_search_columns",
+      "table_listing_rows_selected",
+      "table_listing_cells_selected",
+      "table_listing_columns_selected",
+      "table_listing_state"
+    ))
 
-    # argument asserts ----
-
-    # bookmark ---
-    default_a <- default_categorical_A
-    default_b <- default_categorical_B
-
-    shiny::onRestore(function(state) {
-      default_a <<- if (FP_ID$CATEGORICAL_VAL_A %in% names(state$input)) {
-        state[["input"]][[FP_ID$CATEGORICAL_VAL_A]]
-      } else {
-        default_a
+    get_var_choices <- function(dataset, accept_function) {
+      res <- character(0)
+      for (col_name in names(dataset)){
+        col <- dataset[[col_name]]
+        if (accept_function(col)) {
+          choice_text <- col_name
+          label <- attr(col, "label")
+          if (length(label)) choice_text <- sprintf("%s [%s]", col_name, label)
+          res[[choice_text]] <- col_name
+        }
       }
-      default_b <<- if (FP_ID$CATEGORICAL_VAL_B %in% names(state$input)) {
-        state[["input"]][[FP_ID$CATEGORICAL_VAL_B]]
-      } else {
-        default_b
+      return(res)
+    }
+
+    shiny::updateSelectInput(
+      inputId = FP_ID$MAIN_GRP,
+      choices = c("None", get_var_choices(group_dataset, is.factor)),
+      selected = default_group
+    )
+
+    shiny::updateSelectInput(
+      inputId = FP_ID$CAT, 
+      choices = levels(bm_dataset[[cat_var]]), 
+      selected = default_cat
+    )
+
+    shiny::updateSelectInput(inputId = FP_ID$PAR, choices = default_par, selected = default_par)
+    shiny::observeEvent(input[[FP_ID$CAT]], ignoreNULL = FALSE, {
+      selected <- input[[FP_ID$PAR]]
+      categories <- input[[FP_ID$CAT]]
+     
+      if (length(default_par)) {
+        selected <- default_par
+        categories <- default_cat
+        default_par <<- NULL # ignore defaults after the first activation
       }
+      
+      cat_mask <- (bm_dataset[[cat_var]] %in% categories)
+      choices <- levels(droplevels(bm_dataset[[par_var]][cat_mask]))
+      
+      shiny::updateSelectInput(inputId = FP_ID$PAR, choices = choices, selected = selected)
     })
-
-    # dataset validation ----
-    v_sl_dataset <- shiny::reactive(
-      {
-        ac <- checkmate::makeAssertCollection()
-        checkmate::assert_data_frame(group_dataset(), .var.name = ns("group_dataset"))
-        checkmate::assert_names(
-          names(group_dataset()),
-          type = "unique",
-          must.include = c(VAR$SBJ), .var.name = ns("group_dataset")
-        )
-        checkmate::assert_factor(group_dataset()[[VAR$SBJ]], add = ac, .var.name = ns("group_dataset"))
-        checkmate::reportAssertions(ac)
-        group_dataset()
-      },
-      label = ns("v_sl_dataset")
+    
+    shiny::updateSelectInput(
+      inputId = FP_ID$PAR_VALUE_TRANSFORM,
+      choices = value_vars,
+      selected = default_value
     )
 
-    v_bm_dataset <- shiny::reactive(
-      {
-        df <- bm_dataset()
-        ac <- checkmate::makeAssertCollection()
-        checkmate::assert_data_frame(df, .var.name = ns("bm_dataset"), add = ac)
-        checkmate::assert_names(
-          names(df),
-          type = "unique",
-          must.include = c(
-            VAR$CAT, VAR$PAR, VAR$SBJ, VAR$VIS, VAR$VAL
-          ),
-          .var.name = ns("bm_dataset"),
-          add = ac
-        )
-        unique_par_names <- sum(duplicated(unique(df[c(VAR$CAT, VAR$PAR)])[["PARAM"]])) == 0
-        checkmate::assert_true(unique_par_names, .var.name = ns("bm_dataset"), add = ac)
-        checkmate::assert_factor(df[[VAR$SBJ]], .var.name = ns("bm_dataset"), add = ac)
-        checkmate::reportAssertions(ac)
-        df
-      },
-      label = ns("v_bm_dataset")
+    shiny::updateSelectInput(
+      inputId = FP_ID$CONT_VAR,
+      choices = get_var_choices(group_dataset, is.numeric),
+      selected = default_cont_var
     )
 
-    input_fp <- list()
-    input_fp[[FP_ID$PAR]] <- parameter_server(
-      id = FP_ID$PAR, data = v_bm_dataset,
-      cat_var = VAR$CAT,
-      par_var = VAR$PAR,
-      default_cat = default_cat,
-      default_par = default_par,
-      multi_cat = TRUE,
-      multi_par = TRUE
+    shiny::updateSelectInput(
+      inputId = FP_ID$CATEGORICAL_VAR,
+      choices = get_var_choices(group_dataset, is.factor),
+      selected = default_var
     )
-    input_fp[[FP_ID$PAR_VALUE_TRANSFORM]] <- col_menu_server(
-      id = FP_ID$PAR_VALUE_TRANSFORM,
-      data = v_bm_dataset,
-      label = FP_MSG$LABEL$PAR_VALUE_TRANSFORM,
-      include_func = function(val, name) {
-        name %in% VAR$VAL
-      }, include_none = FALSE, default = default_value
+    
+    shiny::updateSelectInput(
+      inputId = FP_ID$CATEGORICAL_VAL_A, 
+      choices = default_categorical_A, 
+      selected = default_categorical_A
     )
-    input_fp[[FP_ID$MAIN_GRP]] <- col_menu_server(
-      id = FP_ID$MAIN_GRP,
-      data = v_sl_dataset,
-      label = "Select a grouping variable",
-      include_func = function(x) {
-        is.character(x) || is.factor(x)
-      },
-      default = default_group
-    )
-    input_fp[[FP_ID$PAR_VISIT]] <- val_menu_server(
-      id = FP_ID$PAR_VISIT,
-      label = FP_MSG$LABEL$VISIT,
-      data = v_bm_dataset,
-      var = VAR$VIS,
-      default = default_visit
-    )
-    input_fp[[FP_ID$FOREST_KIND]] <- shiny::reactive({
-      shiny::req(input[[FP_ID$FOREST_KIND]])
-      input[[FP_ID$FOREST_KIND]] |> type("forest_kind")
+    shiny::observeEvent(input[[FP_ID$CATEGORICAL_VAR]], ignoreNULL = FALSE, {
+      selected_a <- input[[FP_ID$CATEGORICAL_VAL_A]]
+      categorical_var <- input[[FP_ID$CATEGORICAL_VAR]]
+      if (length(default_categorical_A)) {
+        categorical_var <- default_var
+        selected_a <- default_categorical_A
+        default_categorical_A <<- NULL # ignore defaults after the first activation
+      }
+
+      shiny::req(checkmate::test_subset(categorical_var, names(group_dataset), empty.ok = FALSE))
+      choices <- levels(group_dataset[[categorical_var]])
+
+      shiny::updateSelectInput(inputId = FP_ID$CATEGORICAL_VAL_A, choices = choices, selected = selected_a)
     })
-    input_fp[[FP_ID$CONT_VAR]] <- col_menu_server(
-      id = FP_ID$CONT_VAR,
-      data = v_sl_dataset,
-      label = "Continuous parameter",
-      include_func = function(val, name) {
-        is.numeric(val)
-      }, include_none = FALSE, default = default_var
+
+    shiny::updateSelectInput(
+      inputId = FP_ID$CATEGORICAL_VAL_B, 
+      choices = default_categorical_B, 
+      selected = default_categorical_B
     )
-    input_fp[[FP_ID$CATEGORICAL_VAR]] <- col_menu_server(
-      id = FP_ID$CATEGORICAL_VAR,
-      data = v_sl_dataset,
-      label = "Categorical parameter",
-      include_func = function(val, name) {
-        is.factor(val) || is.character(val)
-      }, include_none = FALSE, default = default_var
+    shiny::observeEvent(input[[FP_ID$CATEGORICAL_VAR]], ignoreNULL = FALSE, {
+      selected_b <- input[[FP_ID$CATEGORICAL_VAL_B]]
+      categorical_var <- input[[FP_ID$CATEGORICAL_VAR]]
+      if (length(default_categorical_B)) {
+        categorical_var <- default_var
+        selected_b <- default_categorical_B
+        default_categorical_B <<- NULL # ignore defaults after the first activation
+      }
+
+      shiny::req(checkmate::test_subset(categorical_var, names(group_dataset), empty.ok = FALSE))
+      choices <- levels(group_dataset[[categorical_var]])
+
+      shiny::updateSelectInput(inputId = FP_ID$CATEGORICAL_VAL_B, choices = choices, selected = selected_b)
+    })
+
+    shiny::updateSelectInput(
+      inputId = FP_ID$PAR_VISIT, 
+      choices = levels(bm_dataset[[visit_var]]), 
+      selected = default_visit
     )
-    input_fp[[FP_ID$CATEGORICAL_VAL_A]] <- shiny::reactive({
-      input[[FP_ID$CATEGORICAL_VAL_A]]
-    })
-    input_fp[[FP_ID$CATEGORICAL_VAL_B]] <- shiny::reactive({
-      input[[FP_ID$CATEGORICAL_VAL_B]]
-    })
 
     # Input validators
 
     # Reactivity must be solved inside otherwise the function does not depend on the value
-    sv_not_empty <- function(input, ..., msg) {
+    sv_test_string <- function(message = "Required") {
       function(x) {
-        if (test_not_empty(input())) NULL else msg
-      }
-    }
-
-    sv_test_string <- function(input, ..., msg) {
-      function(x) {
-        if (checkmate::test_string(input(), min.chars = 1)) NULL else msg
+        if (checkmate::test_string(x, min.chars = 1)) NULL else message
       }
     }
 
@@ -850,22 +844,13 @@ forest_server <- function(id,
     # Input validator for parameters
     param_iv <- shinyvalidate::InputValidator$new()
     param_iv$add_rule(
-      get_id(input_fp[[FP_ID$PAR]])[["cat"]],
-      sv_not_empty(input_fp[[FP_ID$PAR]][["cat"]],
-        msg = "Select at least one category"
-      )
+      FP_ID$CAT, shinyvalidate::sv_required("Select at least one category")
     )
     param_iv$add_rule(
-      get_id(input_fp[[FP_ID$PAR]])[["par"]],
-      sv_not_empty(input_fp[[FP_ID$PAR]][["par"]],
-        msg = "Select at least one parameter"
-      )
+      FP_ID$PAR, shinyvalidate::sv_required("Select at least one parameter")
     )
     param_iv$add_rule(
-      get_id(input_fp[[FP_ID$PAR_VALUE_TRANSFORM]]),
-      sv_not_empty(input_fp[[FP_ID$PAR_VALUE_TRANSFORM]],
-        msg = "Select one value transform"
-      )
+      FP_ID$PAR_VALUE_TRANSFORM, shinyvalidate::sv_required("Select one value-transform")
     )
     param_iv$enable()
 
@@ -875,7 +860,7 @@ forest_server <- function(id,
         param_iv$is_valid()
       }),
       label_if_valid = shiny::reactive({
-        it_selection_to_label(input_fp[[FP_ID$PAR]][["par"]]())
+        it_selection_to_label(input[[FP_ID$PAR]])
       }),
       label_if_not_valid = shiny::reactive({
         "[select parameters]"
@@ -885,34 +870,23 @@ forest_server <- function(id,
     # Input validator for categorical values
     categorical_var_iv <- shinyvalidate::InputValidator$new()
     categorical_var_iv$add_rule(
-      get_id(input_fp[[FP_ID$CATEGORICAL_VAR]]),
-      sv_not_empty(input_fp[[FP_ID$CATEGORICAL_VAR]],
-        msg = "Select one categorical variable"
-      )
+      FP_ID$CATEGORICAL_VAR, shinyvalidate::sv_required("Select one categorical variable")
     )
+    categorical_var_iv$add_rule(FP_ID$CATEGORICAL_VAL_A, sv_test_string(message = "Select one categorical value"))
+    categorical_var_iv$add_rule(FP_ID$CATEGORICAL_VAL_B, sv_test_string(message = "Select one categorical value"))
     categorical_var_iv$add_rule(
       FP_ID$CATEGORICAL_VAL_A,
-      sv_test_string(input_fp[[FP_ID$CATEGORICAL_VAL_A]],
-        msg = "Select one categorical value"
-      )
-    )
-    categorical_var_iv$add_rule(
-      FP_ID$CATEGORICAL_VAL_B,
-      sv_test_string(input_fp[[FP_ID$CATEGORICAL_VAL_B]],
-        msg = "Select one categorical value"
-      )
-    )
-    categorical_var_iv$add_rule(
-      FP_ID$CATEGORICAL_VAL_A,
-      sv_test_string_different(input_fp[[FP_ID$CATEGORICAL_VAL_A]],
-        input_fp[[FP_ID$CATEGORICAL_VAL_B]],
+      sv_test_string_different(
+        shiny::reactive(input[[FP_ID$CATEGORICAL_VAL_A]]),
+        shiny::reactive(input[[FP_ID$CATEGORICAL_VAL_B]]),
         msg = "Categorical values must be different"
       )
     )
     categorical_var_iv$add_rule(
       FP_ID$CATEGORICAL_VAL_B,
-      sv_test_string_different(input_fp[[FP_ID$CATEGORICAL_VAL_B]],
-        input_fp[[FP_ID$CATEGORICAL_VAL_A]],
+      sv_test_string_different(
+        shiny::reactive(input[[FP_ID$CATEGORICAL_VAL_A]]),
+        shiny::reactive(input[[FP_ID$CATEGORICAL_VAL_B]]),
         msg = "Categorical values must be different"
       )
     )
@@ -921,36 +895,28 @@ forest_server <- function(id,
     # Visits
     visit_iv <- shinyvalidate::InputValidator$new()
     visit_iv$add_rule(
-      get_id(input_fp[[FP_ID$PAR_VISIT]]),
-      sv_not_empty(input_fp[[FP_ID$PAR_VISIT]],
-        msg = "Select at least one visit value"
-      )
+      FP_ID$PAR_VISIT, shinyvalidate::sv_required("Select at least one visit")
     )
     visit_iv$enable()
 
     # Grouping
     group_iv <- shinyvalidate::InputValidator$new()
-    group_iv$add_rule(
-      get_id(input_fp[[FP_ID$MAIN_GRP]]),
-      sv_not_empty(input_fp[[FP_ID$MAIN_GRP]],
-        msg = "Select a group"
-      )
-    )
+    group_iv$add_rule(FP_ID$MAIN_GRP, shinyvalidate::sv_required())
     group_iv$enable()
 
     it_relabel_button(
       id = FP_ID$CONT_CAT_VAR_BUTTON,
       is_valid = shiny::reactive({
         res <- TRUE
-        forest_kind <- input_fp[[FP_ID$FOREST_KIND]]()
+        forest_kind <- input[[FP_ID$FOREST_KIND]]
         if (is_categorical_forest(forest_kind)) res <- categorical_var_iv$is_valid()
         res
       }),
       label_if_valid = shiny::reactive({
-        res <- input_fp[[FP_ID$CONT_VAR]]()
-        forest_kind <- input_fp[[FP_ID$FOREST_KIND]]()
+        res <- input[[FP_ID$CONT_VAR]]
+        forest_kind <- input[[FP_ID$FOREST_KIND]]
         if (is_categorical_forest(forest_kind)) {
-          res <- paste0(input_fp[[FP_ID$CATEGORICAL_VAL_A]](), ", ", input_fp[[FP_ID$CATEGORICAL_VAL_B]]())
+          res <- paste0(input[[FP_ID$CATEGORICAL_VAL_A]], ", ", input[[FP_ID$CATEGORICAL_VAL_B]])
         }
         res
       }),
@@ -969,48 +935,45 @@ forest_server <- function(id,
             "Selection cannot produce an output. Please, review menu feedback."
           )
         )
-        input_fp
+
+        fields <- c(FP_ID$CAT, FP_ID$PAR, FP_ID$PAR_VALUE_TRANSFORM, FP_ID$PAR_VISIT, FP_ID$FOREST_KIND,
+                    FP_ID$CONT_VAR, FP_ID$CATEGORICAL_VAR, FP_ID$CATEGORICAL_VAL_A, FP_ID$CATEGORICAL_VAL_B)
+        res <- list()
+        for (field in fields) res[[field]] <- input[[field]]
+        return(res)
       },
       label = ns("input_fp")
     )
 
-    shiny::observeEvent(input_fp[[FP_ID$CATEGORICAL_VAR]](), {
-      shiny::req(checkmate::test_subset(input_fp[[FP_ID$CATEGORICAL_VAR]](), names(v_sl_dataset()), empty.ok = FALSE))
-      choices <- unique(v_sl_dataset()[[input_fp[[FP_ID$CATEGORICAL_VAR]]()]])
-      shiny::updateSelectizeInput(
-        inputId = FP_ID$CATEGORICAL_VAL_A,
-        choices = choices,
-        selected = default_a %||% input_fp[[FP_ID$CATEGORICAL_VAL_A]]()
-      )
-      shiny::updateSelectizeInput(
-        inputId = FP_ID$CATEGORICAL_VAL_B,
-        choices = choices,
-        selected = default_b %||% input_fp[[FP_ID$CATEGORICAL_VAL_B]]()
-      )
-      default_a <<- NULL
-      default_b <<- NULL
-    })
-
     # data reactives ----
+    filtered_sl_dataset <- shiny::reactive({
+      res <- group_dataset
+      mask <- masks()[["group"]]
+      if (!all(mask)) res <- res[mask, ]
+      return(res)
+    })
 
     data_subset <- shiny::reactive({
       # Reactive is resolved first as nested reactives do no "react"
-      # (pun intented) properly when used inside dplyr::filter
+      # (pun intended) properly when used inside dplyr::filter
       # The suspect is NSE, but further testing is needed.
       l_input_fp <- v_input_subset()
-      # subgroup FP_ID$MAIN_GRP,
 
       group_vect <- c()
-      group_vect[[CNT$MAIN_GROUP]] <- input_fp[[FP_ID$MAIN_GRP]]()
+      group_vect[[CNT$MAIN_GROUP]] <- input[[FP_ID$MAIN_GRP]]
       group_vect <- drop_nones(unlist(group_vect))
+      
+      bm_data <- bm_dataset
+      bm_mask <- masks()[["bm"]]
+      if (!all(bm_mask)) bm_data <- res[bm_mask, ]
 
       fp_subset_data(
-        cat = l_input_fp[[FP_ID$PAR]][["cat"]](),
-        par = l_input_fp[[FP_ID$PAR]][["par"]](),
-        val_col = l_input_fp[[FP_ID$PAR_VALUE_TRANSFORM]](),
-        vis = l_input_fp[[FP_ID$PAR_VISIT]](),
-        bm_ds = v_bm_dataset(),
-        group_ds = v_sl_dataset(),
+        cat = l_input_fp[[FP_ID$CAT]],
+        par = l_input_fp[[FP_ID$PAR]],
+        val_col = l_input_fp[[FP_ID$PAR_VALUE_TRANSFORM]],
+        vis = l_input_fp[[FP_ID$PAR_VISIT]],
+        bm_ds = bm_data,
+        group_ds = filtered_sl_dataset(),
         group_vect = group_vect,
         subj_col = VAR$SBJ,
         cat_col = VAR$CAT,
@@ -1021,10 +984,10 @@ forest_server <- function(id,
 
     result_table <- shiny::reactive(
       {
-        ds <- data_subset() |> type("data_subset")
+        ds <- data_subset()
 
         v_input_subset <- v_input_subset()
-        forest_kind <- v_input_subset[[FP_ID$FOREST_KIND]]() |> type("forest_kind")
+        forest_kind <- v_input_subset[[FP_ID$FOREST_KIND]]
 
         var <- NULL
 
@@ -1036,31 +999,31 @@ forest_server <- function(id,
         )
 
         if (is_continuous_forest(forest_kind)) {
-          var <- v_input_subset[[FP_ID$CONT_VAR]]() |> type("S")
+          var <- v_input_subset[[FP_ID$CONT_VAR]]
         } else {
           stopifnot(is_categorical_forest(forest_kind))
-          var <- v_input_subset[[FP_ID$CATEGORICAL_VAR]]() |> type("S")
+          var <- v_input_subset[[FP_ID$CATEGORICAL_VAR]]
         }
 
         sl <- local({ # use internal column names to avoid variable parameterization
-          sl <- v_sl_dataset()
+          sl <- filtered_sl_dataset()
           names(sl)[names(sl) == VAR$SBJ] <- CNT$SBJ
           names(sl)[names(sl) == var] <- "var2" # TODO: POC
           # TODO? Filter sl to only have these two columns
           sl
-        }) |> type("sl_df")
+        })
 
         res <- NULL
         if (is_continuous_forest(forest_kind)) {
-          label <- forest_kind |> type("S") # TODO: POC
-          fun <- numeric_numeric_functions[[forest_kind]] |> type("fun")
+          label <- forest_kind
+          fun <- numeric_numeric_functions[[forest_kind]]
         } else {
           stopifnot(is_categorical_forest(forest_kind))
 
-          categorical_value_a <- v_input_subset[[FP_ID$CATEGORICAL_VAL_A]]() |> type("S")
-          categorical_value_b <- v_input_subset[[FP_ID$CATEGORICAL_VAL_B]]() |> type("S")
+          categorical_value_a <- v_input_subset[[FP_ID$CATEGORICAL_VAL_A]]
+          categorical_value_b <- v_input_subset[[FP_ID$CATEGORICAL_VAL_B]]
 
-          # TODO? Force the caller to use a proper factor
+          # TODO? Remove, as dv.manager should guarantee this is a factor
           if (is.character(sl[["var2"]])) {
             sl["var2"] <- as.factor(sl[["var2"]])
           }
@@ -1078,13 +1041,11 @@ forest_server <- function(id,
             sl
           }
 
-          label <- forest_kind |> type("S")
-          fun <- numeric_factor_functions[[forest_kind]] |> type("fun")
+          label <- forest_kind
+          fun <- numeric_factor_functions[[forest_kind]]
         }
 
-        res <- gen_result_table_fun(
-          ds, sl, fun, label
-        )
+        res <- gen_result_table_fun(ds, sl, fun, label)
 
         res
       },
@@ -1116,7 +1077,7 @@ forest_server <- function(id,
     forest_div_size <- shiny::reactive({
       res <- input[["forest_div_size"]]
       shiny::req(res)
-      unlist(res) |> type("size")
+      unlist(res)
     }) |>
       shiny::debounce(millis = 100)
     
@@ -1126,9 +1087,9 @@ forest_server <- function(id,
       list(
         ds = result_table(),
         forest_div_size = forest_div_size(),
-        forest_kind = v_input_subset()[[FP_ID$FOREST_KIND]](),
-        is_continuous_forest = is_continuous_forest(v_input_subset()[[FP_ID$FOREST_KIND]]()),
-        is_categorical_forest = is_categorical_forest(v_input_subset()[[FP_ID$FOREST_KIND]]()),
+        forest_kind = v_input_subset()[[FP_ID$FOREST_KIND]],
+        is_continuous_forest = is_continuous_forest(v_input_subset()[[FP_ID$FOREST_KIND]]),
+        is_categorical_forest = is_categorical_forest(v_input_subset()[[FP_ID$FOREST_KIND]]),
         row_order = input[[paste0(FP_ID$TABLE_LISTING, "_rows_current")]]
       )
     })
@@ -1175,7 +1136,7 @@ forest_server <- function(id,
 
 # Data manipulation
 
-#' Subset datasets for correlation heatmap
+#' Subset datasets for forest plot
 #'
 #' @inheritParams bp_subset_data
 #'
@@ -1268,6 +1229,7 @@ mod_forest <- function(module_id,
                        default_value = NULL,
                        default_var = NULL,
                        default_group = NULL,
+                       default_cont_var = NULL,
                        default_categorical_A = NULL,
                        default_categorical_B = NULL) {
   numeric_numeric_function_names <- names(numeric_numeric_functions) %||% character(0)
@@ -1282,25 +1244,77 @@ mod_forest <- function(module_id,
       )
     },
     server = function(afmm) {
-      forest_server(
-        id = module_id,
-        bm_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[bm_dataset_name]]),
-        group_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[group_dataset_name]]),
-        numeric_numeric_functions = numeric_numeric_functions,
-        numeric_factor_functions = numeric_factor_functions,
-        subjid_var = subjid_var,
-        cat_var = cat_var,
-        par_var = par_var,
-        visit_var = visit_var,
-        value_vars = value_vars,
-        default_cat = default_cat,
-        default_par = default_par,
-        default_visit = default_visit,
-        default_var = default_var,
-        default_group = default_group,
-        default_categorical_A = default_categorical_A,
-        default_categorical_B = default_categorical_B
+      selected_dataset_list_name <- shiny::reactive(
+        attr(afmm[["unfiltered_plus_filter_info"]]()[["unfiltered_dataset_list"]], "dataset_list_name")
+      ) |> trigger_only_on_change()
+      
+      masks <- shiny::reactive({
+        info <- afmm[["unfiltered_plus_filter_info"]]()[["filter_info"]][["result"]][["filter_info"]]
+        return(
+          list(
+            bm = info[[bm_dataset_name]][["mask"]],
+            group = info[[group_dataset_name]][["mask"]]
+          )
+        )
+      }) |> trigger_only_on_change()
+      
+      
+      default_input_pairs <- poc(
+        default_cat = FP_ID$CAT,
+        default_par = FP_ID$PAR,
+        default_cont_var = FP_ID$CONT_VAR,
+        default_var = FP_ID$CATEGORICAL_VAR,
+        default_categorical_A = FP_ID$CATEGORICAL_VAL_A,
+        default_categorical_B = FP_ID$CATEGORICAL_VAL_B,
+        default_group = FP_ID$MAIN_GRP,
+        default_visit = FP_ID$PAR_VISIT,
+        default_value = FP_ID$PAR_VALUE_TRANSFORM
       )
+
+      # We run `forest_server` inside an `observeEvent`, which makes regular `onRestore` not work there, but we can 
+      # combine the restored state and the defaults here and free the server from having to deal with bookmarks
+      shiny::onRestore(function(state) {
+        for (var_name in names(default_input_pairs)) {
+          input_id <- default_input_pairs[[var_name]]
+          bookmarked_value <- state[["input"]][[shiny::NS(module_id, input_id)]]
+          if (!is.null(bookmarked_value)) assign(var_name, bookmarked_value, inherits = TRUE)
+        }
+      })
+     
+      # NOTE: Relaunches the server every time the dataset selection changes
+      shiny::observeEvent(selected_dataset_list_name(), {
+        bm_dataset <- afmm[["data"]][[selected_dataset_list_name()]][[bm_dataset_name]]
+        group_dataset <- afmm[["data"]][[selected_dataset_list_name()]][[group_dataset_name]]
+     
+        observer_dedup(
+          id = module_id, 
+          forest_server(
+            id = module_id,
+            bm_dataset = bm_dataset,
+            group_dataset = group_dataset,
+            masks = masks, # NOTE: This is the only reactive that goes into the module
+            numeric_numeric_functions = numeric_numeric_functions,
+            numeric_factor_functions = numeric_factor_functions,
+            subjid_var = subjid_var,
+            cat_var = cat_var,
+            par_var = par_var,
+            visit_var = visit_var,
+            value_vars = value_vars,
+            default_cat = default_cat,
+            default_par = default_par,
+            default_visit = default_visit,
+            default_value = default_value,
+            default_var = default_var,
+            default_group = default_group,
+            default_cont_var = default_cont_var,
+            default_categorical_A = default_categorical_A,
+            default_categorical_B = default_categorical_B
+          )
+        )
+       
+        # first invocation gets defaults, but not the rest
+        for (var_name in names(default_input_pairs)) assign(var_name, NULL, inherits = TRUE)
+      })
     },
     module_id = module_id
   )
@@ -1327,6 +1341,7 @@ mod_forest_API_docs <- list(
   default_value = "", # FIXME(miguel): ? Should be called default_value_var
   default_var = "", # TODO: Check FIXME: ? Should it communicate "default categorical var"
   default_group = "", # TODO: Check FIXME: ? Should it communicate "default grouping var"
+  default_cont_var = "", # TODO: Check
   default_categorical_A = "", # TODO: Check
   default_categorical_B = "" # TODO: Check
 )
@@ -1348,6 +1363,7 @@ mod_forest_API_spec <- TC$group(
   default_value = TC$choice("value_vars") |> TC$flag("optional"), # FIXME(miguel): ? Should be called default_value_var
   default_var = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("optional"), # TODO: Check FIXME: ? Should it communicate "default categorical var"
   default_group = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("optional"), # TODO: Check FIXME: ? Should it communicate "default grouping var"
+  default_cont_var = TC$col("group_dataset_name", TC$numeric()) |> TC$flag("optional"), # TODO: Check
   default_categorical_A = TC$choice_from_col_contents("default_var") |> TC$flag("optional"), # TODO: Check
   default_categorical_B = TC$choice_from_col_contents("default_var") |> TC$flag("optional") # TODO: Check
 ) |> TC$attach_docs(mod_forest_API_docs)
@@ -1356,7 +1372,7 @@ check_mod_forest <- function(
     afmm, datasets, module_id, bm_dataset_name, group_dataset_name, numeric_numeric_functions,
     numeric_factor_functions, subjid_var, cat_var, par_var, visit_var, value_vars,
     default_cat, default_par, default_visit, default_value, default_var, default_group,
-    default_categorical_A, default_categorical_B) {
+    default_cont_var, default_categorical_A, default_categorical_B) {
   err <- CM$container()
 
   # TODO: Replace this function with a generic one that performs the checks based on mod_forest_API_spec.
@@ -1366,7 +1382,7 @@ check_mod_forest <- function(
     afmm, datasets, module_id, bm_dataset_name, group_dataset_name, numeric_numeric_functions,
     numeric_factor_functions, subjid_var, cat_var, par_var, visit_var, value_vars,
     default_cat, default_par, default_visit, default_value, default_var, default_group,
-    default_categorical_A, default_categorical_B, err
+    default_cont_var, default_categorical_A, default_categorical_B, err
   )
 
   # Checks that API spec does not (yet?) capture

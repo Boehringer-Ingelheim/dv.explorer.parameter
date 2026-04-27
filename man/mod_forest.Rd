@@ -23,6 +23,7 @@ mod_forest(
   default_value = NULL,
   default_var = NULL,
   default_group = NULL,
+  default_cont_var = NULL,
   default_categorical_A = NULL,
   default_categorical_B = NULL
 )

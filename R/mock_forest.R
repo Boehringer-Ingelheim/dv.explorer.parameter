@@ -4,13 +4,12 @@
 #' @export
 mock_app_forest <- function(dry_run = FALSE, update_query_string = TRUE, srv_defaults = list(), ui_defaults = list()) {
   data <- test_data()
-  bm_dataset <- shiny::reactive({
-    data[["bm"]]
-  })
-
-  group_dataset <- shiny::reactive({
-    data[["sl"]]
-  })
+  
+  # Patch data to conform with module expectations # TODO: Fix `test_data` instead
+  for(col in c("CAT1", "CAT2", "CAT3")) data[["sl"]][[col]] <- as.factor(data[["sl"]][[col]])
+  
+  bm_dataset <- data[["bm"]]
+  group_dataset <- data[["sl"]]
 
   numeric_numeric_functions <- list(
     "Pearson Correlation" = pearson_correlation,
@@ -26,12 +25,20 @@ mock_app_forest <- function(dry_run = FALSE, update_query_string = TRUE, srv_def
     ),
     ui_defaults
   )
+  
+  masks <- shiny::reactive({
+    list(
+      bm = rep(TRUE, nrow(bm_dataset)), 
+      group = rep(TRUE, nrow(group_dataset))
+    )
+  })
 
   srv_params <- c(
     list(
       id = "not_ebas",
       bm_dataset = bm_dataset,
       group_dataset = group_dataset,
+      masks = masks,
       numeric_numeric_functions = numeric_numeric_functions,
       numeric_factor_functions = numeric_factor_functions,
       subjid_var = "SUBJID",

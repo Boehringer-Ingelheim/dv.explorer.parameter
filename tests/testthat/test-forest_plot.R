@@ -1,15 +1,14 @@
 test_that(
   "Generates proper SVG",
   {
-    type <- dv.explorer.parameter:::type
-    output_size <- c(w = 100, h = 200) |> type("size")
+    output_size <- c(w = 100, h = 200)
     df <- data.frame(
       result = c(1, 2, 3),
       CI_lower_limit = c(0, 1, 2),
       CI_upper_limit = c(2, 3, 4)
-    ) |> type("result_table")
-    table_row_order <- seq_len(nrow(df)) |> type("sequence_permutation")
-    axis_config <- c(x_min = -1, x_max = 1, ref_line_x = 0, tick_count = 5) |> type("axis_config")
+    )
+    table_row_order <- seq_len(nrow(df))
+    axis_config <- c(x_min = -1, x_max = 1, ref_line_x = 0, tick_count = 5)
 
     svg <- dv.explorer.parameter:::gen_svg(output_size, df, table_row_order, axis_config)
     expect_snapshot(svg, cran = TRUE)
@@ -35,13 +34,13 @@ test_that(
       category = as.factor(c("cat_A", "cat_A", "cat_A", "cat_A")),
       parameter = as.factor(c("param_A", "param_A", "param_A", "param_A")),
       value = c(0, 0, 0, 3)
-    ) |> type("data_subset")
+    )
     sl <- data.frame(
       subject_id = as.factor(c("id_0", "id_1", "id_2", "id_3")),
       var2 = c(0, 0, 0, 2)
-    ) |> type("sl_df")
-    fun <- pearson_correlation |> type("fun")
-    label <- "label" |> type("S")
+    )
+    fun <- pearson_correlation
+    label <- "label"
 
     table <- gen_result_table_fun(ds, sl, fun, label) # no warning
     expect_snapshot(table, cran = TRUE)

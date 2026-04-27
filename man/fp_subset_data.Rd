@@ -2,7 +2,7 @@
 % Please edit documentation in R/mod_forest.R
 \name{fp_subset_data}
 \alias{fp_subset_data}
-\title{Subset datasets for correlation heatmap}
+\title{Subset datasets for forest plot}
 \usage{
 fp_subset_data(
   cat,

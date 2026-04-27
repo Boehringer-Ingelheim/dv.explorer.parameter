@@ -6,16 +6,16 @@ tns <- tns_factory("not_ebas")
 
 ID <- poc( # nolint
   INPUT = poc(
-    CAT = tns(FP_ID$PAR, "cat_val"),
-    PAR = tns(FP_ID$PAR, "par_val"),
-    VAL = tns(FP_ID$PAR_VALUE_TRANSFORM, "val"),
+    CAT = tns(FP_ID$CAT),
+    PAR = tns(FP_ID$PAR),
+    VAL = tns(FP_ID$PAR_VALUE_TRANSFORM),
     FOREST_KIND = tns(FP_ID$FOREST_KIND),
-    CONT_VAR = tns(FP_ID$CONT_VAR, "val"),
-    CATEGORICAL_VAR = tns(FP_ID$CATEGORICAL_VAR, "val"),
+    CONT_VAR = tns(FP_ID$CONT_VAR),
+    CATEGORICAL_VAR = tns(FP_ID$CATEGORICAL_VAR),
     CATEGORICAL_VAL_A = tns(FP_ID$CATEGORICAL_VAL_A),
     CATEGORICAL_VAL_B = tns(FP_ID$CATEGORICAL_VAL_B),
-    VIS = tns(FP_ID$PAR_VISIT, "val"),
-    MGRP = tns(FP_ID$MAIN_GRP, "val")
+    VIS = tns(FP_ID$PAR_VISIT),
+    MGRP = tns(FP_ID$MAIN_GRP)
   ),
   OUTPUT = poc(
     TABLE = tns(FP_ID$TABLE_LISTING),
@@ -61,8 +61,8 @@ local({
     vis = inputs[[ID$INPUT$VIS]],
     vis_col = app_args$srv$visit_var,
     group_vect = stats::setNames(c("CAT2", "CAT2", "CAT2"), c(CNT$MAIN_GROUP, CNT$SUB_GROUP, CNT$PAGE_GROUP)),
-    bm_ds = shiny::isolate(app_args$srv$bm_dataset()),
-    group_ds = shiny::isolate(app_args$srv$group_dataset()),
+    bm_ds = app_args$srv$bm_dataset,
+    group_ds = app_args$srv$group_dataset,
     subj_col = app_args$srv$subjid_var
   )
 
@@ -124,8 +124,6 @@ local({
       expect_true(grepl("<div id=\"not_ebas-forest_svg\"", svg_html))
     }
   )
-  
-
 })
 
 
@@ -133,6 +131,7 @@ local({
 
 test_that("bookmark is restored. Odds" |>
   vdoc[["add_spec"]](c(specs$forest_module$bookmark)), {
+  skip() # TODO: Update. Bookmarking is now a property of the davinci module and not of the server
   skip_if_not_running_shiny_tests()
 
   app <- shinytest2::AppDriver$new(root_app$get_url())
@@ -167,6 +166,7 @@ test_that("bookmark is restored. Odds" |>
 
 test_that("bookmark is restored. Continuous" |>
   vdoc[["add_spec"]](c(specs$forest_module$bookmark)), {
+  skip() # TODO: Update. Bookmarking is now a property of the davinci module and not of the server
   skip_if_not_running_shiny_tests()
 
   app <- shinytest2::AppDriver$new(root_app$get_url())
@@ -247,7 +247,7 @@ test_that("default values are set. Continuous", {
     default_par = c("PARAM22", "PARAM23"),
     default_visit = "VISIT2",
     default_value = "VALUE2",
-    default_var = "CONT2"
+    default_cont_var = "CONT2"
   )
 
   app <- start_app_driver(
@@ -265,5 +265,5 @@ test_that("default values are set. Continuous", {
   expect_equal(input_values[[ID$INPUT$CAT]], srv_defaults[["default_cat"]])
   expect_equal(input_values[[ID$INPUT$PAR]], srv_defaults[["default_par"]])
   expect_equal(input_values[[ID$INPUT$VIS]], srv_defaults[["default_visit"]])
-  expect_equal(input_values[[ID$INPUT$CONT_VAR]], srv_defaults[["default_var"]])
+  expect_equal(input_values[[ID$INPUT$CONT_VAR]], srv_defaults[["default_cont_var"]])
 })

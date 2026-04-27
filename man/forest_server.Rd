@@ -8,7 +8,7 @@ forest_server(
   id,
   bm_dataset,
   group_dataset,
-  dataset_name = shiny::reactive(character(0)),
+  masks,
   numeric_numeric_functions = list(),
   numeric_factor_functions = list(),
   subjid_var = "USUBJID",
@@ -22,6 +22,7 @@ forest_server(
   default_value = NULL,
   default_var = NULL,
   default_group = NULL,
+  default_cont_var = NULL,
   default_categorical_A = NULL,
   default_categorical_B = NULL
 )
@@ -49,10 +50,6 @@ An ADSL-like dataset similar in structure to the one in
 with one record per subject.
 
 It should contain, at least, the column specified by the parameter \code{subjid_var}.}
-
-\item{dataset_name}{\verb{[shiny::reactive(*)]}
-
-A reactive that indicates a possible change in the column structure of any of the two datasets}
 
 \item{numeric_numeric_functions, numeric_factor_functions}{\verb{[function(n)]}
 
@@ -90,6 +87,10 @@ Default values for the selectors}
 \item{default_var, default_group, default_categorical_A, default_categorical_B}{\verb{[character(1)|NULL]}
 
 Default values for the selectors}
+
+\item{dataset_name}{\verb{[shiny::reactive(*)]}
+
+A reactive that indicates a possible change in the column structure of any of the two datasets}
 }
 \description{
 Forest plot server function

@@ -137,8 +137,8 @@ check_mod_corr_hm_auto <- function(afmm, datasets, module_id, bm_dataset_name, s
 # dv.explorer.parameter::mod_forest
 check_mod_forest_auto <- function(afmm, datasets, module_id, bm_dataset_name, group_dataset_name, numeric_numeric_functions,
     numeric_factor_functions, subjid_var, cat_var, par_var, visit_var, value_vars, default_cat, default_par,
-    default_visit, default_value, default_var, default_group, default_categorical_A, default_categorical_B,
-    err) {
+    default_visit, default_value, default_var, default_group, default_cont_var, default_categorical_A,
+    default_categorical_B, err) {
     OK <- logical(0)
     used_dataset_names <- new.env(parent = emptyenv())
     OK[["module_id"]] <- CM$check_module_id("module_id", module_id, err)
@@ -195,6 +195,10 @@ check_mod_forest_auto <- function(afmm, datasets, module_id, bm_dataset_name, gr
     flags <- list(optional = TRUE)
     OK[["default_group"]] <- OK[["group_dataset_name"]] && CM$check_dataset_colum_name("default_group",
         default_group, subkind, flags, group_dataset_name, datasets[[group_dataset_name]], err)
+    subkind <- list(kind = "numeric", min = NA, max = NA)
+    flags <- list(optional = TRUE)
+    OK[["default_cont_var"]] <- OK[["group_dataset_name"]] && CM$check_dataset_colum_name("default_cont_var",
+        default_cont_var, subkind, flags, group_dataset_name, datasets[[group_dataset_name]], err)
     flags <- list(optional = TRUE)
     OK[["default_categorical_A"]] <- OK[["default_var"]] && CM$check_choice_from_col_contents("default_categorical_A",
         default_categorical_A, flags, "group_dataset_name", datasets[[group_dataset_name]], default_var,
