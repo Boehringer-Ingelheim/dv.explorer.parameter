@@ -6,7 +6,7 @@ mock_app_forest <- function(dry_run = FALSE, update_query_string = TRUE, srv_def
   data <- test_data()
   
   # Patch data to conform with module expectations # TODO: Fix `test_data` instead
-  for(col in c("CAT1", "CAT2", "CAT3")) data[["sl"]][[col]] <- as.factor(data[["sl"]][[col]])
+  for (col in c("CAT1", "CAT2", "CAT3")) data[["sl"]][[col]] <- as.factor(data[["sl"]][[col]])
   
   bm_dataset <- data[["bm"]]
   group_dataset <- data[["sl"]]

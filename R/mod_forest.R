@@ -1276,7 +1276,8 @@ mod_forest <- function(module_id,
       shiny::onRestore(function(state) {
         for (var_name in names(default_input_pairs)) {
           input_id <- default_input_pairs[[var_name]]
-          bookmarked_value <- state[["input"]][[shiny::NS(module_id, input_id)]]
+          ns <- getDefaultReactiveDomain()[["ns"]]
+          bookmarked_value <- state[["input"]][[ns(paste0(module_id, '-', input_id))]]
           if (!is.null(bookmarked_value)) assign(var_name, bookmarked_value, inherits = TRUE)
         }
       })
