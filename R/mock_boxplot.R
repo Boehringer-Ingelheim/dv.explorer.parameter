@@ -85,11 +85,13 @@ mock_app_boxplot_mm <- function(update_query_string = TRUE, anlfl_flags = FALSE)
         "boxplot",
         bm_dataset_name = "bm",
         group_dataset_name = "adsl",
-        visit_var = "VISIT",
+        x_axis_vars = c("VISIT"),
         value_vars = c("VALUE1", "VALUE2"),
         subjid_var = "SUBJID",
         cat_var = "PARCAT",
-        anlfl_vars = anlfl_vars
+        anlfl_vars = anlfl_vars,
+        default_cat = "PARCAT1",
+        default_par = "PARAM11"
       )
     ),
     filter_data = "adsl",
@@ -97,8 +99,3 @@ mock_app_boxplot_mm <- function(update_query_string = TRUE, anlfl_flags = FALSE)
     enableBookmarking = "url"
   )
 }
-
-
-
-
-
