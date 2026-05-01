@@ -1,3 +1,8 @@
+# dv.explorer.parameter 0.2.1-9003
+
+* Scatterplot matrix:
+    * Fixed labeling issue of selected analysis value
+    
 # dv.explorer.parameter 0.2.1-9002
 
 - [NOT USER-FACING] Update TC.R and DR.R snippets
