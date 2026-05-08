@@ -97,9 +97,7 @@ subset_bds_param <- function(ds, par, par_col, cat, cat_col,
 
   par_in_several_cat <- !test_one_cat_per_par(ds = subset_ds, cat_col = CNT$CAT, par_col = CNT$PAR)
   if (par_in_several_cat) {
-    rlang::abort("Repeated parameter names in different categories is not supported
-Please contact the DaVinci team if this must be implemented
-A possible solution is to paste the category in the parameter name during preprocessing")
+    rlang::abort("Repeated parameter names in different categories is not supported Please contact the DaVinci team if this must be implemented A possible solution is to paste the category in the parameter name during preprocessing")
     #     This piece of logic is complicated and needs input from the user, initially this seems like an unlikely case.
     # nolint start
     # - Factors are releved when parameter is repeated across categories
@@ -112,6 +110,103 @@ A possible solution is to paste the category in the parameter name during prepro
 
   # Columns are renamed therefore direct labelling does not work
   renamed_labels <- stats::setNames(get_lbls_robust(ds)[selected_cols], names(selected_cols))
+  subset_ds <- set_lbls(subset_ds, renamed_labels)
+  subset_ds
+}
+
+# TODO: add tests for masking
+subset_bds_info_param <- function(
+  dataset_list_info,
+  dataset_name,
+  par,
+  par_col,
+  cat,
+  cat_col,
+  val_col,
+  vis,
+  vis_col,
+  subj_col,
+  anlfl_col = NULL
+) {
+  selected_cols <- character(0)
+  selected_cols[[CNT$SBJ]] <- subj_col
+  selected_cols[[CNT$CAT]] <- cat_col
+  selected_cols[[CNT$PAR]] <- par_col
+  selected_cols[[CNT$VIS]] <- vis_col
+  selected_cols[[CNT$VAL]] <- val_col
+
+  if (!is.null(anlfl_col)) {
+    selected_cols[[CNT$ANLFL]] <- anlfl_col
+  }
+
+  ds <- dataset_list_info[[DVM$UFDL]][[dataset_name]]
+
+  mask <- ds[[cat_col]] %in%
+    cat &
+    ds[[par_col]] %in% par &
+    ds[[vis_col]] %in% vis
+
+  if (!is.null(anlfl_col) && anlfl_col %in% names(ds)) {
+    mask <- mask & ds[[anlfl_col]] %in% "Y"
+  }
+
+  subset_ds <- dataset_list_info[[DVM$GFDFN]](
+    dataset_list_info,
+    dataset_name,
+    selected_cols,
+    mask
+  )
+  colnames(subset_ds) <- names(selected_cols)
+
+  par_in_several_cat <- !test_one_cat_per_par(
+    ds = subset_ds,
+    cat_col = CNT$CAT,
+    par_col = CNT$PAR
+  )
+  if (par_in_several_cat) {
+    rlang::abort(
+      "Repeated parameter names in different categories is not supported Please contact the DaVinci team if this must be implemented A possible solution is to paste the category in the parameter name during preprocessing"
+    )
+    #     This piece of logic is complicated and needs input from the user, initially this seems like an unlikely case.
+    # nolint start
+    # - Factors are releved when parameter is repeated across categories
+    # - If parameters are renamed an attribute `parameter_renamed` is set to TRUE
+    #      log_inform("Renaming parameters repeated across categories", class = "DEBUG")
+    #      subset_ds[[CNT$PAR]] <- factor(paste0(subset_ds[[CNT$CAT]], "-", subset_ds[[CNT$PAR]])) # nolint
+    #      attr(subset_ds, "parameter_renamed") <- TRUE
+    # nolint end
+  }
+
+  renamed_labels <- stats::setNames(
+    get_lbls_robust(ds)[selected_cols],
+    names(selected_cols)
+  )
+  subset_ds <- set_lbls(subset_ds, renamed_labels)
+  subset_ds
+}
+
+subset_adsl_info <- function(dataset_list_info, dataset_name, group_vect, subj_col) {
+  ds <- dataset_list_info[[DVM$UFDL]][[dataset_name]]
+  checkmate::assert_subset(c(group_vect, subj_col), names(ds))
+
+  selected_cols <- c(
+    stats::setNames(subj_col, CNT$SBJ),
+    group_vect
+  )
+
+  subset_ds <- dataset_list_info[[DVM$GFDFN]](
+    dataset_list_info,
+    dataset_name,
+    selected_cols
+  )
+
+  colnames(subset_ds) <- names(selected_cols)
+  # Columns are renamed therefore direct labelling does not work
+  renamed_labels <- stats::setNames(
+    get_lbls_robust(ds)[selected_cols],
+    names(selected_cols)
+  )
+
   subset_ds <- set_lbls(subset_ds, renamed_labels)
   subset_ds
 }
@@ -163,10 +258,12 @@ subset_adsl <- function(ds, group_vect, subj_col) {
   colnames(subset_ds) <- names(selected_cols)
   # Columns are renamed therefore direct labelling does not work
   renamed_labels <- stats::setNames(get_lbls_robust(ds)[selected_cols], names(selected_cols))
-
+    
   subset_ds <- set_lbls(subset_ds, renamed_labels)
   subset_ds
 }
+
+
 
 # Helper functions ----
 
@@ -407,3 +504,4 @@ equal_and_mask_from_vec <- function(ds, fl) {
     m & ds[[n]] == v
   }, .init = mask)
 }
+  

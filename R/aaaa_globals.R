@@ -123,3 +123,10 @@ STYLE <- poc( # nolint
   AXIS_TITLE_SIZE = 16,
   STRIP_TEXT_SIZE = 12
 )
+
+DVM <- poc(
+  UDLWFI = "unfiltered_dataset_list_with_filter_info",
+  UFDL = "unfiltered_dataset_list",
+  FI = "filter_info",
+  GFDFN = "get_filtered_dataset"
+)

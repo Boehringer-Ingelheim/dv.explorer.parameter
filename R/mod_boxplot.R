@@ -138,8 +138,11 @@ boxplot_UI <- function(id) { # nolint
 
   chart <- shiny::div(
     shiny::plotOutput(
-      outputId = ns(BP$ID$CHART), click = ns(BP$ID$CHART_CLICK),
-      dblclick = ns(BP$ID$CHART_DCLICK), height = "100%"
+      outputId = ns(BP$ID$CHART),
+      click = ns(BP$ID$CHART_CLICK),
+      dblclick = ns(BP$ID$CHART_DCLICK),
+      height = "100%",
+      width = "100%"
     ),
     style = "height:70vh"
   )
@@ -181,7 +184,6 @@ boxplot_UI <- function(id) { # nolint
   } else {
     main_ui
   }
-
 }
 
 #' Boxplot server function
@@ -251,26 +253,29 @@ boxplot_UI <- function(id) { # nolint
 #'
 #' @export
 #'
-boxplot_server <- function(id,
-                           bm_dataset,
-                           group_dataset,
-                           dataset_name = shiny::reactive(character(0)),
-                           cat_var = "PARCAT",
-                           par_var = "PARAM",
-                           value_vars = "AVAL",
-                           visit_var = "AVISIT",
-                           anlfl_vars = NULL,
-                           subjid_var = "USUBJID",
-                           quantile_type = 7L,
-                           default_cat = NULL,
-                           default_par = NULL,
-                           default_visit = NULL,
-                           default_value = NULL,
+boxplot_server <- function(
+  id,
+  dataset_list_info,
+  bm_dataset_name,
+  group_dataset_name,
+  cat_var = "PARCAT",
+  par_var = "PARAM",
+  value_vars = "AVAL",
+  visit_var = "AVISIT",
+  anlfl_vars = NULL,
+  subjid_var = "USUBJID",
+  quantile_type = 7L,
+  default_cat = NULL,
+  default_par = NULL,
+  default_visit = NULL,
+  default_value = NULL,
                            default_main_group = NULL,
                            default_sub_group = NULL,
                            default_page_group = NULL,
                            on_sbj_click = function(x) {
                            }) {
+  ..t$add_period("boxplot_server", TRUE)
+  on.exit(..t$add_period("boxplot_server", FALSE), add = TRUE)
   # All these are covered by check_mod_boxplot_auto
   ac <- checkmate::makeAssertCollection()
   # id assert ---- It goes on its own as id is used to provide context to the other assertions
@@ -312,74 +317,31 @@ boxplot_server <- function(id,
 
     # dataset validation ----
 
-    v_group_dataset <- shiny::reactive(
+    v_dataset_list_info <- shiny::reactive(
       {
         # Covered by check_mod_boxplot_auto (except for min.rows, which is filter-dependent)
+        # TODO: Check if covered by check_mod_boxplot_auto (except for unique_par_names, which is _mostly_ covered by #ahwopu)
         ac <- checkmate::makeAssertCollection()
-        checkmate::assert_data_frame(group_dataset(), .var.name = ns("group_dataset"))
-        checkmate::assert_names(
-          names(group_dataset()),
-          type = "unique",
-          must.include = c(VAR$SBJ),
-          .var.name = ns("group_dataset")
-        )
-        checkmate::assert_factor(group_dataset()[[VAR$SBJ]], add = ac, .var.name = ns("group_dataset"))
-        checkmate::reportAssertions(ac)
+        r_group_dataset <- dataset_list_info()[[DVM$UFDL]][[group_dataset_name]]
+        r_group_dataset_mask <- dataset_list_info()[[DVM$FI]][[group_dataset_name]][["mask"]]
+
+        r_bm_dataset <- dataset_list_info()[[DVM$UFDL]][[bm_dataset_name]]
+        r_bm_dataset_mask <- dataset_list_info()[[DVM$FI]][[bm_dataset_name]][["mask"]]
+
         shiny::validate(
           shiny::need(
-            nrow(group_dataset()) > 0,
+            length(r_group_dataset_mask) > 0 && any(r_group_dataset_mask),
             "Group dataset has 0 rows"
-          )
-        )
-        group_dataset()
-      },
-      label = ns(" v_group_dataset")
-    )
-
-    v_bm_dataset <- shiny::reactive(
-      {
-        # Covered by check_mod_boxplot_auto (except for unique_par_names, which is _mostly_ covered by #ahwopu)
-        ac <- checkmate::makeAssertCollection()
-        checkmate::assert_data_frame(bm_dataset(), .var.name = ns("group_dataset"))
-        checkmate::assert_names(
-          names(bm_dataset()),
-          type = "unique",
-          must.include = c(
-            VAR$CAT,
-            VAR$PAR,
-            VAR$SBJ,
-            VAR$VIS,
-            VAR$VAL
           ),
-          .var.name = ns("bm_dataset")
-        )
-
-        if (nrow(bm_dataset()) > 0) {
-          unique_par_names <- bm_dataset() |>
-            dplyr::distinct(dplyr::across(c(VAR$CAT, VAR$PAR))) |>
-            dplyr::group_by(dplyr::across(c(VAR$PAR))) |>
-            dplyr::tally() |>
-            dplyr::pull(.data[["n"]]) |>
-            max()
-
-          unique_par_names <- unique_par_names == 1
-          checkmate::assert_true(unique_par_names, .var.name = ns("bm_dataset"))
-        }
-
-        checkmate::assert_factor(bm_dataset()[[VAR$SBJ]], .var.name = ns("bm_dataset"))
-
-        checkmate::reportAssertions(ac)
-
-        shiny::validate(
           shiny::need(
-            nrow(bm_dataset()) > 0,
-            "Parameter dataset has 0 rows"
+            length(r_bm_dataset_mask) > 0 && any(r_bm_dataset_mask),
+            "Biomarker dataset has 0 rows"
           )
         )
 
-        bm_dataset()
+        dataset_list_info()
       },
-      label = ns("v_bm_dataset")
+      label = ns(" v_dataset_list_info")
     )
 
     # input
@@ -387,7 +349,9 @@ boxplot_server <- function(id,
     inputs <- list()
     inputs[[BP$ID$MAIN_GRP]] <- col_menu_server(
       id = BP$ID$MAIN_GRP,
-      data = v_group_dataset,
+      data = shiny::reactive({
+        v_dataset_list_info()[[DVM$UFDL]][[group_dataset_name]]
+      }),
       label = "Select a grouping variable",
       include_func = function(x) {
         is.factor(x) || is.character(x)
@@ -396,7 +360,9 @@ boxplot_server <- function(id,
     )
     inputs[[BP$ID$SUB_GRP]] <- col_menu_server(
       id = BP$ID$SUB_GRP,
-      data = v_group_dataset,
+      data = shiny::reactive({
+        v_dataset_list_info()[[DVM$UFDL]][[group_dataset_name]]
+      }),
       label = "Select a sub grouping variable",
       include_func = function(x) {
         is.factor(x) || is.character(x)
@@ -405,7 +371,9 @@ boxplot_server <- function(id,
     )
     inputs[[BP$ID$PAGE_GRP]] <- col_menu_server(
       id = BP$ID$PAGE_GRP,
-      data = v_group_dataset,
+      data = shiny::reactive({
+        v_dataset_list_info()[[DVM$UFDL]][[group_dataset_name]]
+      }),
       label = "Select a page grouping variable",
       include_func = function(x) {
         is.factor(x) || is.character(x)
@@ -414,7 +382,13 @@ boxplot_server <- function(id,
     )
     inputs[[BP$ID$PAR]] <- parameter_server(
       id = BP$ID$PAR,
-      data = v_bm_dataset,
+      data = shiny::reactive({        
+        v_dataset_list_info()[[DVM$GFDFN]](
+          v_dataset_list_info(),
+          bm_dataset_name,          
+          c(VAR$CAT, VAR$PAR)
+        )
+      }),
       cat_var = VAR$CAT,
       par_var = VAR$PAR,
       default_cat = default_cat,
@@ -423,13 +397,21 @@ boxplot_server <- function(id,
     inputs[[BP$ID$PAR_VISIT]] <- val_menu_server(
       id = BP$ID$PAR_VISIT,
       label = BP$MSG$LABEL$PAR_VISIT,
-      data = v_bm_dataset,
+      data = shiny::reactive({
+        v_dataset_list_info()[[DVM$GFDFN]](
+          v_dataset_list_info(),
+          bm_dataset_name,
+          c(VAR$VIS)
+        )
+      }),
       var = VAR$VIS,
       default = default_visit
     )
     inputs[[BP$ID$PAR_VALUE]] <- col_menu_server(
       id = BP$ID$PAR_VALUE,
-      data = v_bm_dataset,
+      data = shiny::reactive({
+        v_dataset_list_info()[[DVM$UFDL]][[bm_dataset_name]]
+      }),
       label = BP$MSG$LABEL$PAR_VALUE,
       include_func = function(val, name) {
         name %in% VAR$VAL
@@ -442,7 +424,11 @@ boxplot_server <- function(id,
     if (!is.null(anlfl_vars) && length(anlfl_vars) > 0) {
       inputs[[BP$ID$ANLFL_FILTER]] <- col_menu_server(
         id = BP$ID$ANLFL_FILTER,
-        data = v_bm_dataset,
+        data = shiny::reactive({
+          v_dataset_list_info()[[DVM$UFDL]][[
+            group_dataset_name
+          ]]
+        }),
         label = BP$MSG$LABEL$ANLFL_FILTER,
         include_func = function(x, name) name %in% anlfl_vars,
         include_none = FALSE,
@@ -609,20 +595,25 @@ boxplot_server <- function(id,
         )
       )
 
-      bp_subset_data(
+      r_v_dataset_list_info <- v_dataset_list_info()
+
+      df <- bp_subset_dataset_info(
         cat = l_inputs[[BP$ID$PAR]][["cat"]],
         par = l_inputs[[BP$ID$PAR]][["par"]],
-        val_col = l_inputs[[BP$ID$PAR_VALUE]],
         vis = l_inputs[[BP$ID$PAR_VISIT]],
         group_vect = group_vect,
-        bm_ds = v_bm_dataset(),
-        group_ds = v_group_dataset(),
+        ds_list_info = r_v_dataset_list_info,
+        bm_ds_name = bm_dataset_name,
+        group_ds_name = group_dataset_name,        
         subj_col = VAR$SBJ,
         cat_col = VAR$CAT,
         par_col = VAR$PAR,
         vis_col = VAR$VIS,
+        val_col = l_inputs[[BP$ID$PAR_VALUE]],
         anlfl_col = l_inputs[[BP$ID$ANLFL_FILTER]]
       )
+
+      df
     })
 
     bp_title_data <- shiny::reactive({
@@ -659,6 +650,8 @@ boxplot_server <- function(id,
     }
 
     output[[BP$ID$CHART]] <- shiny::renderPlot({
+      ..t$add_period("boxplot_chart", TRUE)
+      on.exit(..t$add_period("boxplot_chart", FALSE), add = TRUE)    
       do.call(bp_get_boxplot_output, output_arguments[[BP$ID$CHART]][["arguments"]]())
     })
 
@@ -766,17 +759,33 @@ boxplot_server <- function(id,
     )
 
     shiny::observeEvent(loaded_state(), {
-      get_update(inputs[[BP$ID$MAIN_GRP]])[["val"]](selected = loaded_state()[[BP$ID$MAIN_GRP]])
-      get_update(inputs[[BP$ID$SUB_GRP]])[["val"]](selected = loaded_state()[[BP$ID$SUB_GRP]])
-      get_update(inputs[[BP$ID$PAGE_GRP]])[["val"]](selected = loaded_state()[[BP$ID$PAGE_GRP]])
+      get_update(inputs[[BP$ID$MAIN_GRP]])[["val"]](
+        selected = loaded_state()[[BP$ID$MAIN_GRP]]
+      )
+      get_update(inputs[[BP$ID$SUB_GRP]])[["val"]](
+        selected = loaded_state()[[BP$ID$SUB_GRP]]
+      )
+      get_update(inputs[[BP$ID$PAGE_GRP]])[["val"]](
+        selected = loaded_state()[[BP$ID$PAGE_GRP]]
+      )
       get_update(inputs[[BP$ID$PAR]])[["val"]](
         cat_selected = loaded_state()[[BP$ID$PAR]][["cat"]],
         par_selected = loaded_state()[[BP$ID$PAR]][["par"]]
       )
-      get_update(inputs[[BP$ID$PAR_VISIT]])[["val"]](selected = loaded_state()[[BP$ID$PAR_VISIT]])
-      get_update(inputs[[BP$ID$PAR_VALUE]])[["val"]](selected = loaded_state()[[BP$ID$PAR_VALUE]])
-      shiny::updateCheckboxInput(inputId = BP$ID$VIOLIN_CHECK, value = loaded_state()[[BP$ID$VIOLIN_CHECK]])
-      shiny::updateCheckboxInput(inputId = BP$ID$SHOW_POINTS_CHECK, value = loaded_state()[[BP$ID$SHOW_POINTS_CHECK]])
+      get_update(inputs[[BP$ID$PAR_VISIT]])[["val"]](
+        selected = loaded_state()[[BP$ID$PAR_VISIT]]
+      )
+      get_update(inputs[[BP$ID$PAR_VALUE]])[["val"]](
+        selected = loaded_state()[[BP$ID$PAR_VALUE]]
+      )
+      shiny::updateCheckboxInput(
+        inputId = BP$ID$VIOLIN_CHECK,
+        value = loaded_state()[[BP$ID$VIOLIN_CHECK]]
+      )
+      shiny::updateCheckboxInput(
+        inputId = BP$ID$SHOW_POINTS_CHECK,
+        value = loaded_state()[[BP$ID$SHOW_POINTS_CHECK]]
+      )
     })
 
     # debug tab
@@ -814,7 +823,6 @@ boxplot_server <- function(id,
 
     return(res)
   }
-
 
   shiny::moduleServer(id, module)
 }
@@ -879,15 +887,23 @@ mod_boxplot <- function(module_id,
       server_wrapper_func(
         boxplot_server(
           id = module_id,
-          bm_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[bm_dataset_name]]),
-          group_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[group_dataset_name]]),
-          dataset_name = afmm[["dataset_name"]],
+          dataset_list_info = afmm[[DVM$UDLWFI]],
+          bm_dataset_name = bm_dataset_name,
+          group_dataset_name = group_dataset_name,
           on_sbj_click = on_sbj_click_fun,
-          cat_var = cat_var, par_var = par_var, value_vars = value_vars, visit_var = visit_var,
-          anlfl_vars = anlfl_vars, subjid_var = subjid_var,
+          cat_var = cat_var,
+          par_var = par_var,
+          value_vars = value_vars,
+          visit_var = visit_var,
+          anlfl_vars = anlfl_vars,
+          subjid_var = subjid_var,
           quantile_type = quantile_type,
-          default_cat = default_cat, default_par = default_par, default_visit = default_visit,
-          default_value = default_value, default_main_group = default_main_group, default_sub_group = default_sub_group,
+          default_cat = default_cat,
+          default_par = default_par,
+          default_visit = default_visit,
+          default_value = default_value,
+          default_main_group = default_main_group,
+          default_sub_group = default_sub_group,
           default_page_group = default_page_group
         )
       )
@@ -897,83 +913,58 @@ mod_boxplot <- function(module_id,
   mod
 }
 
-# Boxplot module interface description ----
-# TODO: Fill in
-mod_boxplot_API_docs <- list(
-  "Boxplot",
-  module_id = "",
-  bm_dataset_name = "",
-  group_dataset_name = "",
-  receiver_id = "",
-  cat_var = "",
-  par_var = "",
-  value_vars = "",
-  visit_var = "",
-  anlfl_vars = "",
-  subjid_var = "",
-  quantile_type = "",
-  default_cat = "",
-  default_par = "",
-  default_visit = "",
-  default_value = "",
-  default_main_group = "",
-  default_sub_group = "",
-  default_page_group = "",
-  server_wrapper_func = ""
-)
 
-mod_boxplot_API_spec <- TC$group(
-  module_id = TC$mod_ID(),
-  bm_dataset_name = TC$dataset_name(),
-  group_dataset_name = TC$dataset_name() |> TC$flag("subject_level_dataset_name"),
-  receiver_id = TC$character() |> TC$flag("optional", "ignore"),
-  cat_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("map_character_to_factor"),
-  par_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("map_character_to_factor"),
-  value_vars = TC$col("bm_dataset_name", TC$numeric()) |> TC$flag("one_or_more"),
-  visit_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())) |> TC$flag("map_character_to_factor"),
-  anlfl_vars = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("zero_or_more", "optional"),
-  subjid_var = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("subjid_var", "map_character_to_factor"),
-  quantile_type = TC$integer(min = 1, max = 9) |> TC$flag("manual_check"),
-  default_cat = TC$choice_from_col_contents("cat_var") |> TC$flag("zero_or_more", "optional"),
-  default_par = TC$choice_from_col_contents("par_var") |> TC$flag("zero_or_more", "optional"),
-  default_visit = TC$choice_from_col_contents("visit_var") |> TC$flag("optional"),
-  default_value = TC$choice("value_vars") |> TC$flag("optional"), # FIXME(miguel): ? Should be called default_value_var
-  default_main_group = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("optional"),
-  default_sub_group = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("optional"),
-  default_page_group = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("optional"),
-  server_wrapper_func = TC$fn(arg_count = 1) |> TC$flag("optional", "ignore")
-) |> TC$attach_docs(mod_boxplot_API_docs)
+  # Boxplot module interface description ----
+  # TODO: Fill in
+  mod_boxplot_API_docs <- list(
+    "Boxplot",
+    module_id = "",
+    bm_dataset_name = "",
+    group_dataset_name = "",
+    receiver_id = "",
+    cat_var = "",
+    par_var = "",
+    value_vars = "",
+    visit_var = "",
+    anlfl_vars = "",
+    subjid_var = "",
+    quantile_type = "",
+    default_cat = "",
+    default_par = "",
+    default_visit = "",
+    default_value = "",
+    default_main_group = "",
+    default_sub_group = "",
+    default_page_group = "",
+    server_wrapper_func = ""
+  )
 
+  mod_boxplot_API_spec <- TC$group(
+    module_id = TC$mod_ID(),
+    bm_dataset_name = TC$dataset_name(),
+    group_dataset_name = TC$dataset_name() |> TC$flag("subject_level_dataset_name"),
+    receiver_id = TC$character() |> TC$flag("optional", "ignore"),
+    cat_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("map_character_to_factor"),
+    par_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("map_character_to_factor"),
+    value_vars = TC$col("bm_dataset_name", TC$numeric()) |> TC$flag("one_or_more"),
+    visit_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())) |>
+      TC$flag("map_character_to_factor"),
+    anlfl_vars = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("zero_or_more", "optional"),
+    subjid_var = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |>
+      TC$flag("subjid_var", "map_character_to_factor"),
+    quantile_type = TC$integer(min = 1, max = 9) |> TC$flag("manual_check"),
+    default_cat = TC$choice_from_col_contents("cat_var") |> TC$flag("zero_or_more", "optional"),
+    default_par = TC$choice_from_col_contents("par_var") |> TC$flag("zero_or_more", "optional"),
+    default_visit = TC$choice_from_col_contents("visit_var") |> TC$flag("optional"),
+    default_value = TC$choice("value_vars") |> TC$flag("optional"), # FIXME(miguel): ? Should be called default_value_var
+    default_main_group = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("optional"),
+    default_sub_group = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("optional"),
+    default_page_group = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("optional"),
+    server_wrapper_func = TC$fn(arg_count = 1) |> TC$flag("optional", "ignore")
+  ) |>
+    TC$attach_docs(mod_boxplot_API_docs)
 
-check_mod_boxplot <- function(
-  afmm,
-  datasets,
-  module_id,
-  bm_dataset_name,
-  group_dataset_name,
-  receiver_id,
-  cat_var,
-  par_var,
-  value_vars,
-  visit_var,
-  anlfl_vars,
-  subjid_var,
-  quantile_type,
-  default_cat,
-  default_par,
-  default_visit,
-  default_value,
-  default_main_group,
-  default_sub_group,
-  default_page_group,
-  server_wrapper_func
-) {
-
-  err <- CM$container()
-
-  # TODO: Replace this function with a generic one that performs the checks based on mod_boxplot_API_spec.
-  # Something along the lines of OK <- CM$check_API(mod_corr_hm_API_spec, args = match.call(), err)
-  OK <- check_mod_boxplot_auto(
+  check_mod_boxplot <- function(
     afmm,
     datasets,
     module_id,
@@ -994,47 +985,79 @@ check_mod_boxplot <- function(
     default_main_group,
     default_sub_group,
     default_page_group,
-    server_wrapper_func,
-    err
-  )
+    server_wrapper_func
+  ) {
+    err <- CM$container()
 
-  # Checks that API spec does not (yet?) capture
-
-  # Check that `quantile_type` is an integer scalar
-  CM$assert(
-    container = err,
-    cond = checkmate::test_integerish(
+    # TODO: Replace this function with a generic one that performs the checks based on mod_boxplot_API_spec.
+    # Something along the lines of OK <- CM$check_API(mod_corr_hm_API_spec, args = match.call(), err)
+    OK <- check_mod_boxplot_auto(
+      afmm,
+      datasets,
+      module_id,
+      bm_dataset_name,
+      group_dataset_name,
+      receiver_id,
+      cat_var,
+      par_var,
+      value_vars,
+      visit_var,
+      anlfl_vars,
+      subjid_var,
       quantile_type,
-      lower = 1,
-      upper = 9,
-      len = 1,
-      any.missing = FALSE,
-      null.ok = FALSE
-    ),
-    msg = "The value assigned to `quantile_type` must be a non-missing integer scalar between 1 and 9."
-  )
-
-  #ahwopu
-  if (OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] && OK[["visit_var"]] && OK[["anlfl_vars"]]) {
-    check_unique_sub_cat_par_vis(
-      datasets, "bm_dataset_name", bm_dataset_name,
-      subjid_var, cat_var, par_var, visit_var, anlfl_vars,
-      err = err
+      default_cat,
+      default_par,
+      default_visit,
+      default_value,
+      default_main_group,
+      default_sub_group,
+      default_page_group,
+      server_wrapper_func,
+      err
     )
+
+    # Checks that API spec does not (yet?) capture
+
+    # Check that `quantile_type` is an integer scalar
+    CM$assert(
+      container = err,
+      cond = checkmate::test_integerish(
+        quantile_type,
+        lower = 1,
+        upper = 9,
+        len = 1,
+        any.missing = FALSE,
+        null.ok = FALSE
+      ),
+      msg = "The value assigned to `quantile_type` must be a non-missing integer scalar between 1 and 9."
+    )
+
+    #ahwopu
+    if (OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] && OK[["visit_var"]] && OK[["anlfl_vars"]]) {
+      check_unique_sub_cat_par_vis(
+        datasets,
+        "bm_dataset_name",
+        bm_dataset_name,
+        subjid_var,
+        cat_var,
+        par_var,
+        visit_var,
+        anlfl_vars,
+        err = err
+      )
+    }
+
+    res <- list(errors = err[["messages"]])
+    return(res)
   }
 
-  res <- list(errors = err[["messages"]])
-  return(res)
-}
+  dataset_info_boxplot <- function(bm_dataset_name, group_dataset_name, ...) {
+    # TODO: Replace this function with a generic one that builds the list based on mod_boxplot_API_spec.
+    # Something along the lines of CM$dataset_info(mod_boxplot_API_spec, args = match.call())
+    return(list(all = unique(c(bm_dataset_name, group_dataset_name)), subject_level = group_dataset_name))
+  }
 
-dataset_info_boxplot <- function(bm_dataset_name, group_dataset_name, ...) {
-  # TODO: Replace this function with a generic one that builds the list based on mod_boxplot_API_spec.
-  # Something along the lines of CM$dataset_info(mod_boxplot_API_spec, args = match.call())
-  return(list(all = unique(c(bm_dataset_name, group_dataset_name)), subject_level = group_dataset_name))
-}
-
-mod_boxplot <- CM$module(mod_boxplot, check_mod_boxplot, dataset_info_boxplot)
-
+  mod_boxplot <- CM$module(mod_boxplot, check_mod_boxplot, dataset_info_boxplot)
 
 # Data manipulation
 
@@ -1085,44 +1108,75 @@ mod_boxplot <- CM$module(mod_boxplot, check_mod_boxplot, dataset_info_boxplot)
 #'
 #' @keywords internal
 #'
-bp_subset_data <- function(cat,
-                           cat_col,
-                           par,
-                           par_col,
-                           val_col,
-                           vis,
-                           vis_col,
-                           group_vect,
-                           bm_ds,
-                           group_ds,
-                           subj_col,
-                           anlfl_col = NULL) {
 
-  bm_fragment <- subset_bds_param(
-    ds = bm_ds, par = par, par_col = par_col,
-    cat = cat, cat_col = cat_col, val_col = val_col,
-    vis = vis, vis_col = vis_col, subj_col = subj_col,
+bp_subset_dataset_info <- function(
+  cat,
+  par,
+  vis,
+  group_vect,
+  ds_list_info,
+  bm_ds_name,
+  group_ds_name,  
+  subj_col,
+  cat_col,
+  par_col,
+  val_col,
+  vis_col,
+  anlfl_col = NULL
+) {
+  bm_fragment <- subset_bds_info_param(        
+    dataset_list_info = ds_list_info,
+    dataset_name = bm_ds_name,    
+    par = par,
+    par_col = par_col,
+    cat = cat,
+    cat_col = cat_col,
+    val_col = val_col,
+    vis = vis,
+    vis_col = vis_col,
+    subj_col = subj_col,
     anlfl_col = anlfl_col
   )
 
   # Covered by #ahwopu
   shiny::validate(
-    need_one_row_per_sbj(bm_fragment, CNT$SBJ, CNT$PAR, CNT$VIS, msg = CMN$MSG$VALIDATE$BM_TOO_MANY_ROWS)
+    need_one_row_per_sbj(
+      bm_fragment,
+      CNT$SBJ,
+      CNT$PAR,
+      CNT$VIS,
+      msg = CMN$MSG$VALIDATE$BM_TOO_MANY_ROWS
+    )
   )
 
   # Group data ----
   is_grouped <- length(group_vect) > 0
 
   if (is_grouped) {
-    checkmate::assert_subset(names(group_vect), c(CNT$MAIN_GROUP, CNT$SUB_GROUP, CNT$PAGE_GROUP))
+    checkmate::assert_subset(
+      names(group_vect),
+      c(CNT$MAIN_GROUP, CNT$SUB_GROUP, CNT$PAGE_GROUP)
+    )
 
-    grp_fragment <- subset_adsl(
-      ds = group_ds, group_vect = group_vect, subj_col = subj_col
+    grp_fragment <- subset_adsl_info(
+      dataset_list_info = ds_list_info,
+      dataset_name = group_ds_name,
+      group_vect = group_vect,
+      subj_col = subj_col
     )
 
     shiny::validate(
-      need_one_row_per_sbj(grp_fragment, CNT$SBJ, msg = CMN$MSG$VALIDATE$GROUP_TOO_MANY_ROWS),
-      need_disjunct_cols(bm_fragment, grp_fragment, ignore = CNT$SBJ, msg = CMN$MSG$VALIDATE$GROUP_COL_REPEATED)
+      need_one_row_per_sbj(
+        grp_fragment,
+        CNT$SBJ,
+        msg = CMN$MSG$VALIDATE$GROUP_TOO_MANY_ROWS
+      ),
+      need_disjunct_cols(
+        bm_fragment,
+        grp_fragment,
+        ignore = CNT$SBJ,
+        msg = CMN$MSG$VALIDATE$GROUP_COL_REPEATED
+      )
     )
 
     joint_data <- dplyr::left_join(
@@ -1363,7 +1417,12 @@ bp_count_table <- function(ds) {
   # Nonetheless a conservative approach is taken and error is raised in that case
   checkmate::assert_disjunct(names(ds), "Count")
 
-  dplyr::count(ds, dplyr::across(dplyr::all_of(count_by)), .drop = FALSE, name = "Count")
+  dplyr::count(
+    ds,
+    dplyr::across(dplyr::all_of(count_by)),
+    .drop = FALSE,
+    name = "Count"
+  )
 }
 
 #' Calculates a set of summary statistics grouped by all variables except ``r CNT$SBJ`` and ``r CNT$VAL``
@@ -1666,3 +1725,4 @@ bp_get_closest_double_click <- function(ds, click) {
   )
   bp_get_closest_gen_click(ds, click)
 }
+  
