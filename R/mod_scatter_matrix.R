@@ -826,8 +826,7 @@ scatterplotmatrix_chart <- function(ds) {
       strip.text.y = ggplot2::element_text(angle = 0, hjust = 0)
     ) +
     ggplot2::labs(
-      y = val_col,
-      x = "val_col"
+      title = paste("Analysis value:", val_col)
     )
 }
 
