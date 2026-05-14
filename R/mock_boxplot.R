@@ -37,7 +37,7 @@ mock_app_boxplot <- function(dry_run = FALSE, update_query_string = TRUE, srv_de
       subjid_var = "SUBJID",
       cat_var = "PARCAT",
       par_var = "PARAM",
-      visit_var = "VISIT",
+      x_axis_vars = "VISIT",
       value_vars = c("VALUE1", "VALUE2", "VALUE3"),
       anlfl_vars = anlfl_vars,
       quantile_type = 2L
@@ -92,6 +92,48 @@ mock_app_boxplot_mm <- function(update_query_string = TRUE, anlfl_flags = FALSE)
         anlfl_vars = anlfl_vars,
         default_cat = "PARCAT1",
         default_par = "PARAM11"
+      )
+    ),
+    filter_data = "adsl",
+    filter_key = "SUBJID",
+    enableBookmarking = "url"
+  )
+}
+
+
+#' Mock mm boxplot app with deprecated visit_var argument
+#' @keywords mock
+#' @inheritParams mock_app_boxplot
+#' @export
+
+
+
+mock_app_boxplot_mm_depr <- function(update_query_string = TRUE, anlfl_flags = FALSE) {
+  if (!requireNamespace("dv.manager")) {
+    stop("Install dv.manager")
+  }
+
+  data <- test_data(anlfl_flags = anlfl_flags)
+
+
+  if (anlfl_flags) {
+    anlfl_vars <- c("ANLFL1", "ANLFL2")
+  } else {
+    anlfl_vars <- NULL
+  }
+
+  dv.manager::run_app(
+    data = list(dummy = list(bm = data[["bm"]], adsl = data[["sl"]])),
+    module_list = list(
+      Boxplot = mod_boxplot(
+        "boxplot",
+        bm_dataset_name = "bm",
+        group_dataset_name = "adsl",
+        visit_var = "VISIT",
+        value_vars = c("VALUE1", "VALUE2"),
+        subjid_var = "SUBJID",
+        cat_var = "PARCAT",
+        anlfl_vars = anlfl_vars
       )
     ),
     filter_data = "adsl",

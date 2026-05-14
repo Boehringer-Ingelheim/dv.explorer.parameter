@@ -857,6 +857,7 @@ mod_boxplot <- function(module_id,
                         par_var = "PARAM",
                         value_vars = "AVAL",
                         x_axis_vars = c("AVISIT"),
+                        visit_var = NULL,
                         anlfl_vars = NULL,
                         subjid_var = "SUBJID",
                         quantile_type = 7L,
@@ -875,6 +876,15 @@ mod_boxplot <- function(module_id,
       )
     },
     server = function(afmm) {
+      if (!is.null(visit_var)) {
+        x_axis_vars <- visit_var
+        lifecycle::deprecate_warn(
+          "0.2.1",
+          "mod_boxplot(visit_var = )",
+          "mod_boxplot(x_axis_vars = )"
+        )
+      }
+
       if (is.null(receiver_id)) {
         on_sbj_click_fun <- function() NULL
       } else {

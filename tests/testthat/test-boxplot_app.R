@@ -11,6 +11,7 @@ ID <- poc(
     PAR = tns(BP$ID$PAR, "par_val"),
     VAL = tns(BP$ID$PAR_VALUE, "val"),
     VIS = tns(BP$ID$PAR_VISIT, "val"),
+    X_VAR = tns(BP$ID$PAR_VISIT, "val"),
     MGRP = tns(BP$ID$MAIN_GRP, "val"),
     SGRP = tns(BP$ID$SUB_GRP, "val"),
     PGRP = tns(BP$ID$PAGE_GRP, "val"),
@@ -102,7 +103,7 @@ local({
   })
 
   exported_test_values <- app$get_value(export = "not_ebas-output_arguments")
-  
+
   expected_ds <- bp_subset_data(
     cat = inputs[[ID$INPUT$CAT]],
     cat_col = app_args$srv$cat_var,
@@ -110,7 +111,7 @@ local({
     par_col = app_args$srv$par_var,
     val_col = inputs[[ID$INPUT$VAL]],
     vis = inputs[[ID$INPUT$VIS]],
-    vis_col = app_args$srv$visit_var,
+    x_axis_col = app_args$srv$x_axis_vars,
     group_vect = stats::setNames(c("CAT2", "CAT2", "CAT2"), c(CNT$MAIN_GROUP, CNT$SUB_GROUP, CNT$PAGE_GROUP)),
     bm_ds = shiny::isolate(app_args$srv$bm_dataset()),
     group_ds = shiny::isolate(app_args$srv$group_dataset()),
@@ -227,9 +228,9 @@ local({
       app_input_values <- app_input_values[!names(app_input_values) %in% excluded]
       app_input_values["not_ebas-click"] <- list(NULL)
       app_input_values["not_ebas-dclick"] <- list(NULL)
-      
+
       bmk_input_values <- bookmark_app$get_values()[["input"]]
-      
+
       expect_identical(app_input_values, bmk_input_values)
     }
   )
@@ -262,7 +263,7 @@ test_that("default values are set", {
   input_values <- app$get_values()[["input"]]
   expect_equal(input_values[[ID$INPUT$CAT]], srv_defaults[["default_cat"]])
   expect_equal(input_values[[ID$INPUT$PAR]], srv_defaults[["default_par"]])
-  expect_equal(input_values[[ID$INPUT$VIS]], srv_defaults[["default_visit"]])
+  expect_equal(input_values[[ID$INPUT$X_VAR]], srv_defaults[["default_visit"]])
   expect_equal(input_values[[ID$INPUT$VAL]], srv_defaults[["default_value"]])
   expect_equal(input_values[[ID$INPUT$MGRP]], srv_defaults[["default_main_group"]])
   expect_equal(input_values[[ID$INPUT$SGRP]], srv_defaults[["default_sub_group"]])
@@ -297,7 +298,7 @@ test_that("default values are set including analysis flag variables", {
   input_values <- app$get_values()[["input"]]
   expect_equal(input_values[[ID$INPUT$CAT]], srv_defaults[["default_cat"]])
   expect_equal(input_values[[ID$INPUT$PAR]], srv_defaults[["default_par"]])
-  expect_equal(input_values[[ID$INPUT$VIS]], srv_defaults[["default_visit"]])
+  expect_equal(input_values[[ID$INPUT$X_VAR]], srv_defaults[["default_visit"]])
   expect_equal(input_values[[ID$INPUT$VAL]], srv_defaults[["default_value"]])
   expect_equal(input_values[[ID$INPUT$MGRP]], srv_defaults[["default_main_group"]])
   expect_equal(input_values[[ID$INPUT$SGRP]], srv_defaults[["default_sub_group"]])
