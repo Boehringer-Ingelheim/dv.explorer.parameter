@@ -10,6 +10,8 @@ ID <- poc(
     CAT = tns(BP$ID$PAR, "cat_val"),
     PAR = tns(BP$ID$PAR, "par_val"),
     VAL = tns(BP$ID$PAR_VALUE, "val"),
+    X_VALS = tns(BP$ID$X_VALS, "val"),
+    MGRP = tns(BP$ID$MAIN_GRP, "val"),
     SGRP = tns(BP$ID$SUB_GRP, "val"),
     PGRP = tns(BP$ID$PAGE_GRP, "val"),
     VCHECK = tns(BP$ID$VIOLIN_CHECK),
@@ -57,7 +59,8 @@ local({
   inputs <- list()
   inputs[[ID$INPUT$CAT]] <- "PARCAT2"
   inputs[[ID$INPUT$VAL]] <- "VALUE2"
-  inputs[[ID$INPUT$VIS]] <- c("VISIT1", "VISIT2", "VISIT3")
+  inputs[[ID$INPUT$X_VALS]] <- c("VISIT1", "VISIT2", "VISIT3")
+  inputs[[ID$INPUT$MGRP]] <- "CAT2"
   inputs[[ID$INPUT$SGRP]] <- "CAT2"
   inputs[[ID$INPUT$PGRP]] <- "CAT2"
   inputs[[ID$INPUT$VCHECK]] <- TRUE
@@ -69,6 +72,7 @@ local({
   inputs2[[ID$INPUT$PAR]] <- c("PARAM22", "PARAM23")
 
   app$set_inputs(!!!inputs)
+
   app$wait_for_idle()
   app$set_inputs(!!!inputs2)
   app$wait_for_idle()
@@ -108,9 +112,9 @@ local({
     par = inputs2[[ID$INPUT$PAR]],
     par_col = app_args$srv$par_var,
     val_col = inputs[[ID$INPUT$VAL]],
-    vis = inputs[[ID$INPUT$VIS]],
-    vis_col = app_args$srv$x_axis_vars,
-    group_vect = stats::setNames(c("CAT2", "CAT2"), c(CNT$SUB_GROUP, CNT$PAGE_GROUP)),
+    x_axis_vals = inputs[[ID$INPUT$X_VALS]],
+    x_axis_col = app_args$srv$x_axis_vars,
+    group_vect = stats::setNames(c("CAT2", "CAT2", "CAT2"), c(CNT$MAIN_GROUP, CNT$SUB_GROUP, CNT$PAGE_GROUP)),
     bm_ds = shiny::isolate(app_args$srv$bm_dataset()),
     group_ds = shiny::isolate(app_args$srv$group_dataset()),
     subj_col = app_args$srv$subjid_var
@@ -119,8 +123,7 @@ local({
   test_that(
     "boxplot chart is included according to selection" |>
       vdoc[["add_spec"]](c(specs$boxplot_module$boxplot_chart, specs$boxplot_module$composition)),
-    {
-      expected <- list(
+    { expected <- list(
         ds = expected_ds,
         violin = inputs[[ID$INPUT$VCHECK]],
         show_points = inputs[[ID$INPUT$SPCHECK]],
@@ -152,6 +155,7 @@ local({
       listing <- shiny::isolate(exported_test_values[[BP$ID$TABLE_LISTING]]$render())[["x"]][["data"]]
       expect_identical(unique(as.character(listing[[CNT$CAT]])), "PARCAT2")
       expect_identical(unique(as.character(listing[[CNT$PAR]])), "PARAM23")
+      expect_identical(unique(as.character(listing[[CNT$MAIN_GROUP]])), "B")
       expect_identical(unique(as.character(listing[[CNT$SUB_GROUP]])), "B")
       expect_identical(unique(as.character(listing[[CNT$PAGE_GROUP]])), "B")
       expect_identical(unique(as.character(listing[[CNT$VIS]])), "VISIT3")
@@ -163,7 +167,7 @@ local({
       vdoc[["add_spec"]](c(specs$boxplot_module$single_listing, specs$boxplot_module$composition)),
     {
       listing <- shiny::isolate(exported_test_values[[BP$ID$TABLE_SINGLE_LISTING]]$render())[["x"]][["data"]]
-      expect_identical(unique(as.character(listing[[CNT$SBJ]])), "12")
+      expect_identical(unique(as.character(listing[[CNT$SBJ]])), "7")
     }
   )
 
@@ -241,8 +245,9 @@ test_that("default values are set", {
   srv_defaults <- list(
     default_cat = "PARCAT2",
     default_par = c("PARAM22", "PARAM23"),
-    default_x_vals = "VISIT2",
+    default_x_axis_vals = "VISIT2",
     default_value = "VALUE2",
+    default_main_group = "CAT1",
     default_sub_group = "CAT2",
     default_page_group = "CAT3"
   )
@@ -260,8 +265,9 @@ test_that("default values are set", {
   input_values <- app$get_values()[["input"]]
   expect_equal(input_values[[ID$INPUT$CAT]], srv_defaults[["default_cat"]])
   expect_equal(input_values[[ID$INPUT$PAR]], srv_defaults[["default_par"]])
-  expect_equal(input_values[[ID$INPUT$VIS]], srv_defaults[["default_x_vals"]])
+  expect_equal(input_values[[ID$INPUT$X_VALS]], srv_defaults[["default_x_axis_vals"]])
   expect_equal(input_values[[ID$INPUT$VAL]], srv_defaults[["default_value"]])
+  expect_equal(input_values[[ID$INPUT$MGRP]], srv_defaults[["default_main_group"]])
   expect_equal(input_values[[ID$INPUT$SGRP]], srv_defaults[["default_sub_group"]])
   expect_equal(input_values[[ID$INPUT$PGRP]], srv_defaults[["default_page_group"]])
 })
@@ -273,8 +279,9 @@ test_that("default values are set including analysis flag variables", {
   srv_defaults <- list(
     default_cat = "PARCAT2",
     default_par = c("PARAM22", "PARAM23"),
-    default_x_vals = "VISIT2",
+    default_x_axis_vals = "VISIT2",
     default_value = "VALUE2",
+    default_main_group = "CAT1",
     default_sub_group = "CAT2",
     default_page_group = "CAT3"
   )
@@ -293,8 +300,9 @@ test_that("default values are set including analysis flag variables", {
   input_values <- app$get_values()[["input"]]
   expect_equal(input_values[[ID$INPUT$CAT]], srv_defaults[["default_cat"]])
   expect_equal(input_values[[ID$INPUT$PAR]], srv_defaults[["default_par"]])
-  expect_equal(input_values[[ID$INPUT$VIS]], srv_defaults[["default_x_vals"]])
+  expect_equal(input_values[[ID$INPUT$X_VALS]], srv_defaults[["default_x_axis_vals"]])
   expect_equal(input_values[[ID$INPUT$VAL]], srv_defaults[["default_value"]])
+  expect_equal(input_values[[ID$INPUT$MGRP]], srv_defaults[["default_main_group"]])
   expect_equal(input_values[[ID$INPUT$SGRP]], srv_defaults[["default_sub_group"]])
   expect_equal(input_values[[ID$INPUT$PGRP]], srv_defaults[["default_page_group"]])
   expect_equal(input_values[[ID$INPUT$ANLFL]], "ANLFL1")
