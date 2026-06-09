@@ -43,14 +43,14 @@ check_unique_sub_cat_par_vis_ <- function(datasets, ds_name, ds_value, sub, cat,
         trimws()
       return(paste(lines, collapse = "\n"))
     }
-  
+
     dataset <- datasets[[ds_value]]
 
     # If specified, filter on analysis flag
     if (!is.null(anlfl)) {
       dataset <- dataset[dataset[[anlfl]] %in% "Y", ]
     }
-  
+
   # Text to indicate filter on analysis flag
     if (is.null(anlfl)) {
       ds_filter <- ""
@@ -58,11 +58,11 @@ check_unique_sub_cat_par_vis_ <- function(datasets, ds_name, ds_value, sub, cat,
       ds_filter <- paste0(" filtered on `", CM$format_inline_asis(sprintf('%s = "Y"', anlfl)), "`")
     }
 
-    ok <- local({        
-      cat_par_combinations <- check_unique_cat_par_combinations(dataset, cat, par)      
+    ok <- local({
+      cat_par_combinations <- check_unique_cat_par_combinations(dataset, cat, par)
 
       CM$assert(err, !cat_par_combinations[["any_dup"]], {
-        cat_par_combinations[["unique"]]        
+        cat_par_combinations[["unique"]]
         unique_repeat_params <- vctrs::vec_unique(cat_par_combinations[["unique"]][[par]][cat_par_combinations[["dup_mask"]]])
         dups <- df_to_string(
           data.frame(
@@ -119,16 +119,16 @@ check_unique_sub_cat_par_vis_ <- function(datasets, ds_name, ds_value, sub, cat,
           "</pre>"
         )
       })
-      
+
     })
 
-    
+
 
     ok <- ok &&
       local({
-        sub_cat_par_vis_combinations <- check_unique_sub_cat_par_vis_combinations(dataset, sub, cat, par, vis)        
+        sub_cat_par_vis_combinations <- check_unique_sub_cat_par_vis_combinations(dataset, sub, cat, par, vis)
 
-        CM$assert(err, !sub_cat_par_vis_combinations[["any_dup"]], {          
+        CM$assert(err, !sub_cat_par_vis_combinations[["any_dup"]], {
           prefixes <- c(
             rep("Subject:", length(sub)),
             rep("Category:", length(cat)),
@@ -137,7 +137,7 @@ check_unique_sub_cat_par_vis_ <- function(datasets, ds_name, ds_value, sub, cat,
           )
 
           supposedly_unique <- dataset[c(sub, cat, par, vis)]
-          first_duplicates <- head(supposedly_unique[sub_cat_par_vis_combinations[["dup_mask"]], ], 5)
+          first_duplicates <- utils::head(supposedly_unique[sub_cat_par_vis_combinations[["dup_mask"]], ], 5)
           names(first_duplicates) <- paste(prefixes, names(first_duplicates))
           dups <- df_to_string(first_duplicates)
 
