@@ -993,7 +993,6 @@ mod_boxplot_API_docs <- list(
   server_wrapper_func = ""
 )
 
-
 mod_boxplot_API_spec <- TC$group(
   module_id = TC$mod_ID(),
   bm_dataset_name = TC$dataset_name(),
@@ -1020,17 +1019,21 @@ mod_boxplot_API_spec <- TC$group(
 ) |> TC$attach_docs(mod_boxplot_API_docs)
 
 check_mod_boxplot <- function(
-    afmm, datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id,
+    afmm,
+    datasets,
+    module_id, bm_dataset_name, group_dataset_name, receiver_id,
     cat_var, par_var, value_vars, x_axis_vars, visit_var, anlfl_vars, subjid_var, quantile_type,
     default_cat, default_par, default_x_axis_var, default_x_axis_vals, default_visit, default_value,
-    default_main_group, default_sub_group, default_page_group, server_wrapper_func) {
+    default_main_group, default_sub_group, default_page_group, server_wrapper_func
+) {
 
   err <- CM$container()
 
   # TODO: Replace this function with a generic one that performs the checks based on mod_boxplot_API_spec.
   # Something along the lines of OK <- CM$check_API(mod_corr_hm_API_spec, args = match.call(), err)
   OK <- check_mod_boxplot_auto(
-    afmm, datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id,
+    afmm,
+    datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id,
     cat_var, par_var, value_vars, x_axis_vars, visit_var, anlfl_vars, subjid_var, quantile_type,
     default_cat, default_par, default_x_axis_var, default_x_axis_vals, default_visit, default_value,
     default_main_group, default_sub_group, default_page_group, server_wrapper_func, err
@@ -1041,7 +1044,11 @@ check_mod_boxplot <- function(
   # Check that `quantile_type` is an integer scalar
   CM$assert(
     container = err,
-    cond = checkmate::test_integerish(quantile_type, lower = 1, upper = 9, len = 1, any.missing = FALSE, null.ok = FALSE),
+    cond = checkmate::test_integerish(
+      quantile_type,
+      lower = 1,
+      upper = 9, len = 1, any.missing = FALSE, null.ok = FALSE
+    ),
     msg = "The value assigned to `quantile_type` must be a non-missing integer scalar between 1 and 9."
   )
 
@@ -1272,11 +1279,6 @@ boxplot_chart <- function(ds, violin, show_points, log_project_y, title_data = N
     )
   }
 
-
-
-
-
-
   # Define grid
 
   cols <- c(
@@ -1290,7 +1292,6 @@ boxplot_chart <- function(ds, violin, show_points, log_project_y, title_data = N
   } else {
     ggplot2::vars(.data[[CNT$PAR]])
   }
-
 
   p <- ggplot2::ggplot(
     data = ds,
