@@ -4,8 +4,8 @@
 
 # dv.explorer.parameter::mod_boxplot
 check_mod_boxplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id,
-    cat_var, par_var, value_vars, visit_var, x_axis_vars, anlfl_vars, subjid_var, quantile_type, default_cat,
-    default_par, default_visit, default_x_axis_vals, default_x_axis_var, default_value, default_main_group,
+    cat_var, par_var, value_vars, x_axis_vars, visit_var, anlfl_vars, subjid_var, quantile_type, default_cat,
+    default_par, default_x_axis_var, default_x_axis_vals, default_visit, default_value, default_main_group,
     default_sub_group, default_page_group, server_wrapper_func, err) {
     OK <- logical(0)
     used_dataset_names <- new.env(parent = emptyenv())
@@ -33,13 +33,13 @@ check_mod_boxplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, g
         subkind, flags, bm_dataset_name, datasets[[bm_dataset_name]], err)
     subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor"), list(kind = "numeric",
         min = NA, max = NA)))
-    flags <- list(optional = TRUE, map_character_to_factor = TRUE)
-    OK[["visit_var"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("visit_var", visit_var,
+    flags <- list(one_or_more = TRUE, map_character_to_factor = TRUE)
+    OK[["x_axis_vars"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("x_axis_vars", x_axis_vars,
         subkind, flags, bm_dataset_name, datasets[[bm_dataset_name]], err)
     subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor"), list(kind = "numeric",
         min = NA, max = NA)))
-    flags <- list(one_or_more = TRUE, map_character_to_factor = TRUE)
-    OK[["x_axis_vars"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("x_axis_vars", x_axis_vars,
+    flags <- list(optional = TRUE, map_character_to_factor = TRUE)
+    OK[["visit_var"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("visit_var", visit_var,
         subkind, flags, bm_dataset_name, datasets[[bm_dataset_name]], err)
     subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
     flags <- list(zero_or_more = TRUE, optional = TRUE)
@@ -59,14 +59,14 @@ check_mod_boxplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, g
     OK[["default_par"]] <- OK[["par_var"]] && CM$check_choice_from_col_contents("default_par", default_par,
         flags, "bm_dataset_name", datasets[[bm_dataset_name]], par_var, err)
     flags <- list(optional = TRUE)
-    OK[["default_visit"]] <- OK[["visit_var"]] && CM$check_choice_from_col_contents("default_visit",
-        default_visit, flags, "bm_dataset_name", datasets[[bm_dataset_name]], visit_var, err)
-    flags <- list(optional = TRUE)
+    OK[["default_x_axis_var"]] <- OK[["x_axis_vars"]] && CM$check_choice("default_x_axis_var", default_x_axis_var,
+        flags, "x_axis_vars", x_axis_vars, err)
+    flags <- list(one_or_more = TRUE, optional = TRUE)
     OK[["default_x_axis_vals"]] <- OK[["x_axis_vars"]] && CM$check_choice_from_col_contents("default_x_axis_vals",
         default_x_axis_vals, flags, "bm_dataset_name", datasets[[bm_dataset_name]], x_axis_vars, err)
     flags <- list(optional = TRUE)
-    OK[["default_x_axis_var"]] <- OK[["x_axis_vars"]] && CM$check_choice("default_x_axis_var", default_x_axis_var,
-        flags, "x_axis_vars", x_axis_vars, err)
+    OK[["default_visit"]] <- OK[["visit_var"]] && CM$check_choice_from_col_contents("default_visit",
+        default_visit, flags, "bm_dataset_name", datasets[[bm_dataset_name]], visit_var, err)
     flags <- list(optional = TRUE)
     OK[["default_value"]] <- OK[["value_vars"]] && CM$check_choice("default_value", default_value, flags,
         "value_vars", value_vars, err)

@@ -5,7 +5,7 @@ BP <- poc( # nolint
     PAR_BUTTON = "par_button",
     PAR = "par",
     PAR_VALUE = "par_value",
-    X_VAR= "x_var",
+    X_VAR = "x_var",
     X_VALS = "x_vals",
     ANLFL_FILTER = "anlfl_filter",
     PAR_TRANSFORM = "par_transform",
@@ -302,7 +302,7 @@ boxplot_server <- function(id,
     min.chars = 1, any.missing = FALSE,
     all.missing = FALSE, unique = TRUE, min.len = 1, add = ac
   )
-  checkmate::assert_character(x_axis_vars, min.chars = 1, null.ok =FALSE, add = ac)
+  checkmate::assert_character(x_axis_vars, min.chars = 1, null.ok = FALSE, add = ac)
   checkmate::assert_string(subjid_var, min.chars = 1, add = ac)
 
   checkmate::reportAssertions(ac)
@@ -954,7 +954,7 @@ mod_boxplot <- function(module_id,
           anlfl_vars = anlfl_vars, subjid_var = subjid_var,
           quantile_type = quantile_type,
           default_cat = default_cat, default_par = default_par,
-          default_x_axis_var =default_x_axis_var, default_x_axis_vals = default_x_axis_vals,
+          default_x_axis_var = default_x_axis_var, default_x_axis_vals = default_x_axis_vals,
           default_value = default_value, default_main_group = default_main_group, default_sub_group = default_sub_group,
           default_page_group = default_page_group
         )
@@ -976,16 +976,16 @@ mod_boxplot_API_docs <- list(
   cat_var = "",
   par_var = "",
   value_vars = "",
-  visit_var = "",
   x_axis_vars = "",
+  visit_var = "",
   anlfl_vars = "",
   subjid_var = "",
   quantile_type = "",
   default_cat = "",
   default_par = "",
-  default_visit = "",
-  default_x_axis_vals = "",
   default_x_axis_var = "",
+  default_x_axis_vals = "",
+  default_visit = "",
   default_value = "",
   default_main_group = "",
   default_sub_group = "",
@@ -1002,16 +1002,16 @@ mod_boxplot_API_spec <- TC$group(
   cat_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("map_character_to_factor"),
   par_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("map_character_to_factor"),
   value_vars = TC$col("bm_dataset_name", TC$numeric()) |> TC$flag("one_or_more"),
+  x_axis_vars = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())) |> TC$flag("one_or_more", "map_character_to_factor"),
   visit_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())) |> TC$flag("optional", "map_character_to_factor"),
-  x_axis_vars = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric() )) |> TC$flag("one_or_more", "map_character_to_factor"),
   anlfl_vars = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("zero_or_more", "optional"),
   subjid_var = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("subjid_var", "map_character_to_factor"),
   quantile_type = TC$integer(min = 1, max = 9) |> TC$flag("manual_check"),
   default_cat = TC$choice_from_col_contents("cat_var") |> TC$flag("zero_or_more", "optional"),
   default_par = TC$choice_from_col_contents("par_var") |> TC$flag("zero_or_more", "optional"),
-  default_visit = TC$choice_from_col_contents("visit_var") |> TC$flag("optional"),
-  default_x_axis_vals = TC$choice_from_col_contents("x_axis_vars") |> TC$flag("one_or_more", "optional"),
   default_x_axis_var =  TC$choice("x_axis_vars") |> TC$flag("optional"),
+  default_x_axis_vals = TC$choice_from_col_contents("x_axis_vars") |> TC$flag("one_or_more", "optional"),
+  default_visit = TC$choice_from_col_contents("visit_var") |> TC$flag("optional"),
   default_value = TC$choice("value_vars") |> TC$flag("optional"), # FIXME(miguel): ? Should be called default_value_var
   default_main_group = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("optional"),
   default_sub_group = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("optional"),
@@ -1019,22 +1019,21 @@ mod_boxplot_API_spec <- TC$group(
   server_wrapper_func = TC$fn(arg_count = 1) |> TC$flag("optional", "ignore")
 ) |> TC$attach_docs(mod_boxplot_API_docs)
 
-
 check_mod_boxplot <- function(
     afmm, datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id,
     cat_var, par_var, value_vars, x_axis_vars, visit_var, anlfl_vars, subjid_var, quantile_type,
-    default_cat, default_par, default_x_axis_vals, default_x_axis_var, default_visit, default_value,
+    default_cat, default_par, default_x_axis_var, default_x_axis_vals, default_visit, default_value,
     default_main_group, default_sub_group, default_page_group, server_wrapper_func) {
-  warn <- CM$container()
   err <- CM$container()
+  warn <- CM$container()
 
   # TODO: Replace this function with a generic one that performs the checks based on mod_boxplot_API_spec.
   # Something along the lines of OK <- CM$check_API(mod_corr_hm_API_spec, args = match.call(), warn, err)
   OK <- check_mod_boxplot_auto(
     afmm, datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id,
     cat_var, par_var, value_vars, x_axis_vars, visit_var, anlfl_vars, subjid_var, quantile_type,
-    default_cat, default_par, default_x_axis_vals, default_x_axis_var, default_visit, default_value,
-    default_main_group, default_sub_group, default_page_group, server_wrapper_func, warn, err
+    default_cat, default_par, default_x_axis_var, default_x_axis_vals, default_visit, default_value,
+    default_main_group, default_sub_group, default_page_group, server_wrapper_func, err
   )
 
   # Checks that API spec does not (yet?) capture
@@ -1047,27 +1046,27 @@ check_mod_boxplot <- function(
   )
 
   #ahwopu
-  if (OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] && OK[["x_axis_vars"]] && OK[["anlfl_vars"]]) {
-
-    if (!is.null(anlfl_vars)) {
-      # Check grouping values are unique for specified analysis flags
-      for (anlfl_var in anlfl_vars) {
-        CM$check_unique_sub_cat_par_vis(
-          datasets, "bm_dataset_name", bm_dataset_name,
-          subjid_var, cat_var, par_var, x_axis_vars, anlfl_var,
-          warn = warn, err = err
-        )
-      }
-    } else {
-      # Check grouping values are unique without subsetting on analysis flags
-      CM$check_unique_sub_cat_par_vis(
-        datasets, "bm_dataset_name", bm_dataset_name,
-        subjid_var, cat_var, par_var, x_axis_vars,
-        warn = warn, err = err
-      )
-    }
-
-  }
+  # if (OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] && OK[["x_axis_vars"]] && OK[["anlfl_vars"]]) {
+  #
+  #   if (!is.null(anlfl_vars)) {
+  #     # Check grouping values are unique for specified analysis flags
+  #     for (anlfl_var in anlfl_vars) {
+  #       CM$check_unique_sub_cat_par_vis(
+  #         datasets, "bm_dataset_name", bm_dataset_name,
+  #         subjid_var, cat_var, par_var, x_axis_vars, anlfl_var,
+  #         warn = warn, err = err
+  #       )
+  #     }
+  #   } else {
+  #     # Check grouping values are unique without subsetting on analysis flags
+  #     CM$check_unique_sub_cat_par_vis(
+  #       datasets, "bm_dataset_name", bm_dataset_name,
+  #       subjid_var, cat_var, par_var, x_axis_vars,
+  #       warn = warn, err = err
+  #     )
+  #   }
+  #
+  # }
 
   res <- list(warnings = warn[["messages"]], errors = err[["messages"]])
   return(res)
@@ -1079,7 +1078,7 @@ dataset_info_boxplot <- function(bm_dataset_name, group_dataset_name, ...) {
   return(list(all = unique(c(bm_dataset_name, group_dataset_name)), subject_level = group_dataset_name))
 }
 
-#mod_boxplot <- CM$module(mod_boxplot, check_mod_boxplot, dataset_info_boxplot) #, map_afmm_mod_boxplot_auto)
+mod_boxplot <- CM$module(mod_boxplot, check_mod_boxplot, dataset_info_boxplot) #, map_afmm_mod_boxplot_auto)
 
 
 # Data manipulation
