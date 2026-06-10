@@ -266,7 +266,7 @@ boxplot_server <- function(id,
                            cat_var = "PARCAT",
                            par_var = "PARAM",
                            value_vars = "AVAL",
-                           x_axis_vars = "AVISIT",
+                           x_axis_vars = NULL,
                            anlfl_vars = NULL,
                            subjid_var = "USUBJID",
                            quantile_type = 7L,
@@ -687,7 +687,8 @@ boxplot_server <- function(id,
     )
 
     if (is_shiny_test_mode()) {
-       output_arguments[[BP$ID$CHART]][["render"]] <- shiny::reactive(
+      brow
+      output_arguments[[BP$ID$CHART]][["render"]] <- shiny::reactive(
         do.call(bp_get_boxplot_output, output_arguments[[BP$ID$CHART]][["arguments"]]())
       )
     }
@@ -726,7 +727,7 @@ boxplot_server <- function(id,
     )
 
     if (is_shiny_test_mode()) {
-       output_arguments[[BP$ID$TABLE_SINGLE_LISTING]][["render"]] <- shiny::reactive(
+      output_arguments[[BP$ID$TABLE_SINGLE_LISTING]][["render"]] <- shiny::reactive(
         do.call(bp_get_single_listings_output, output_arguments[[BP$ID$TABLE_SINGLE_LISTING]][["arguments"]]())
       )
     }
@@ -743,7 +744,7 @@ boxplot_server <- function(id,
       )
     )
     if (is_shiny_test_mode()) {
-       output_arguments[[BP$ID$TABLE_COUNT]][["render"]] <- shiny::reactive({
+      output_arguments[[BP$ID$TABLE_COUNT]][["render"]] <- shiny::reactive({
         do.call(bp_get_count_output, output_arguments[[BP$ID$TABLE_COUNT]][["arguments"]]())
       })
     }
@@ -760,7 +761,7 @@ boxplot_server <- function(id,
       )
     )
     if (is_shiny_test_mode()) {
-       output_arguments[[BP$ID$TABLE_SUMMARY]][["render"]] <- shiny::reactive({
+      output_arguments[[BP$ID$TABLE_SUMMARY]][["render"]] <- shiny::reactive({
         do.call(bp_get_summary_output, output_arguments[[BP$ID$TABLE_SUMMARY]][["arguments"]]())
       })
     }
@@ -776,7 +777,7 @@ boxplot_server <- function(id,
       )
     )
     if (is_shiny_test_mode()) {
-       output_arguments[[BP$ID$TABLE_SIGNIFICANCE]][["render"]] <- shiny::reactive({
+      output_arguments[[BP$ID$TABLE_SIGNIFICANCE]][["render"]] <- shiny::reactive({
         do.call(bp_get_significance_output, output_arguments[[BP$ID$TABLE_SIGNIFICANCE]][["arguments"]]())
       })
     }
@@ -895,7 +896,7 @@ mod_boxplot <- function(module_id,
                         cat_var = "PARCAT",
                         par_var = "PARAM",
                         value_vars = "AVAL",
-                        x_axis_vars = c("AVISIT"),
+                        x_axis_vars = NULL,
                         visit_var = NULL,
                         anlfl_vars = NULL,
                         subjid_var = "SUBJID",
@@ -910,6 +911,110 @@ mod_boxplot <- function(module_id,
                         default_sub_group = NULL,
                         default_page_group = NULL,
                         server_wrapper_func = function(x) list(subj_id = x)) {
+
+  # temporary backward compatibility for visit_var and default_visit
+
+
+  if (!is.null(visit_var)) {
+
+    if (!is.null(x_axis_vars)) {
+      lifecycle::deprecate_stop(
+        when = "0.2.1",
+        what = "mod_boxplot(visit_var = )",
+        details = "Both `x_axis_vars` and deprecated `visit_var` were supplied. "
+      )
+    } else {
+      lifecycle::deprecate_warn(
+        when = "0.2.1",
+        what = "mod_boxplot(visit_var = )",
+        details = "Use mod_boxplot(x_axis_vars = ) instead."
+      )
+      x_axis_vars <- visit_var
+    }
+  }
+
+  # this has to be added to the argument after deprecation is removed
+  if (is.null(x_axis_vars)) {
+    if ("AVISIT" %in% names(bm_dataset_name)) {
+      x_axis_vars <- "AVISIT"
+    } else {
+     stop("Default for `x_axis_vars`, 'AVISIT', not found on dataset specified by `bm_dataset_name`")
+    }
+  }
+
+
+  if (!is.null(default_visit)) {
+
+    if (!is.null(default_x_axis_vals)) {
+      lifecycle::deprecate_stop(
+        when = "0.2.1",
+        what = "mod_boxplot(default_visit = )",
+        details = "Both `default_x_axis_vals` and deprecated `default_visit` were supplied. "
+      )
+    } else {
+      lifecycle::deprecate_warn(
+        when = "0.2.1",
+        what = "mod_boxplot(default_visit = )",
+        details = "Use mod_boxplot(default_x_axis_vals = ) instead."
+      )
+      default_x_axis_vals <- default_visit
+    }
+  }
+
+
+
+  # if (!is.null(visit_var)) {
+  #   lifecycle::deprecate_warn(
+  #     when = "0.2.1",
+  #     what = "mod_boxplot(visit_var = )",
+  #     details = "Use mod_boxplot(x_axis_vars = ) instead."
+  #   )
+  #   if (is.null(x_axis_vars)) {
+  #     x_axis_vars <- visit_var
+  #   }
+  # }
+  #
+  #
+  # if (!is.null(default_visit)) {
+  #   lifecycle::deprecate_warn(
+  #     when = "0.2.1",
+  #     what = "mod_boxplot(default_visit = )",
+  #     details = "Use mod_boxplot(default_x_axis_vals = ) instead."
+  #   )
+  #   if (is.null(default_x_axis_vals)) {
+  #     default_x_axis_vals <- default_visit
+  #   }
+  # }
+  # if (is.null(x_axis_vars)) {
+  #   stop("Either `x_axis_vars` or deprecated `visit_var` must be supplied.")
+  # }
+  #
+  #
+  # if (!is.null(visit_var) && is.null(x_axis_vars)) {
+  #   lifecycle::deprecate_warn(
+  #     when = "0.2.1",
+  #     what = "mod_boxplot(visit_var = )",
+  #     details = "Use mod_boxplot(x_axis_vars = ) instead."
+  #   )
+  #   x_axis_vars <- visit_var
+  # }
+  #
+  # if (!is.null(default_visit)) {
+  #   lifecycle::deprecate_warn(
+  #     when = "0.2.1",
+  #     what = "mod_boxplot(default_visit = )",
+  #     details = "Use mod_boxplot(default_x_axis_vals = ) instead."
+  #   )
+  #   default_x_axis_vals <- default_visit
+  # }
+  #
+  # #
+  # if (is.null(x_axis_vars) && is.null(visit_var)) {
+  #   x_axis_vars <- "AVISIT"
+  # }
+
+
+
   mod <- list(
     ui = function(module_id) {
       boxplot_UI(
@@ -917,24 +1022,6 @@ mod_boxplot <- function(module_id,
       )
     },
     server = function(afmm) {
-      if (!is.null(visit_var)) {
-        lifecycle::deprecate_warn(
-          when = "0.2.1",
-          what = "mod_boxplot(visit_var = )",
-          details = "Use mod_boxplot(x_axis_vars = ) instead."
-        )
-        x_axis_vars <- visit_var
-      }
-
-      if (!is.null(default_visit)) {
-        lifecycle::deprecate_warn(
-          when = "0.2.1",
-          what = "mod_boxplot(default_visit = )",
-          details = "Use mod_boxplot(default_x_axis_vals = ) instead."
-        )
-        default_x_axis_vals <- default_visit
-      }
-
       if (is.null(receiver_id)) {
         on_sbj_click_fun <- function() NULL
       } else {
@@ -1001,7 +1088,7 @@ mod_boxplot_API_spec <- TC$group(
   cat_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("map_character_to_factor"),
   par_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("map_character_to_factor"),
   value_vars = TC$col("bm_dataset_name", TC$numeric()) |> TC$flag("one_or_more"),
-  x_axis_vars = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())) |> TC$flag("one_or_more", "map_character_to_factor"),
+  x_axis_vars = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())) |> TC$flag("optional", "one_or_more", "map_character_to_factor"),
   visit_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())) |> TC$flag("optional", "map_character_to_factor"),
   anlfl_vars = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("zero_or_more", "optional"),
   subjid_var = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("subjid_var", "map_character_to_factor"),
@@ -1009,7 +1096,7 @@ mod_boxplot_API_spec <- TC$group(
   default_cat = TC$choice_from_col_contents("cat_var") |> TC$flag("zero_or_more", "optional"),
   default_par = TC$choice_from_col_contents("par_var") |> TC$flag("zero_or_more", "optional"),
   default_x_axis_var =  TC$choice("x_axis_vars") |> TC$flag("optional"),
-  default_x_axis_vals = TC$choice_from_col_contents("x_axis_vars") |> TC$flag("one_or_more", "optional"),
+  default_x_axis_vals = TC$choice_from_col_contents("x_axis_vars") |> TC$flag("optional"),
   default_visit = TC$choice_from_col_contents("visit_var") |> TC$flag("optional"),
   default_value = TC$choice("value_vars") |> TC$flag("optional"), # FIXME(miguel): ? Should be called default_value_var
   default_main_group = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("optional"),
@@ -1021,10 +1108,27 @@ mod_boxplot_API_spec <- TC$group(
 check_mod_boxplot <- function(
     afmm,
     datasets,
-    module_id, bm_dataset_name, group_dataset_name, receiver_id,
-    cat_var, par_var, value_vars, x_axis_vars, visit_var, anlfl_vars, subjid_var, quantile_type,
-    default_cat, default_par, default_x_axis_var, default_x_axis_vals, default_visit, default_value,
-    default_main_group, default_sub_group, default_page_group, server_wrapper_func
+    module_id,
+    bm_dataset_name,
+    group_dataset_name,
+    receiver_id,
+    cat_var, par_var,
+    value_vars,
+    x_axis_vars,
+    visit_var,
+    anlfl_vars,
+    subjid_var,
+    quantile_type,
+    default_cat,
+    default_par,
+    default_x_axis_var,
+    default_x_axis_vals,
+    default_visit,
+    default_value,
+    default_main_group,
+    default_sub_group,
+    default_page_group,
+    server_wrapper_func
 ) {
 
   err <- CM$container()
@@ -1033,10 +1137,30 @@ check_mod_boxplot <- function(
   # Something along the lines of OK <- CM$check_API(mod_corr_hm_API_spec, args = match.call(), err)
   OK <- check_mod_boxplot_auto(
     afmm,
-    datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id,
-    cat_var, par_var, value_vars, x_axis_vars, visit_var, anlfl_vars, subjid_var, quantile_type,
-    default_cat, default_par, default_x_axis_var, default_x_axis_vals, default_visit, default_value,
-    default_main_group, default_sub_group, default_page_group, server_wrapper_func, err
+    datasets,
+    module_id,
+    bm_dataset_name,
+    group_dataset_name,
+    receiver_id,
+    cat_var,
+    par_var,
+    value_vars,
+    x_axis_vars,
+    visit_var,
+    anlfl_vars,
+    subjid_var,
+    quantile_type,
+    default_cat,
+    default_par,
+    default_x_axis_var,
+    default_x_axis_vals,
+    default_visit,
+    default_value,
+    default_main_group,
+    default_sub_group,
+    default_page_group,
+    server_wrapper_func,
+    err
   )
 
   # Checks that API spec does not (yet?) capture
@@ -1054,11 +1178,13 @@ check_mod_boxplot <- function(
 
   #ahwopu
   if (OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] && OK[["x_axis_vars"]] && OK[["anlfl_vars"]]) {
-    check_unique_sub_cat_par_vis(
-      datasets, "bm_dataset_name", bm_dataset_name,
-      subjid_var, cat_var, par_var, visit_var, anlfl_vars,
-      err = err
-    )
+    for (x_var in x_axis_vars) {
+      check_unique_sub_cat_par_vis(
+        datasets, "bm_dataset_name", bm_dataset_name,
+        subjid_var, cat_var, par_var, x_var, anlfl_vars,
+        err = err
+      )
+    }
   }
 
   res <- list(errors = err[["messages"]])
@@ -1288,7 +1414,7 @@ boxplot_chart <- function(ds, violin, show_points, log_project_y, title_data = N
   rows <- if (is_page_grouped) {
     ggplot2::vars(.data[[CNT$PAR]],
                   .data[[CNT$PAGE_GROUP]]
-                  )
+    )
   } else {
     ggplot2::vars(.data[[CNT$PAR]])
   }
@@ -1464,7 +1590,6 @@ bp_summary_table <- function(ds, quantile_type) {
 #' @keywords internal
 
 bp_significance_table <- function(ds) {
-  checkmate::assert_subset(CNT$VIS, names(ds))
   checkmate::assert_subset(CNT$MAIN_GROUP, names(ds))
 
   # If a variable in the original dataset has the name Count a conflict may appear

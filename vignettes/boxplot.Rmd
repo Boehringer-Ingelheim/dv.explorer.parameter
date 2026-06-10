@@ -60,7 +60,7 @@ creator should specify the values for these arguments as applicable.
      1 record per subject per parameter per analysis visit
 
     It expects, at least, the columns passed in the arguments,
-    `subjid_var`, `cat_var`, `par_var`, `visit_var` and `value_vars`.    
+    `subjid_var`, `cat_var`, `par_var`, `value_vars` and `x_axis_vars`.    
 
 -  `group_dataset_name`: 
 

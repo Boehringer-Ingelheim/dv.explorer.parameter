@@ -33,7 +33,7 @@ check_mod_boxplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, g
         subkind, flags, bm_dataset_name, datasets[[bm_dataset_name]], err)
     subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor"), list(kind = "numeric",
         min = NA, max = NA)))
-    flags <- list(one_or_more = TRUE, map_character_to_factor = TRUE)
+    flags <- list(optional = TRUE, one_or_more = TRUE, map_character_to_factor = TRUE)
     OK[["x_axis_vars"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("x_axis_vars", x_axis_vars,
         subkind, flags, bm_dataset_name, datasets[[bm_dataset_name]], err)
     subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor"), list(kind = "numeric",
@@ -61,7 +61,7 @@ check_mod_boxplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, g
     flags <- list(optional = TRUE)
     OK[["default_x_axis_var"]] <- OK[["x_axis_vars"]] && CM$check_choice("default_x_axis_var", default_x_axis_var,
         flags, "x_axis_vars", x_axis_vars, err)
-    flags <- list(one_or_more = TRUE, optional = TRUE)
+    flags <- list(optional = TRUE)
     OK[["default_x_axis_vals"]] <- OK[["x_axis_vars"]] && CM$check_choice_from_col_contents("default_x_axis_vals",
         default_x_axis_vals, flags, "bm_dataset_name", datasets[[bm_dataset_name]], x_axis_vars, err)
     flags <- list(optional = TRUE)
