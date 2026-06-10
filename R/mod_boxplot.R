@@ -687,7 +687,6 @@ boxplot_server <- function(id,
     )
 
     if (is_shiny_test_mode()) {
-      brow
       output_arguments[[BP$ID$CHART]][["render"]] <- shiny::reactive(
         do.call(bp_get_boxplot_output, output_arguments[[BP$ID$CHART]][["arguments"]]())
       )
@@ -960,60 +959,6 @@ mod_boxplot <- function(module_id,
       default_x_axis_vals <- default_visit
     }
   }
-
-
-
-  # if (!is.null(visit_var)) {
-  #   lifecycle::deprecate_warn(
-  #     when = "0.2.1",
-  #     what = "mod_boxplot(visit_var = )",
-  #     details = "Use mod_boxplot(x_axis_vars = ) instead."
-  #   )
-  #   if (is.null(x_axis_vars)) {
-  #     x_axis_vars <- visit_var
-  #   }
-  # }
-  #
-  #
-  # if (!is.null(default_visit)) {
-  #   lifecycle::deprecate_warn(
-  #     when = "0.2.1",
-  #     what = "mod_boxplot(default_visit = )",
-  #     details = "Use mod_boxplot(default_x_axis_vals = ) instead."
-  #   )
-  #   if (is.null(default_x_axis_vals)) {
-  #     default_x_axis_vals <- default_visit
-  #   }
-  # }
-  # if (is.null(x_axis_vars)) {
-  #   stop("Either `x_axis_vars` or deprecated `visit_var` must be supplied.")
-  # }
-  #
-  #
-  # if (!is.null(visit_var) && is.null(x_axis_vars)) {
-  #   lifecycle::deprecate_warn(
-  #     when = "0.2.1",
-  #     what = "mod_boxplot(visit_var = )",
-  #     details = "Use mod_boxplot(x_axis_vars = ) instead."
-  #   )
-  #   x_axis_vars <- visit_var
-  # }
-  #
-  # if (!is.null(default_visit)) {
-  #   lifecycle::deprecate_warn(
-  #     when = "0.2.1",
-  #     what = "mod_boxplot(default_visit = )",
-  #     details = "Use mod_boxplot(default_x_axis_vals = ) instead."
-  #   )
-  #   default_x_axis_vals <- default_visit
-  # }
-  #
-  # #
-  # if (is.null(x_axis_vars) && is.null(visit_var)) {
-  #   x_axis_vars <- "AVISIT"
-  # }
-
-
 
   mod <- list(
     ui = function(module_id) {
