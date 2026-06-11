@@ -1041,7 +1041,7 @@ mod_boxplot_API_spec <- TC$group(
   default_cat = TC$choice_from_col_contents("cat_var") |> TC$flag("zero_or_more", "optional"),
   default_par = TC$choice_from_col_contents("par_var") |> TC$flag("zero_or_more", "optional"),
   default_x_axis_var =  TC$choice("x_axis_vars") |> TC$flag("optional"),
-  default_x_axis_vals = TC$choice_from_col_contents("x_axis_vars") |> TC$flag("optional"),
+  default_x_axis_vals = TC$choice_from_col_contents("x_axis_vars") |> TC$flag("one_or_more", "optional"),
   default_visit = TC$choice_from_col_contents("visit_var") |> TC$flag("optional"),
   default_value = TC$choice("value_vars") |> TC$flag("optional"), # FIXME(miguel): ? Should be called default_value_var
   default_main_group = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("optional"),
