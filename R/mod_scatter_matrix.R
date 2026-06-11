@@ -827,8 +827,7 @@ scatterplotmatrix_chart <- function(ds) {
     ) +
     ggplot2::labs(
       y = val_col,
-      x = "val_col"
-    )
+      x = val_col)
 }
 
 # Composed functions ----
