@@ -134,7 +134,7 @@ dv.manager::run_app(
       x_axis_vars = "AVISIT",
       subjid_var = "USUBJID",
       default_cat = "CHEM",
-      default_par = c("Alanine Aminotransferase (U/L)", "Albumin (g/L)" ),
+      default_par = c("Alanine Aminotransferase (U/L)", "Albumin (g/L)"),
       default_x_axis_vals = c("          Week 2", "          Week 4", "          Week 6"),
       default_main_group = "ARM",
       default_sub_group = "AGEGR1"
