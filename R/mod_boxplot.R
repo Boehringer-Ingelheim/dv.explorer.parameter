@@ -649,8 +649,8 @@ boxplot_server <- function(id,
         par = l_inputs[[BP$ID$PAR]][["par"]],
         par_col = VAR$PAR,
         val_col = l_inputs[[BP$ID$PAR_VALUE]],
-        x_axis_vals = l_inputs[[BP$ID$X_VALS]],
-        x_axis_col = l_inputs[[BP$ID$X_VAR]],
+        vis = l_inputs[[BP$ID$X_VALS]],
+        vis_col = l_inputs[[BP$ID$X_VAR]],
         group_vect = group_vect,
         bm_ds = v_bm_dataset(),
         group_ds = v_group_dataset(),
@@ -1199,8 +1199,8 @@ bp_subset_data <- function(cat,
                            par,
                            par_col,
                            val_col,
-                           x_axis_vals,
-                           x_axis_col,
+                           vis,
+                           vis_col,
                            group_vect,
                            bm_ds,
                            group_ds,
@@ -1208,12 +1208,12 @@ bp_subset_data <- function(cat,
                            anlfl_col = NULL) {
 
   # Converting selected x-axis variable to factor if it is a numeric type
-  if (is.numeric(bm_ds[[x_axis_col]])) bm_ds[[x_axis_col]] <- as.factor(bm_ds[[x_axis_col]])
+  if (is.numeric(bm_ds[[vis_col]])) bm_ds[[vis_col]] <- as.factor(bm_ds[[vis_col]])
 
   bm_fragment <- subset_bds_param(
     ds = bm_ds, par = par, par_col = par_col,
     cat = cat, cat_col = cat_col, val_col = val_col,
-    vis = x_axis_vals, vis_col = x_axis_col, subj_col = subj_col,
+    vis = vis, vis_col = vis_col, subj_col = subj_col,
     anlfl_col = anlfl_col
   )
 
@@ -1262,7 +1262,7 @@ bp_subset_data <- function(cat,
   if (!is.null(anlfl_col) && CNT$ANLFL %in% names(joint_data)) {
     joint_data[[CNT$ANLFL]] <- factor(joint_data[[CNT$ANLFL]], levels = "Y")
   }
-  joint_data[[CNT$VIS]] <- factor(joint_data[[CNT$VIS]], levels = x_axis_vals)
+  joint_data[[CNT$VIS]] <- factor(joint_data[[CNT$VIS]], levels = vis)
   joint_data[[CNT$SBJ]] <- droplevels(joint_data[[CNT$SBJ]])
 
   # Relabel with labels before releveling
