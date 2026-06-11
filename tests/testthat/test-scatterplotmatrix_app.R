@@ -32,7 +32,7 @@ if (is.null(root_app)) {
 
 local({
   app <- shinytest2::AppDriver$new(root_app$get_url())
-  app_args <- dv.explorer.parameter::mock_app_boxplot(dry_run = TRUE)
+  app_args <- dv.explorer.parameter::mock_app_scatterplotmatrix(dry_run = TRUE)
 
   inputs <- list()
   inputs[[ID$INPUT$CAT]] <- "PARCAT2"
