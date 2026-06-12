@@ -46,11 +46,10 @@ test_that("scatter_plot produces an SVG", {
     df[[CNT$PAR]] <- c("par_1", "par_1", "par_1", "par_2", "par_2", "par_2") |> as.factor()
     df[[CNT$VAL]] <- c(1, 1, 3, 4, 5, 5.5)
     df
-  }) |>
-    type("data_subset")
+  })
 
-  x_var <- "par_1" |> type("S")
-  y_var <- "par_2" |> type("S")
+  x_var <- "par_1"
+  y_var <- "par_2"
   svg <- scatter_plot(df, x_var, y_var)
 
   expect_true(is.character(svg) && startsWith(svg, "<svg"))
@@ -94,11 +93,10 @@ test_that("ch_listings_table returns unique combinations of heatmap data and sum
     df[[CNT$PAR]] <- c("par_1", "par_1", "par_1", "par_2", "par_2", "par_2") |> as.factor()
     df[[CNT$VAL]] <- c(1, 1, 3, 4, 5, 5.5)
     df
-  }) |>
-    type("data_subset")
+  })
 
-  pearson <- dv.explorer.parameter::pearson_correlation |> type("fun")
-  label <- "label" |> type("S")
+  pearson <- dv.explorer.parameter::pearson_correlation
+  label <- "label"
   corr_df <- apply_correlation_function(ds, pearson, label)
 
   res <- ch_listings_table(corr_df, ds, label)
