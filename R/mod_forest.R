@@ -1245,11 +1245,11 @@ mod_forest <- function(module_id,
     },
     server = function(afmm) {
       selected_dataset_list_name <- shiny::reactive(
-        attr(afmm[["unfiltered_plus_filter_info"]]()[["unfiltered_dataset_list"]], "dataset_list_name")
+        attr(afmm[["unfiltered_dataset_list_with_filter_info"]]()[["unfiltered_dataset_list"]], "dataset_list_name")
       ) |> trigger_only_on_change()
       
       masks <- shiny::reactive({
-        info <- afmm[["unfiltered_plus_filter_info"]]()[["filter_info"]][["result"]][["filter_info"]]
+        info <- afmm[["unfiltered_dataset_list_with_filter_info"]]()[["filter_info"]]
         return(
           list(
             bm = info[[bm_dataset_name]][["mask"]],
@@ -1257,7 +1257,6 @@ mod_forest <- function(module_id,
           )
         )
       }) |> trigger_only_on_change()
-      
       
       default_input_pairs <- poc(
         default_cat = FP_ID$CAT,
@@ -1274,10 +1273,12 @@ mod_forest <- function(module_id,
       # We run `forest_server` inside an `observeEvent`, which makes regular `onRestore` not work there, but we can 
       # combine the restored state and the defaults here and free the server from having to deal with bookmarks
       shiny::onRestore(function(state) {
+        ns <- getDefaultReactiveDomain()[["ns"]]
+        
         for (var_name in names(default_input_pairs)) {
           input_id <- default_input_pairs[[var_name]]
-          ns <- getDefaultReactiveDomain()[["ns"]]
-          bookmarked_value <- state[["input"]][[ns(paste0(module_id, '-', input_id))]]
+          namespaced_input_id <- ns(paste0(module_id, "-", input_id))
+          bookmarked_value <- state[["input"]][[namespaced_input_id]]
           if (!is.null(bookmarked_value)) assign(var_name, bookmarked_value, inherits = TRUE)
         }
       })
@@ -1287,6 +1288,20 @@ mod_forest <- function(module_id,
         bm_dataset <- afmm[["data"]][[selected_dataset_list_name()]][[bm_dataset_name]]
         group_dataset <- afmm[["data"]][[selected_dataset_list_name()]][[group_dataset_name]]
      
+        ns <- getDefaultReactiveDomain()[["ns"]]
+        current_input <- getDefaultReactiveDomain()[["input"]]
+        for (var_name in names(default_input_pairs)) {
+          if (is.null(get(var_name, inherits = TRUE))) {
+            input_id <- default_input_pairs[[var_name]]
+            namespaced_input_id <- ns(paste0(module_id, "-", input_id))
+            current_value <- current_input[[namespaced_input_id]]
+            if (length(current_value) && !identical(current_value, "")) { # FIXME: Does this depend on the type
+              message(sprintf("Recovering value %s for input %s", current_value, namespaced_input_id))
+              assign(var_name, current_value, inherits = TRUE)
+            }
+          }
+        }
+        
         observer_dedup(
           id = module_id, 
           forest_server(
