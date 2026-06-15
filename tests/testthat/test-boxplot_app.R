@@ -72,7 +72,6 @@ local({
   inputs2[[ID$INPUT$PAR]] <- c("PARAM22", "PARAM23")
 
   app$set_inputs(!!!inputs)
-
   app$wait_for_idle()
   app$set_inputs(!!!inputs2)
   app$wait_for_idle()
