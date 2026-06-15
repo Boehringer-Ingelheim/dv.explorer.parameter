@@ -122,7 +122,8 @@ local({
   test_that(
     "boxplot chart is included according to selection" |>
       vdoc[["add_spec"]](c(specs$boxplot_module$boxplot_chart, specs$boxplot_module$composition)),
-    { expected <- list(
+    {
+      expected <- list(
         ds = expected_ds,
         violin = inputs[[ID$INPUT$VCHECK]],
         show_points = inputs[[ID$INPUT$SPCHECK]],
