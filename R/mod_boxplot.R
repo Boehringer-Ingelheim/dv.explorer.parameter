@@ -225,7 +225,7 @@ boxplot_UI <- function(id) { # nolint
 #'
 #' @param cat_var,par_var,x_axis_vars `[character(1)]`
 #'
-#' Columns from `bm_dataset` that correspond to the parameter category, parameter
+#' Columns from `bm_dataset` that correspond to the parameter category and parameter
 #'
 #' @param x_axis_vars `[character(n)]`
 #'
