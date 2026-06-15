@@ -104,7 +104,7 @@ boxplot_UI <- function(id) { # nolint
   parameter_menu <- drop_menu_helper(
     ns(BP$ID$PAR_BUTTON), BP$MSG$LABEL$PAR_BUTTON,
     parameter_UI(id = ns(BP$ID$PAR)),
-    col_menu_UI(ns(BP$ID$PAR_VALUE)),
+    id = col_menu_UI(ns(BP$ID$PAR_VALUE)),
     col_menu_UI(id = ns(BP$ID$X_VAR)),
     val_menu_UI(id = ns(BP$ID$X_VALS)),
     col_menu_UI(id = ns(BP$ID$ANLFL_FILTER))
