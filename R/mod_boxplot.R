@@ -223,7 +223,7 @@ boxplot_UI <- function(id) { # nolint
 #'
 #' a reactive indicating when the dataset has possibly changed its columns
 #'
-#' @param cat_var,par_var,x_axis_vars `[character(1)]`
+#' @param cat_var,par_var `[character(1)]`
 #'
 #' Columns from `bm_dataset` that correspond to the parameter category and parameter
 #'
@@ -252,10 +252,13 @@ boxplot_UI <- function(id) { # nolint
 #'
 #' Function to invoke when a subject is clicked in the single subject listing
 #'
-#' @param default_cat,default_par,default_x_axis_var,default_x_axis_vals,default_value,default_main_group,default_sub_group,default_page_group
-#' `[character(1)|NULL]`
+#' @param default_cat,default_par,default_x_axis_var,default_value,default_main_group,default_sub_group,default_page_group `[character(1)|NULL]`
 #'
 #' Default values for the selectors
+#'
+#' @param default_x_axis_vals  `[character(n)|NULL]`
+#'
+#' Default values for the x axis variable
 #'
 #' @export
 #'
@@ -292,7 +295,7 @@ boxplot_server <- function(id,
                               any.missing = FALSE, unique = TRUE, add = ac)
   checkmate::assert_character(default_cat, min.chars = 1, null.ok = TRUE, add = ac)
   checkmate::assert_character(default_par, min.chars = 1, null.ok = TRUE, add = ac)
-  checkmate::assert_character(default_x_axis_vals, any.missing = FALSE, null.ok = TRUE, add = ac)
+  checkmate::assert_character(default_x_axis_vals, min.chars = 1, any.missing = FALSE, null.ok = TRUE, add = ac)
   checkmate::assert_string(default_value, min.chars = 1, null.ok = TRUE, add = ac)
   checkmate::assert_string(default_main_group, min.chars = 1, null.ok = TRUE, add = ac)
   checkmate::assert_string(default_sub_group, min.chars = 1, null.ok = TRUE, add = ac)
@@ -302,7 +305,7 @@ boxplot_server <- function(id,
     min.chars = 1, any.missing = FALSE,
     all.missing = FALSE, unique = TRUE, min.len = 1, add = ac
   )
-  checkmate::assert_character(x_axis_vars, min.chars = 1, null.ok = FALSE, add = ac)
+  checkmate::assert_character(x_axis_vars, min.chars = 1, any.missing = FALSE, null.ok = FALSE, add = ac)
   checkmate::assert_string(subjid_var, min.chars = 1, add = ac)
 
   checkmate::reportAssertions(ac)
@@ -881,7 +884,7 @@ boxplot_server <- function(id,
 #'
 #' A function that will be applied to the server returned value. Its default value will work for the current cases.
 #'
-#' inheritParams boxplot_server
+#' @inheritParams boxplot_server
 #'
 #' @name mod_boxplot
 #'
@@ -912,7 +915,6 @@ mod_boxplot <- function(module_id,
                         server_wrapper_func = function(x) list(subj_id = x)) {
 
   # temporary backward compatibility for visit_var and default_visit
-
 
   if (!is.null(visit_var)) {
 
@@ -961,9 +963,7 @@ mod_boxplot <- function(module_id,
 
   mod <- list(
     ui = function(module_id) {
-      boxplot_UI(
-        id = module_id
-      )
+      boxplot_UI(id = module_id)
     },
     server = function(afmm) {
       if (is.null(receiver_id)) {
@@ -1115,7 +1115,10 @@ check_mod_boxplot <- function(
     cond = checkmate::test_integerish(
       quantile_type,
       lower = 1,
-      upper = 9, len = 1, any.missing = FALSE, null.ok = FALSE
+      upper = 9,
+      len = 1,
+      any.missing = FALSE,
+      null.ok = FALSE
     ),
     msg = "The value assigned to `quantile_type` must be a non-missing integer scalar between 1 and 9."
   )
