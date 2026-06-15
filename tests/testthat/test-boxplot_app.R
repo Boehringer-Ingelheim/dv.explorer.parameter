@@ -306,4 +306,3 @@ test_that("default values are set including analysis flag variables", {
   expect_equal(input_values[[ID$INPUT$PGRP]], srv_defaults[["default_page_group"]])
   expect_equal(input_values[[ID$INPUT$ANLFL]], "ANLFL1")
 })
-
