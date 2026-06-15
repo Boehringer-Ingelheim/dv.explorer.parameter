@@ -941,7 +941,6 @@ mod_boxplot <- function(module_id,
     }
   }
 
-
   if (!is.null(default_visit)) {
 
     if (!is.null(default_x_axis_vals)) {
