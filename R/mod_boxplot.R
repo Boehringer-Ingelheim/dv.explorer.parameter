@@ -396,23 +396,18 @@ boxplot_server <- function(id,
 
     # input
 
-    x_axis_selector_data <- shiny::reactive({
-      dplyr::distinct(
-        dplyr::select(v_bm_dataset(), dplyr::all_of(x_axis_vars))
-      )
-    })
-
     inputs <- list()
     inputs[[BP$ID$X_VAR]] <- col_menu_server(
       id = BP$ID$X_VAR,
-      data = x_axis_selector_data,
+      data = v_bm_dataset,
       label = BP$MSG$LABEL$X_VAR,
       include_none = FALSE,
-      include_func = function(x) {
-        is.factor(x) || is.character(x) || is.numeric(x)
+      include_func = function(x, name) {
+        (is.factor(x) || is.character(x) || is.numeric(x)) && name %in% x_axis_vars
       },
       default = default_x_axis_var
     )
+
     inputs[[BP$ID$MAIN_GRP]] <- col_menu_server(
       id = BP$ID$MAIN_GRP,
       data = v_group_dataset,
@@ -917,21 +912,14 @@ mod_boxplot <- function(module_id,
   # temporary backward compatibility for visit_var and default_visit
 
   if (!is.null(visit_var)) {
-
     if (!is.null(x_axis_vars)) {
-      lifecycle::deprecate_stop(
-        when = "0.2.1",
-        what = "mod_boxplot(visit_var = )",
-        details = "Both `x_axis_vars` and deprecated `visit_var` were supplied. "
-      )
-    } else {
-      lifecycle::deprecate_warn(
-        when = "0.2.1",
-        what = "mod_boxplot(visit_var = )",
-        details = "Use mod_boxplot(x_axis_vars = ) instead."
-      )
-      x_axis_vars <- visit_var
+      stop("You cannot supply both `x_axis_vars` and deprecated `visit_var`.")
     }
+    .Deprecated(
+      new = "x_axis_vars",
+      msg = "'visit_var' is deprecated. Use 'x_axis_vars' instead."
+    )
+    x_axis_vars <- visit_var
   }
 
   # this has to be added to the argument after deprecation is removed
@@ -939,26 +927,19 @@ mod_boxplot <- function(module_id,
     if ("AVISIT" %in% names(bm_dataset_name)) {
       x_axis_vars <- "AVISIT"
     } else {
-     stop("Default for `x_axis_vars`, 'AVISIT', not found on dataset specified by `bm_dataset_name`")
+      stop("Default for `x_axis_vars`, 'AVISIT', not found on dataset specified by `bm_dataset_name`")
     }
   }
 
   if (!is.null(default_visit)) {
-
     if (!is.null(default_x_axis_vals)) {
-      lifecycle::deprecate_stop(
-        when = "0.2.1",
-        what = "mod_boxplot(default_visit = )",
-        details = "Both `default_x_axis_vals` and deprecated `default_visit` were supplied. "
-      )
-    } else {
-      lifecycle::deprecate_warn(
-        when = "0.2.1",
-        what = "mod_boxplot(default_visit = )",
-        details = "Use mod_boxplot(default_x_axis_vals = ) instead."
-      )
-      default_x_axis_vals <- default_visit
+      stop("You cannot supply both `default_x_axis_vals` and deprecated `default_visit`")
     }
+    .Deprecated(
+      new = "default_x_axis_vals",
+      msg = "'default_visit' is deprecated. Use 'default_x_axis_vals' instead."
+    )
+    default_x_axis_vals <- default_visit
   }
 
   mod <- list(
@@ -1040,7 +1021,8 @@ mod_boxplot_API_spec <- TC$group(
   default_cat = TC$choice_from_col_contents("cat_var") |> TC$flag("zero_or_more", "optional"),
   default_par = TC$choice_from_col_contents("par_var") |> TC$flag("zero_or_more", "optional"),
   default_x_axis_var =  TC$choice("x_axis_vars") |> TC$flag("optional"),
-  default_x_axis_vals = TC$choice_from_col_contents("x_axis_vars") |> TC$flag("one_or_more", "optional"),
+  # FIXME: Can't represent this behavior right now
+  default_x_axis_vals = TC$character() |> TC$flag("optional", "ignore"),
   default_visit = TC$choice_from_col_contents("visit_var") |> TC$flag("optional"),
   default_value = TC$choice("value_vars") |> TC$flag("optional"), # FIXME(miguel): ? Should be called default_value_var
   default_main_group = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("optional"),
@@ -1122,6 +1104,31 @@ check_mod_boxplot <- function(
     ),
     msg = "The value assigned to `quantile_type` must be a non-missing integer scalar between 1 and 9."
   )
+
+  # check default values exist in the selected x-axis variable
+  if (!is.null(default_x_axis_vals) && OK[["bm_dataset_name"]] && OK[["x_axis_vars"]]) {
+
+    selected_x_axis_var <- if (is.null(default_x_axis_var)) {
+      x_axis_vars[[1]]
+    } else {
+      default_x_axis_var
+    }
+
+    valid_vals <- unique(as.character(datasets[[bm_dataset_name]][[selected_x_axis_var]]))
+
+    missing_vals <- setdiff(default_x_axis_vals, valid_vals)
+
+    CM$assert(
+      container = err,
+      cond = length(missing_vals) == 0,
+      msg = paste0(
+        "The following values supplied in `default_x_axis_vals` do not exist in the selected x-axis variable `",
+        selected_x_axis_var,
+        "`: ",
+        paste(missing_vals, collapse = ", ")
+      )
+    )
+  }
 
   #ahwopu
   if (OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] && OK[["x_axis_vars"]] && OK[["anlfl_vars"]]) {

@@ -69,7 +69,6 @@ mock_app_boxplot_mm <- function(update_query_string = TRUE, anlfl_flags = FALSE)
 
   data <- test_data(anlfl_flags = anlfl_flags)
 
-
   if (anlfl_flags) {
     anlfl_vars <- c("ANLFL1", "ANLFL2")
   } else {
@@ -83,13 +82,16 @@ mock_app_boxplot_mm <- function(update_query_string = TRUE, anlfl_flags = FALSE)
         "boxplot",
         bm_dataset_name = "bm",
         group_dataset_name = "adsl",
-        x_axis_vars = c("VISIT"),
+        x_axis_vars = c("VISIT", "VISIT2"),
         value_vars = c("VALUE1", "VALUE2"),
         subjid_var = "SUBJID",
         cat_var = "PARCAT",
         anlfl_vars = anlfl_vars,
+        default_x_axis_vals = c("VISIT1", "VISIT3"),
         default_cat = "PARCAT1",
-        default_par = "PARAM11"
+        default_par = "PARAM11",
+        default_main_group = "CAT2",
+        default_sub_group = "CAT1"
       )
     ),
     filter_data = "adsl",
@@ -97,7 +99,6 @@ mock_app_boxplot_mm <- function(update_query_string = TRUE, anlfl_flags = FALSE)
     enableBookmarking = "url"
   )
 }
-
 
 #' Mock mm boxplot app with deprecated visit_var and default_visit arguments
 #' @keywords mock
@@ -139,93 +140,16 @@ mock_app_boxplot_mm_depr <- function(update_query_string = TRUE, anlfl_flags = F
   )
 }
 
-
-
 #' Mock mm boxplot app with using crossover design data
 #' @keywords mock
 #' @inheritParams mock_app_boxplot
 #' @export
-mock_app_boxplot_mm_crossover <- function(update_query_string = TRUE, anlfl_flags = FALSE) {
-
-  set.seed(42)
-
-  subjects <- sprintf("SUBJ%03d", 1:24)
-  sequences <- c(
-    rep("R-T1-T2-T3", 6),
-    rep("T1-T2-T3-R", 6),
-    rep("T2-T3-R-T1", 6),
-    rep("T3-R-T1-T2", 6)
-  )
-
-  # assign COUNTRY, GENDER and BMI_STATUS per subject
-  countries <- c("USA", "Germany", "UK")
-  genders <- c("Male", "Female")
-  bmi_statuses <- c(
-    "Underweight",
-    "Normal Weight",
-    "Overweight",
-    "Obese"
-  )
-
-  subject_country <- sample(countries, length(subjects), replace = TRUE)
-  subject_gender  <- sample(genders, length(subjects), replace = TRUE)
-  subject_bmi     <- sample(bmi_statuses, length(subjects), replace = TRUE)
-
-  trt_map <- list(
-    "R-T1-T2-T3" = c("R", "T1", "T2", "T3"),
-    "T1-T2-T3-R" = c("T1", "T2", "T3", "R"),
-    "T2-T3-R-T1" = c("T2", "T3", "R", "T1"),
-    "T3-R-T1-T2" = c("T3", "R", "T1", "T2")
-  )
-
-  rows <- vector("list", length(subjects) * 4)
-  k <- 1
-
-  for (i in seq_along(subjects)) {
-    subj <- subjects[i]
-    seqn <- sequences[i]
-    trts <- trt_map[[seqn]]
-
-    # subject-level attributes
-    country <- subject_country[i]
-    gender  <- subject_gender[i]
-    bmi     <- subject_bmi[i]
-
-    for (visit in 1:4) {
-      trt <- trts[visit]
-      base <- c(R = 100, T1 = 92, T2 = 88, T3 = 84)[[trt]]
-      aval <- round(base + rnorm(1, 0, 4), 2)
-
-      rows[[k]] <- data.frame(
-        USUBJID = subj,
-        COUNTRY = country,
-        GENDER = gender,
-        BMI_STATUS = bmi,
-        PARCAT = "EFFICACY",
-        PARAM = "CHANGE_FROM_BASELINE",
-        AVISIT = paste("Visit", visit),
-        AVISITN = visit,
-        TRT = trt,
-        SEQUENCE = seqn,
-        PERIOD = visit,
-        AVAL = aval,
-        stringsAsFactors = FALSE
-      )
-      k <- k + 1
-    }
-  }
-
-  # create data frame with multiple records per subject
-  df <- do.call(rbind, rows)
-
-  # create subject level data frame
-  adsl <- unique(df[c("USUBJID", "COUNTRY", "GENDER", "BMI_STATUS")])
-
-
-
+mock_app_boxplot_mm_crossover <- function(update_query_string = TRUE, anlfl_flags = FALSE, crossover = TRUE) {
   if (!requireNamespace("dv.manager")) {
     stop("Install dv.manager")
   }
+
+  data <- test_data(anlfl_flags = anlfl_flags, crossover = crossover)
 
   if (anlfl_flags) {
     anlfl_vars <- c("ANLFL1", "ANLFL2")
@@ -234,24 +158,27 @@ mock_app_boxplot_mm_crossover <- function(update_query_string = TRUE, anlfl_flag
   }
 
   dv.manager::run_app(
-    data = list(dummy = list(bm = df, adsl = adsl)),
+    data = list(dummy = list(bm = data[["bm"]], adsl = data[["sl"]])),
     module_list = list(
       Boxplot = mod_boxplot(
         "boxplot",
         bm_dataset_name = "bm",
         group_dataset_name = "adsl",
-        value_vars = c("AVAL"),
-        subjid_var = "USUBJID",
+        value_vars = c("VALUE1", "VALUE2"),
+        subjid_var = "SUBJID",
         cat_var = "PARCAT",
         anlfl_vars = anlfl_vars,
-        x_axis_vars = c("AVISIT", "AVISITN", "TRT"),
-        default_cat = "EFFICACY",
-        default_par = "CHANGE_FROM_BASELINE",
-        default_x_axis_var = "TRT"
+        x_axis_vars = c("VISIT", "VISIT2", "TRT"),
+        default_cat = "PARCAT1",
+        default_par = "PARAM12",
+        default_x_axis_var = "TRT",
+        default_x_axis_vals = c("R", "T1"),
+        default_main_group = "CAT2",
+        default_sub_group = "CAT1"
       )
     ),
     filter_data = "adsl",
-    filter_key = "USUBJID",
+    filter_key = "SUBJID",
     enableBookmarking = "url"
   )
 }

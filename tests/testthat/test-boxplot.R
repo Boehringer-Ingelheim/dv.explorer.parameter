@@ -302,19 +302,6 @@ local({
   })
 })
 
-
-# test_that("boxplot_chart injects a dummy main group when there is none", {
-#   df <- data.frame(
-#     parameter = c(rep("PA", 5), rep("PB", 5)),
-#     subject_id = 1,
-#     value = 1:10
-#   )
-#
-#   p <- boxplot_chart(df, FALSE, FALSE, FALSE)
-#
-#   expect_true(CNT$MAIN_GROUP %in% names(p$data))
-# })
-
 # bp_listings table ----
 
 # Most of the functionality in this element is provided by equal_and_mask_from_vec
