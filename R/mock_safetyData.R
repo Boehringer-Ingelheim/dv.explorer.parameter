@@ -5,6 +5,7 @@ safety_data <- function() {
 
   adsl <- safetyData::adam_adsl
   adlb <- safetyData::adam_adlbc
+  adlb[["AVISIT"]] <- trimws(adlb[["AVISIT"]], which = "left")
 
   avisitn_mask <- is.finite(adlb[["AVISITN"]]) & adlb[["AVISITN"]] < 99
   adlb <- adlb[avisitn_mask, ]
