@@ -57,7 +57,7 @@ test_data <- function(random_bm_values = FALSE, anlfl_flags = FALSE, crossover =
 
     bm <- bm |>
       dplyr::left_join(
-        dplyr::select(sl, SUBJID, ARM),
+        dplyr::select(sl, dplyr::all_of(c("SUBJID", "ARM"))),
         by = "SUBJID"
       ) |>
       dplyr::left_join(

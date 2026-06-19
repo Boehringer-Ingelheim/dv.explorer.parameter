@@ -10,6 +10,7 @@ ID <- poc(
     CAT = tns(BP$ID$PAR, "cat_val"),
     PAR = tns(BP$ID$PAR, "par_val"),
     VAL = tns(BP$ID$PAR_VALUE, "val"),
+    X_VAR = tns(BP$ID$X_VAR, "val"),
     X_VALS = tns(BP$ID$X_VALS, "val"),
     MGRP = tns(BP$ID$MAIN_GRP, "val"),
     SGRP = tns(BP$ID$SUB_GRP, "val"),
@@ -59,6 +60,7 @@ local({
   inputs <- list()
   inputs[[ID$INPUT$CAT]] <- "PARCAT2"
   inputs[[ID$INPUT$VAL]] <- "VALUE2"
+  inputs[[ID$INPUT$X_VAR]] <- "VISIT"
   inputs[[ID$INPUT$X_VALS]] <- c("VISIT1", "VISIT2", "VISIT3")
   inputs[[ID$INPUT$MGRP]] <- "CAT2"
   inputs[[ID$INPUT$SGRP]] <- "CAT2"
@@ -112,7 +114,7 @@ local({
     par_col = app_args$srv$par_var,
     val_col = inputs[[ID$INPUT$VAL]],
     vis = inputs[[ID$INPUT$X_VALS]],
-    vis_col = app_args$srv$x_axis_vars,
+    vis_col = inputs[[ID$INPUT$X_VAR]],
     group_vect = stats::setNames(c("CAT2", "CAT2", "CAT2"), c(CNT$MAIN_GROUP, CNT$SUB_GROUP, CNT$PAGE_GROUP)),
     bm_ds = shiny::isolate(app_args$srv$bm_dataset()),
     group_ds = shiny::isolate(app_args$srv$group_dataset()),
@@ -245,6 +247,7 @@ test_that("default values are set", {
   srv_defaults <- list(
     default_cat = "PARCAT2",
     default_par = c("PARAM22", "PARAM23"),
+    default_x_axis_var = "VISIT",
     default_x_axis_vals = "VISIT2",
     default_value = "VALUE2",
     default_main_group = "CAT1",
@@ -265,6 +268,7 @@ test_that("default values are set", {
   input_values <- app$get_values()[["input"]]
   expect_equal(input_values[[ID$INPUT$CAT]], srv_defaults[["default_cat"]])
   expect_equal(input_values[[ID$INPUT$PAR]], srv_defaults[["default_par"]])
+  expect_equal(input_values[[ID$INPUT$X_VAR]], srv_defaults[["default_x_axis_var"]])
   expect_equal(input_values[[ID$INPUT$X_VALS]], srv_defaults[["default_x_axis_vals"]])
   expect_equal(input_values[[ID$INPUT$VAL]], srv_defaults[["default_value"]])
   expect_equal(input_values[[ID$INPUT$MGRP]], srv_defaults[["default_main_group"]])
@@ -279,6 +283,7 @@ test_that("default values are set including analysis flag variables", {
   srv_defaults <- list(
     default_cat = "PARCAT2",
     default_par = c("PARAM22", "PARAM23"),
+    default_x_axis_var = "VISIT",
     default_x_axis_vals = "VISIT2",
     default_value = "VALUE2",
     default_main_group = "CAT1",
@@ -300,6 +305,7 @@ test_that("default values are set including analysis flag variables", {
   input_values <- app$get_values()[["input"]]
   expect_equal(input_values[[ID$INPUT$CAT]], srv_defaults[["default_cat"]])
   expect_equal(input_values[[ID$INPUT$PAR]], srv_defaults[["default_par"]])
+  expect_equal(input_values[[ID$INPUT$X_VAR]], srv_defaults[["default_x_axis_var"]])
   expect_equal(input_values[[ID$INPUT$X_VALS]], srv_defaults[["default_x_axis_vals"]])
   expect_equal(input_values[[ID$INPUT$VAL]], srv_defaults[["default_value"]])
   expect_equal(input_values[[ID$INPUT$MGRP]], srv_defaults[["default_main_group"]])
