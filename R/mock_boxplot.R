@@ -67,7 +67,7 @@ mock_app_boxplot_mm <- function(update_query_string = TRUE, anlfl_flags = FALSE)
     stop("Install dv.manager")
   }
 
-  data <- test_data(anlfl_flags = anlfl_flags)
+  data <- test_data(anlfl_flags = anlfl_flags, crossover = TRUE)
 
   if (anlfl_flags) {
     anlfl_vars <- c("ANLFL1", "ANLFL2")
@@ -82,7 +82,7 @@ mock_app_boxplot_mm <- function(update_query_string = TRUE, anlfl_flags = FALSE)
         "boxplot",
         bm_dataset_name = "bm",
         group_dataset_name = "adsl",
-        x_axis_vars = c("VISIT", "VISIT2"),
+        x_axis_vars = c("VISIT", "VISIT2", "TRT"),
         value_vars = c("VALUE1", "VALUE2"),
         subjid_var = "SUBJID",
         cat_var = "PARCAT",
@@ -132,49 +132,6 @@ mock_app_boxplot_mm_depr <- function(update_query_string = TRUE, anlfl_flags = F
         anlfl_vars = anlfl_vars,
         default_visit = "VISIT1",
         default_main_group = "CAT1"
-      )
-    ),
-    filter_data = "adsl",
-    filter_key = "SUBJID",
-    enableBookmarking = "url"
-  )
-}
-
-#' Mock mm boxplot app with using crossover design data
-#' @keywords mock
-#' @inheritParams mock_app_boxplot
-#' @export
-mock_app_boxplot_mm_crossover <- function(update_query_string = TRUE, anlfl_flags = FALSE, crossover = TRUE) {
-  if (!requireNamespace("dv.manager")) {
-    stop("Install dv.manager")
-  }
-
-  data <- test_data(anlfl_flags = anlfl_flags, crossover = crossover)
-
-  if (anlfl_flags) {
-    anlfl_vars <- c("ANLFL1", "ANLFL2")
-  } else {
-    anlfl_vars <- NULL
-  }
-
-  dv.manager::run_app(
-    data = list(dummy = list(bm = data[["bm"]], adsl = data[["sl"]])),
-    module_list = list(
-      Boxplot = mod_boxplot(
-        "boxplot",
-        bm_dataset_name = "bm",
-        group_dataset_name = "adsl",
-        value_vars = c("VALUE1", "VALUE2"),
-        subjid_var = "SUBJID",
-        cat_var = "PARCAT",
-        anlfl_vars = anlfl_vars,
-        x_axis_vars = c("VISIT", "VISIT2", "TRT"),
-        default_cat = "PARCAT1",
-        default_par = "PARAM12",
-        default_x_axis_var = "TRT",
-        default_x_axis_vals = c("R", "T1"),
-        default_main_group = "CAT2",
-        default_sub_group = "CAT1"
       )
     ),
     filter_data = "adsl",
