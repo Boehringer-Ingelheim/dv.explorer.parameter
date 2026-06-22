@@ -912,6 +912,16 @@ mod_boxplot <- function(module_id,
   # temporary backward compatibility for visit_var and default_visit
 
   if (!is.null(visit_var)) {
+
+    # handling mixing old and new concept together
+    if (!is.null(default_x_axis_vals)) {
+      stop(
+        "Invalid argument combination: `visit_var` (deprecated single-value mode) ",
+        "cannot be used with `default_x_axis_vals` (multi-value x-axis mode).\n\n",
+        "Use `default_visit` instead of `default_x_axis_vals` when using `visit_var`."
+      )
+    }
+
     if (!is.null(x_axis_vars)) {
       stop("You cannot supply both `x_axis_vars` and deprecated `visit_var`.")
     }
