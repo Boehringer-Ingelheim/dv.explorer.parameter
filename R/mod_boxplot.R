@@ -229,7 +229,7 @@ boxplot_UI <- function(id) { # nolint
 #'
 #' @param x_axis_vars `[character(n)]`
 #'
-#' x-axis variables
+#' Columns from `bm_dataset` that correspond to x-axis variables
 #'
 #' @param value_vars `[character(n)]`
 #'
@@ -258,7 +258,7 @@ boxplot_UI <- function(id) { # nolint
 #'
 #' @param default_x_axis_vals  `[character(n)|NULL]`
 #'
-#' Default values for the x axis variable
+#' Default values for the x-axis variable
 #'
 #' @export
 #'
