@@ -240,7 +240,6 @@ local({
   )
 })
 
-
 test_that("default values are set", {
   skip_if_not_running_shiny_tests()
 
@@ -249,6 +248,8 @@ test_that("default values are set", {
     default_par = c("PARAM22", "PARAM23"),
     default_x_axis_var = "VISIT",
     default_x_axis_vals = "VISIT2",
+    #default_x_axis_var = "VISIT2",
+    #default_x_axis_vals = "2",
     default_value = "VALUE2",
     default_main_group = "CAT1",
     default_sub_group = "CAT2",
@@ -275,7 +276,6 @@ test_that("default values are set", {
   expect_equal(input_values[[ID$INPUT$SGRP]], srv_defaults[["default_sub_group"]])
   expect_equal(input_values[[ID$INPUT$PGRP]], srv_defaults[["default_page_group"]])
 })
-
 
 test_that("default values are set including analysis flag variables", {
   skip_if_not_running_shiny_tests()

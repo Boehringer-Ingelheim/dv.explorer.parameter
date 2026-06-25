@@ -57,7 +57,6 @@ mock_app_boxplot <- function(dry_run = FALSE, update_query_string = TRUE, srv_de
   )
 }
 
-
 #' Mock mm boxplot app
 #' @keywords mock
 #' @inheritParams mock_app_boxplot

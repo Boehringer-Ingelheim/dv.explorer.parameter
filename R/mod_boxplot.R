@@ -910,46 +910,33 @@ mod_boxplot <- function(module_id,
                         server_wrapper_func = function(x) list(subj_id = x)) {
 
   # temporary backward compatibility for visit_var and default_visit
-
   if (!is.null(visit_var)) {
 
-    # handling mixing old and new concept together
-    if (!is.null(default_x_axis_vals)) {
-      stop(
-        "Invalid argument combination: `visit_var` (deprecated single-value mode) ",
-        "cannot be used with `default_x_axis_vals` (multi-value x-axis mode).\n\n",
-        "Use `default_visit` instead of `default_x_axis_vals` when using `visit_var`."
-      )
-    }
-
-    if (!is.null(x_axis_vars)) {
-      stop("You cannot supply both `x_axis_vars` and deprecated `visit_var`.")
-    }
     .Deprecated(
       new = "x_axis_vars",
       msg = "'visit_var' is deprecated. Use 'x_axis_vars' instead."
     )
+
     x_axis_vars <- visit_var
   }
 
-  # this has to be added to the argument after deprecation is removed
-  if (is.null(x_axis_vars)) {
-    if ("AVISIT" %in% names(bm_dataset_name)) {
-      x_axis_vars <- "AVISIT"
-    } else {
-      stop("Default for `x_axis_vars`, 'AVISIT', not found on dataset specified by `bm_dataset_name`")
-    }
-  }
-
   if (!is.null(default_visit)) {
-    if (!is.null(default_x_axis_vals)) {
-      stop("You cannot supply both `default_x_axis_vals` and deprecated `default_visit`")
-    }
+
     .Deprecated(
       new = "default_x_axis_vals",
       msg = "'default_visit' is deprecated. Use 'default_x_axis_vals' instead."
     )
+
     default_x_axis_vals <- default_visit
+  }
+
+  # this is needed here while the backward compatibility is supported
+  # has to be added to the argument after deprecation is removed
+  # NOTE:
+  # This logic must mirror the x-axis resolution performed
+  # in check_mod_boxplot(). Keep both implementations synchronized.
+  if (is.null(x_axis_vars)) {
+    x_axis_vars <- "AVISIT"
   }
 
   mod <- list(
@@ -1006,7 +993,7 @@ mod_boxplot_API_docs <- list(
   default_cat = "",
   default_par = "",
   default_x_axis_var = "",
-  default_x_axis_vals = "",
+  default_x_axis_vals = list(""),
   default_visit = "",
   default_value = "",
   default_main_group = "",
@@ -1032,7 +1019,7 @@ mod_boxplot_API_spec <- TC$group(
   default_par = TC$choice_from_col_contents("par_var") |> TC$flag("zero_or_more", "optional"),
   default_x_axis_var =  TC$choice("x_axis_vars") |> TC$flag("optional"),
   # FIXME: Can't represent this behavior right now
-  default_x_axis_vals = TC$character() |> TC$flag("optional", "ignore"),
+  default_x_axis_vals = TC$group() |> TC$flag("manual_check"),
   default_visit = TC$choice_from_col_contents("visit_var") |> TC$flag("optional"),
   default_value = TC$choice("value_vars") |> TC$flag("optional"), # FIXME(miguel): ? Should be called default_value_var
   default_main_group = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("optional"),
@@ -1069,6 +1056,87 @@ check_mod_boxplot <- function(
 
   err <- CM$container()
 
+  # Deprecated/new API compatibility checking
+  old_api_used <-
+    !is.null(visit_var) ||
+    !is.null(default_visit)
+
+  new_api_used <-
+    !is.null(x_axis_vars) ||
+    !is.null(default_x_axis_var) ||
+    !is.null(default_x_axis_vals)
+
+  CM$assert(
+    container = err,
+    cond = !(old_api_used && new_api_used),
+    msg = paste(
+      "Deprecated arguments (`visit_var`, `default_visit`)",
+      "cannot be used together with",
+      "new arguments (`x_axis_vars`, `default_x_axis_var`,",
+      "`default_x_axis_vals`)."
+    )
+  )
+
+  # stop execution if there is a compatibility error
+  if (length(err[["messages"]]) > 0) {
+    return(list(errors = err[["messages"]]))
+  }
+
+  # Determine concept used (old vs new)
+  using_old_api <-
+    !is.null(visit_var) ||
+    !is.null(default_visit)
+
+  using_new_api <- !using_old_api
+
+  # X-axis resolution
+  x_axis_source <- "user"
+
+  if (using_old_api) {
+    x_axis_vars <- visit_var
+    x_axis_source <- "visit_var_deprecated"
+  } else if (is.null(x_axis_vars)) {
+    x_axis_source <- "default_avisit"
+  }
+
+  # Validate fallback resolution (only relevant if default was used)
+
+  x_axis_resolved_ok <- TRUE
+  if (x_axis_source == "default_avisit") {
+    x_axis_resolved_ok <- "AVISIT" %in% names(datasets[[bm_dataset_name]])
+
+    CM$assert(
+      container = err,
+      cond = x_axis_resolved_ok,
+      msg = paste0(
+        "Neither `x_axis_vars` nor `visit_var` was supplied, so the default ",
+        "`AVISIT` was used, but column `AVISIT` does not exist in dataset `",
+        bm_dataset_name,
+        "`."
+      )
+    )
+    if (x_axis_resolved_ok) {
+      x_axis_vars <- "AVISIT"
+    }
+  }
+
+  if (length(err[["messages"]]) > 0) {
+    return(list(errors = err[["messages"]]))
+  }
+
+  # Create arguments for auto validator
+  if (using_old_api) {
+    val_x_axis_vars <- NULL
+    val_default_x_axis_var <- NULL
+    val_visit_var <- visit_var
+    val_default_visit <- default_visit
+  } else {
+    val_x_axis_vars <- x_axis_vars
+    val_default_x_axis_var <- default_x_axis_var
+    val_visit_var <- NULL
+    val_default_visit <- NULL
+  }
+
   # TODO: Replace this function with a generic one that performs the checks based on mod_boxplot_API_spec.
   # Something along the lines of OK <- CM$check_API(mod_corr_hm_API_spec, args = match.call(), err)
   OK <- check_mod_boxplot_auto(
@@ -1081,16 +1149,16 @@ check_mod_boxplot <- function(
     cat_var,
     par_var,
     value_vars,
-    x_axis_vars,
-    visit_var,
+    val_x_axis_vars,
+    val_visit_var,
     anlfl_vars,
     subjid_var,
     quantile_type,
     default_cat,
     default_par,
-    default_x_axis_var,
+    val_default_x_axis_var,
     default_x_axis_vals,
-    default_visit,
+    val_default_visit,
     default_value,
     default_main_group,
     default_sub_group,
@@ -1098,6 +1166,10 @@ check_mod_boxplot <- function(
     server_wrapper_func,
     err
   )
+
+  if (length(err[["messages"]]) > 0) {
+    return(list(errors = err[["messages"]]))
+  }
 
   # Checks that API spec does not (yet?) capture
 
@@ -1116,7 +1188,11 @@ check_mod_boxplot <- function(
   )
 
   # check default values exist in the selected x-axis variable
-  if (!is.null(default_x_axis_vals) && OK[["bm_dataset_name"]] && OK[["x_axis_vars"]]) {
+  if (using_new_api &&
+      !is.null(default_x_axis_vals) &&
+      OK[["bm_dataset_name"]] &&
+      OK[["x_axis_vars"]] &&
+      x_axis_resolved_ok) {
 
     selected_x_axis_var <- if (is.null(default_x_axis_var)) {
       x_axis_vars[[1]]
@@ -1124,7 +1200,9 @@ check_mod_boxplot <- function(
       default_x_axis_var
     }
 
-    valid_vals <- unique(as.character(datasets[[bm_dataset_name]][[selected_x_axis_var]]))
+    valid_vals <- unique(as.character(
+      datasets[[bm_dataset_name]][[selected_x_axis_var]]
+    ))
 
     missing_vals <- setdiff(default_x_axis_vals, valid_vals)
 

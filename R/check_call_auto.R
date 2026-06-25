@@ -61,8 +61,8 @@ check_mod_boxplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, g
     flags <- list(optional = TRUE)
     OK[["default_x_axis_var"]] <- OK[["x_axis_vars"]] && CM$check_choice("default_x_axis_var", default_x_axis_var,
         flags, "x_axis_vars", x_axis_vars, err)
-    "NOTE: default_x_axis_vals (character) has no associated automated checks"
-    "      The expectation is that it either does not require them or that"
+    "NOTE: default_x_axis_vals (group) tagged as \"manual_check\""
+    "      The expectation is that it either does not require automated checks or that"
     "      the caller of this function has written manual checks near the call site."
     flags <- list(optional = TRUE)
     OK[["default_visit"]] <- OK[["visit_var"]] && CM$check_choice_from_col_contents("default_visit",
