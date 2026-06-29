@@ -36,7 +36,7 @@ mock_app_boxplot <- function(dry_run = FALSE, update_query_string = TRUE, srv_de
       subjid_var = "SUBJID",
       cat_var = "PARCAT",
       par_var = "PARAM",
-      x_axis_vars = "VISIT",
+      x_axis_vars = c("VISIT", "VISIT2"),
       value_vars = c("VALUE1", "VALUE2", "VALUE3"),
       anlfl_vars = anlfl_vars,
       quantile_type = 2L

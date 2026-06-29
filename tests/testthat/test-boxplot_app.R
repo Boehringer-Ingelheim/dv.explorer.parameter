@@ -246,10 +246,8 @@ test_that("default values are set", {
   srv_defaults <- list(
     default_cat = "PARCAT2",
     default_par = c("PARAM22", "PARAM23"),
-    default_x_axis_var = "VISIT",
-    default_x_axis_vals = "VISIT2",
-    #default_x_axis_var = "VISIT2",
-    #default_x_axis_vals = "2",
+    default_x_axis_var = "VISIT2",
+    default_x_axis_vals = "4",
     default_value = "VALUE2",
     default_main_group = "CAT1",
     default_sub_group = "CAT2",
@@ -283,8 +281,8 @@ test_that("default values are set including analysis flag variables", {
   srv_defaults <- list(
     default_cat = "PARCAT2",
     default_par = c("PARAM22", "PARAM23"),
-    default_x_axis_var = "VISIT",
-    default_x_axis_vals = "VISIT2",
+    default_x_axis_var = "VISIT2",
+    default_x_axis_vals = "4",
     default_value = "VALUE2",
     default_main_group = "CAT1",
     default_sub_group = "CAT2",

@@ -1070,10 +1070,10 @@ check_mod_boxplot <- function(
     container = err,
     cond = !(old_api_used && new_api_used),
     msg = paste(
-      "Deprecated arguments (`visit_var`, `default_visit`)",
+      "Deprecated arguments (<b>`visit_var`</b>, <b>`default_visit`</b>)",
       "cannot be used together with",
-      "new arguments (`x_axis_vars`, `default_x_axis_var`,",
-      "`default_x_axis_vals`)."
+      "new arguments (<b>`x_axis_vars`</b>, <b>`default_x_axis_var`</b>,",
+      "<b>`default_x_axis_vals`</b>)."
     )
   )
 
@@ -1093,35 +1093,20 @@ check_mod_boxplot <- function(
   x_axis_source <- "user"
 
   if (using_old_api) {
-    x_axis_vars <- visit_var
-    x_axis_source <- "visit_var_deprecated"
-  } else if (is.null(x_axis_vars)) {
-    x_axis_source <- "default_avisit"
-  }
 
-  # Validate fallback resolution (only relevant if default was used)
-
-  x_axis_resolved_ok <- TRUE
-  if (x_axis_source == "default_avisit") {
-    x_axis_resolved_ok <- "AVISIT" %in% names(datasets[[bm_dataset_name]])
-
-    CM$assert(
-      container = err,
-      cond = x_axis_resolved_ok,
-      msg = paste0(
-        "Neither `x_axis_vars` nor `visit_var` was supplied, so the default ",
-        "`AVISIT` was used, but column `AVISIT` does not exist in dataset `",
-        bm_dataset_name,
-        "`."
-      )
-    )
-    if (x_axis_resolved_ok) {
-      x_axis_vars <- "AVISIT"
+    # Old API defaults to AVISIT when visit_var is omitted
+    if (is.null(visit_var)) {
+      visit_var <- "AVISIT"
+      x_axis_source <- "default_avisit"
+    } else {
+      x_axis_source <- "visit_var_deprecated"
     }
-  }
+    x_axis_vars <- visit_var
 
-  if (length(err[["messages"]]) > 0) {
-    return(list(errors = err[["messages"]]))
+  } else if (is.null(x_axis_vars)) {
+
+    x_axis_vars <- "AVISIT"
+
   }
 
   # Create arguments for auto validator
@@ -1184,7 +1169,7 @@ check_mod_boxplot <- function(
       any.missing = FALSE,
       null.ok = FALSE
     ),
-    msg = "The value assigned to `quantile_type` must be a non-missing integer scalar between 1 and 9."
+    msg = "The value assigned to <b>`quantile_type`</b> must be a non-missing integer scalar between 1 and 9."
   )
 
   # check default values exist in the selected x-axis variable
@@ -1210,7 +1195,7 @@ check_mod_boxplot <- function(
       container = err,
       cond = length(missing_vals) == 0,
       msg = paste0(
-        "The following values supplied in `default_x_axis_vals` do not exist in the selected x-axis variable `",
+        "The following values supplied in <b>`default_x_axis_vals`</b> do not exist in the selected x-axis variable `",
         selected_x_axis_var,
         "`: ",
         paste(missing_vals, collapse = ", ")
