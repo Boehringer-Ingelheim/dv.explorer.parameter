@@ -1,6 +1,7 @@
 # nolint start
 print(R.version.string)
 print(sessionInfo())
+cat("Hmisc:", as.character(packageVersion("Hmisc")), "\n")
 
 component <- "wfphm-wf"
 # Steps
