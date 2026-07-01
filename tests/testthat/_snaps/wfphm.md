@@ -4987,38 +4987,45 @@
       <environment: namespace:base>
       
       $tr_mapper$`Scale by (result-mean)/SD of each parameter`
-      function(x) {
-        (x - mean(x, na.rm = TRUE)) / stats::sd(x, na.rm = TRUE)
+      function (x) 
+      {
+          (x - mean(x, na.rm = TRUE))/stats::sd(x, na.rm = TRUE)
       }
       <bytecode: RANDOM VALUE - NO SNAPSHOT>
       <environment: namespace:dv.explorer.parameter>
       
       $tr_mapper$`Scale by result/Gini's Mean Difference of each parameter`
-      function(x) {
-        x / Hmisc::GiniMd(x, na.rm = TRUE)
+      function (x) 
+      {
+          x/Hmisc::GiniMd(x, na.rm = TRUE)
       }
       <bytecode: RANDOM VALUE - NO SNAPSHOT>
       <environment: namespace:dv.explorer.parameter>
       
       $tr_mapper$`Scale by parameter with truncation`
-      function(x) tr_trunc_z_score(x, -3, 3)
+      function (x) 
+      tr_trunc_z_score(x, -3, 3)
       <bytecode: RANDOM VALUE - NO SNAPSHOT>
       <environment: namespace:dv.explorer.parameter>
       
       $tr_mapper$`Normalize (result-min)/max`
-      function(x) {
-        (x - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE))
+      function (x) 
+      {
+          (x - min(x, na.rm = TRUE))/(max(x, na.rm = TRUE) - min(x, 
+              na.rm = TRUE))
       }
       <bytecode: RANDOM VALUE - NO SNAPSHOT>
       <environment: namespace:dv.explorer.parameter>
       
       $tr_mapper$`Percentize (rank of result/maximal rank)`
-      function(x) {
-        if (!all(is.na(x))) {
-          return(stats::ecdf(x)(x))
-        } else {
-          return(rep(NA, length(x)))
-        }
+      function (x) 
+      {
+          if (!all(is.na(x))) {
+              return((stats::ecdf(x))(x))
+          }
+          else {
+              return(rep(NA, length(x)))
+          }
       }
       <bytecode: RANDOM VALUE - NO SNAPSHOT>
       <environment: namespace:dv.explorer.parameter>
@@ -14824,38 +14831,45 @@
       <environment: namespace:base>
       
       $tr_mapper$`Scale by (result-mean)/SD of each parameter`
-      function(x) {
-        (x - mean(x, na.rm = TRUE)) / stats::sd(x, na.rm = TRUE)
+      function (x) 
+      {
+          (x - mean(x, na.rm = TRUE))/stats::sd(x, na.rm = TRUE)
       }
       <bytecode: RANDOM VALUE - NO SNAPSHOT>
       <environment: namespace:dv.explorer.parameter>
       
       $tr_mapper$`Scale by result/Gini's Mean Difference of each parameter`
-      function(x) {
-        x / Hmisc::GiniMd(x, na.rm = TRUE)
+      function (x) 
+      {
+          x/Hmisc::GiniMd(x, na.rm = TRUE)
       }
       <bytecode: RANDOM VALUE - NO SNAPSHOT>
       <environment: namespace:dv.explorer.parameter>
       
       $tr_mapper$`Scale by parameter with truncation`
-      function(x) tr_trunc_z_score(x, -3, 3)
+      function (x) 
+      tr_trunc_z_score(x, -3, 3)
       <bytecode: RANDOM VALUE - NO SNAPSHOT>
       <environment: namespace:dv.explorer.parameter>
       
       $tr_mapper$`Normalize (result-min)/max`
-      function(x) {
-        (x - min(x, na.rm = TRUE)) / (max(x, na.rm = TRUE) - min(x, na.rm = TRUE))
+      function (x) 
+      {
+          (x - min(x, na.rm = TRUE))/(max(x, na.rm = TRUE) - min(x, 
+              na.rm = TRUE))
       }
       <bytecode: RANDOM VALUE - NO SNAPSHOT>
       <environment: namespace:dv.explorer.parameter>
       
       $tr_mapper$`Percentize (rank of result/maximal rank)`
-      function(x) {
-        if (!all(is.na(x))) {
-          return(stats::ecdf(x)(x))
-        } else {
-          return(rep(NA, length(x)))
-        }
+      function (x) 
+      {
+          if (!all(is.na(x))) {
+              return((stats::ecdf(x))(x))
+          }
+          else {
+              return(rep(NA, length(x)))
+          }
       }
       <bytecode: RANDOM VALUE - NO SNAPSHOT>
       <environment: namespace:dv.explorer.parameter>
