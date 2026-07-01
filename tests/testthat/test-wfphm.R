@@ -1,4 +1,6 @@
 # nolint start
+print(R.version.string)
+print(sessionInfo())
 
 component <- "wfphm-wf"
 # Steps
@@ -60,7 +62,7 @@ test_that(
   {
     skip_if_not_running_shiny_tests()
     fail_if_app_not_started()
-    
+
     app <- shinytest2::AppDriver$new(root_app$get_url())
     app$set_inputs(
       !!C$CAT := "CAT1",
@@ -120,7 +122,7 @@ test_that(
   {
     skip_if_not_running_shiny_tests()
     fail_if_app_not_started()
-    
+
 
     app <- shinytest2::AppDriver$new(app_anlfl$get_url())
 
@@ -184,7 +186,7 @@ test_that(
   {
     skip_if_not_running_shiny_tests()
     fail_if_app_not_started()
-    
+
     app <- shinytest2::AppDriver$new(root_app$get_url())
     app$set_inputs(
       !!C$CAT := "CAT1", # nolint
@@ -250,7 +252,7 @@ test_that(
       variant <- "int"
     }
 
-    expect_true(file_found)    
+    expect_true(file_found)
     expect_snapshot_file(path = png_file, variant = variant)
     # Viewport is incorrectly sized when reviewing the snapshot in the shinytest2 review tool
     # but if viewed in an external viewer the file is complete
