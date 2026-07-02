@@ -30,7 +30,7 @@ test_data <- function(random_bm_values = FALSE, anlfl_flags = FALSE, crossover =
     bm[["VALUE3"]] <- 100 + seq_len(nrow(bm))
   }
 
-    sl <- data.frame(
+  sl <- data.frame(
     SUBJID = 1:n_participants
   )
   sl[["CAT1"]] <- sample(c("Y", "N"), size = nrow(sl), replace = TRUE)

@@ -1083,10 +1083,7 @@ check_mod_boxplot <- function(
   }
 
   # Determine concept used (old vs new)
-  using_old_api <-
-    !is.null(visit_var) ||
-    !is.null(default_visit)
-
+  using_old_api <- old_api_used
   using_new_api <- !using_old_api
 
   # X-axis resolution
@@ -1176,8 +1173,7 @@ check_mod_boxplot <- function(
   if (using_new_api &&
       !is.null(default_x_axis_vals) &&
       OK[["bm_dataset_name"]] &&
-      OK[["x_axis_vars"]] &&
-      x_axis_resolved_ok) {
+      OK[["x_axis_vars"]]) {
 
     selected_x_axis_var <- if (is.null(default_x_axis_var)) {
       x_axis_vars[[1]]

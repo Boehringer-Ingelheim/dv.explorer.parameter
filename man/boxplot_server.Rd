@@ -49,7 +49,7 @@ Columns from \code{bm_dataset} that correspond to values of the parameters}
 
 \item{x_axis_vars}{\verb{[character(n)]}
 
-x-axis variables}
+Columns from \code{bm_dataset} that correspond to x-axis variables}
 
 \item{anlfl_vars}{\verb{[character(n)]}
 
@@ -70,7 +70,7 @@ Default values for the selectors}
 
 \item{default_x_axis_vals}{\verb{[character(n)|NULL]}
 
-Default values for the x axis variable}
+Default values for the x-axis variable}
 
 \item{on_sbj_click}{\verb{[function()]}
 

@@ -53,7 +53,7 @@ Columns from \code{bm_dataset} that correspond to values of the parameters}
 
 \item{x_axis_vars}{\verb{[character(n)]}
 
-x-axis variables}
+Columns from \code{bm_dataset} that correspond to x-axis variables}
 
 \item{visit_var}{Deprecated. Use \code{x_axis_vars}.}
 
@@ -76,7 +76,7 @@ Default values for the selectors}
 
 \item{default_x_axis_vals}{\verb{[character(n)|NULL]}
 
-Default values for the x axis variable}
+Default values for the x-axis variable}
 
 \item{default_visit}{Deprecated. Use \code{default_x_axis_vals}.}
 
