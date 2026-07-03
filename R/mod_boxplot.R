@@ -1149,10 +1149,6 @@ check_mod_boxplot <- function(
     err
   )
 
-  if (length(err[["messages"]]) > 0) {
-    return(list(errors = err[["messages"]]))
-  }
-
   # Checks that API spec does not (yet?) capture
 
   # Check that `quantile_type` is an integer scalar
@@ -1170,43 +1166,56 @@ check_mod_boxplot <- function(
   )
 
   # check default values exist in the selected x-axis variable
-  if (using_new_api &&
-      !is.null(default_x_axis_vals) &&
-      OK[["bm_dataset_name"]] &&
-      OK[["x_axis_vars"]]) {
+  if (using_new_api) {
+    if (!is.null(default_x_axis_vals) &&
+        OK[["bm_dataset_name"]] &&
+        OK[["x_axis_vars"]]) {
 
-    selected_x_axis_var <- if (is.null(default_x_axis_var)) {
-      x_axis_vars[[1]]
-    } else {
-      default_x_axis_var
+      selected_x_axis_var <- if (is.null(default_x_axis_var)) {
+        x_axis_vars[[1]]
+      } else {
+        default_x_axis_var
+      }
+
+      valid_vals <- unique(as.character(
+        datasets[[bm_dataset_name]][[selected_x_axis_var]]
+      ))
+
+      missing_vals <- setdiff(default_x_axis_vals, valid_vals)
+
+      CM$assert(
+        container = err,
+        cond = length(missing_vals) == 0,
+        msg = paste0(
+          "The following values supplied in <b>`default_x_axis_vals`</b> do not exist in the selected x-axis variable `",
+          selected_x_axis_var,
+          "`: ",
+          paste(missing_vals, collapse = ", ")
+        )
+      )
     }
 
-    valid_vals <- unique(as.character(
-      datasets[[bm_dataset_name]][[selected_x_axis_var]]
-    ))
+    #ahwopu
+    if (OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] && OK[["x_axis_vars"]] && OK[["anlfl_vars"]]) {
+      for (x_var in x_axis_vars) {
+        check_unique_sub_cat_par_vis(
+          datasets, "bm_dataset_name", bm_dataset_name,
+          subjid_var, cat_var, par_var, x_var, anlfl_vars,
+          err = err
+        )
+      }
+    }
 
-    missing_vals <- setdiff(default_x_axis_vals, valid_vals)
-
-    CM$assert(
-      container = err,
-      cond = length(missing_vals) == 0,
-      msg = paste0(
-        "The following values supplied in <b>`default_x_axis_vals`</b> do not exist in the selected x-axis variable `",
-        selected_x_axis_var,
-        "`: ",
-        paste(missing_vals, collapse = ", ")
-      )
-    )
-  }
-
-  #ahwopu
-  if (OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] && OK[["x_axis_vars"]] && OK[["anlfl_vars"]]) {
-    for (x_var in x_axis_vars) {
-      check_unique_sub_cat_par_vis(
-        datasets, "bm_dataset_name", bm_dataset_name,
-        subjid_var, cat_var, par_var, x_var, anlfl_vars,
-        err = err
-      )
+  } else {
+    #ahwopu
+    if (OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] && OK[["visit_var"]] && OK[["anlfl_vars"]]) {
+      for (x_var in x_axis_vars) {
+        check_unique_sub_cat_par_vis(
+          datasets, "bm_dataset_name", bm_dataset_name,
+          subjid_var, cat_var, par_var, x_var, anlfl_vars,
+          err = err
+        )
+      }
     }
   }
 
