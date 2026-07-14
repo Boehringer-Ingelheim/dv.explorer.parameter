@@ -68,7 +68,7 @@ test_that(
       !!C$PCAT := "PARCAT1"
     )
 
-      app$set_inputs(
+    app$set_inputs(
       !!C$PPAR := "PARAM11"
     )
 
@@ -87,14 +87,33 @@ test_that(
         }
       )
     }
+    normalize_hmpar_args <- function(x) {
+      if (!is.null(x$tr_mapper)) {
+        x$tr_mapper <- names(x$tr_mapper)
+      }
+
+      x
+    }
 
     expect_snapshot(cran = TRUE, exported_values[["not_ebas-wf_args"]] |> resolve_reactive())
     expect_snapshot(cran = TRUE, exported_values[["not_ebas-hmcat_args"]] |> resolve_reactive())
     expect_snapshot(cran = TRUE, exported_values[["not_ebas-hmcont_args"]] |> resolve_reactive())
-    expect_snapshot(cran = TRUE, exported_values[["not_ebas-hmpar_args"]] |> resolve_reactive(), transform = function(x) {
-      is_bytecode <- grepl("bytecode", x)
-      ifelse(is_bytecode, "<bytecode: RANDOM VALUE - NO SNAPSHOT>", x)
-    })
+    hmpar_args <- exported_values[["not_ebas-hmpar_args"]] |>
+      resolve_reactive() |>
+      normalize_hmpar_args()
+
+    expect_snapshot(
+      cran = TRUE,
+      hmpar_args,
+      transform = function(x) {
+        is_bytecode <- grepl("bytecode", x)
+        ifelse(is_bytecode, "<bytecode: RANDOM VALUE - NO SNAPSHOT>", x)
+      }
+    )
+    # expect_snapshot(cran = TRUE, exported_values[["not_ebas-hmpar_args"]] |> resolve_reactive(), transform = function(x) {
+    #   is_bytecode <- grepl("bytecode", x)
+    #   ifelse(is_bytecode, "<bytecode: RANDOM VALUE - NO SNAPSHOT>", x)
+    # })
   }
 )
 
@@ -150,6 +169,13 @@ test_that(
         }
       )
     }
+    normalize_hmpar_args <- function(x) {
+      if (!is.null(x$tr_mapper)) {
+        x$tr_mapper <- names(x$tr_mapper)
+      }
+
+      x
+    }
 
     # In specific environments the margin calculation operation is really slow so we wait 10s or until the value is ready
     for (i in 1:10) {
@@ -162,10 +188,22 @@ test_that(
     expect_snapshot(cran = TRUE, exported_values[["not_ebas-wf_args"]] |> resolve_reactive())
     expect_snapshot(cran = TRUE, exported_values[["not_ebas-hmcat_args"]] |> resolve_reactive())
     expect_snapshot(cran = TRUE, exported_values[["not_ebas-hmcont_args"]] |> resolve_reactive())
-    expect_snapshot(cran = TRUE, exported_values[["not_ebas-hmpar_args"]] |> resolve_reactive(), transform = function(x) {
-      is_bytecode <- grepl("bytecode", x)
-      ifelse(is_bytecode, "<bytecode: RANDOM VALUE - NO SNAPSHOT>", x)
-    })
+    hmpar_args <- exported_values[["not_ebas-hmpar_args"]] |>
+      resolve_reactive() |>
+      normalize_hmpar_args()
+
+    expect_snapshot(
+      cran = TRUE,
+      hmpar_args,
+      transform = function(x) {
+        is_bytecode <- grepl("bytecode", x)
+        ifelse(is_bytecode, "<bytecode: RANDOM VALUE - NO SNAPSHOT>", x)
+      }
+    )
+    # expect_snapshot(cran = TRUE, exported_values[["not_ebas-hmpar_args"]] |> resolve_reactive(), transform = function(x) {
+    #   is_bytecode <- grepl("bytecode", x)
+    #   ifelse(is_bytecode, "<bytecode: RANDOM VALUE - NO SNAPSHOT>", x)
+    # })
   }
 )
 
@@ -280,3 +318,4 @@ test_that(
 )
 
 # nolint end
+
