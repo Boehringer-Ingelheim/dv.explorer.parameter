@@ -110,10 +110,6 @@ test_that(
         ifelse(is_bytecode, "<bytecode: RANDOM VALUE - NO SNAPSHOT>", x)
       }
     )
-    # expect_snapshot(cran = TRUE, exported_values[["not_ebas-hmpar_args"]] |> resolve_reactive(), transform = function(x) {
-    #   is_bytecode <- grepl("bytecode", x)
-    #   ifelse(is_bytecode, "<bytecode: RANDOM VALUE - NO SNAPSHOT>", x)
-    # })
   }
 )
 
@@ -200,10 +196,6 @@ test_that(
         ifelse(is_bytecode, "<bytecode: RANDOM VALUE - NO SNAPSHOT>", x)
       }
     )
-    # expect_snapshot(cran = TRUE, exported_values[["not_ebas-hmpar_args"]] |> resolve_reactive(), transform = function(x) {
-    #   is_bytecode <- grepl("bytecode", x)
-    #   ifelse(is_bytecode, "<bytecode: RANDOM VALUE - NO SNAPSHOT>", x)
-    # })
   }
 )
 
