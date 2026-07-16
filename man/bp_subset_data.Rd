@@ -56,7 +56,7 @@ The \verb{_group} columns depend on the names in \code{group_vect}\tabular{lllll
 \description{
 Prepares the basic input for the rest of the boxplot functions.
 \itemize{
-\item \code{bm_dataset} is subset according to category, parameter and visit selection
+\item \code{bm_dataset} is subset according to category, parameter and selected x-axis variable
 \item \code{group_dataset} is subset according to group_selection
 \item both are joined using \code{subject_col} as a common key
 \item it uses a left join
@@ -74,7 +74,7 @@ otherwise a regular error is produced.
 }
 \subsection{Shiny validation errors:}{
 \itemize{
-\item The fragment from bm contains more than row per subject, category, parameter and visit combination
+\item The fragment from bm contains more than row per subject, category, parameter and selected x-axis variable combination
 \item The fragment from group contains more than row per subject
 \item If \code{bm_ds} and \code{grp_ds} share column names, apart from \code{subj_col}, after internal renaming has occured
 \item If the returned dataset has 0 rows

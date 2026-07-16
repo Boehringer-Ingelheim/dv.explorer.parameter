@@ -12,12 +12,15 @@ mod_boxplot(
   cat_var = "PARCAT",
   par_var = "PARAM",
   value_vars = "AVAL",
-  visit_var = "AVISIT",
+  x_axis_vars = NULL,
+  visit_var = NULL,
   anlfl_vars = NULL,
   subjid_var = "SUBJID",
   quantile_type = 7L,
   default_cat = NULL,
   default_par = NULL,
+  default_x_axis_var = NULL,
+  default_x_axis_vals = NULL,
   default_visit = NULL,
   default_value = NULL,
   default_main_group = NULL,
@@ -38,17 +41,21 @@ Name of the dataset}
 \item{receiver_id}{\verb{[character(1)]}
 
 Shiny ID of the module receiving the selected subject ID in the data listing. This ID must
-be present in the app or be NULL.
+be present in the app or be NULL.}
 
-inheritParams boxplot_server}
+\item{cat_var, par_var}{\verb{[character(1)]}
 
-\item{cat_var, par_var, visit_var}{\verb{[character(1)]}
-
-Columns from \code{bm_dataset} that correspond to the parameter category, parameter and visit}
+Columns from \code{bm_dataset} that correspond to the parameter category and parameter}
 
 \item{value_vars}{\verb{[character(n)]}
 
 Columns from \code{bm_dataset} that correspond to values of the parameters}
+
+\item{x_axis_vars}{\verb{[character(n)]}
+
+Columns from \code{bm_dataset} that correspond to x-axis variables}
+
+\item{visit_var}{Deprecated. Use \code{x_axis_vars}.}
 
 \item{anlfl_vars}{\verb{[character(n)]}
 
@@ -63,9 +70,15 @@ Column corresponding to subject ID}
 Quantile algorithm type passed to \code{\link[stats]{quantile}}
 (an integer between 1 and 9, default 7).}
 
-\item{default_cat, default_par, default_visit, default_value, default_main_group, default_sub_group, default_page_group}{\verb{[character(1)|NULL]}
+\item{default_cat, default_par, default_x_axis_var, default_value, default_main_group, default_sub_group, default_page_group}{\verb{[character(1)|NULL]}
 
 Default values for the selectors}
+
+\item{default_x_axis_vals}{\verb{[character(n)|NULL]}
+
+Default values for the x-axis variable}
+
+\item{default_visit}{Deprecated. Use \code{default_x_axis_vals}.}
 
 \item{server_wrapper_func}{\verb{[function()]}
 

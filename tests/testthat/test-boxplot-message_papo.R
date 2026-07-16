@@ -6,7 +6,7 @@ mod <- mod_boxplot(
   subjid_var = "SUBJID",
   cat_var = "PARCAT",
   par_var = "PARAM",
-  visit_var = "VISIT",
+  x_axis_vars = "VISIT",
   value_vars = c("VALUE1", "VALUE2", "VALUE3"),
   default_cat = "PARCAT1",
   default_par = "PARAM11"

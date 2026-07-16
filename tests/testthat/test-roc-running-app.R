@@ -3,7 +3,7 @@
     # https://rstudio.github.io/shinytest2/articles/robust.html#assert-as-little-unnecessary-information
     # TODO: A failure to start the app will delete all snapshots as they are never declared
 
-    expect_table <- function(x) {      
+    expect_table <- function(x) {
       expect_true(grepl("<table", app$get_html(paste0("#", x))))
     }
 
@@ -86,6 +86,7 @@ app$wait_for_idle()
 
 exported <- app$get_value(export = "roc-output_arguments")
 
+
 test_that("only and all listed outputs are present", {
   skip_if_not_running_shiny_tests()
 
@@ -108,12 +109,28 @@ local({
         )
       ),
     {
-    # METRICS PLOT test is sensitive to being loaded or byte-compiled. When byte compiled piped functions are inlined.
-    # The snapshot correspond to the byte compiled version
-    expect_snapshot(shiny::isolate(exported[[uo]]()), cran = TRUE, transform = function(x) {
-      is_bytecode <- grepl("bytecode", x)
-      ifelse(is_bytecode, "<bytecode: RANDOM VALUE - NO SNAPSHOT>", x)
-    })
+
+      if (identical(o_n, "METRICS_PLOT")) {
+
+        metric_args <- shiny::isolate(exported[[uo]]())
+        metric_args$compute_metric_fn <- "<function>"
+
+        expect_snapshot(
+          metric_args,
+          cran = TRUE, transform = function(x) {
+            is_bytecode <- grepl("bytecode", x)
+            ifelse(is_bytecode, "<bytecode: RANDOM VALUE - NO SNAPSHOT>", x)
+          }
+        )
+
+      } else {
+
+        expect_snapshot(shiny::isolate(exported[[uo]]()), cran = TRUE, transform = function(x) {
+          is_bytecode <- grepl("bytecode", x)
+          ifelse(is_bytecode, "<bytecode: RANDOM VALUE - NO SNAPSHOT>", x)
+        })
+
+      }
 
     t <- attr(o, "tab")
     exp <- attr(o, "expect")
@@ -128,7 +145,7 @@ local({
 })
 
 local({
-  inputs <- rlang::list2(    
+  inputs <- rlang::list2(
     !!ID$MISC$GRP := c("None")
   )
 
@@ -155,12 +172,28 @@ local({
           )
         ),
       {
-        # METRICS PLOT test is sensitive to being loaded or byte-compiled. When byte compiled piped functions are inlined.
-    # The snapshot correspond to the byte compiled version
-    expect_snapshot(shiny::isolate(exported[[uo]]()), cran = TRUE, transform = function(x) {
-      is_bytecode <- grepl("bytecode", x)
-      ifelse(is_bytecode, "<bytecode: RANDOM VALUE - NO SNAPSHOT>", x)
-    })
+        if (identical(o_n, "METRICS_PLOT")) {
+
+          metric_args <- shiny::isolate(exported[[uo]]())
+          metric_args$compute_metric_fn <- "<function>"
+
+          expect_snapshot(
+            metric_args,
+            cran = TRUE, transform = function(x) {
+              is_bytecode <- grepl("bytecode", x)
+              ifelse(is_bytecode, "<bytecode: RANDOM VALUE - NO SNAPSHOT>", x)
+            }
+          )
+
+        } else {
+
+          expect_snapshot(shiny::isolate(exported[[uo]]()), cran = TRUE, transform = function(x) {
+            is_bytecode <- grepl("bytecode", x)
+            ifelse(is_bytecode, "<bytecode: RANDOM VALUE - NO SNAPSHOT>", x)
+          })
+
+        }
+
 
         t <- attr(o, "tab")
         exp <- attr(o, "expect")
@@ -180,11 +213,11 @@ test_that("Bookmark test" |>
       specs$roc$bookmark
     )
   ), {
-  skip_if_not_running_shiny_tests()  
+  skip_if_not_running_shiny_tests()
 
 # URL is automatically updated with the bookmarked URL
   bmk_url <- app$get_js("window.location.href")
-    
+
   bookmark_app <- suppressWarnings(shinytest2::AppDriver$new(bmk_url))
   bookmark_app$wait_for_idle()
   app_input_values <- app$get_values()[["input"]]

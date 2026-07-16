@@ -1,3 +1,8 @@
+# dv.explorer.parameter 0.2.1-9004
+
+- boxplot:
+    - Replaced single-visit boxplots with boxplots across multiple values of a selected x-axis variable (e.g. visits or treatments in crossover trials)
+    
 # dv.explorer.parameter 0.2.1-9003
 
 - Scatterplot matrix:

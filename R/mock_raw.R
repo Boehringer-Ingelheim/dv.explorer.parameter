@@ -1,4 +1,4 @@
-test_data <- function(random_bm_values = FALSE, anlfl_flags = FALSE) {
+test_data <- function(random_bm_values = FALSE, anlfl_flags = FALSE, crossover = FALSE) {
   set.seed(1)
 
   n_participants <- 20
@@ -40,6 +40,32 @@ test_data <- function(random_bm_values = FALSE, anlfl_flags = FALSE) {
   sl[["CONT2"]] <- sample(100:200, size = nrow(sl), replace = TRUE)
   sl[["CONT3"]] <- sample(200:300, size = nrow(sl), replace = TRUE)
 
+  # Create crossover treatment sequences and treatment assignments
+  if (crossover) {
+
+    arm_levels <- c("R-T2-T1", "T1-R-T2", "T2-T1-R")
+    sl[["ARM"]] <- rep(arm_levels, length.out = nrow(sl))
+    trt_map <- data.frame(
+      ARM = rep(arm_levels, each = 3),
+      VISITN = rep(1:3, times = 3),
+      TRT = c(
+        "R",  "T2", "T1",
+        "T1", "R",  "T2",
+        "T2", "T1", "R"
+      )
+    )
+
+    bm <- bm |>
+      dplyr::left_join(
+        dplyr::select(sl, dplyr::all_of(c("SUBJID", "ARM"))),
+        by = "SUBJID"
+      ) |>
+      dplyr::left_join(
+        trt_map,
+        by = c("ARM", "VISITN")
+      )
+  }
+
   bm <- bm |>
     dplyr::mutate(
       SUBJID = factor(.data[["SUBJID"]]),
@@ -71,6 +97,13 @@ test_data <- function(random_bm_values = FALSE, anlfl_flags = FALSE) {
     sl,
     SUBJID = factor(.data[["SUBJID"]]) # nolint
   )
+
+  # Convert crossover variables to factors
+  if (crossover) {
+    sl[["ARM"]] <- factor(sl[["ARM"]])
+    bm[["ARM"]] <- factor(bm[["ARM"]])
+    bm[["TRT"]] <- factor(bm[["TRT"]])
+  }
 
   for (col in names(bm)) {
     attr(bm[[col]], "label") <- paste("Label of", col)
