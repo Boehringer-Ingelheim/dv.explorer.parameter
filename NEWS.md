@@ -1,3 +1,8 @@
+# dv.explorer.parameter 0.2.1-9005
+
+- lineplot:
+    - Improved EEF about default_visit_val parameter containng valid values
+    
 # dv.explorer.parameter 0.2.1-9004
 
 - boxplot:

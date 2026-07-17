@@ -1950,6 +1950,55 @@ check_mod_lineplot <- function(
     }
   }
 
+  # Validate default_visit_val contents
+  if (OK[["visit_vars"]] && !is.null(default_visit_val)) {
+
+    ds <- datasets[[bm_dataset_name]]
+
+    for (visit_var in names(default_visit_val)) {
+
+      CM$assert(
+        container = err,
+        cond = visit_var %in% c(visit_vars, cdisc_visit_vars),
+        msg = sprintf(
+          "The visit variable '%s' specified in default_visit_val is not present in visit_vars or cdisc_visit_vars.",
+          visit_var
+        )
+      )
+
+      configured_values <- default_visit_val[[visit_var]]
+      available_values <- unique(as.character(ds[[visit_var]]))
+      configured_values_chr <- as.character(configured_values)
+
+      invalid_values <- setdiff(configured_values_chr, available_values)
+
+      CM$assert(
+        container = err,
+        cond = length(invalid_values) == 0,
+        msg = sprintf(
+          paste(
+            "The parameter <b>default_visit_val</b> contains values that are not present",
+            "in visit variable <b>%s</b> of dataset <b>%s</b>.<br><br>",
+            "<b>Invalid values:</b><br><pre>%s</pre>",
+            "<b>Available values:</b><br><pre>%s</pre>",
+            "A common cause of this issue is constructing <b>default_visit_val</b>",
+            "from a factor variable without first converting it to character.",
+            "For example:<br><pre>",
+            "# Incorrect\n",
+            "unique(unlist(lapply(data_list, function(x) x$sv$VISIT)))\n\n",
+            "# Correct\n",
+            "unique(unlist(lapply(data_list, function(x) as.character(x$sv$VISIT)))",
+            "</pre>"
+          ),
+          visit_var,
+          bm_dataset_name,
+          paste(invalid_values, collapse = "\n"),
+          paste(head(available_values, 50), collapse = "\n")
+        )
+      )
+    }
+  }
+
   if (OK[["subjid_var"]] && OK[["par_var"]] && OK[["ref_line_vars"]]) {
     ds <- datasets[[bm_dataset_name]]
 
