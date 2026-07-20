@@ -1,3 +1,7 @@
+# dv.explorer.parameter 0.2.1-9005
+
+- [NOT USER-FACING] Fix encoding of single character in DR.R snippet
+    
 # dv.explorer.parameter 0.2.1-9004
 
 - boxplot:

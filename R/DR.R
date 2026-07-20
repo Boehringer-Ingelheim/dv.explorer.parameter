@@ -125,13 +125,13 @@ DR <- local({ # _D_ressing _R_oom
         font-size: 2rem;
         display: inline-block;
         margin-left: 1rem;
-        content:'\203A';
+        content:'\u203A';
       }
 
       .toggle-checkbox:checked + .toggle-label .chevron:before {
         font-size: 2rem;
         display: inline-block;
-        content:'\203A';
+        content:'\u203A';
         transform: rotate(90deg);
       }
 
