@@ -1806,10 +1806,7 @@ mod_lineplot_API_docs <- list(
   par_var = "",
   visit_vars = "",
   cdisc_visit_vars = "",
-
-  ##################################
   anlfl_vars = "",
-
   value_vars = "",
   additional_listing_vars = "",
   ref_line_vars = "",
@@ -1819,9 +1816,7 @@ mod_lineplot_API_docs <- list(
   default_par = "",
   default_val = "",
   default_visit_var = "",
-  default_visit_val = list(
-    ""
-  ),
+  default_visit_val = list(""),
   default_main_group = "",
   default_sub_group = "",
   default_transparency = "",
@@ -1955,6 +1950,12 @@ check_mod_lineplot <- function(
 
     ds <- datasets[[bm_dataset_name]]
 
+    CM$assert(
+      container = err,
+      cond = is.list(default_visit_val),
+      msg = "default_visit_val must be a named list."
+    )
+
     for (visit_var in names(default_visit_val)) {
 
       CM$assert(
@@ -1967,35 +1968,21 @@ check_mod_lineplot <- function(
       )
 
       configured_values <- default_visit_val[[visit_var]]
-      available_values <- unique(as.character(ds[[visit_var]]))
-      configured_values_chr <- as.character(configured_values)
-
-      invalid_values <- setdiff(configured_values_chr, available_values)
 
       CM$assert(
         container = err,
-        cond = length(invalid_values) == 0,
+        cond = !is.factor(configured_values),
         msg = sprintf(
           paste(
-            "The parameter <b>default_visit_val</b> contains values that are not present",
-            "in visit variable <b>%s</b> of dataset <b>%s</b>.<br><br>",
-            "<b>Invalid values:</b><br><pre>%s</pre>",
-            "<b>Available values:</b><br><pre>%s</pre>",
-            "A common cause of this issue is constructing <b>default_visit_val</b>",
-            "from a factor variable without first converting it to character.",
-            "For example:<br><pre>",
-            "# Incorrect\n",
-            "unique(unlist(lapply(data_list, function(x) x$sv$VISIT)))\n\n",
-            "# Correct\n",
-            "unique(unlist(lapply(data_list, function(x) as.character(x$sv$VISIT)))",
-            "</pre>"
+            "The default values supplied for visit variable '%s' are factors.",
+            "The lineplot module expects character or numeric values.",
+            "Please convert visit values explicitly using:",
+            "<pre>as.character(...)</pre>"
           ),
-          visit_var,
-          bm_dataset_name,
-          paste(invalid_values, collapse = "\n"),
-          paste(head(available_values, 50), collapse = "\n")
+          visit_var
         )
       )
+
     }
   }
 
