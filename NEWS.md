@@ -1,8 +1,12 @@
 # dv.explorer.parameter 0.2.1-9006
 
 - lineplot:
-    - Improved EEF about default_visit_val parameter containng valid values
-    
+    - Improved EEF about default_visit_val parameter containing valid values
+
+# dv.explorer.parameter 0.2.1-9005
+
+- [NOT USER-FACING] Fix encoding of single character in DR.R snippet
+
 # dv.explorer.parameter 0.2.1-9004
 
 - boxplot:
