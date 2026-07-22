@@ -1806,10 +1806,7 @@ mod_lineplot_API_docs <- list(
   par_var = "",
   visit_vars = "",
   cdisc_visit_vars = "",
-
-  ##################################
   anlfl_vars = "",
-
   value_vars = "",
   additional_listing_vars = "",
   ref_line_vars = "",
@@ -1819,9 +1816,7 @@ mod_lineplot_API_docs <- list(
   default_par = "",
   default_val = "",
   default_visit_var = "",
-  default_visit_val = list(
-    ""
-  ),
+  default_visit_val = list(""),
   default_main_group = "",
   default_sub_group = "",
   default_transparency = "",
@@ -1947,6 +1942,46 @@ check_mod_lineplot <- function(
           )
         )
       }
+    }
+  }
+
+  # Validate default_visit_val contents
+  if (OK[["visit_vars"]] && OK[["cdisc_visit_vars"]] && !is.null(default_visit_val)) {
+
+    ds <- datasets[[bm_dataset_name]]
+
+    CM$assert(
+      container = err,
+      cond = is.list(default_visit_val),
+      msg = "default_visit_val must be a named list."
+    )
+
+    for (visit_var in names(default_visit_val)) {
+
+      CM$assert(
+        container = err,
+        cond = visit_var %in% c(visit_vars, cdisc_visit_vars),
+        msg = sprintf(
+          "The visit variable '%s' specified in `default_visit_val` is not present in `visit_vars` or `cdisc_visit_vars`.",
+          visit_var
+        )
+      )
+
+      configured_values <- default_visit_val[[visit_var]]
+
+      CM$assert(
+        container = err,
+        cond = !is.factor(configured_values),
+        msg = sprintf(
+          paste(
+            "The default values supplied for visit variable '%s' in `default_visit_val` have been passed as a factor.",
+            "The lineplot module expects character or numeric values.",
+            "Please convert factors using <code>as.character()</code>."
+          ),
+          visit_var
+        )
+      )
+
     }
   }
 
