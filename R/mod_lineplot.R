@@ -1976,7 +1976,7 @@ check_mod_lineplot <- function(
           paste(
             "The default values supplied for visit variable '%s' in `default_visit_val` have been passed as a factor.",
             "The lineplot module expects character or numeric values.",
-            "Please convert factors using `as.character()`."
+            "Please convert factors using <code>as.character()</code>."
           ),
           visit_var
         )
