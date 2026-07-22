@@ -1946,7 +1946,7 @@ check_mod_lineplot <- function(
   }
 
   # Validate default_visit_val contents
-  if (OK[["visit_vars"]] && !is.null(default_visit_val)) {
+  if (OK[["visit_vars"]] && OK[["cdisc_visit_vars"]] && !is.null(default_visit_val)) {
 
     ds <- datasets[[bm_dataset_name]]
 
@@ -1962,7 +1962,7 @@ check_mod_lineplot <- function(
         container = err,
         cond = visit_var %in% c(visit_vars, cdisc_visit_vars),
         msg = sprintf(
-          "The visit variable '%s' specified in default_visit_val is not present in visit_vars or cdisc_visit_vars.",
+          "The visit variable '%s' specified in `default_visit_val` is not present in `visit_vars` or `cdisc_visit_vars`.",
           visit_var
         )
       )
@@ -1974,10 +1974,9 @@ check_mod_lineplot <- function(
         cond = !is.factor(configured_values),
         msg = sprintf(
           paste(
-            "The default values supplied for visit variable '%s' are factors.",
+            "The default values supplied for visit variable '%s' in `default_visit_val` have been passed as a factor.",
             "The lineplot module expects character or numeric values.",
-            "Please convert visit values explicitly using:",
-            "<pre>as.character(...)</pre>"
+            "Please convert factors using `as.character()`."
           ),
           visit_var
         )
