@@ -1,32 +1,17 @@
-# dv.explorer.parameter 0.2.1-9006
+# dv.explorer.parameter 0.3.0
 
 - lineplot:
     - Improved EEF about default_visit_val parameter containing valid values
 
-# dv.explorer.parameter 0.2.1-9005
-
-- [NOT USER-FACING] Fix encoding of single character in DR.R snippet
-
-# dv.explorer.parameter 0.2.1-9004
-
 - boxplot:
     - Replaced single-visit boxplots with boxplots across multiple values of a selected x-axis variable (e.g. visits or treatments in crossover trials)
     
-# dv.explorer.parameter 0.2.1-9003
-
-- Scatterplot matrix:
+- scatterplot matrix:
     - Fixed labeling issue of selected analysis value
-    
-# dv.explorer.parameter 0.2.1-9002
 
+- [NOT USER-FACING] Fix encoding of single character in DR.R snippet    
 - [NOT USER-FACING] Update TC.R and DR.R snippets
-
-# dv.explorer.parameter 0.2.1-9001
-
 - [NOT USER-FACING] Update CM.R snippet
-
-# dv.explorer.parameter 0.2.1-9000
-
 - Faster early error feedback
 
 # dv.explorer.parameter 0.2.1
