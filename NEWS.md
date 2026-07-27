@@ -1,7 +1,7 @@
 # dv.explorer.parameter 0.3.0
 
 - lineplot:
-    - Improved EEF about default_visit_val parameter containing valid values
+    - Improved early error feedback about default_visit_val parameter containing valid values
 
 - boxplot:
     - Replaced single-visit boxplots with boxplots across multiple values of a selected x-axis variable (e.g. visits or treatments in crossover trials)
