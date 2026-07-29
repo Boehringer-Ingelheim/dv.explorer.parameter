@@ -1415,13 +1415,13 @@ boxplot_chart <- function(ds, violin, show_points, log_project_y, title_data = N
     aes <- ggplot2::aes(
       x = .data[[CNT$VIS]],
       y = .data[[CNT$VAL]],
-      fill = .data[[CNT$MAIN_GROUP]]
+      color = .data[[CNT$MAIN_GROUP]]
     )
 
     labs <- ggplot2::labs(
       x = get_lbl_robust(ds, CNT$VIS),
       y = get_lbl_robust(ds, CNT$VAL),
-      fill = get_lbl_robust(ds, CNT$MAIN_GROUP)
+      color = get_lbl_robust(ds, CNT$MAIN_GROUP)
     )
 
   } else {
