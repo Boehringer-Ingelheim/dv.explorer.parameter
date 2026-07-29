@@ -1546,7 +1546,7 @@ bp_listings_table <- function(ds, f_ds) {
     mask <- rep(FALSE, nrow(ds))
   } else {
     click_list <- purrr::map_chr(f_ds, ~ as.character(.x))
-    click_list <- click_list[!names(f_ds) %in% (c(CNT$SBJ, CNT$VAL))]
+    click_list <- click_list[!names(f_ds) %in% (c(CNT$SBJ, CNT$VAL, CNT$MAIN_GROUP))]
     mask <- equal_and_mask_from_vec(ds, click_list)
   }
   ds[mask, ]
