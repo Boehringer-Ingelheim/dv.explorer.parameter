@@ -1458,8 +1458,6 @@ boxplot_chart <- function(ds, violin, show_points, log_project_y, title_data = N
     dodge_width <- 0.9
     dodge <- ggplot2::position_dodge(width = dodge_width)
 
-    set.seed(1)
-
     if (violin) {
       p <- p +
         ggplot2::geom_violin(trim = FALSE, drop = FALSE, position = dodge) +

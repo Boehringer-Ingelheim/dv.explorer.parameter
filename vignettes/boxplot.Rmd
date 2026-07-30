@@ -89,7 +89,7 @@ This visualizations consists of a facetted boxplot plot based on the set of para
 
 ## Population listing and single listing
 
-A table containing a listing of the population of a single boxplot selected by clicking, and a table containing a
+A table containing a listing of the population of a single x-axis value selected by clicking, and a table containing a
 single subject selected by double clicking on an individual data point in the boxplot.
 
 The single subject table contains a drill down button that can be used to obtain more information about the subject.
