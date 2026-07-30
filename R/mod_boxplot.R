@@ -1458,10 +1458,13 @@ boxplot_chart <- function(ds, violin, show_points, log_project_y, title_data = N
     dodge_width <- 0.9
     dodge <- ggplot2::position_dodge(width = dodge_width)
 
+    set.seed(1)
+
     if (violin) {
       p <- p +
         ggplot2::geom_violin(trim = FALSE, drop = FALSE, position = dodge) +
         ggplot2::geom_boxplot(
+          width = 0.1,
           outlier.shape = if (show_points) NA else 19,
           position = dodge
         )
@@ -1472,7 +1475,7 @@ boxplot_chart <- function(ds, violin, show_points, log_project_y, title_data = N
     if (show_points) {
       point_pos <- if (is_main_grouped) {
         ggplot2::position_jitterdodge(
-          jitter.width = 0.15,
+          jitter.width = 0.2,
           jitter.height = 0,
           dodge.width = dodge_width
         )
