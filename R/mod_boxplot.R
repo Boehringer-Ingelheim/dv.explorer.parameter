@@ -1415,13 +1415,13 @@ boxplot_chart <- function(ds, violin, show_points, log_project_y, title_data = N
     aes <- ggplot2::aes(
       x = .data[[CNT$VIS]],
       y = .data[[CNT$VAL]],
-      fill = .data[[CNT$MAIN_GROUP]]
+      color = .data[[CNT$MAIN_GROUP]]
     )
 
     labs <- ggplot2::labs(
       x = get_lbl_robust(ds, CNT$VIS),
       y = get_lbl_robust(ds, CNT$VAL),
-      fill = get_lbl_robust(ds, CNT$MAIN_GROUP)
+      color = get_lbl_robust(ds, CNT$MAIN_GROUP)
     )
 
   } else {
@@ -1455,18 +1455,33 @@ boxplot_chart <- function(ds, violin, show_points, log_project_y, title_data = N
     data = ds,
     mapping = aes
   )
+    dodge_width <- 0.9
+    dodge <- ggplot2::position_dodge(width = dodge_width)
 
-  if (violin) {
-    p <- p +
-      ggplot2::geom_violin(trim = FALSE) +
-      ggplot2::geom_boxplot(width = 0.1, outlier.shape = if (show_points) NA else 19)
-  } else {
-    p <- p + ggplot2::geom_boxplot(outlier.shape = if (show_points) NA else 19)
-  }
+    if (violin) {
+      p <- p +
+        ggplot2::geom_violin(trim = FALSE, drop = FALSE, position = dodge) +
+        ggplot2::geom_boxplot(
+          width = 0.1,
+          outlier.shape = if (show_points) NA else 19,
+          position = dodge
+        )
+    } else {
+      p <- p + ggplot2::geom_boxplot(outlier.shape = if (show_points) NA else 19, position = dodge)
+    }
 
-  if (show_points) {
-    p <- p + ggplot2::geom_jitter(width = .2, height = 0)
-  }
+    if (show_points) {
+      point_pos <- if (is_main_grouped) {
+        ggplot2::position_jitterdodge(
+          jitter.width = 0.2,
+          jitter.height = 0,
+          dodge.width = dodge_width
+        )
+      } else {
+        ggplot2::position_jitter(width = 0.2, height = 0)
+      }
+      p <- p + ggplot2::geom_point(position = point_pos)
+    }
 
   title_text <- sprintf(
     "Parameter = %s\nValue = %s\nX-axis = %s\n",
@@ -1532,7 +1547,7 @@ bp_listings_table <- function(ds, f_ds) {
     mask <- rep(FALSE, nrow(ds))
   } else {
     click_list <- purrr::map_chr(f_ds, ~ as.character(.x))
-    click_list <- click_list[!names(f_ds) %in% (c(CNT$SBJ, CNT$VAL))]
+    click_list <- click_list[!names(f_ds) %in% (c(CNT$SBJ, CNT$VAL, CNT$MAIN_GROUP))]
     mask <- equal_and_mask_from_vec(ds, click_list)
   }
   ds[mask, ]
