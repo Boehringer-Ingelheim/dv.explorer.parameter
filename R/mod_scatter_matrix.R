@@ -613,39 +613,26 @@ check_mod_scatterplotmatrix <- function(
     afmm, datasets, module_id, bm_dataset_name, group_dataset_name,
     cat_var, par_var, value_vars, visit_var, anlfl_vars, subjid_var,
     default_cat, default_par, default_visit, default_value, default_main_group) {
-  warn <- CM$container()
   err <- CM$container()
 
   # TODO: Replace this function with a generic one that performs the checks based on mod_boxplot_API_spec.
-  # Something along the lines of OK <- CM$check_API(mod_corr_hm_API_spec, args = match.call(), warn, err)
+  # Something along the lines of OK <- CM$check_API(mod_corr_hm_API_spec, args = match.call(), err)
   OK <- check_mod_scatterplotmatrix_auto(
     afmm, datasets, module_id, bm_dataset_name, group_dataset_name,
     cat_var, par_var, value_vars, visit_var, anlfl_vars, subjid_var,
-    default_cat, default_par, default_visit, default_value, default_main_group, warn, err
+    default_cat, default_par, default_visit, default_value, default_main_group, err
   )
 
   # Checks that API spec does not (yet?) capture
   if (OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] && OK[["visit_var"]] && OK[["anlfl_vars"]]) {
-
-    if (!is.null(anlfl_vars)) {
-      for (anlfl_var in anlfl_vars) {
-        CM$check_unique_sub_cat_par_vis(
-          datasets, "bm_dataset_name", bm_dataset_name,
-          subjid_var, cat_var, par_var, visit_var, anlfl_var,
-          warn = warn, err = err
-        )
-      }
-    } else {
-      CM$check_unique_sub_cat_par_vis(
-        datasets, "bm_dataset_name", bm_dataset_name,
-        subjid_var, cat_var, par_var, visit_var,
-        warn = warn, err = err
-      )
-    }
-
+    check_unique_sub_cat_par_vis(
+      datasets, "bm_dataset_name", bm_dataset_name,
+      subjid_var, cat_var, par_var, visit_var, anlfl_vars,
+      err = err
+    )
   }
 
-  res <- list(warnings = warn[["messages"]], errors = err[["messages"]])
+  res <- list(errors = err[["messages"]])
   return(res)
 }
 
@@ -656,8 +643,7 @@ dataset_info_scatterplotmatrix <- function(bm_dataset_name, group_dataset_name, 
 }
 
 mod_scatterplotmatrix <- CM$module(
-  mod_scatterplotmatrix, check_mod_scatterplotmatrix,
-  dataset_info_scatterplotmatrix, map_afmm_mod_scatterplotmatrix_auto
+  mod_scatterplotmatrix, check_mod_scatterplotmatrix, dataset_info_scatterplotmatrix
 )
 
 # Logic functions ----
@@ -841,8 +827,7 @@ scatterplotmatrix_chart <- function(ds) {
     ) +
     ggplot2::labs(
       y = val_col,
-      x = "val_col"
-    )
+      x = val_col)
 }
 
 # Composed functions ----

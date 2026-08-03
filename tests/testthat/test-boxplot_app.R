@@ -10,7 +10,8 @@ ID <- poc(
     CAT = tns(BP$ID$PAR, "cat_val"),
     PAR = tns(BP$ID$PAR, "par_val"),
     VAL = tns(BP$ID$PAR_VALUE, "val"),
-    VIS = tns(BP$ID$PAR_VISIT, "val"),
+    X_VAR = tns(BP$ID$X_VAR, "val"),
+    X_VALS = tns(BP$ID$X_VALS, "val"),
     MGRP = tns(BP$ID$MAIN_GRP, "val"),
     SGRP = tns(BP$ID$SUB_GRP, "val"),
     PGRP = tns(BP$ID$PAGE_GRP, "val"),
@@ -59,7 +60,8 @@ local({
   inputs <- list()
   inputs[[ID$INPUT$CAT]] <- "PARCAT2"
   inputs[[ID$INPUT$VAL]] <- "VALUE2"
-  inputs[[ID$INPUT$VIS]] <- "VISIT2"
+  inputs[[ID$INPUT$X_VAR]] <- "VISIT"
+  inputs[[ID$INPUT$X_VALS]] <- c("VISIT1", "VISIT2", "VISIT3")
   inputs[[ID$INPUT$MGRP]] <- "CAT2"
   inputs[[ID$INPUT$SGRP]] <- "CAT2"
   inputs[[ID$INPUT$PGRP]] <- "CAT2"
@@ -77,7 +79,7 @@ local({
   app$wait_for_idle()
 
   # set clicks
-  click <- readRDS("app/data/bp_click.rds")
+  click <- readRDS(testthat::test_path("app", "data", "bp_click.rds"))
 
   # single click
   local({
@@ -87,6 +89,7 @@ local({
       app$set_inputs("not_ebas-click" = click, allow_no_input_binding_ = TRUE, wait_ = FALSE)
       app$wait_for_idle()
       table <- app$get_value(output = ID$OUTPUT$TABLES$LISTING)
+      i <- i + 1
     }
   })
 
@@ -98,19 +101,20 @@ local({
       app$set_inputs("not_ebas-dclick" = click, allow_no_input_binding_ = TRUE, wait_ = FALSE)
       app$wait_for_idle()
       table <- app$get_value(output = ID$OUTPUT$TABLES$SINGLE)
+      i <- i + 1
     }
   })
 
   exported_test_values <- app$get_value(export = "not_ebas-output_arguments")
-  
+
   expected_ds <- bp_subset_data(
     cat = inputs[[ID$INPUT$CAT]],
     cat_col = app_args$srv$cat_var,
     par = inputs2[[ID$INPUT$PAR]],
     par_col = app_args$srv$par_var,
     val_col = inputs[[ID$INPUT$VAL]],
-    vis = inputs[[ID$INPUT$VIS]],
-    vis_col = app_args$srv$visit_var,
+    vis = inputs[[ID$INPUT$X_VALS]],
+    vis_col = inputs[[ID$INPUT$X_VAR]],
     group_vect = stats::setNames(c("CAT2", "CAT2", "CAT2"), c(CNT$MAIN_GROUP, CNT$SUB_GROUP, CNT$PAGE_GROUP)),
     bm_ds = shiny::isolate(app_args$srv$bm_dataset()),
     group_ds = shiny::isolate(app_args$srv$group_dataset()),
@@ -156,6 +160,7 @@ local({
       expect_identical(unique(as.character(listing[[CNT$MAIN_GROUP]])), "B")
       expect_identical(unique(as.character(listing[[CNT$SUB_GROUP]])), "B")
       expect_identical(unique(as.character(listing[[CNT$PAGE_GROUP]])), "B")
+      expect_identical(unique(as.character(listing[[CNT$VIS]])), "VISIT3")
     }
   )
 
@@ -227,14 +232,13 @@ local({
       app_input_values <- app_input_values[!names(app_input_values) %in% excluded]
       app_input_values["not_ebas-click"] <- list(NULL)
       app_input_values["not_ebas-dclick"] <- list(NULL)
-      
+
       bmk_input_values <- bookmark_app$get_values()[["input"]]
-      
+
       expect_identical(app_input_values, bmk_input_values)
     }
   )
 })
-
 
 test_that("default values are set", {
   skip_if_not_running_shiny_tests()
@@ -242,7 +246,8 @@ test_that("default values are set", {
   srv_defaults <- list(
     default_cat = "PARCAT2",
     default_par = c("PARAM22", "PARAM23"),
-    default_visit = "VISIT2",
+    default_x_axis_var = "VISIT2",
+    default_x_axis_vals = "4",
     default_value = "VALUE2",
     default_main_group = "CAT1",
     default_sub_group = "CAT2",
@@ -262,13 +267,13 @@ test_that("default values are set", {
   input_values <- app$get_values()[["input"]]
   expect_equal(input_values[[ID$INPUT$CAT]], srv_defaults[["default_cat"]])
   expect_equal(input_values[[ID$INPUT$PAR]], srv_defaults[["default_par"]])
-  expect_equal(input_values[[ID$INPUT$VIS]], srv_defaults[["default_visit"]])
+  expect_equal(input_values[[ID$INPUT$X_VAR]], srv_defaults[["default_x_axis_var"]])
+  expect_equal(input_values[[ID$INPUT$X_VALS]], srv_defaults[["default_x_axis_vals"]])
   expect_equal(input_values[[ID$INPUT$VAL]], srv_defaults[["default_value"]])
   expect_equal(input_values[[ID$INPUT$MGRP]], srv_defaults[["default_main_group"]])
   expect_equal(input_values[[ID$INPUT$SGRP]], srv_defaults[["default_sub_group"]])
   expect_equal(input_values[[ID$INPUT$PGRP]], srv_defaults[["default_page_group"]])
 })
-
 
 test_that("default values are set including analysis flag variables", {
   skip_if_not_running_shiny_tests()
@@ -276,7 +281,8 @@ test_that("default values are set including analysis flag variables", {
   srv_defaults <- list(
     default_cat = "PARCAT2",
     default_par = c("PARAM22", "PARAM23"),
-    default_visit = "VISIT2",
+    default_x_axis_var = "VISIT2",
+    default_x_axis_vals = "4",
     default_value = "VALUE2",
     default_main_group = "CAT1",
     default_sub_group = "CAT2",
@@ -297,7 +303,8 @@ test_that("default values are set including analysis flag variables", {
   input_values <- app$get_values()[["input"]]
   expect_equal(input_values[[ID$INPUT$CAT]], srv_defaults[["default_cat"]])
   expect_equal(input_values[[ID$INPUT$PAR]], srv_defaults[["default_par"]])
-  expect_equal(input_values[[ID$INPUT$VIS]], srv_defaults[["default_visit"]])
+  expect_equal(input_values[[ID$INPUT$X_VAR]], srv_defaults[["default_x_axis_var"]])
+  expect_equal(input_values[[ID$INPUT$X_VALS]], srv_defaults[["default_x_axis_vals"]])
   expect_equal(input_values[[ID$INPUT$VAL]], srv_defaults[["default_value"]])
   expect_equal(input_values[[ID$INPUT$MGRP]], srv_defaults[["default_main_group"]])
   expect_equal(input_values[[ID$INPUT$SGRP]], srv_defaults[["default_sub_group"]])

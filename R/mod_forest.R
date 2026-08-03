@@ -1357,17 +1357,16 @@ check_mod_forest <- function(
     numeric_factor_functions, subjid_var, cat_var, par_var, visit_var, value_vars,
     default_cat, default_par, default_visit, default_value, default_var, default_group,
     default_categorical_A, default_categorical_B) {
-  warn <- CM$container()
   err <- CM$container()
 
   # TODO: Replace this function with a generic one that performs the checks based on mod_forest_API_spec.
-  # Something along the lines of OK <- CM$check_API(mod_corr_hm_API_spec, args = match.call(), warn, err)
+  # Something along the lines of OK <- CM$check_API(mod_corr_hm_API_spec, args = match.call(), err)
 
   OK <- check_mod_forest_auto(
     afmm, datasets, module_id, bm_dataset_name, group_dataset_name, numeric_numeric_functions,
     numeric_factor_functions, subjid_var, cat_var, par_var, visit_var, value_vars,
     default_cat, default_par, default_visit, default_value, default_var, default_group,
-    default_categorical_A, default_categorical_B, warn, err
+    default_categorical_A, default_categorical_B, err
   )
 
   # Checks that API spec does not (yet?) capture
@@ -1381,7 +1380,7 @@ check_mod_forest <- function(
     )
   }
 
-  res <- list(warnings = warn[["messages"]], errors = err[["messages"]])
+  res <- list(errors = err[["messages"]])
   return(res)
 }
 
@@ -1391,7 +1390,7 @@ dataset_info_forest <- function(bm_dataset_name, group_dataset_name, ...) {
   return(list(all = unique(c(bm_dataset_name, group_dataset_name)), subject_level = group_dataset_name))
 }
 
-mod_forest <- CM$module(mod_forest, check_mod_forest, dataset_info_forest, map_afmm_mod_forest_auto)
+mod_forest <- CM$module(mod_forest, check_mod_forest, dataset_info_forest)
 
 # TODO: Move pearson_correlation and spearman_correlation to their own file
 # TODO: Maybe odds_ratio too

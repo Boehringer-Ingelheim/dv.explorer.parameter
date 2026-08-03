@@ -897,43 +897,28 @@ check_mod_scatterplot <- function(
     default_x_cat, default_x_par, default_x_value, default_x_visit,
     default_y_cat, default_y_par, default_y_value, default_y_visit,
     default_group, default_color, compute_lm_cor_fn) {
-  warn <- CM$container()
   err <- CM$container()
 
   # TODO: Replace this function with a generic one that performs the checks based on mod_boxplot_API_spec.
-  # Something along the lines of OK <- CM$check_API(mod_corr_hm_API_spec, args = match.call(), warn, err)
+  # Something along the lines of OK <- CM$check_API(mod_corr_hm_API_spec, args = match.call(), err)
   OK <- check_mod_scatterplot_auto(
     afmm, datasets, module_id, bm_dataset_name, group_dataset_name,
     cat_var, par_var, value_vars, visit_var, anlfl_vars, subjid_var,
     default_x_cat, default_x_par, default_x_value, default_x_visit,
     default_y_cat, default_y_par, default_y_value, default_y_visit,
-    default_group, default_color, compute_lm_cor_fn, warn, err
+    default_group, default_color, compute_lm_cor_fn, err
   )
 
   # Checks that API spec does not (yet?) capture
   if (OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] && OK[["visit_var"]] && OK[["anlfl_vars"]]) {
-
-    if (!is.null(anlfl_vars)) {
-      # Check grouping values are unique for specified analysis flags
-      for (anlfl_var in anlfl_vars) {
-        CM$check_unique_sub_cat_par_vis(
-          datasets, "bm_dataset_name", bm_dataset_name,
-          subjid_var, cat_var, par_var, visit_var, anlfl_var,
-          warn = warn, err = err
-        )
-      }
-    } else {
-      # Check grouping values are unique without subsetting on analysis flags
-      CM$check_unique_sub_cat_par_vis(
-        datasets, "bm_dataset_name", bm_dataset_name,
-        subjid_var, cat_var, par_var, visit_var,
-        warn = warn, err = err
-      )
-    }
-
+    check_unique_sub_cat_par_vis(
+      datasets, "bm_dataset_name", bm_dataset_name,
+      subjid_var, cat_var, par_var, visit_var, anlfl_vars,
+      err = err
+    )
   }
 
-  res <- list(warnings = warn[["messages"]], errors = err[["messages"]])
+  res <- list(errors = err[["messages"]])
   return(res)
 }
 
@@ -943,7 +928,7 @@ dataset_info_scatterplot <- function(bm_dataset_name, group_dataset_name, ...) {
   return(list(all = unique(c(bm_dataset_name, group_dataset_name)), subject_level = group_dataset_name))
 }
 
-mod_scatterplot <- CM$module(mod_scatterplot, check_mod_scatterplot, dataset_info_scatterplot, map_afmm_mod_scatterplot_auto)
+mod_scatterplot <- CM$module(mod_scatterplot, check_mod_scatterplot, dataset_info_scatterplot)
 
 # Logic functions ----
 

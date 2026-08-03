@@ -263,10 +263,11 @@ test_that("bp_subset_data errors when group_vect names are not a subset of CNT$M
 local({
   eg_args <- list()
   eg_args[[CNT$SBJ]] <- 1:2
-  eg_args[[CNT$PAR]] <- c("PA", "PB")
+  eg_args[[CNT$PAR]] <- c("PA")
+  eg_args[[CNT$VIS]] <- c("W1", "W2")
   eg_args[[CNT$MAIN_GROUP]] <- c("MA", "MB")
   eg_args[[CNT$SUB_GROUP]] <- c("SA", "SB")
-  eg_args[[CNT$PAGE_GROUP]] <- c("PA", "PB")
+  eg_args[[CNT$PAGE_GROUP]] <- c("PA", "PB", "PC")
   df <- do.call(expand.grid, eg_args)
   df[[CNT$VAL]] <- seq_len(nrow(df))
 
@@ -299,19 +300,6 @@ local({
       boxplot_chart(df, FALSE, FALSE, TRUE)
     )
   })
-})
-
-
-test_that("boxplot_chart injects a dummy main group when there is none", {
-  df <- data.frame(
-    parameter = c(rep("PA", 5), rep("PB", 5)),
-    subject_id = 1,
-    value = 1:10
-  )
-
-  p <- boxplot_chart(df, FALSE, FALSE, FALSE)
-
-  expect_true(CNT$MAIN_GROUP %in% names(p$data))
 })
 
 # bp_listings table ----

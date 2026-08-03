@@ -12,13 +12,14 @@ boxplot_server(
   cat_var = "PARCAT",
   par_var = "PARAM",
   value_vars = "AVAL",
-  visit_var = "AVISIT",
+  x_axis_vars = NULL,
   anlfl_vars = NULL,
   subjid_var = "USUBJID",
   quantile_type = 7L,
   default_cat = NULL,
   default_par = NULL,
-  default_visit = NULL,
+  default_x_axis_var = NULL,
+  default_x_axis_vals = NULL,
   default_value = NULL,
   default_main_group = NULL,
   default_sub_group = NULL,
@@ -38,13 +39,17 @@ Dataframes as described in the \verb{Input dataframes} section}
 
 a reactive indicating when the dataset has possibly changed its columns}
 
-\item{cat_var, par_var, visit_var}{\verb{[character(1)]}
+\item{cat_var, par_var}{\verb{[character(1)]}
 
-Columns from \code{bm_dataset} that correspond to the parameter category, parameter and visit}
+Columns from \code{bm_dataset} that correspond to the parameter category and parameter}
 
 \item{value_vars}{\verb{[character(n)]}
 
 Columns from \code{bm_dataset} that correspond to values of the parameters}
+
+\item{x_axis_vars}{\verb{[character(n)]}
+
+Columns from \code{bm_dataset} that correspond to x-axis variables}
 
 \item{anlfl_vars}{\verb{[character(n)]}
 
@@ -59,9 +64,13 @@ Column corresponding to subject ID}
 Quantile algorithm type passed to \code{\link[stats]{quantile}}
 (an integer between 1 and 9, default 7).}
 
-\item{default_cat, default_par, default_visit, default_value, default_main_group, default_sub_group, default_page_group}{\verb{[character(1)|NULL]}
+\item{default_cat, default_par, default_x_axis_var, default_value, default_main_group, default_sub_group, default_page_group}{\verb{[character(1)|NULL]}
 
 Default values for the selectors}
+
+\item{default_x_axis_vals}{\verb{[character(n)|NULL]}
+
+Default values for the x-axis variable}
 
 \item{on_sbj_click}{\verb{[function()]}
 
@@ -73,11 +82,11 @@ Function to invoke when a subject is clicked in the single subject listing}
 
 It expects a dataset similar to
 https://www.cdisc.org/kb/examples/adam-basic-data-structure-bds-using-paramcd-80288192 ,
-1 record per subject per parameter per analysis visit.
+1 record per subject per parameter per value of the selected x-axis variable.
 
 It must contain, at least, the columns passed in the parameters, \code{subjid_var}, \code{cat_var}, \code{par_var},
-\code{visit_var} and \code{value_vars}. The values of these variables are as described
-in the CDISC standard for the variables USUBJID, PARCAT, PARAM, AVISIT and AVAL.
+\code{x_axis_vars} and \code{value_vars}. These correspond respectively to the subject identifier,
+parameter category, parameter, x-axis grouping variables, and parameter values.
 }
 
 \subsection{group_dataset}{

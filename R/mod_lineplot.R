@@ -1806,10 +1806,7 @@ mod_lineplot_API_docs <- list(
   par_var = "",
   visit_vars = "",
   cdisc_visit_vars = "",
-
-  ##################################
   anlfl_vars = "",
-
   value_vars = "",
   additional_listing_vars = "",
   ref_line_vars = "",
@@ -1819,9 +1816,7 @@ mod_lineplot_API_docs <- list(
   default_par = "",
   default_val = "",
   default_visit_var = "",
-  default_visit_val = list(
-    ""
-  ),
+  default_visit_val = list(""),
   default_main_group = "",
   default_sub_group = "",
   default_transparency = "",
@@ -1876,44 +1871,29 @@ check_mod_lineplot <- function(
     default_centrality_fn, default_dispersion_fn, default_cat, default_par,
     default_val, default_visit_var, default_visit_val, default_main_group, default_sub_group,
     default_transparency, default_y_axis_projection) {
-  warn <- CM$container()
   err <- CM$container()
 
   # TODO: Replace this function with a generic one that performs the checks based on mod_corr_hm_API_spec.
-  # Something along the lines of OK <- CM$check_API(mod_corr_hm_API_spec, args = match.call(), warn, err)
+  # Something along the lines of OK <- CM$check_API(mod_corr_hm_API_spec, args = match.call(), err)
 
   OK <- check_mod_lineplot_auto(
     afmm, datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id, summary_fns,
     subjid_var, cat_var, par_var, visit_vars, cdisc_visit_vars, anlfl_vars, value_vars, additional_listing_vars,
     ref_line_vars, default_centrality_fn, default_dispersion_fn, default_cat, default_par, default_val,
     default_visit_var, default_visit_val, default_main_group, default_sub_group, default_transparency,
-    default_y_axis_projection, warn, err
+    default_y_axis_projection, err
   )
 
   # Checks that API spec does not (yet?) capture
   if (OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] &&
       OK[["visit_vars"]] && OK[["cdisc_visit_vars"]] && OK[["anlfl_vars"]]) {
-
     for (visit_var in c(visit_vars, cdisc_visit_vars)) {
-      if (!is.null(anlfl_vars)) {
-        # Check grouping values are unique for specified analysis flags
-        for (anlfl_var in anlfl_vars) {
-          CM$check_unique_sub_cat_par_vis(
-            datasets, "bm_dataset_name", bm_dataset_name,
-            subjid_var, cat_var, par_var, visit_var, anlfl = anlfl_var,
-            warn = warn, err = err
-          )
-        }
-      } else {
-        # Check grouping values are unique without subsetting on analysis flags
-        CM$check_unique_sub_cat_par_vis(
-          datasets, "bm_dataset_name", bm_dataset_name,
-          subjid_var, cat_var, par_var, visit_var,
-          warn = warn, err = err
-        )
-      }
+      check_unique_sub_cat_par_vis(
+        datasets, "bm_dataset_name", bm_dataset_name,
+        subjid_var, cat_var, par_var, visit_var, anlfl_vars,
+        err = err
+      )
     }
-
   }
 
   if (OK[["visit_vars"]] && OK[["cdisc_visit_vars"]]) {
@@ -1965,6 +1945,46 @@ check_mod_lineplot <- function(
     }
   }
 
+  # Validate default_visit_val contents
+  if (OK[["visit_vars"]] && OK[["cdisc_visit_vars"]] && !is.null(default_visit_val)) {
+
+    ds <- datasets[[bm_dataset_name]]
+
+    CM$assert(
+      container = err,
+      cond = is.list(default_visit_val),
+      msg = "default_visit_val must be a named list."
+    )
+
+    for (visit_var in names(default_visit_val)) {
+
+      CM$assert(
+        container = err,
+        cond = visit_var %in% c(visit_vars, cdisc_visit_vars),
+        msg = sprintf(
+          "The visit variable '%s' specified in `default_visit_val` is not present in `visit_vars` or `cdisc_visit_vars`.",
+          visit_var
+        )
+      )
+
+      configured_values <- default_visit_val[[visit_var]]
+
+      CM$assert(
+        container = err,
+        cond = !is.factor(configured_values),
+        msg = sprintf(
+          paste(
+            "The default values supplied for visit variable '%s' in `default_visit_val` have been passed as a factor.",
+            "The lineplot module expects character or numeric values.",
+            "Please convert factors using <code>as.character()</code>."
+          ),
+          visit_var
+        )
+      )
+
+    }
+  }
+
   if (OK[["subjid_var"]] && OK[["par_var"]] && OK[["ref_line_vars"]]) {
     ds <- datasets[[bm_dataset_name]]
 
@@ -2002,7 +2022,7 @@ check_mod_lineplot <- function(
     }
   }
 
-  res <- list(warnings = warn[["messages"]], errors = err[["messages"]])
+  res <- list(errors = err[["messages"]])
   return(res)
 }
 
@@ -2012,4 +2032,4 @@ dataset_info_lineplot <- function(bm_dataset_name, group_dataset_name, ...) {
   return(list(all = unique(c(bm_dataset_name, group_dataset_name)), subject_level = group_dataset_name))
 }
 
-mod_lineplot <- CM$module(mod_lineplot, check_mod_lineplot, dataset_info_lineplot, map_afmm_mod_lineplot_auto)
+mod_lineplot <- CM$module(mod_lineplot, check_mod_lineplot, dataset_info_lineplot)

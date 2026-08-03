@@ -1147,15 +1147,14 @@ check_mod_roc <- function(
     afmm, datasets, module_id, pred_dataset_name, resp_dataset_name, group_dataset_name, pred_cat_var,
     pred_par_var, pred_value_vars, pred_visit_var, resp_cat_var, resp_par_var, resp_value_vars,
     resp_visit_var, subjid_var, quantile_type, compute_roc_fn, compute_metric_fn) {
-  warn <- CM$container()
   err <- CM$container()
 
   # TODO: Replace this function with a generic one that performs the checks based on mod_boxplot_API_spec.
-  # Something along the lines of OK <- CM$check_API(mod_corr_hm_API_spec, args = match.call(), warn, err)
+  # Something along the lines of OK <- CM$check_API(mod_corr_hm_API_spec, args = match.call(), err)
   OK <- check_mod_roc_auto(
     afmm, datasets, module_id, pred_dataset_name, resp_dataset_name, group_dataset_name, pred_cat_var,
     pred_par_var, pred_value_vars, pred_visit_var, resp_cat_var, resp_par_var, resp_value_vars,
-    resp_visit_var, subjid_var, quantile_type, compute_roc_fn, compute_metric_fn, warn, err
+    resp_visit_var, subjid_var, quantile_type, compute_roc_fn, compute_metric_fn, err
   )
 
   # Checks that API spec does not (yet?) capture
@@ -1169,23 +1168,23 @@ check_mod_roc <- function(
 
   # #ouhigo
   if (OK[["subjid_var"]] && OK[["pred_cat_var"]] && OK[["pred_par_var"]] && OK[["pred_visit_var"]]) {
-    CM$check_unique_sub_cat_par_vis(
+    check_unique_sub_cat_par_vis(
       datasets, "pred_dataset_name", pred_dataset_name,
-      subjid_var, pred_cat_var, pred_par_var, pred_visit_var, anlfl = NULL, warn = warn, err = err
+      subjid_var, pred_cat_var, pred_par_var, pred_visit_var, anlfl_vars = NULL, err = err
     )
   }
 
   if (OK[["subjid_var"]] && OK[["resp_cat_var"]] && OK[["resp_par_var"]] && OK[["resp_visit_var"]]) {
-    CM$check_unique_sub_cat_par_vis(
+    check_unique_sub_cat_par_vis(
       datasets, "resp_dataset_name", resp_dataset_name,
-      subjid_var, resp_cat_var, resp_par_var, resp_visit_var, anlfl = NULL,
-      warn, err
+      subjid_var, resp_cat_var, resp_par_var, resp_visit_var, anlfl_vars = NULL,
+      err
     )
   }
 
   # TODO: check resp_value_vars are binary?
 
-  res <- list(warnings = warn[["messages"]], errors = err[["messages"]])
+  res <- list(errors = err[["messages"]])
   return(res)
 }
 
@@ -1198,7 +1197,7 @@ dataset_info_roc <- function(pred_dataset_name, resp_dataset_name, group_dataset
   ))
 }
 
-mod_roc <- CM$module(mod_roc, check_mod_roc, dataset_info_roc, map_afmm_mod_roc_auto)
+mod_roc <- CM$module(mod_roc, check_mod_roc, dataset_info_roc)
 
 # Server Logic
 

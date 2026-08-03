@@ -242,7 +242,7 @@ shiny_test <- {
     {
       skip_if_not_running_shiny_tests()
       fail_if_app_not_started()
-      
+
       app <- shinytest2::AppDriver$new(root_app$get_url())
       do.call(app$set_inputs, purrr::map(state_one, ~ deparse1(.x, collapse = "\n")))
       app$wait_for_idle()
@@ -255,7 +255,7 @@ shiny_test <- {
     {
       skip_if_not_running_shiny_tests()
       fail_if_app_not_started()
-      
+
 
       # We check that the returned svgs are the same when switching between states, this implies no duplicated
       # elements appear when the svg is redrawn. If any duplicated element appear there would be differences between
@@ -288,7 +288,7 @@ shiny_test <- {
     {
       skip_if_not_running_shiny_tests()
       fail_if_app_not_started()
-      
+
       app <- shinytest2::AppDriver$new(root_app$get_url())
       do.call(app$set_inputs, purrr::map(state_one, ~ deparse1(.x, collapse = "\n")))
       app$wait_for_idle()
@@ -330,7 +330,7 @@ shiny_test <- {
     {
       skip_if_not_running_shiny_tests()
       fail_if_app_not_started()
-      
+
       app <- shinytest2::AppDriver$new(root_app$get_url())
       do.call(app$set_inputs, purrr::map(state_one, ~ deparse1(.x, collapse = "\n")))
       app$wait_for_idle()
@@ -396,7 +396,7 @@ shiny_test <- {
 
       skip_if_not_running_shiny_tests()
       fail_if_app_not_started()
-      
+
       app <- shinytest2::AppDriver$new(root_app$get_url())
 
       do.call(app$set_inputs, purrr::map(state_one, ~ deparse1(.x, collapse = "\n")))
@@ -426,7 +426,7 @@ shiny_test <- {
     {
       skip_if_not_running_shiny_tests()
       fail_if_app_not_started()
-      
+
 
       app <- shinytest2::AppDriver$new(root_app$get_url())
       ch <- app$get_chromote_session()
@@ -475,7 +475,7 @@ shiny_test <- {
     {
       skip_if_not_running_shiny_tests()
       fail_if_app_not_started()
-      
+
       app <- shinytest2::AppDriver$new(root_app$get_url())
       ch <- app$get_chromote_session()
       do.call(app$set_inputs, purrr::map(state_one, ~ deparse1(.x, collapse = "\n")))
@@ -516,7 +516,7 @@ shiny_test <- {
     {
       skip_if_not_running_shiny_tests()
       fail_if_app_not_started()
-      
+
       app <- shinytest2::AppDriver$new(root_app$get_url())
       do.call(app$set_inputs, purrr::map(state_one, ~ deparse1(.x, collapse = "\n")))
       app$wait_for_idle()
@@ -550,7 +550,7 @@ shiny_test <- {
 
   #     skip_if_not_running_shiny_tests()
   #     fail_if_app_not_started()
-      
+
   #   }
   # )
 }

@@ -13,7 +13,7 @@ test_that("boxplot_server prints message for 0 rows group_dataset", {
       bm_dataset    = reactive(bm_dataset),
       group_dataset = reactive(group_dataset),
       value_vars = "VALUE1",
-      visit_var = "VISIT",
+      x_axis_vars = "VISIT",
       subjid_var = "SUBJID"
     ),
     {
@@ -38,7 +38,7 @@ test_that("boxplot_server prints message for 0 rows bm_dataset", {
       bm_dataset    = reactive(bm_dataset),
       group_dataset = reactive(group_dataset),
       value_vars = "VALUE1",
-      visit_var = "VISIT",
+      x_axis_vars = "VISIT",
       subjid_var = "SUBJID"
     ),
     {
