@@ -14,7 +14,7 @@ statistics and between group stat comparisons.
 
 #### Pre-requisite:
 
-\
+  
 
 ![](images/info.png)**“Parameter” Term Disambiguation**
 
@@ -29,7 +29,7 @@ disambiguate the usage in this guide:
 - **Argument** is used to represent parameter of a function in the
   programming context
 
-\
+  
 
 ## Features
 
@@ -67,7 +67,7 @@ the values for these arguments as applicable.
   , 1 record per subject per parameter per analysis visit
 
   It expects, at least, the columns passed in the arguments,
-  `subjid_var`, `cat_var`, `par_var`, `visit_var` and `value_vars`.
+  `subjid_var`, `cat_var`, `par_var`, `value_vars` and `x_axis_vars`.
 
 - `group_dataset_name`:
 
@@ -101,7 +101,7 @@ of parameters and grouping variable.
 
 ### Population listing and single listing
 
-A table containing a listing of the population of a single boxplot
+A table containing a listing of the population of a single x-axis value
 selected by clicking, and a table containing a single subject selected
 by double clicking on an individual data point in the boxplot.
 
@@ -133,7 +133,6 @@ different groups.
 ## Creating a boxplot application
 
 ``` r
-
 adbm_dataset <- dv.explorer.parameter:::safety_data()[["bm"]]
 adsl_dataset <- dv.explorer.parameter:::safety_data()[["sl"]]
 
@@ -147,8 +146,13 @@ dv.manager::run_app(
       cat_var = "PARCAT1",
       par_var = "PARAM",
       value_vars = c("AVAL", "CHG"),
-      visit_var = "AVISIT",
-      subjid_var = "USUBJID"
+      x_axis_vars = "AVISIT",
+      subjid_var = "USUBJID",
+      default_cat = "CHEM",
+      default_par = c("Alanine Aminotransferase (U/L)", "Albumin (g/L)"),
+      default_x_axis_vals = c("Week 2", "Week 4", "Week 6"),
+      default_main_group = "ARM",
+      default_sub_group = "AGEGR1"
     )
   ),
   filter_data = "adsl",

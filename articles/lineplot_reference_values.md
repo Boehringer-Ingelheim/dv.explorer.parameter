@@ -30,7 +30,6 @@ Laboratory values dataset *\[expand/collapse\]*
 We can do so by configuring `mod_lineplot` thus:
 
 ``` r
-
 dv.explorer.parameter::mod_lineplot(
   module_id = "lineplot", bm_dataset_name = "lb", group_dataset_name = "sl",
   subjid_var = "SUBJID", cat_var = "PARCAT1", par_var = "PARAM", 
@@ -48,7 +47,6 @@ We can modify that call to `mod_lineplot` by providing a value for the
 numerical columns holding reference values:
 
 ``` r
-
 dv.explorer.parameter::mod_lineplot(
   ..., default_main_group = "SEX", ref_line_vars = c("A1LO", "A1HI")
 )
@@ -73,7 +71,6 @@ well. If we change the main grouping to `COUNTRY`, the plot remains the
 same except for the grouping legend:
 
 ``` r
-
 dv.explorer.parameter::mod_lineplot(
   ..., default_main_group = "COUNTRY", ref_line_vars = c("A1LO", "A1HI")
 )
@@ -90,7 +87,6 @@ row in the `lb` dataset.
 What happens if we don’t provide a main grouping variable?
 
 ``` r
-
 dv.explorer.parameter::mod_lineplot(
   ..., ref_line_vars = c("A1LO", "A1HI")
 )

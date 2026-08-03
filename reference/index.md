@@ -18,6 +18,8 @@
 - [`mock_app_boxplot()`](mock_app_boxplot.md) : Mock boxplot app
 - [`mock_app_boxplot_mm()`](mock_app_boxplot_mm.md) : Mock mm boxplot
   app
+- [`mock_app_boxplot_mm_depr()`](mock_app_boxplot_mm_depr.md) : Mock mm
+  boxplot app with deprecated visit_var and default_visit arguments
 - [`mock_app_corr_hm()`](mock_app_corr_hm.md) : Mock corr hm app
 - [`mock_app_correlation_hm_mm()`](mock_app_correlation_hm_mm.md) : Mock
   corr hm app

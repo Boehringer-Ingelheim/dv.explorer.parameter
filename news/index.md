@@ -1,5 +1,21 @@
 # Changelog
 
+## dv.explorer.parameter 0.3.0
+
+- lineplot:
+  - Improved early error feedback about default_visit_val parameter
+    containing valid values
+- boxplot:
+  - Replaced single-visit boxplots with boxplots across multiple values
+    of a selected x-axis variable (e.g. visits or treatments in
+    crossover trials)
+- scatterplot matrix:
+  - Fixed labeling issue of selected analysis value
+- \[NOT USER-FACING\] Fix encoding of single character in DR.R snippet  
+- \[NOT USER-FACING\] Update TC.R and DR.R snippets
+- \[NOT USER-FACING\] Update CM.R snippet
+- Faster early error feedback
+
 ## dv.explorer.parameter 0.2.1
 
 - lineplot:
@@ -12,10 +28,11 @@
 
   - Scatterplot matrix: Fixed an issue where the analysis flag was
     plotted in the matrix alongside user-selected parameters
-  - ROC: \*Fixed an issue in the Summary tab where visualisation output
-    was not produced for predictor/response combinations where the
-    response has only one value; these are now included in the plot with
-    a blank ROC entry
+  - ROC:
+    - Fixed an issue in the Summary tab where visualisation output was
+      not produced for predictor/response combinations where the
+      response has only one value; these are now included in the plot
+      with a blank ROC entry
     - Fixed an issue in the Summary tab where visualisation output was
       not produced when no grouping variable was selected
   - Line plot: Fixed an issue where labels attached to reference line

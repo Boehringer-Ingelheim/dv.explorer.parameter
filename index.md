@@ -15,7 +15,6 @@ detailed description of each of them:
 # Installation
 
 ``` r
-
 if (!require("remotes")) install.packages("remotes")
 remotes::install_github("Boehringer-Ingelheim/dv.explorer.parameter")
 ```

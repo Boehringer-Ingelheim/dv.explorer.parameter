@@ -15,7 +15,7 @@ to evaluate how predictive is a continuous parameter of binary endpoint.
 
 #### Pre-requisite:
 
-\
+  
 
 ![](images/info.png)**“Parameter” Term Disambiguation**
 
@@ -30,9 +30,9 @@ disambiguate the usage in this guide:
 - **Argument** is used to represent parameter of a function in the
   programming context
 
-\
+  
 
-\
+  
 
 ## Features
 
@@ -51,7 +51,7 @@ disambiguate the usage in this guide:
   combination
 - A summary table for the ROC analysis
 
-\
+  
 
 ## Arguments for the module
 
@@ -201,7 +201,6 @@ errors).
 ## Creating a ROC application
 
 ``` r
-
 
 adbm_dataset <- test_roc_data()[["adbm"]]
 adbin_dataset <- test_roc_data()[["adbin"]]

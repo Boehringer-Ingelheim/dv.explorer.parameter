@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">dv.explorer.parameter</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -143,7 +143,7 @@ continuous parameters. It expects a dataset similar to <a href="https://www.cdis
 , 1 record per subject per parameter per analysis visit</p>
 <p>It expects, at least, the columns passed in the arguments,
 <code>subjid_var</code>, <code>cat_var</code>, <code>par_var</code>,
-<code>visit_var</code> and <code>value_vars</code>.</p>
+<code>value_vars</code> and <code>x_axis_vars</code>.</p>
 </li>
 <li>
 <p><code>group_dataset_name</code>:</p>
@@ -190,9 +190,10 @@ set of parameters and grouping variable.</p>
 <div class="section level3">
 <h3 id="population-listing-and-single-listing">Population listing and single listing<a class="anchor" aria-label="anchor" href="#population-listing-and-single-listing"></a>
 </h3>
-<p>A table containing a listing of the population of a single boxplot
-selected by clicking, and a table containing a single subject selected
-by double clicking on an individual data point in the boxplot.</p>
+<p>A table containing a listing of the population of a single x-axis
+value selected by clicking, and a table containing a single subject
+selected by double clicking on an individual data point in the
+boxplot.</p>
 <p>The single subject table contains a drill down button that can be
 used to obtain more information about the subject. This setting requires
 additional configuration.</p>
@@ -235,8 +236,13 @@ different groups.</p>
 <span>      cat_var <span class="op">=</span> <span class="st">"PARCAT1"</span>,</span>
 <span>      par_var <span class="op">=</span> <span class="st">"PARAM"</span>,</span>
 <span>      value_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"AVAL"</span>, <span class="st">"CHG"</span><span class="op">)</span>,</span>
-<span>      visit_var <span class="op">=</span> <span class="st">"AVISIT"</span>,</span>
-<span>      subjid_var <span class="op">=</span> <span class="st">"USUBJID"</span></span>
+<span>      x_axis_vars <span class="op">=</span> <span class="st">"AVISIT"</span>,</span>
+<span>      subjid_var <span class="op">=</span> <span class="st">"USUBJID"</span>,</span>
+<span>      default_cat <span class="op">=</span> <span class="st">"CHEM"</span>,</span>
+<span>      default_par <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Alanine Aminotransferase (U/L)"</span>, <span class="st">"Albumin (g/L)"</span><span class="op">)</span>,</span>
+<span>      default_x_axis_vals <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Week 2"</span>, <span class="st">"Week 4"</span>, <span class="st">"Week 6"</span><span class="op">)</span>,</span>
+<span>      default_main_group <span class="op">=</span> <span class="st">"ARM"</span>,</span>
+<span>      default_sub_group <span class="op">=</span> <span class="st">"AGEGR1"</span></span>
 <span>    <span class="op">)</span></span>
 <span>  <span class="op">)</span>,</span>
 <span>  filter_data <span class="op">=</span> <span class="st">"adsl"</span>,</span>

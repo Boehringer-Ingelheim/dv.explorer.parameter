@@ -2,8 +2,8 @@
 
 Prepares the basic input for the rest of the boxplot functions.
 
-- `bm_dataset` is subset according to category, parameter and visit
-  selection
+- `bm_dataset` is subset according to category, parameter and selected
+  x-axis variable
 
 - `group_dataset` is subset according to group_selection
 
@@ -101,7 +101,7 @@ The `_group` columns depend on the names in `group_vect`
 ### Shiny validation errors:
 
 - The fragment from bm contains more than row per subject, category,
-  parameter and visit combination
+  parameter and selected x-axis variable combination
 
 - The fragment from group contains more than row per subject
 

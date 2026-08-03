@@ -9,10 +9,10 @@ bm_dataset
 
 It expects a dataset similar to
 https://www.cdisc.org/kb/examples/adam-basic-data-structure-bds-using-paramcd-80288192 ,
-1 record per subject per parameter per analysis visit.
+1 record per subject per parameter per value of the selected x-axis variable.
 It must contain, at least, the columns passed in the parameters, subjid_var, cat_var, par_var,
-visit_var and value_vars. The values of these variables are as described
-in the CDISC standard for the variables USUBJID, PARCAT, PARAM, AVISIT and AVAL.
+x_axis_vars and value_vars. These correspond respectively to the subject identifier,
+parameter category, parameter, x-axis grouping variables, and parameter values.
 
 
 
@@ -37,10 +37,10 @@ bm_dataset
 
 It expects a dataset similar to
 https://www.cdisc.org/kb/examples/adam-basic-data-structure-bds-using-paramcd-80288192 ,
-1 record per subject per parameter per analysis visit.
+1 record per subject per parameter per value of the selected x-axis variable.
 It must contain, at least, the columns passed in the parameters, subjid_var, cat_var, par_var,
-visit_var and value_vars. The values of these variables are as described
-in the CDISC standard for the variables USUBJID, PARCAT, PARAM, AVISIT and AVAL.
+x_axis_vars and value_vars. These correspond respectively to the subject identifier,
+parameter category, parameter, x-axis grouping variables, and parameter values.
 
 
 
@@ -63,7 +63,7 @@ It must contain, at least, the column passed in the parameter, subjid_var.
 
     <a class="navbar-brand me-2" href="../index.html">dv.explorer.parameter</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -114,10 +114,10 @@ It must contain, at least, the column passed in the parameter, subjid_var.
 
 <p>It expects a dataset similar to
 https://www.cdisc.org/kb/examples/adam-basic-data-structure-bds-using-paramcd-80288192 ,
-1 record per subject per parameter per analysis visit.</p>
+1 record per subject per parameter per value of the selected x-axis variable.</p>
 <p>It must contain, at least, the columns passed in the parameters, <code>subjid_var</code>, <code>cat_var</code>, <code>par_var</code>,
-<code>visit_var</code> and <code>value_vars</code>. The values of these variables are as described
-in the CDISC standard for the variables USUBJID, PARCAT, PARAM, AVISIT and AVAL.</p>
+<code>x_axis_vars</code> and <code>value_vars</code>. These correspond respectively to the subject identifier,
+parameter category, parameter, x-axis grouping variables, and parameter values.</p>
 </div>
 
 <div class="section">
@@ -145,13 +145,14 @@ one record per subject.</p>
 <span>  cat_var <span class="op">=</span> <span class="st">"PARCAT"</span>,</span>
 <span>  par_var <span class="op">=</span> <span class="st">"PARAM"</span>,</span>
 <span>  value_vars <span class="op">=</span> <span class="st">"AVAL"</span>,</span>
-<span>  visit_var <span class="op">=</span> <span class="st">"AVISIT"</span>,</span>
+<span>  x_axis_vars <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  anlfl_vars <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  subjid_var <span class="op">=</span> <span class="st">"USUBJID"</span>,</span>
 <span>  quantile_type <span class="op">=</span> <span class="fl">7L</span>,</span>
 <span>  default_cat <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  default_par <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  default_visit <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  default_x_axis_var <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  default_x_axis_vals <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  default_value <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  default_main_group <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  default_sub_group <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -179,14 +180,19 @@ one record per subject.</p>
 <p>a reactive indicating when the dataset has possibly changed its columns</p></dd>
 
 
-<dt id="arg-cat-var-par-var-visit-var">cat_var, par_var, visit_var<a class="anchor" aria-label="anchor" href="#arg-cat-var-par-var-visit-var"></a></dt>
+<dt id="arg-cat-var-par-var">cat_var, par_var<a class="anchor" aria-label="anchor" href="#arg-cat-var-par-var"></a></dt>
 <dd><p><code>[character(1)]</code></p>
-<p>Columns from <code>bm_dataset</code> that correspond to the parameter category, parameter and visit</p></dd>
+<p>Columns from <code>bm_dataset</code> that correspond to the parameter category and parameter</p></dd>
 
 
 <dt id="arg-value-vars">value_vars<a class="anchor" aria-label="anchor" href="#arg-value-vars"></a></dt>
 <dd><p><code>[character(n)]</code></p>
 <p>Columns from <code>bm_dataset</code> that correspond to values of the parameters</p></dd>
+
+
+<dt id="arg-x-axis-vars">x_axis_vars<a class="anchor" aria-label="anchor" href="#arg-x-axis-vars"></a></dt>
+<dd><p><code>[character(n)]</code></p>
+<p>Columns from <code>bm_dataset</code> that correspond to x-axis variables</p></dd>
 
 
 <dt id="arg-anlfl-vars">anlfl_vars<a class="anchor" aria-label="anchor" href="#arg-anlfl-vars"></a></dt>
@@ -205,9 +211,14 @@ one record per subject.</p>
 (an integer between 1 and 9, default 7).</p></dd>
 
 
-<dt id="arg-default-cat-default-par-default-visit-default-value-default-main-group-default-sub-group-default-page-group">default_cat, default_par, default_visit, default_value, default_main_group, default_sub_group, default_page_group<a class="anchor" aria-label="anchor" href="#arg-default-cat-default-par-default-visit-default-value-default-main-group-default-sub-group-default-page-group"></a></dt>
+<dt id="arg-default-cat-default-par-default-x-axis-var-default-value-default-main-group-default-sub-group-default-page-group">default_cat, default_par, default_x_axis_var, default_value, default_main_group, default_sub_group, default_page_group<a class="anchor" aria-label="anchor" href="#arg-default-cat-default-par-default-x-axis-var-default-value-default-main-group-default-sub-group-default-page-group"></a></dt>
 <dd><p><code>[character(1)|NULL]</code></p>
 <p>Default values for the selectors</p></dd>
+
+
+<dt id="arg-default-x-axis-vals">default_x_axis_vals<a class="anchor" aria-label="anchor" href="#arg-default-x-axis-vals"></a></dt>
+<dd><p><code>[character(n)|NULL]</code></p>
+<p>Default values for the x-axis variable</p></dd>
 
 
 <dt id="arg-on-sbj-click">on_sbj_click<a class="anchor" aria-label="anchor" href="#arg-on-sbj-click"></a></dt>

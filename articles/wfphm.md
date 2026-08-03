@@ -18,7 +18,7 @@ plot and the heatmaps to look for patterns.
 
 #### Pre-requisite:
 
-\
+  
 
 ![](images/info.png)**“Parameter” Term Disambiguation**
 
@@ -33,7 +33,7 @@ disambiguate the usage in this guide:
 - **Argument** is used to represent parameter of a function in the
   programming context
 
-\
+  
 
 ## Features
 
@@ -64,7 +64,7 @@ as the module allows the user to select it from the available variables
 in the dataset. By selecting different variables one can observe if the
 rest of the plots follow a particular pattern.
 
-\
+  
 
 ## Mandatory Arguments for the module
 
@@ -132,7 +132,6 @@ This example datasets includes only a subset of the columns from the
 ADaM standard dataset mentioned above.
 
 ``` r
-
 example_dataset <- list(
   "adbm" = tibble::tibble(
     SUBJID = factor(c(1, 1, 2, 2, 3, 3)),
@@ -151,12 +150,10 @@ example_dataset <- list(
 ```
 
 ``` r
-
 DT::datatable(example_dataset[["adsl"]], rownames = FALSE)
 ```
 
 ``` r
-
 DT::datatable(example_dataset[["adbm"]], rownames = FALSE)
 ```
 
@@ -167,7 +164,6 @@ code. The example dataset created above is used as the input dataset for
 this app.
 
 ``` r
-
 module_list <- list(
   "WFPHM" = dv.explorer.parameter::mod_wfphm(
     module_id = "wfphm",
@@ -290,7 +286,6 @@ But if a custom column is derived we can modify the call to the module
 so it is included in the menu as seen in the example below.
 
 ``` r
-
 # Lets create a new custom
 example_dataset_custom_aval <- example_dataset
 example_dataset_custom_aval[["adbm"]][["CUSTOM_AVAL"]] <- example_dataset_custom_aval[["adbm"]][["AVAL"]] + 100
@@ -321,7 +316,6 @@ that happens because specifying a new column overrides the default
 columns. If one is specified then all should be specified.
 
 ``` r
-
 module_list_custom_aval <- list(
   "WFPHM" = dv.explorer.parameter::mod_wfphm(
     module_id = "wfphm",
@@ -429,7 +423,7 @@ as Z-score or Min-Max. The transformation is applied to each parameter
 ![](images/Note.png)**Note** Outliers definition, described in the
 previous section, does not affect the calculation of the transformations
 
-\
+  
 
 ![](images/hmpar_transformation.png)
 
@@ -442,7 +436,6 @@ values from a row and it must returned a similar vector with the
 transformed values.
 
 ``` r
-
 module_list_custom_transformation <- list( # nolint
   "WFPHM" = dv.explorer.parameter::mod_wfphm(
     module_id = "wfphm",
@@ -481,7 +474,6 @@ When the menu entries reference a column in the dataset, we can decorate
 the entries by setting a label attribute for the columns.
 
 ``` r
-
 # Assign some labels to the dataset
 example_dataset_labelled <- example_dataset
 attr(example_dataset_labelled[["adbm"]][["SUBJID"]], "label") <- "Subject ID"
@@ -510,7 +502,6 @@ notice, the non standard column names are used as the values for
 applicable module arguments.
 
 ``` r
-
 adbm_dataset <- dv.explorer.parameter:::safety_data()[["bm"]]
 adsl_dataset <- dv.explorer.parameter:::safety_data()[["sl"]]
   

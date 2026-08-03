@@ -16,12 +16,15 @@ mod_boxplot(
   cat_var = "PARCAT",
   par_var = "PARAM",
   value_vars = "AVAL",
-  visit_var = "AVISIT",
+  x_axis_vars = NULL,
+  visit_var = NULL,
   anlfl_vars = NULL,
   subjid_var = "SUBJID",
   quantile_type = 7L,
   default_cat = NULL,
   default_par = NULL,
+  default_x_axis_var = NULL,
+  default_x_axis_vals = NULL,
   default_visit = NULL,
   default_value = NULL,
   default_main_group = NULL,
@@ -52,20 +55,28 @@ mod_boxplot(
   Shiny ID of the module receiving the selected subject ID in the data
   listing. This ID must be present in the app or be NULL.
 
-  inheritParams boxplot_server
-
-- cat_var, par_var, visit_var:
+- cat_var, par_var:
 
   `[character(1)]`
 
-  Columns from `bm_dataset` that correspond to the parameter category,
-  parameter and visit
+  Columns from `bm_dataset` that correspond to the parameter category
+  and parameter
 
 - value_vars:
 
   `[character(n)]`
 
   Columns from `bm_dataset` that correspond to values of the parameters
+
+- x_axis_vars:
+
+  `[character(n)]`
+
+  Columns from `bm_dataset` that correspond to x-axis variables
+
+- visit_var:
+
+  Deprecated. Use `x_axis_vars`.
 
 - anlfl_vars:
 
@@ -87,12 +98,22 @@ mod_boxplot(
   [`quantile`](https://rdrr.io/r/stats/quantile.html) (an integer
   between 1 and 9, default 7).
 
-- default_cat, default_par, default_visit, default_value,
+- default_cat, default_par, default_x_axis_var, default_value,
   default_main_group, default_sub_group, default_page_group:
 
   `[character(1)|NULL]`
 
   Default values for the selectors
+
+- default_x_axis_vals:
+
+  `[character(n)|NULL]`
+
+  Default values for the x-axis variable
+
+- default_visit:
+
+  Deprecated. Use `default_x_axis_vals`.
 
 - server_wrapper_func:
 

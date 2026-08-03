@@ -12,7 +12,7 @@ plot through its “data listing” and “data count” tables.
 
 #### Pre-requisite:
 
-\
+  
 
 ![](images/info.png)**“Parameter” Term Disambiguation**
 
@@ -27,7 +27,7 @@ disambiguate the usage in this guide:
 - **Argument** is used to represent parameter of a function in the
   programming context
 
-\
+  
 
 ## Features
 
@@ -131,7 +131,6 @@ the whole plot.
 ## Creating a lineplot application
 
 ``` r
-
 
 adbm_dataset <- dv.explorer.parameter:::safety_data()[["bm"]]
 adsl_dataset <- dv.explorer.parameter:::safety_data()[["sl"]]

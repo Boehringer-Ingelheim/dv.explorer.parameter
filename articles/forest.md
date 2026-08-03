@@ -12,7 +12,7 @@ over a single visit.
 
 #### Pre-requisite:
 
-\
+  
 
 ![](images/info.png)**“Parameter” Term Disambiguation**
 
@@ -27,7 +27,7 @@ disambiguate the usage in this guide:
 - **Argument** is used to represent parameter of a function in the
   programming context
 
-\
+  
 
 ## Features
 
@@ -121,7 +121,6 @@ image).
 ## Creating a forest plot application
 
 ``` r
-
 adbm_dataset <- dv.explorer.parameter:::safety_data()[["bm"]]
 adsl_dataset <- dv.explorer.parameter:::safety_data()[["sl"]]
 

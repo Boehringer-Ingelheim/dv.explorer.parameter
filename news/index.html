@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">dv.explorer.parameter</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.2.1</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -47,6 +47,22 @@
     </div>
 
     <div class="section level2">
+<h2 class="pkg-version" data-toc-text="0.3.0" id="dvexplorerparameter-030">dv.explorer.parameter 0.3.0<a class="anchor" aria-label="anchor" href="#dvexplorerparameter-030"></a></h2>
+<ul><li>lineplot:
+<ul><li>Improved early error feedback about default_visit_val parameter containing valid values</li>
+</ul></li>
+<li>boxplot:
+<ul><li>Replaced single-visit boxplots with boxplots across multiple values of a selected x-axis variable (e.g. visits or treatments in crossover trials)</li>
+</ul></li>
+<li>scatterplot matrix:
+<ul><li>Fixed labeling issue of selected analysis value</li>
+</ul></li>
+<li>[NOT USER-FACING] Fix encoding of single character in DR.R snippet<br></li>
+<li>[NOT USER-FACING] Update TC.R and DR.R snippets</li>
+<li>[NOT USER-FACING] Update CM.R snippet</li>
+<li>Faster early error feedback</li>
+</ul></div>
+    <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.2.1" id="dvexplorerparameter-021">dv.explorer.parameter 0.2.1<a class="anchor" aria-label="anchor" href="#dvexplorerparameter-021"></a></h2>
 <ul><li>lineplot:
 <ul><li>Fixed malfunction of highlighting feature when reference lines are plotted</li>
@@ -57,8 +73,9 @@
 <ul><li>
 <p>Bug Fixes</p>
 <ul><li>Scatterplot matrix: Fixed an issue where the analysis flag was plotted in the matrix alongside user-selected parameters</li>
-<li>ROC: *Fixed an issue in the Summary tab where visualisation output was not produced for predictor/response combinations where the response has only one value; these are now included in the plot with a blank ROC entry
-<ul><li>Fixed an issue in the Summary tab where visualisation output was not produced when no grouping variable was selected</li>
+<li>ROC:
+<ul><li>Fixed an issue in the Summary tab where visualisation output was not produced for predictor/response combinations where the response has only one value; these are now included in the plot with a blank ROC entry</li>
+<li>Fixed an issue in the Summary tab where visualisation output was not produced when no grouping variable was selected</li>
 </ul></li>
 <li>Line plot: Fixed an issue where labels attached to reference line variables were not used in the plot legend</li>
 </ul></li>
