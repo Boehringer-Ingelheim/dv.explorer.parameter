@@ -1,3 +1,7 @@
+# dv.explorer.parameter 0.3.0-9000
+
+- [NOT USER-FACING/REMOVE BEFORE PR TO MAIN] Address dv.manager 3.1.0 deprecation warning messages
+
 # dv.explorer.parameter 0.3.0
 
 - lineplot:

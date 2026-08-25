@@ -1079,9 +1079,9 @@ mod_roc <- function(
     server = function(afmm) {
       roc_server(
         id = module_id,
-        pred_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[pred_dataset_name]]),
-        resp_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[resp_dataset_name]]),
-        group_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[group_dataset_name]]),
+        pred_dataset = shiny::reactive(afmm[["filtered_dataset_list"]]()[[pred_dataset_name]]),
+        resp_dataset = shiny::reactive(afmm[["filtered_dataset_list"]]()[[resp_dataset_name]]),
+        group_dataset = shiny::reactive(afmm[["filtered_dataset_list"]]()[[group_dataset_name]]),
         dataset_name = afmm[["dataset_name"]],
         pred_cat_var = pred_cat_var,
         pred_par_var = pred_par_var,
@@ -4760,7 +4760,7 @@ mock_roc_mm_app <- function(adbm = test_roc_data()[["adbm"]],
           group_dataset_name = "adsl"
         )
       ),
-      filter_data = "adsl",
+      filter_dataset_name = "adsl",
       filter_key = "USUBJID",
       enableBookmarking = "url"
     )
