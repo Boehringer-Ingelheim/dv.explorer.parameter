@@ -192,7 +192,7 @@ module_list <- list(
         )
       ),
       module_list = module_list,
-      filter_data = "adsl",
+      filter_dataset_name = "adsl",
       filter_key = "USUBJID",
       enableBookmarking = "url"
     )

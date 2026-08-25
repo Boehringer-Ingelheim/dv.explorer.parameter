@@ -140,7 +140,7 @@ dv.manager::run_app(
       default_sub_group = "AGEGR1"
     )
   ),
-  filter_data = "adsl",
+  filter_dataset_name = "adsl",
   filter_key = "USUBJID"
 )
 ```
