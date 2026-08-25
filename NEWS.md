@@ -9,9 +9,6 @@
 - scatterplot matrix:
     - Fixed labeling issue of selected analysis value
 
-- [NOT USER-FACING] Fix encoding of single character in DR.R snippet    
-- [NOT USER-FACING] Update TC.R and DR.R snippets
-- [NOT USER-FACING] Update CM.R snippet
 - Faster early error feedback
 
 # dv.explorer.parameter 0.2.1
