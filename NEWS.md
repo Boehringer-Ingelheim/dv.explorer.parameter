@@ -1,3 +1,7 @@
+# dv.explorer.parameter 0.3.0-9000
+
+- boxplot: Includes flags for removing violin plots and p values from the user interface
+
 # dv.explorer.parameter 0.3.0
 
 - lineplot:
