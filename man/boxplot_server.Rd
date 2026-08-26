@@ -16,6 +16,8 @@ boxplot_server(
   anlfl_vars = NULL,
   subjid_var = "USUBJID",
   quantile_type = 7L,
+  allow_pvalue = TRUE,
+  allow_violin = TRUE,
   default_cat = NULL,
   default_par = NULL,
   default_x_axis_var = NULL,
@@ -63,6 +65,14 @@ Column corresponding to subject ID}
 
 Quantile algorithm type passed to \code{\link[stats]{quantile}}
 (an integer between 1 and 9, default 7).}
+
+\item{allow_pvalue}{\verb{[logical(1)]}
+
+If \code{FALSE}, the significance table (containing p-values comparing groups) is not displayed}
+
+\item{allow_violin}{\verb{[logical(1)]}
+
+If \code{FALSE}, the violin plot option is not displayed and violin plots cannot be shown}
 
 \item{default_cat, default_par, default_x_axis_var, default_value, default_main_group, default_sub_group, default_page_group}{\verb{[character(1)|NULL]}
 

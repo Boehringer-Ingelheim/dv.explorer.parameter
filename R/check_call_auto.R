@@ -6,7 +6,7 @@
 check_mod_boxplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id,
     cat_var, par_var, value_vars, x_axis_vars, visit_var, anlfl_vars, subjid_var, quantile_type, default_cat,
     default_par, default_x_axis_var, default_x_axis_vals, default_visit, default_value, default_main_group,
-    default_sub_group, default_page_group, server_wrapper_func, err) {
+    default_sub_group, default_page_group, server_wrapper_func, allow_pvalue, allow_violin, err) {
     OK <- logical(0)
     used_dataset_names <- new.env(parent = emptyenv())
     OK[["module_id"]] <- CM$check_module_id("module_id", module_id, err)
@@ -85,6 +85,12 @@ check_mod_boxplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, g
     flags <- list(optional = TRUE, ignore = TRUE)
     OK[["server_wrapper_func"]] <- CM$check_function("server_wrapper_func", server_wrapper_func, 1, flags,
         err)
+    "NOTE: allow_pvalue (logical) tagged as \"manual_check\""
+    "      The expectation is that it either does not require automated checks or that"
+    "      the caller of this function has written manual checks near the call site."
+    "NOTE: allow_violin (logical) tagged as \"manual_check\""
+    "      The expectation is that it either does not require automated checks or that"
+    "      the caller of this function has written manual checks near the call site."
     for (ds_name in names(used_dataset_names)) {
         OK[["subjid_var"]] <- OK[["subjid_var"]] && CM$check_subjid_col(datasets, ds_name, get(ds_name),
             "subjid_var", subjid_var, err)
