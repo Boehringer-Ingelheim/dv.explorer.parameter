@@ -955,7 +955,7 @@ mod_corr_hm <- function(module_id, bm_dataset_name,
     server = function(afmm) {
       corr_hm_server(
         id = module_id,
-        bm_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[bm_dataset_name]]),
+        bm_dataset = shiny::reactive(afmm[["filtered_dataset_list"]]()[[bm_dataset_name]]),
         default_value = default_value, subjid_var = subjid_var, cat_var = cat_var, par_var = par_var,
         visit_var = visit_var, anlfl_vars = anlfl_vars, value_vars = value_vars
       )

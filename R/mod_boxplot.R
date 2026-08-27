@@ -955,8 +955,8 @@ mod_boxplot <- function(module_id,
       server_wrapper_func(
         boxplot_server(
           id = module_id,
-          bm_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[bm_dataset_name]]),
-          group_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[group_dataset_name]]),
+          bm_dataset = shiny::reactive(afmm[["filtered_dataset_list"]]()[[bm_dataset_name]]),
+          group_dataset = shiny::reactive(afmm[["filtered_dataset_list"]]()[[group_dataset_name]]),
           dataset_name = afmm[["dataset_name"]],
           on_sbj_click = on_sbj_click_fun,
           cat_var = cat_var, par_var = par_var, value_vars = value_vars, x_axis_vars = x_axis_vars,

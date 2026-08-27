@@ -1,3 +1,7 @@
+# dv.explorer.parameter 0.3.0-9000
+
+- [NOT USER-FACING/REMOVE BEFORE PR TO MAIN] Address dv.manager 3.1.0 deprecation warning messages
+
 # dv.explorer.parameter 0.3.0
 
 - lineplot:
@@ -9,9 +13,6 @@
 - scatterplot matrix:
     - Fixed labeling issue of selected analysis value
 
-- [NOT USER-FACING] Fix encoding of single character in DR.R snippet    
-- [NOT USER-FACING] Update TC.R and DR.R snippets
-- [NOT USER-FACING] Update CM.R snippet
 - Faster early error feedback
 
 # dv.explorer.parameter 0.2.1
