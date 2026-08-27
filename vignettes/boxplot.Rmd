@@ -154,7 +154,7 @@ dv.manager::run_app(
       allow_pvalue = FALSE
     )
   ),
-  filter_data = "adsl",
+  filter_dataset_name = "adsl",
   filter_key = "USUBJID"
 )
 ```

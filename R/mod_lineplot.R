@@ -1753,8 +1753,8 @@ mod_lineplot <- function(module_id,
 
       lineplot_server(
         id = module_id,
-        bm_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[bm_dataset_name]]),
-        group_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[group_dataset_name]]),
+        bm_dataset = shiny::reactive(afmm[["filtered_dataset_list"]]()[[bm_dataset_name]]),
+        group_dataset = shiny::reactive(afmm[["filtered_dataset_list"]]()[[group_dataset_name]]),
         on_sbj_click = on_sbj_click_fun,
         summary_fns = summary_fns,
         subjid_var = subjid_var,

@@ -550,8 +550,8 @@ mod_scatterplotmatrix <- function(module_id,
     server = function(afmm) {
       scatterplotmatrix_server(
         id = module_id,
-        bm_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[bm_dataset_name]]),
-        group_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[group_dataset_name]]),
+        bm_dataset = shiny::reactive(afmm[["filtered_dataset_list"]]()[[bm_dataset_name]]),
+        group_dataset = shiny::reactive(afmm[["filtered_dataset_list"]]()[[group_dataset_name]]),
         dataset_name = afmm[["dataset_name"]],
         cat_var = cat_var,
         par_var = par_var,

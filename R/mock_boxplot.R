@@ -96,7 +96,7 @@ mock_app_boxplot_mm <- function(update_query_string = TRUE, anlfl_flags = FALSE,
         allow_violin = allow_violin
       )
     ),
-    filter_data = "adsl",
+    filter_dataset_name = "adsl",
     filter_key = "SUBJID",
     enableBookmarking = "url"
   )
@@ -136,7 +136,7 @@ mock_app_boxplot_mm_depr <- function(update_query_string = TRUE, anlfl_flags = F
         default_main_group = "CAT1"
       )
     ),
-    filter_data = "adsl",
+    filter_dataset_name = "adsl",
     filter_key = "SUBJID",
     enableBookmarking = "url"
   )

@@ -65,7 +65,7 @@ module_list <- list(
 dv.manager::run_app(
   data = list("DS" = list(lb = lb, sl = sl)),
   module_list = module_list,
-  filter_data = "sl",
+  filter_dataset_name = "sl",
   filter_key = "SUBJID"
 )
 ```
