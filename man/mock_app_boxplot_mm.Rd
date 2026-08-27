@@ -4,12 +4,19 @@
 \alias{mock_app_boxplot_mm}
 \title{Mock mm boxplot app}
 \usage{
-mock_app_boxplot_mm(update_query_string = TRUE, anlfl_flags = FALSE)
+mock_app_boxplot_mm(
+  update_query_string = TRUE,
+  anlfl_flags = FALSE,
+  allow_pvalue = TRUE,
+  allow_violin = TRUE
+)
 }
 \arguments{
 \item{update_query_string}{automatically update query string with app state}
 
 \item{anlfl_flags}{indicates that the input data contain analysis flag variables or not}
+
+\item{allow_pvalue, allow_violin}{passed onto \code{mod_boxplot()}}
 }
 \description{
 Mock mm boxplot app

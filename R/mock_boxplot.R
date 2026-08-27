@@ -60,8 +60,9 @@ mock_app_boxplot <- function(dry_run = FALSE, update_query_string = TRUE, srv_de
 #' Mock mm boxplot app
 #' @keywords mock
 #' @inheritParams mock_app_boxplot
+#' @param allow_pvalue,allow_violin passed onto `mod_boxplot()`
 #' @export
-mock_app_boxplot_mm <- function(update_query_string = TRUE, anlfl_flags = FALSE) {
+mock_app_boxplot_mm <- function(update_query_string = TRUE, anlfl_flags = FALSE, allow_pvalue = TRUE, allow_violin = TRUE) {
   if (!requireNamespace("dv.manager")) {
     stop("Install dv.manager")
   }
@@ -90,7 +91,9 @@ mock_app_boxplot_mm <- function(update_query_string = TRUE, anlfl_flags = FALSE)
         default_cat = "PARCAT1",
         default_par = "PARAM11",
         default_main_group = "CAT2",
-        default_sub_group = "CAT1"
+        default_sub_group = "CAT1",
+        allow_pvalue = allow_pvalue,
+        allow_violin = allow_violin
       )
     ),
     filter_dataset_name = "adsl",

@@ -4,10 +4,18 @@
 \alias{boxplot_UI}
 \title{Boxplot UI function}
 \usage{
-boxplot_UI(id)
+boxplot_UI(id, allow_pvalue = TRUE, allow_violin = TRUE)
 }
 \arguments{
 \item{id}{Shiny ID \verb{[character(1)]}}
+
+\item{allow_pvalue}{\verb{[logical(1)]}
+
+If \code{FALSE}, the significance table (containing p-values comparing groups) is not displayed}
+
+\item{allow_violin}{\verb{[logical(1)]}
+
+If \code{FALSE}, the violin plot option is not displayed}
 }
 \description{
 Boxplot UI function

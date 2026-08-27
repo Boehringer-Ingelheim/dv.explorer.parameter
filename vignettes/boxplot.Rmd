@@ -34,6 +34,7 @@ population listings, summary statistics and between group stat comparisons.
 `boxplot` features the following plot and tables:
 
 -   A set of boxplot/violin charts with different custom groupings and optionally showing the individual data points.
+    The violin plot option can be restricted by the App Creator (see `allow_violin` below).
 -   A table showing the population listing of the selected boxplot
 -   A table showing the number of subjects per boxplot
 -   A table showing the number of subjects per boxplot and addition stats on the parameter value distribution
@@ -68,6 +69,14 @@ creator should specify the values for these arguments as applicable.
     It expects to contain, at least, `subjid_var`
 
 Refer to `dv.explorer.parameter::mod_boxplot()` for the complete list of arguments and their description.
+
+**Optional Arguments controlling visible features**
+
+-   `allow_violin`: If `FALSE` (default: `TRUE`), the violin plot option is removed from the "Other" menu and
+    violin plots cannot be displayed.
+
+-   `allow_pvalue`: If `FALSE` (default: `TRUE`), the "Data Significance" tab, which contains p-values comparing
+    groups, is not displayed.
 
 # Input menus
 
@@ -113,6 +122,9 @@ A table containing a set of summary statistics per boxplot.
 
 A table containing a set of statistical tests comparing the means of different groups.
 
+Since this table contains p-values, it is only displayed if the App Creator sets `allow_pvalue = TRUE`
+(the default) when calling `mod_boxplot()`.
+
 ![](images/bp_signif_table.png)
 
 # Creating a boxplot application
@@ -137,7 +149,9 @@ dv.manager::run_app(
       default_par = c("Alanine Aminotransferase (U/L)", "Albumin (g/L)"),
       default_x_axis_vals = c("Week 2", "Week 4", "Week 6"),
       default_main_group = "ARM",
-      default_sub_group = "AGEGR1"
+      default_sub_group = "AGEGR1",
+      allow_violin = TRUE,
+      allow_pvalue = FALSE
     )
   ),
   filter_dataset_name = "adsl",

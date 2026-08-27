@@ -311,3 +311,42 @@ test_that("default values are set including analysis flag variables", {
   expect_equal(input_values[[ID$INPUT$PGRP]], srv_defaults[["default_page_group"]])
   expect_equal(input_values[[ID$INPUT$ANLFL]], "ANLFL1")
 })
+
+test_that(
+  "violin checkbox and significance tab are hidden when not allowed by the App Creator" |>
+    vdoc[["add_spec"]](c(specs$boxplot_module$violin_configurable, specs$boxplot_module$pvalue_configurable)),
+  {
+    skip_if_not_running_shiny_tests()
+
+    app <- start_app_driver(
+      rlang::quo(
+        dv.explorer.parameter::mock_app_boxplot(
+          ui_defaults = list(allow_pvalue = FALSE, allow_violin = FALSE),
+          srv_defaults = list(allow_pvalue = FALSE, allow_violin = FALSE)
+        )
+      )
+    )
+    app$wait_for_idle()
+
+    input_values <- app$get_values()[["input"]]
+    expect_null(input_values[[ID$INPUT$VCHECK]])
+
+    html <- app$get_html("body")
+    expect_false(grepl(BP$MSG$LABEL$TABLE_SIGNIFICANCE, html, fixed = TRUE))
+  }
+)
+
+test_that(
+  "violin checkbox and significance tab are shown when allowed by the App Creator (default)" |>
+    vdoc[["add_spec"]](c(specs$boxplot_module$violin_configurable, specs$boxplot_module$pvalue_configurable)),
+  {
+    skip_if_not_running_shiny_tests()
+
+    app <- start_app_driver(dv.explorer.parameter::mock_app_boxplot())
+    app$wait_for_idle()
+
+    html <- app$get_html("body")
+    expect_true(grepl(BP$MSG$LABEL$VIOLIN_CHECK, html, fixed = TRUE))
+    expect_true(grepl(BP$MSG$LABEL$TABLE_SIGNIFICANCE, html, fixed = TRUE))
+  }
+)

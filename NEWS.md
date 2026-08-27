@@ -1,3 +1,7 @@
+# dv.explorer.parameter 0.3.0-9001
+
+- boxplot: Includes flags for removing violin plots and p values from the user interface
+
 # dv.explorer.parameter 0.3.0-9000
 
 - [NOT USER-FACING/REMOVE BEFORE PR TO MAIN] Address dv.manager 3.1.0 deprecation warning messages

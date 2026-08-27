@@ -26,7 +26,9 @@ mod_boxplot(
   default_main_group = NULL,
   default_sub_group = NULL,
   default_page_group = NULL,
-  server_wrapper_func = function(x) list(subj_id = x)
+  server_wrapper_func = function(x) list(subj_id = x),
+  allow_pvalue = TRUE,
+  allow_violin = TRUE
 )
 }
 \arguments{
@@ -83,6 +85,14 @@ Default values for the x-axis variable}
 \item{server_wrapper_func}{\verb{[function()]}
 
 A function that will be applied to the server returned value. Its default value will work for the current cases.}
+
+\item{allow_pvalue}{\verb{[logical(1)]}
+
+If \code{FALSE}, the significance table (containing p-values comparing groups) is not displayed}
+
+\item{allow_violin}{\verb{[logical(1)]}
+
+If \code{FALSE}, the violin plot option is not displayed and violin plots cannot be shown}
 }
 \description{
 \code{mod_boxplot} is a Shiny module prepared to display data with boxplot charts with different levels of grouping.
