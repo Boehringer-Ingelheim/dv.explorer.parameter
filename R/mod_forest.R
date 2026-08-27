@@ -301,7 +301,7 @@ gen_svg_ <- function(output_size, df, table_row_order, axis_config) {
   viewbox_height <- cell_height * (row_count + 1)
 
   header <- ssub(
-    '<svg version="1.1" viewBox="X_MIN 0 RANGE VIEWBOX_HEIGHT" height="100%" width="100%" style="overflow: visible">',
+    '<svg version="1.1" viewBox="X_MIN 0 RANGE VIEWBOX_HEIGHT" width="100%" style="overflow: visible">',
     X_MIN = x_min, RANGE = x_range, VIEWBOX_HEIGHT = viewbox_height
   )
   ref_line <- ssub(
