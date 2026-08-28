@@ -1,3 +1,7 @@
+# dv.explorer.parameter 0.3.0-9002
+
+- forest plot: Fix regression in calculation of plot height
+
 # dv.explorer.parameter 0.3.0-9001
 
 - boxplot: Includes flags for removing violin plots and p values from the user interface
