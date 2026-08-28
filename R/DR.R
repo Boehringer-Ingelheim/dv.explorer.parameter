@@ -1068,8 +1068,8 @@ DR <- local({ # _D_ressing _R_oom
           afmm <- list(
             data = list(DS = datasets()),
             dataset_metadata = list(name = shiny::reactive("DS")),
-            unfiltered_dataset = datasets,
-            filtered_dataset = datasets,
+            unfiltered_dataset_list = datasets,
+            filtered_dataset_list = datasets,
             module_output = function() list()
           )
 

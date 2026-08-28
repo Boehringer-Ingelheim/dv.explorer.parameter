@@ -1181,6 +1181,8 @@ check_mod_boxplot <- function(
     default_sub_group,
     default_page_group,
     server_wrapper_func,
+    allow_pvalue,
+    allow_violin,
     err
   )
 

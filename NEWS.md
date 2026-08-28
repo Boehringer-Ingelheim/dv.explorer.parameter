@@ -1,3 +1,8 @@
+# dv.explorer.parameter 0.3.0-9003
+
+- [NOT USER-FACING/REMOVE BEFORE PR TO MAIN] Adapt dressing room to dv.manager 3.1.0 new afmm names
+- [NOT USER-FACING/REMOVE BEFORE PR TO MAIN] Pass new boxplot flags to EEF checker function
+
 # dv.explorer.parameter 0.3.0-9002
 
 - forest plot: Fix regression in calculation of plot height
