@@ -1,4 +1,4 @@
-# YT#VHd7ae73ab90ca3891a847507d0a833cc6#VHb8d7094dccccb00c0c217628906ca717#
+# YT#VHef1af52f38c3fd9e7535ab6f81170fa3#VHd7ae73ab90ca3891a847507d0a833cc6#
 DR <- local({ # _D_ressing _R_oom
   inline_shiny_input <- function(elem, label = NULL, name_selector = NULL, label_elem = NULL) {
     if (is.character(label) && length(label) == 1 && nchar(label) > 0) {
@@ -1068,8 +1068,8 @@ DR <- local({ # _D_ressing _R_oom
           afmm <- list(
             data = list(DS = datasets()),
             dataset_metadata = list(name = shiny::reactive("DS")),
-            unfiltered_dataset = datasets,
-            filtered_dataset = datasets,
+            unfiltered_dataset_list = datasets,
+            filtered_dataset_list = datasets,
             module_output = function() list()
           )
 
