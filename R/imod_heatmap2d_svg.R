@@ -280,11 +280,21 @@ HM2SVG_server <- function(id, data, x_desc = "S", y_desc = "W", z_desc = "E", pa
       palette <- resolve_or_return(palette)
 
       na_color <- names(which(is.na(palette)))
-      if (length(na_color) > 0) stop("Explicit NA on palette still not supported") # TODO
+      if (length(na_color) > 1) stop("Explicit NA on palette should only be specified once")
 
       colors <- names(palette)
       values <- unname(palette)
       pal_fun <- scales::gradient_n_pal(colors, values)
+      
+      if (length(na_color) == 1) {
+        base_pal_fun <- pal_fun
+        pal_fun <- function(v) {
+          res <- base_pal_fun(v)
+          res[is.na(res)] <- na_color 
+          return(res)
+        }
+      }
+      
       return(pal_fun)
     })
 

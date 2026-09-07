@@ -210,6 +210,7 @@ apply_correlation_function <- function(df, fun, z_label) {
 
       if (is.character(test_res)) {
         res[i_row, ][["error"]] <- res[reflected_i_row, ][["error"]] <- test_res
+        res[i_row, ][["z"]] <- res[reflected_i_row, ][["z"]] <- NA_real_
       } else {
         fields <- c("z", CH_MSG$LABEL$P_VALUE, CH_MSG$LABEL$CI_MIN, CH_MSG$LABEL$CI_MAX, CH_MSG$LABEL$COUNT)
         valid_pairs_count <- length(wider[[i]]) - sum(is.na(wider[[i]]) | is.na(wider[[j]]))
@@ -483,7 +484,16 @@ scatter_plot <- function(df, x_var, y_var) {
         )
       }
 
-      svg_string <- scatter_plot(df, x_var, y_var)
+      svg_string <- ""
+      if (nrow(df)) {
+        svg_string <- scatter_plot(df, x_var, y_var)
+      } else {
+        svg_string <- '
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 40">
+          <text x="50%" y="55%" text-anchor="middle" font-size="1rem" fill="#aaa">No Data</text>
+        </svg>
+        '
+      }
 
       shiny::HTML(svg_string)
     }
@@ -775,7 +785,9 @@ corr_hm_server <- function(id,
     })
 
     palette <- pal_div_palette(-1, 0, 1, rev(RColorBrewer::brewer.pal(11, name = "RdBu")))
-
+    transparent_white <- "#FFFFFF00"
+    palette[[transparent_white]] <- NA_real_
+    
     v_click_xy <- HM2SVG_server(id = CH_ID$CHART, data = correlation_data, palette = palette)
 
     output_arguments <- list()
