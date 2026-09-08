@@ -124,6 +124,11 @@ confidence intervals and number of points contributing to the
 calculation. Decimal values on this table are rounded (mathematical,
 round-to-even) to four digits of precision.
 
+The confidence intervals are computed as follows:
+
+- In the case of Pearson Correlation: Fisher's Z transform.
+- In the case of Spearman Correlation: The method is described in  Section 1.32 of [Bonett (2021, Volume 2)](https://bpb-us-e1.wpmucdn.com/sites.ucsc.edu/dist/2/1389/files/2026/08/part2.pdf) and originally published in [Bonnet-Wright (2000)](https://web.archive.org/web/20130203182221/http://biostat.georgiahealth.edu/Journal%20Club/bonett_wright_2000.pdf). It matches the behavior of `statpsych::ci.spear`.
+
 # Creating a correlation heatmap application
 
 ```{r, eval=FALSE}

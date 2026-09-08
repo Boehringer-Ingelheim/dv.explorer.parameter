@@ -1411,6 +1411,8 @@ NULL
 #'
 #' @export
 pearson_correlation <- function(a, b) {
+  # IMPORTANT NOTE: This function is used also by the correlation heatmap module
+  #                 Changes to this function may affect the validity of that module or its documentation
   test <- stats::cor.test(a, b)
   res <- list(
     result = test[["estimate"]][["cor"]],
@@ -1430,6 +1432,9 @@ pearson_correlation <- function(a, b) {
 #'
 #' @export
 spearman_correlation <- function(a, b) {
+  # IMPORTANT NOTE: This function is used also by the correlation heatmap module
+  #                 Changes to this function may affect the validity of that module or its documentation
+  
   # Adapted from https://stats.stackexchange.com/a/506367
   spearman_CI <- function(x, y, rho, alpha = 0.05) {
     n <- sum(stats::complete.cases(x, y))

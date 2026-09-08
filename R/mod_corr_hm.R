@@ -92,10 +92,8 @@ NULL
 #'
 #' @keywords developers
 #'
-#' @param id `[character(1)]`
+#' @param id `[character(1)]` Shiny ID
 #' @param default_corr_method Default correlation method `[character(1)]`
-#'
-#' Shiny ID
 #'
 #' @export
 corr_hm_UI <- function(id, default_cat = NULL, default_par = NULL, default_visit = NULL, default_corr_method = NULL) {

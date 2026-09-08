@@ -1,3 +1,9 @@
+# dv.explorer.parameter 0.3.0-9004
+
+- correlation heatmap:
+    - Display cells with errors as NAs.
+    - Document confidence interval functions
+
 # dv.explorer.parameter 0.3.0-9003
 
 - [NOT USER-FACING/REMOVE BEFORE PR TO MAIN] Adapt dressing room to dv.manager 3.1.0 new afmm names
