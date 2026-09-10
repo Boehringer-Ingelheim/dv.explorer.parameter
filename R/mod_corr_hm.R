@@ -231,7 +231,9 @@ apply_correlation_function <- function(df, fun, z_label) {
   if (sum(significant_indices)) {
     data[significant_indices, ][["label"]] <- paste0(data[significant_indices, ][["label"]], "<br>(*)")
   }
-  data[as.numeric(data[["x"]]) >= as.numeric(data[["y"]]), ][["label"]] <- "" # remove upper triangle
+  upper_triangle_mask <- as.integer(data[["x"]]) >= as.integer(data[["y"]])
+  na_mask <- is.na(data[["z"]])
+  data[["label"]][upper_triangle_mask & !na_mask] <- "" # remove non-NA labels from upper triangle
   attr(data[["z"]], "label") <- z_label
 
   if (all(is.na(data[["error"]]))) { # remove error column if empty
@@ -769,6 +771,46 @@ corr_hm_server <- function(id,
       data <- apply_correlation_function(df, corr_fun, z_label) |>
         set_lbl("y", get_lbl_robust(df, "value"))
 
+      data <- local({ # insert parameter-visit combinations that lack data
+        cat_par_vis <- shiny::isolate(mpvs())
+        expected_parvis <- ch_paste_par_vis(cat_par_vis[["parameter"]], cat_par_vis[["visit"]])
+        missing_parvis <- setdiff(expected_parvis, levels(data[["x"]]))
+        if (length(missing_parvis) > 0) {
+          all_combinations <- expand.grid(x = expected_parvis, y = expected_parvis)
+          data <- merge(all_combinations, data, by = c("x", "y"), all.x = TRUE, all.y = TRUE)
+          
+          # new rows have 0 observations and an appropriate error message
+          new_rows_mask <- (data[["x"]] %in% missing_parvis | data[["y"]] %in% missing_parvis)
+          data[["N"]][new_rows_mask] <- 0L
+          data[["error"]][new_rows_mask] <- "not enough observations"
+         
+          # diagonal elements on new rows match style of the rest of diagonal elements 
+          new_diagonal_cell_mask <- (data[["x"]] == data[["y"]] & data[["x"]] %in% missing_parvis)
+          data[["label"]][new_diagonal_cell_mask] <- ""
+          data[["z"]][new_diagonal_cell_mask] <- 1
+          
+          # if expansion of matrix "flipped" labels over the diagonal, we move them back under it
+          n <- length(expected_parvis)
+          for (i in seq_len(n - 1)) {
+            for (j in (i + 1):n) { # Skips upper triangle and diagonal
+              # Compute dataframe row corresponding to this particular combination
+              i_row <- (i - 1) * n + (j - 1) + 1
+              reflected_i_row <- (j - 1) * n + (i - 1) + 1
+              
+              label <- data[["label"]][[i_row]]
+              reflected_label <- data[["label"]][[reflected_i_row]]
+              if (isTRUE(nchar(label) == 0 && nchar(reflected_label) > 0)) {
+                data[["label"]][[i_row]] <- reflected_label
+                data[["label"]][[reflected_i_row]] <- label
+              }
+            }
+          }
+          
+        }
+        
+        return(data)
+      })
+      
       shiny::validate(
         shiny::need(
           nrow(data) > 1,
@@ -857,6 +899,10 @@ corr_hm_server <- function(id,
 
 # Data manipulation
 
+ch_paste_par_vis <- function(p, v) {
+  paste0(p, " - ", v)
+}
+
 #' Subset datasets for correlation heatmap
 #'
 #' @description
@@ -896,8 +942,7 @@ ch_subset_data <- function(sel, cat_col, par_col, val_col, vis_col,
   par <- unique(sel[[CNT$PAR]])
   vis <- unique(sel[[CNT$VIS]])
 
-  paste_par_vis <- function(p, v) paste0(p, " - ", v)
-  sel_par_vis <- paste_par_vis(sel[[CNT$PAR]], sel[[CNT$VIS]])
+  sel_par_vis <- ch_paste_par_vis(sel[[CNT$PAR]], sel[[CNT$VIS]])
   res <- subset_bds_param(
     ds = bm_ds, par = par, par_col = par_col,
     cat = cat, cat_col = cat_col, val_col = val_col,
@@ -909,7 +954,7 @@ ch_subset_data <- function(sel, cat_col, par_col, val_col, vis_col,
     need_rows(res)
   )
 
-  res[[CNT$PAR]] <- paste_par_vis(res[[CNT$PAR]], res[[CNT$VIS]])
+  res[[CNT$PAR]] <- ch_paste_par_vis(res[[CNT$PAR]], res[[CNT$VIS]])
   res <- res[res[[CNT$PAR]] %in% sel_par_vis, ]
   res[[CNT$PAR]] <- factor(res[[CNT$PAR]])
 

@@ -3,6 +3,7 @@
 - correlation heatmap:
     - Display cells with errors as NAs.
     - Document confidence interval functions
+    - Display parameter-visit combinations that lack data
 
 # dv.explorer.parameter 0.3.0-9003
 
