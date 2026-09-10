@@ -466,47 +466,46 @@ scatter_plot <- function(df, x_var, y_var) {
   return(svg_string)
 }
 
-    get_corr_hm_svg <- function(ds, click) {
-      df <- ds      
-      x_var <- click[["x"]]
-      y_var <- click[["y"]]      
-      df <- df[df[[CNT$PAR]] %in% c(x_var, y_var), ]
-      na_inf_idx <- is.na(df[[CNT$VAL]]) | !is.finite(df[[CNT$VAL]])
-      na_inf_subjects <- levels(droplevels(df[[CNT$SBJ]][na_inf_idx]))
-      df <- df[!df[[CNT$SBJ]] %in% na_inf_subjects, ]
+get_corr_hm_svg <- function(ds, click) {
+  df <- ds
+  x_var <- click[["x"]]
+  y_var <- click[["y"]]
+  df <- df[df[[CNT$PAR]] %in% c(x_var, y_var), ]
+  na_inf_idx <- is.na(df[[CNT$VAL]]) | !is.finite(df[[CNT$VAL]])
+  na_inf_subjects <- levels(droplevels(df[[CNT$SBJ]][na_inf_idx]))
+  df <- df[!df[[CNT$SBJ]] %in% na_inf_subjects, ]
 
-      if (length(na_inf_subjects) > 0) {
-        shiny::showNotification(
-          paste(length(na_inf_subjects), "have been dropped due to NA or Inf values"),
-          type = "warning"
-        )
-      }
+  if (length(na_inf_subjects) > 0) {
+    shiny::showNotification(
+      paste(length(na_inf_subjects), "have been dropped due to NA or Inf values"),
+      type = "warning"
+    )
+  }
 
-      svg_string <- ""
-      if (nrow(df)) {
-        svg_string <- scatter_plot(df, x_var, y_var)
-      } else {
-        svg_string <- '
+  svg_string <- ""
+  if (nrow(df)) {
+    svg_string <- scatter_plot(df, x_var, y_var)
+  } else {
+    svg_string <- '
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 40">
           <text x="50%" y="55%" text-anchor="middle" font-size="1rem" fill="#aaa">No Data</text>
         </svg>
         '
-      }
+  }
 
-      shiny::HTML(svg_string)
-    }
+  shiny::HTML(svg_string)
+}
 
-      ch_label_for_method <- function(method) {
-        if (method == CH_ID$CORR_METHOD_PEARSON) {
-          res <- paste(CH_MSG$LABEL$CORR_METHOD_PEARSON, "c.c.")
-        } else if (method == CH_ID$CORR_METHOD_SPEARMAN) {
-          res <- paste(CH_MSG$LABEL$CORR_METHOD_SPEARMAN, "c.c.")
-        }
-        res
-      }
+ch_label_for_method <- function(method) {
+  if (method == CH_ID$CORR_METHOD_PEARSON) {
+    res <- paste(CH_MSG$LABEL$CORR_METHOD_PEARSON, "c.c.")
+  } else if (method == CH_ID$CORR_METHOD_SPEARMAN) {
+    res <- paste(CH_MSG$LABEL$CORR_METHOD_SPEARMAN, "c.c.")
+  }
+  res
+}
 
 get_listing_content <- function(ds, corr_data, method) {
-  
   z_label <- ch_label_for_method(method)
 
   res <- ch_listings_table(corr_data, ds, z_label)
@@ -747,8 +746,6 @@ corr_hm_server <- function(id,
 
     # correlation heatmap plot----
 
-
-
     correlation_data <- shiny::reactive({
       df <- data_subset()
       method <- v_input_subset()[[CH_ID$CORR_METHOD]]
@@ -785,7 +782,7 @@ corr_hm_server <- function(id,
     palette <- pal_div_palette(-1, 0, 1, rev(RColorBrewer::brewer.pal(11, name = "RdBu")))
     transparent_white <- "#FFFFFF00"
     palette[[transparent_white]] <- NA_real_
-    
+
     v_click_xy <- HM2SVG_server(id = CH_ID$CHART, data = correlation_data, palette = palette)
 
     output_arguments <- list()
@@ -793,7 +790,7 @@ corr_hm_server <- function(id,
     output_arguments[[CH_ID$SCATTER]][["arguments"]] <- shiny::reactive({
       list(
         ds = data_subset(),
-        click =  v_click_xy()
+        click = v_click_xy()
       )
     })
 
@@ -909,7 +906,7 @@ ch_subset_data <- function(sel, cat_col, par_col, val_col, vis_col,
   )
 
   shiny::validate(
-   need_rows(res)
+    need_rows(res)
   )
 
   res[[CNT$PAR]] <- paste_par_vis(res[[CNT$PAR]], res[[CNT$VIS]])
@@ -1011,8 +1008,9 @@ mod_corr_hm_API_spec <- TC$group(
 
 
 check_mod_corr_hm <- function(
-    afmm, datasets, module_id, bm_dataset_name, subjid_var, cat_var, par_var, visit_var,
-    anlfl_vars, value_vars, default_cat, default_par, default_visit, default_value) {
+  afmm, datasets, module_id, bm_dataset_name, subjid_var, cat_var, par_var, visit_var,
+  anlfl_vars, value_vars, default_cat, default_par, default_visit, default_value
+) {
   err <- CM$container()
 
   # TODO: Replace this function with a generic one that performs the checks based on mod_corr_hm_API_spec.
