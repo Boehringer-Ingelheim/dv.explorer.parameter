@@ -5,6 +5,7 @@
     - Document confidence interval functions
     - Display parameter-visit combinations that lack data
     - Guard against missing data in click-through scatter plots
+    - Indicate heatmap interactivity with hover-on pointer change
 
 # dv.explorer.parameter 0.3.0-9003
 

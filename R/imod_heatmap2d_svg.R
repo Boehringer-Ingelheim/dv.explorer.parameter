@@ -119,7 +119,7 @@ HM2SVG_plot <- function(ds, x_desc, y_desc, z_desc, pal_fun, palette, ns) {
   )
   outer_margin <- SVG_push("g", "transform='translate(X, Y)'", X = spacer_width, Y = spacer_width)
 
-  grid <- SVG_push("g", "transform='translate(W)'", W = legend_width + spacer_width)
+  grid <- SVG_push("g", "transform='translate(W)' style='cursor:pointer'", W = legend_width + spacer_width)
 
   # The bulk of the SVG contents are the grid cells. Instead of iterating through them, we interpolate a template string
   # with the contents of the data frame, because it's much faster
