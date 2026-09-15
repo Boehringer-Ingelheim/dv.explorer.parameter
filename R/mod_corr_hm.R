@@ -267,19 +267,16 @@ scatter_plot <- function(df, x_var, y_var) {
   )
   df <- df[c(CNT$SBJ, CNT$PAR, CNT$VAL)]
   checkmate::assert_numeric(df[[CNT$VAL]], finite = TRUE, any.missing = FALSE)
-  x_y_df <- tidyr::pivot_wider(df, names_from = CNT$PAR, values_from = CNT$VAL)[union(x_var, y_var)]
-  x <- x_y_df[[x_var]]
-  y <- x_y_df[[y_var]]
-
-  # NOTE: This is scatterplot needs a thorough tightening of screws, but let's see how users like it first
+  
+  # TODO: This scatter plot needs a thorough tightening of screws, but let's see how users like it first
 
   svg_elem_list <- list()
   svg_elem_stack <- list()
 
   # TODO: Repeats #irewah
-  SVG_append_raw <- function(s) svg_elem_list[[length(svg_elem_list) + 1]] <<- s # nolint
+  SVG_append_raw <- function(s) svg_elem_list[[length(svg_elem_list) + 1]] <<- s
 
-  SVG_push <- function(elem, desc, ...) { # nolint
+  SVG_push <- function(elem, desc, ...) {
     s <- paste0("<", elem, " ", ssub(desc, ...), ">")
     index <- length(svg_elem_list) + 1
     elem_index <- list(elem = elem, index = index)
@@ -288,7 +285,7 @@ scatter_plot <- function(df, x_var, y_var) {
     return(elem_index)
   }
 
-  SVG_pop <- function(elem_index) { # nolint
+  SVG_pop <- function(elem_index) {
     top <- svg_elem_stack[[length(svg_elem_stack)]]
     if (!identical(top, elem_index)) stop("pop does not match push")
     s <- paste0("</", elem_index[["elem"]], ">")
@@ -320,7 +317,34 @@ scatter_plot <- function(df, x_var, y_var) {
   # nolint end
 
   viewbox_size <- 2 * apron_size + scatter_size + axis_size
+  
+  tick_size <- 20
+  axis_legend_size <- tick_size * 1.5
 
+  wide_df <- tidyr::pivot_wider(df, names_from = CNT$PAR, values_from = CNT$VAL)
+  can_plot <- (x_var %in% names(wide_df) && y_var %in% names(wide_df))
+  
+  if (!can_plot) {
+    svg <- SVG_push(
+      "svg", "xmlns='http://www.w3.org/2000/svg' version='2.1' width=100% viewBox='0 0 W H'",
+      W = viewbox_size, H = viewbox_size
+    ) 
+    
+    SVG_append_raw("
+    <text x='X' y='Y' font-size='6rem' fill='#aaaaaa' text-anchor='middle' dominant-baseline='central'>
+      No data
+    </text>" |> ssub(X = viewbox_size / 2, Y = viewbox_size / 2))
+                   
+    SVG_pop(svg)
+    svg_string <- paste(svg_elem_list, collapse = "\n")
+  
+    return(svg_string) # IMPORTANT: early out
+  }
+    
+  x_y_df <- wide_df[union(x_var, y_var)]
+  x <- x_y_df[[x_var]]
+  y <- x_y_df[[y_var]]
+  
   r_x <- range(x, na.rm = TRUE)
   r_x[is.na(r_x)] <- 1
   x_min <- floor(r_x[[1]])
@@ -405,8 +429,6 @@ scatter_plot <- function(df, x_var, y_var) {
   SVG_append_raw(dots)
   SVG_pop(into_scatter_area)
 
-  tick_size <- 20
-
   # Axes ticks
   SVG_append_raw("<text x='X' y='Y' font-size=FS px alignment-baseline='hanging' text-anchor='end'>TEXT</text>" |>
     ssub(
@@ -430,7 +452,6 @@ scatter_plot <- function(df, x_var, y_var) {
     ))
 
 
-  axis_legend_size <- tick_size * 1.5
   y_label <- (y_label_NE + y_label_SE) / 2
 
   y_label_max_width <- scatter_size * 0.8

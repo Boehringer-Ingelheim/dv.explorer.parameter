@@ -4,6 +4,7 @@
     - Display cells with errors as NAs.
     - Document confidence interval functions
     - Display parameter-visit combinations that lack data
+    - Guard against missing data in click-through scatter plots
 
 # dv.explorer.parameter 0.3.0-9003
 
