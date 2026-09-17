@@ -57,7 +57,9 @@ corr_hm_module = list(
     ",
     bookmark = "
     The application shall support bookmarking. Clicks and brush are explicitely excluded.
-    "
+    ",
+    show_missing_data_as_NA = "The chart shows NA for selected combinations of categories, parameter and visits that lack data",
+    show_errors_as_NA = "The chart shows NA for correlation coefficients that produce an error during computation"
 ),
 
 forest_module = list(

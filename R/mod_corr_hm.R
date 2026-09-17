@@ -243,6 +243,45 @@ apply_correlation_function <- function(df, fun, z_label) {
   data
 }
 
+insert_parameter_visit_combinations_that_lack_data <- function(data, cat_par_vis) {
+  expected_parvis <- ch_paste_par_vis(cat_par_vis[["parameter"]], cat_par_vis[["visit"]])
+  missing_parvis <- setdiff(expected_parvis, levels(data[["x"]]))
+  if (length(missing_parvis) > 0) {
+    all_combinations <- expand.grid(x = expected_parvis, y = expected_parvis)
+    data <- merge(all_combinations, data, by = c("x", "y"), all.x = TRUE, all.y = TRUE)
+    
+    # new rows have 0 observations and an appropriate error message
+    new_rows_mask <- (data[["x"]] %in% missing_parvis | data[["y"]] %in% missing_parvis)
+    data[["N"]][new_rows_mask] <- 0L
+    data[["error"]][new_rows_mask] <- "not enough observations"
+    data[["label"]][new_rows_mask] <- "NA"
+    
+    # diagonal elements on new rows match style of the rest of diagonal elements 
+    new_diagonal_cell_mask <- (data[["x"]] == data[["y"]] & data[["x"]] %in% missing_parvis)
+    data[["label"]][new_diagonal_cell_mask] <- ""
+    data[["z"]][new_diagonal_cell_mask] <- 1
+    
+    # if expansion of matrix "flipped" labels over the diagonal, we move them back under it
+    n <- length(expected_parvis)
+    for (i in seq_len(n - 1)) {
+      for (j in (i + 1):n) { # Skips upper triangle and diagonal
+        # Compute dataframe row corresponding to this particular combination
+        i_row <- (i - 1) * n + (j - 1) + 1
+        reflected_i_row <- (j - 1) * n + (i - 1) + 1
+        
+        label <- data[["label"]][[i_row]]
+        reflected_label <- data[["label"]][[reflected_i_row]]
+        if (isTRUE(nchar(label) == 0 && nchar(reflected_label) > 0)) {
+          data[["label"]][[i_row]] <- reflected_label
+          data[["label"]][[reflected_i_row]] <- label
+        }
+      }
+    }
+  }
+  
+  return(data)
+}
+
 # TODO: Document signature
 ch_listings_table <- function(corr_df, ds, z_label) {
   meaningful_unique_indices <- as.numeric(corr_df[["x"]]) > as.numeric(corr_df[["y"]])
@@ -791,47 +830,12 @@ corr_hm_server <- function(id,
       #       produce a partial or complete listing using our internal function.
       data <- apply_correlation_function(df, corr_fun, z_label) |>
         set_lbl("y", get_lbl_robust(df, "value"))
+     
+      cat_par_vis <- shiny::isolate(mpvs())
+      data <- insert_parameter_visit_combinations_that_lack_data(
+        data, cat_par_vis
+      )
 
-      data <- local({ # insert parameter-visit combinations that lack data
-        cat_par_vis <- shiny::isolate(mpvs())
-        expected_parvis <- ch_paste_par_vis(cat_par_vis[["parameter"]], cat_par_vis[["visit"]])
-        missing_parvis <- setdiff(expected_parvis, levels(data[["x"]]))
-        if (length(missing_parvis) > 0) {
-          all_combinations <- expand.grid(x = expected_parvis, y = expected_parvis)
-          data <- merge(all_combinations, data, by = c("x", "y"), all.x = TRUE, all.y = TRUE)
-          
-          # new rows have 0 observations and an appropriate error message
-          new_rows_mask <- (data[["x"]] %in% missing_parvis | data[["y"]] %in% missing_parvis)
-          data[["N"]][new_rows_mask] <- 0L
-          data[["error"]][new_rows_mask] <- "not enough observations"
-         
-          # diagonal elements on new rows match style of the rest of diagonal elements 
-          new_diagonal_cell_mask <- (data[["x"]] == data[["y"]] & data[["x"]] %in% missing_parvis)
-          data[["label"]][new_diagonal_cell_mask] <- ""
-          data[["z"]][new_diagonal_cell_mask] <- 1
-          
-          # if expansion of matrix "flipped" labels over the diagonal, we move them back under it
-          n <- length(expected_parvis)
-          for (i in seq_len(n - 1)) {
-            for (j in (i + 1):n) { # Skips upper triangle and diagonal
-              # Compute dataframe row corresponding to this particular combination
-              i_row <- (i - 1) * n + (j - 1) + 1
-              reflected_i_row <- (j - 1) * n + (i - 1) + 1
-              
-              label <- data[["label"]][[i_row]]
-              reflected_label <- data[["label"]][[reflected_i_row]]
-              if (isTRUE(nchar(label) == 0 && nchar(reflected_label) > 0)) {
-                data[["label"]][[i_row]] <- reflected_label
-                data[["label"]][[reflected_i_row]] <- label
-              }
-            }
-          }
-          
-        }
-        
-        return(data)
-      })
-      
       shiny::validate(
         shiny::need(
           nrow(data) > 1,
