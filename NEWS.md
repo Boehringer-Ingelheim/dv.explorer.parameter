@@ -2,7 +2,7 @@
 
 - correlation heatmap:
     - Display cells with errors as NAs.
-    - Document confidence interval functions
+    - Document the calculation of p-values and confidence intervals
     - Display parameter-visit combinations that lack data
     - Guard against missing data in click-through scatter plots
     - Indicate heatmap interactivity with hover-on pointer change
