@@ -85,11 +85,11 @@ check_mod_boxplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, g
     flags <- list(optional = TRUE, ignore = TRUE)
     OK[["server_wrapper_func"]] <- CM$check_function("server_wrapper_func", server_wrapper_func, 1, flags,
         err)
-    "NOTE: allow_pvalue (logical) tagged as \"manual_check\""
-    "      The expectation is that it either does not require automated checks or that"
+    "NOTE: allow_pvalue (logical) has no associated automated checks"
+    "      The expectation is that it either does not require them or that"
     "      the caller of this function has written manual checks near the call site."
-    "NOTE: allow_violin (logical) tagged as \"manual_check\""
-    "      The expectation is that it either does not require automated checks or that"
+    "NOTE: allow_violin (logical) has no associated automated checks"
+    "      The expectation is that it either does not require them or that"
     "      the caller of this function has written manual checks near the call site."
     for (ds_name in names(used_dataset_names)) {
         OK[["subjid_var"]] <- OK[["subjid_var"]] && CM$check_subjid_col(datasets, ds_name, get(ds_name),
@@ -398,9 +398,9 @@ check_mod_roc_auto <- function(afmm, datasets, module_id, pred_dataset_name, res
 
 # dv.explorer.parameter::mod_scatterplot
 check_mod_scatterplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, group_dataset_name,
-    cat_var, par_var, value_vars, visit_var, anlfl_vars, subjid_var, default_x_cat, default_x_par, default_x_value,
-    default_x_visit, default_y_cat, default_y_par, default_y_value, default_y_visit, default_group, default_color,
-    compute_lm_cor_fn, err) {
+    cat_var, par_var, value_vars, visit_var, ref_line_vars, anlfl_vars, subjid_var, default_x_cat, default_x_par,
+    default_x_value, default_x_visit, default_y_cat, default_y_par, default_y_value, default_y_visit,
+    default_group, default_color, compute_lm_cor_fn, err) {
     OK <- logical(0)
     used_dataset_names <- new.env(parent = emptyenv())
     OK[["module_id"]] <- CM$check_module_id("module_id", module_id, err)
@@ -427,6 +427,10 @@ check_mod_scatterplot_auto <- function(afmm, datasets, module_id, bm_dataset_nam
     flags <- list(map_character_to_factor = TRUE)
     OK[["visit_var"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("visit_var", visit_var,
         subkind, flags, bm_dataset_name, datasets[[bm_dataset_name]], err)
+    subkind <- list(kind = "numeric", min = NA, max = NA)
+    flags <- list(zero_or_more = TRUE, optional = TRUE)
+    OK[["ref_line_vars"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("ref_line_vars",
+        ref_line_vars, subkind, flags, bm_dataset_name, datasets[[bm_dataset_name]], err)
     subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
     flags <- list(zero_or_more = TRUE, optional = TRUE)
     OK[["anlfl_vars"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("anlfl_vars", anlfl_vars,

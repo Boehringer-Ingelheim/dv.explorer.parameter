@@ -295,6 +295,7 @@ scatterplot_server <- function(id,
                                par_var = "PARAM",
                                value_vars = "AVAL",
                                visit_var = "AVISIT",
+                               ref_line_vars = character(0),
                                anlfl_vars = NULL,
                                subjid_var = "USUBJID",
                                default_x_cat = NULL,
@@ -797,6 +798,7 @@ mod_scatterplot <- function(module_id,
                             par_var = "PARAM",
                             value_vars = "AVAL",
                             visit_var = "AVISIT",
+                            ref_line_vars = character(0), # TODO: Discuss type discipline and style of `anlfl_vars=NULL`
                             anlfl_vars = NULL,
                             subjid_var = "USUBJID",
                             default_x_cat = NULL,
@@ -822,6 +824,7 @@ mod_scatterplot <- function(module_id,
         par_var = par_var,
         value_vars = value_vars,
         visit_var = visit_var,
+        ref_line_vars = ref_line_vars,
         anlfl_vars = anlfl_vars,
         subjid_var = subjid_var,
         default_x_cat = default_x_cat,
@@ -853,6 +856,7 @@ mod_scatterplot_API_docs <- list(
   par_var = "",
   value_vars = "",
   visit_var = "",
+  ref_line_vars = "",
   anlfl_vars = "",
   subjid_var = "",
   default_x_cat = "",
@@ -876,6 +880,7 @@ mod_scatterplot_API_spec <- TC$group(
   par_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("map_character_to_factor"),
   value_vars = TC$col("bm_dataset_name", TC$numeric()) |> TC$flag("one_or_more"),
   visit_var = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor(), TC$numeric())) |> TC$flag("map_character_to_factor"),
+  ref_line_vars = TC$col("bm_dataset_name", TC$numeric()) |> TC$flag("zero_or_more", "optional"),
   anlfl_vars = TC$col("bm_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("zero_or_more", "optional"),
   subjid_var = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("subjid_var", "map_character_to_factor"),
   default_x_cat = TC$choice_from_col_contents("cat_var") |> TC$flag("optional"),
@@ -893,7 +898,7 @@ mod_scatterplot_API_spec <- TC$group(
 
 check_mod_scatterplot <- function(
     afmm, datasets, module_id, bm_dataset_name, group_dataset_name,
-    cat_var, par_var, value_vars, visit_var, anlfl_vars, subjid_var,
+    cat_var, par_var, value_vars, visit_var, ref_line_vars, anlfl_vars, subjid_var,
     default_x_cat, default_x_par, default_x_value, default_x_visit,
     default_y_cat, default_y_par, default_y_value, default_y_visit,
     default_group, default_color, compute_lm_cor_fn) {
@@ -903,7 +908,7 @@ check_mod_scatterplot <- function(
   # Something along the lines of OK <- CM$check_API(mod_corr_hm_API_spec, args = match.call(), err)
   OK <- check_mod_scatterplot_auto(
     afmm, datasets, module_id, bm_dataset_name, group_dataset_name,
-    cat_var, par_var, value_vars, visit_var, anlfl_vars, subjid_var,
+    cat_var, par_var, value_vars, visit_var, ref_line_vars, anlfl_vars, subjid_var,
     default_x_cat, default_x_par, default_x_value, default_x_visit,
     default_y_cat, default_y_par, default_y_value, default_y_visit,
     default_group, default_color, compute_lm_cor_fn, err
