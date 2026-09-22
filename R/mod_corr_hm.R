@@ -92,10 +92,8 @@ NULL
 #'
 #' @keywords developers
 #'
-#' @param id `[character(1)]`
+#' @param id `[character(1)]` Shiny ID
 #' @param default_corr_method Default correlation method `[character(1)]`
-#'
-#' Shiny ID
 #'
 #' @export
 corr_hm_UI <- function(id, default_cat = NULL, default_par = NULL, default_visit = NULL, default_corr_method = NULL) {
@@ -210,6 +208,7 @@ apply_correlation_function <- function(df, fun, z_label) {
 
       if (is.character(test_res)) {
         res[i_row, ][["error"]] <- res[reflected_i_row, ][["error"]] <- test_res
+        res[i_row, ][["z"]] <- res[reflected_i_row, ][["z"]] <- NA_real_
       } else {
         fields <- c("z", CH_MSG$LABEL$P_VALUE, CH_MSG$LABEL$CI_MIN, CH_MSG$LABEL$CI_MAX, CH_MSG$LABEL$COUNT)
         valid_pairs_count <- length(wider[[i]]) - sum(is.na(wider[[i]]) | is.na(wider[[j]]))
@@ -232,7 +231,9 @@ apply_correlation_function <- function(df, fun, z_label) {
   if (sum(significant_indices)) {
     data[significant_indices, ][["label"]] <- paste0(data[significant_indices, ][["label"]], "<br>(*)")
   }
-  data[as.numeric(data[["x"]]) >= as.numeric(data[["y"]]), ][["label"]] <- "" # remove upper triangle
+  upper_triangle_mask <- as.integer(data[["x"]]) >= as.integer(data[["y"]])
+  na_mask <- is.na(data[["z"]])
+  data[["label"]][upper_triangle_mask & !na_mask] <- "" # remove non-NA labels from upper triangle
   attr(data[["z"]], "label") <- z_label
 
   if (all(is.na(data[["error"]]))) { # remove error column if empty
@@ -240,6 +241,45 @@ apply_correlation_function <- function(df, fun, z_label) {
   }
 
   data
+}
+
+insert_parameter_visit_combinations_that_lack_data <- function(data, cat_par_vis) {
+  expected_parvis <- ch_paste_par_vis(cat_par_vis[["parameter"]], cat_par_vis[["visit"]])
+  missing_parvis <- setdiff(expected_parvis, levels(data[["x"]]))
+  if (length(missing_parvis) > 0) {
+    all_combinations <- expand.grid(x = expected_parvis, y = expected_parvis)
+    data <- merge(all_combinations, data, by = c("x", "y"), all.x = TRUE, all.y = TRUE)
+    
+    # new rows have 0 observations and an appropriate error message
+    new_rows_mask <- (data[["x"]] %in% missing_parvis | data[["y"]] %in% missing_parvis)
+    data[["N"]][new_rows_mask] <- 0L
+    data[["error"]][new_rows_mask] <- "not enough observations"
+    data[["label"]][new_rows_mask] <- "NA"
+    
+    # diagonal elements on new rows match style of the rest of diagonal elements 
+    new_diagonal_cell_mask <- (data[["x"]] == data[["y"]] & data[["x"]] %in% missing_parvis)
+    data[["label"]][new_diagonal_cell_mask] <- ""
+    data[["z"]][new_diagonal_cell_mask] <- 1
+    
+    # if expansion of matrix "flipped" labels over the diagonal, we move them back under it
+    n <- length(expected_parvis)
+    for (i in seq_len(n - 1)) {
+      for (j in (i + 1):n) { # Skips upper triangle and diagonal
+        # Compute dataframe row corresponding to this particular combination
+        i_row <- (i - 1) * n + (j - 1) + 1
+        reflected_i_row <- (j - 1) * n + (i - 1) + 1
+        
+        label <- data[["label"]][[i_row]]
+        reflected_label <- data[["label"]][[reflected_i_row]]
+        if (isTRUE(nchar(label) == 0 && nchar(reflected_label) > 0)) {
+          data[["label"]][[i_row]] <- reflected_label
+          data[["label"]][[reflected_i_row]] <- label
+        }
+      }
+    }
+  }
+  
+  return(data)
 }
 
 # TODO: Document signature
@@ -266,19 +306,16 @@ scatter_plot <- function(df, x_var, y_var) {
   )
   df <- df[c(CNT$SBJ, CNT$PAR, CNT$VAL)]
   checkmate::assert_numeric(df[[CNT$VAL]], finite = TRUE, any.missing = FALSE)
-  x_y_df <- tidyr::pivot_wider(df, names_from = CNT$PAR, values_from = CNT$VAL)[union(x_var, y_var)]
-  x <- x_y_df[[x_var]]
-  y <- x_y_df[[y_var]]
-
-  # NOTE: This is scatterplot needs a thorough tightening of screws, but let's see how users like it first
+  
+  # TODO: This scatter plot needs a thorough tightening of screws, but let's see how users like it first
 
   svg_elem_list <- list()
   svg_elem_stack <- list()
 
   # TODO: Repeats #irewah
-  SVG_append_raw <- function(s) svg_elem_list[[length(svg_elem_list) + 1]] <<- s # nolint
+  SVG_append_raw <- function(s) svg_elem_list[[length(svg_elem_list) + 1]] <<- s
 
-  SVG_push <- function(elem, desc, ...) { # nolint
+  SVG_push <- function(elem, desc, ...) {
     s <- paste0("<", elem, " ", ssub(desc, ...), ">")
     index <- length(svg_elem_list) + 1
     elem_index <- list(elem = elem, index = index)
@@ -287,7 +324,7 @@ scatter_plot <- function(df, x_var, y_var) {
     return(elem_index)
   }
 
-  SVG_pop <- function(elem_index) { # nolint
+  SVG_pop <- function(elem_index) {
     top <- svg_elem_stack[[length(svg_elem_stack)]]
     if (!identical(top, elem_index)) stop("pop does not match push")
     s <- paste0("</", elem_index[["elem"]], ">")
@@ -319,7 +356,34 @@ scatter_plot <- function(df, x_var, y_var) {
   # nolint end
 
   viewbox_size <- 2 * apron_size + scatter_size + axis_size
+  
+  tick_size <- 20
+  axis_legend_size <- tick_size * 1.5
 
+  wide_df <- tidyr::pivot_wider(df, names_from = CNT$PAR, values_from = CNT$VAL)
+  can_plot <- (x_var %in% names(wide_df) && y_var %in% names(wide_df))
+  
+  if (!can_plot) {
+    svg <- SVG_push(
+      "svg", "xmlns='http://www.w3.org/2000/svg' version='2.1' width=100% viewBox='0 0 W H'",
+      W = viewbox_size, H = viewbox_size
+    ) 
+    
+    SVG_append_raw("
+    <text x='X' y='Y' font-size='6rem' fill='#aaaaaa' text-anchor='middle' dominant-baseline='central'>
+      No data
+    </text>" |> ssub(X = viewbox_size / 2, Y = viewbox_size / 2))
+                   
+    SVG_pop(svg)
+    svg_string <- paste(svg_elem_list, collapse = "\n")
+  
+    return(svg_string) # IMPORTANT: early out
+  }
+    
+  x_y_df <- wide_df[union(x_var, y_var)]
+  x <- x_y_df[[x_var]]
+  y <- x_y_df[[y_var]]
+  
   r_x <- range(x, na.rm = TRUE)
   r_x[is.na(r_x)] <- 1
   x_min <- floor(r_x[[1]])
@@ -404,8 +468,6 @@ scatter_plot <- function(df, x_var, y_var) {
   SVG_append_raw(dots)
   SVG_pop(into_scatter_area)
 
-  tick_size <- 20
-
   # Axes ticks
   SVG_append_raw("<text x='X' y='Y' font-size=FS px alignment-baseline='hanging' text-anchor='end'>TEXT</text>" |>
     ssub(
@@ -429,7 +491,6 @@ scatter_plot <- function(df, x_var, y_var) {
     ))
 
 
-  axis_legend_size <- tick_size * 1.5
   y_label <- (y_label_NE + y_label_SE) / 2
 
   y_label_max_width <- scatter_size * 0.8
@@ -467,38 +528,46 @@ scatter_plot <- function(df, x_var, y_var) {
   return(svg_string)
 }
 
-    get_corr_hm_svg <- function(ds, click) {
-      df <- ds      
-      x_var <- click[["x"]]
-      y_var <- click[["y"]]      
-      df <- df[df[[CNT$PAR]] %in% c(x_var, y_var), ]
-      na_inf_idx <- is.na(df[[CNT$VAL]]) | !is.finite(df[[CNT$VAL]])
-      na_inf_subjects <- levels(droplevels(df[[CNT$SBJ]][na_inf_idx]))
-      df <- df[!df[[CNT$SBJ]] %in% na_inf_subjects, ]
+get_corr_hm_svg <- function(ds, click) {
+  df <- ds
+  x_var <- click[["x"]]
+  y_var <- click[["y"]]
+  df <- df[df[[CNT$PAR]] %in% c(x_var, y_var), ]
+  na_inf_idx <- is.na(df[[CNT$VAL]]) | !is.finite(df[[CNT$VAL]])
+  na_inf_subjects <- levels(droplevels(df[[CNT$SBJ]][na_inf_idx]))
+  df <- df[!df[[CNT$SBJ]] %in% na_inf_subjects, ]
 
-      if (length(na_inf_subjects) > 0) {
-        shiny::showNotification(
-          paste(length(na_inf_subjects), "have been dropped due to NA or Inf values"),
-          type = "warning"
-        )
-      }
+  if (length(na_inf_subjects) > 0) {
+    shiny::showNotification(
+      paste(length(na_inf_subjects), "have been dropped due to NA or Inf values"),
+      type = "warning"
+    )
+  }
 
-      svg_string <- scatter_plot(df, x_var, y_var)
+  svg_string <- ""
+  if (nrow(df)) {
+    svg_string <- scatter_plot(df, x_var, y_var)
+  } else {
+    svg_string <- '
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 40">
+          <text x="50%" y="55%" text-anchor="middle" font-size="1rem" fill="#aaa">No Data</text>
+        </svg>
+        '
+  }
 
-      shiny::HTML(svg_string)
-    }
+  shiny::HTML(svg_string)
+}
 
-      ch_label_for_method <- function(method) {
-        if (method == CH_ID$CORR_METHOD_PEARSON) {
-          res <- paste(CH_MSG$LABEL$CORR_METHOD_PEARSON, "c.c.")
-        } else if (method == CH_ID$CORR_METHOD_SPEARMAN) {
-          res <- paste(CH_MSG$LABEL$CORR_METHOD_SPEARMAN, "c.c.")
-        }
-        res
-      }
+ch_label_for_method <- function(method) {
+  if (method == CH_ID$CORR_METHOD_PEARSON) {
+    res <- paste(CH_MSG$LABEL$CORR_METHOD_PEARSON, "c.c.")
+  } else if (method == CH_ID$CORR_METHOD_SPEARMAN) {
+    res <- paste(CH_MSG$LABEL$CORR_METHOD_SPEARMAN, "c.c.")
+  }
+  res
+}
 
 get_listing_content <- function(ds, corr_data, method) {
-  
   z_label <- ch_label_for_method(method)
 
   res <- ch_listings_table(corr_data, ds, z_label)
@@ -739,8 +808,6 @@ corr_hm_server <- function(id,
 
     # correlation heatmap plot----
 
-
-
     correlation_data <- shiny::reactive({
       df <- data_subset()
       method <- v_input_subset()[[CH_ID$CORR_METHOD]]
@@ -763,6 +830,11 @@ corr_hm_server <- function(id,
       #       produce a partial or complete listing using our internal function.
       data <- apply_correlation_function(df, corr_fun, z_label) |>
         set_lbl("y", get_lbl_robust(df, "value"))
+     
+      cat_par_vis <- shiny::isolate(mpvs())
+      data <- insert_parameter_visit_combinations_that_lack_data(
+        data, cat_par_vis
+      )
 
       shiny::validate(
         shiny::need(
@@ -775,6 +847,8 @@ corr_hm_server <- function(id,
     })
 
     palette <- pal_div_palette(-1, 0, 1, rev(RColorBrewer::brewer.pal(11, name = "RdBu")))
+    transparent_white <- "#FFFFFF00"
+    palette[[transparent_white]] <- NA_real_
 
     v_click_xy <- HM2SVG_server(id = CH_ID$CHART, data = correlation_data, palette = palette)
 
@@ -783,7 +857,7 @@ corr_hm_server <- function(id,
     output_arguments[[CH_ID$SCATTER]][["arguments"]] <- shiny::reactive({
       list(
         ds = data_subset(),
-        click =  v_click_xy()
+        click = v_click_xy()
       )
     })
 
@@ -850,6 +924,10 @@ corr_hm_server <- function(id,
 
 # Data manipulation
 
+ch_paste_par_vis <- function(p, v) {
+  paste0(p, " - ", v)
+}
+
 #' Subset datasets for correlation heatmap
 #'
 #' @description
@@ -889,8 +967,7 @@ ch_subset_data <- function(sel, cat_col, par_col, val_col, vis_col,
   par <- unique(sel[[CNT$PAR]])
   vis <- unique(sel[[CNT$VIS]])
 
-  paste_par_vis <- function(p, v) paste0(p, " - ", v)
-  sel_par_vis <- paste_par_vis(sel[[CNT$PAR]], sel[[CNT$VIS]])
+  sel_par_vis <- ch_paste_par_vis(sel[[CNT$PAR]], sel[[CNT$VIS]])
   res <- subset_bds_param(
     ds = bm_ds, par = par, par_col = par_col,
     cat = cat, cat_col = cat_col, val_col = val_col,
@@ -899,10 +976,10 @@ ch_subset_data <- function(sel, cat_col, par_col, val_col, vis_col,
   )
 
   shiny::validate(
-   need_rows(res)
+    need_rows(res)
   )
 
-  res[[CNT$PAR]] <- paste_par_vis(res[[CNT$PAR]], res[[CNT$VIS]])
+  res[[CNT$PAR]] <- ch_paste_par_vis(res[[CNT$PAR]], res[[CNT$VIS]])
   res <- res[res[[CNT$PAR]] %in% sel_par_vis, ]
   res[[CNT$PAR]] <- factor(res[[CNT$PAR]])
 
@@ -1001,8 +1078,9 @@ mod_corr_hm_API_spec <- TC$group(
 
 
 check_mod_corr_hm <- function(
-    afmm, datasets, module_id, bm_dataset_name, subjid_var, cat_var, par_var, visit_var,
-    anlfl_vars, value_vars, default_cat, default_par, default_visit, default_value) {
+  afmm, datasets, module_id, bm_dataset_name, subjid_var, cat_var, par_var, visit_var,
+  anlfl_vars, value_vars, default_cat, default_par, default_visit, default_value
+) {
   err <- CM$container()
 
   # TODO: Replace this function with a generic one that performs the checks based on mod_corr_hm_API_spec.

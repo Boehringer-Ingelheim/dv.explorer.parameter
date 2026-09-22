@@ -124,6 +124,23 @@ confidence intervals and number of points contributing to the
 calculation. Decimal values on this table are rounded (mathematical,
 round-to-even) to four digits of precision.
 
+The p-values are computed as follows:
+
+- In the case of Pearson's Correlation: <!-- https://stackoverflow.com/questions/45411729/r-function-cor-test-how-is-the-p-value-calculated-for-pearson-correlation#comment77786988_45412227 -->
+
+  - Compute the t-statistic ($r$ is the correlation coefficient, the $df$ degrees of freedom is $n-2$ where $n$ is the number of samples):
+$$t=\frac{r\sqrt{df}}{\sqrt{1-r^{2}}}$$
+  - Get the minimum of the upper and lower probabilities of this t-statistic and multiply by 2 for a two-tailed p-value. In R, this can be written as: `pval = 2 * min(pt(t, df), pt(t, df, lower.tail = FALSE))`.
+  
+- In the case of Spearman's Correlation, the process is described in the R manual page for `?cor.test`:
+
+  > For Spearman's test, p-values are computed using algorithm AS 89 for n < 1290 and ‘exact = TRUE’, otherwise via the asymptotic t approximation.  Note that these are ‘exact’ for n < 10, and use an Edgeworth series approximation for larger sample sizes (the cutoff has been changed from the original paper).
+
+The confidence intervals are computed as follows:
+
+- In the case of Pearson's Correlation: Fisher's Z transform.
+- In the case of Spearman's Correlation: The method is described in  Section 1.32 of [Bonett (2021, Volume 2)](https://bpb-us-e1.wpmucdn.com/sites.ucsc.edu/dist/2/1389/files/2026/08/part2.pdf) and originally published in [Bonnet-Wright (2000)](https://web.archive.org/web/20130203182221/http://biostat.georgiahealth.edu/Journal%20Club/bonett_wright_2000.pdf). It matches the behavior of `statpsych::ci.spear`.
+
 # Creating a correlation heatmap application
 
 ```{r, eval=FALSE}

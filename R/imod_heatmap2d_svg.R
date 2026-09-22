@@ -1,8 +1,8 @@
 # Takes dataframe with x, y, z.
 
-HM2SVG <- pack_of_constants(CHART = "chart", PLOT = "plot", CLICK = "click") # nolint
+HM2SVG <- pack_of_constants(CHART = "chart", PLOT = "plot", CLICK = "click")
 
-HM2SVG_UI <- function(id) { # nolint
+HM2SVG_UI <- function(id) {
   ns <- shiny::NS(id)
   shiny::uiOutput(ns(HM2SVG$CHART))
 }
@@ -37,7 +37,7 @@ HM2SVG_UI <- function(id) { # nolint
 #' @param ns namespace to apply to the click events
 #'
 #' @keywords internal
-HM2SVG_plot <- function(ds, x_desc, y_desc, z_desc, pal_fun, palette, ns) { # nolint
+HM2SVG_plot <- function(ds, x_desc, y_desc, z_desc, pal_fun, palette, ns) {
   data <- ds
   # TODO: default palette?
   lev <- levels(data[["x"]])
@@ -67,9 +67,9 @@ HM2SVG_plot <- function(ds, x_desc, y_desc, z_desc, pal_fun, palette, ns) { # no
   svg_elem_stack <- list()
 
   # TODO: Repeats #irewah
-  SVG_append_raw <- function(s) svg_elem_list[[length(svg_elem_list) + 1]] <<- s # nolint
+  SVG_append_raw <- function(s) svg_elem_list[[length(svg_elem_list) + 1]] <<- s
 
-  SVG_push <- function(elem, desc, ...) { # nolint
+  SVG_push <- function(elem, desc, ...) {
     s <- paste0("<", elem, " ", ssub(desc, ...), ">")
     index <- length(svg_elem_list) + 1
     elem_index <- list(elem = elem, index = index)
@@ -78,7 +78,7 @@ HM2SVG_plot <- function(ds, x_desc, y_desc, z_desc, pal_fun, palette, ns) { # no
     return(elem_index)
   }
 
-  SVG_pop <- function(elem_index) { # nolint
+  SVG_pop <- function(elem_index) {
     top <- svg_elem_stack[[length(svg_elem_stack)]]
     if (!identical(top, elem_index)) stop("pop does not match push")
     s <- paste0("</", elem_index[["elem"]], ">")
@@ -86,7 +86,7 @@ HM2SVG_plot <- function(ds, x_desc, y_desc, z_desc, pal_fun, palette, ns) { # no
     svg_elem_stack[length(svg_elem_stack)] <<- NULL
   }
 
-  SVG_append <- function(elem, desc, ...) { # nolint
+  SVG_append <- function(elem, desc, ...) {
     id <- SVG_push(elem, desc, ...)
     SVG_pop(id)
   }
@@ -119,7 +119,7 @@ HM2SVG_plot <- function(ds, x_desc, y_desc, z_desc, pal_fun, palette, ns) { # no
   )
   outer_margin <- SVG_push("g", "transform='translate(X, Y)'", X = spacer_width, Y = spacer_width)
 
-  grid <- SVG_push("g", "transform='translate(W)'", W = legend_width + spacer_width)
+  grid <- SVG_push("g", "transform='translate(W)' style='cursor:pointer'", W = legend_width + spacer_width)
 
   # The bulk of the SVG contents are the grid cells. Instead of iterating through them, we interpolate a template string
   # with the contents of the data frame, because it's much faster
@@ -133,7 +133,6 @@ HM2SVG_plot <- function(ds, x_desc, y_desc, z_desc, pal_fun, palette, ns) { # no
     x <- cell_width * (i - 1) + ifelse(diagonal_mask, cell_width / 3, 0)
     y <- cell_width * (j - 1) + ifelse(diagonal_mask, cell_width / 3, 0)
 
-    # nolint start
     paste0(
       "<g onclick=\"Shiny.setInputValue('", ns(HM2SVG$CLICK), "', {x: ", i, ", y: ", j, "})\">
        <rect width='", size, "' height='", size, "' x='", x, "' y='", y, "' fill='", data[["color"]],
@@ -147,7 +146,6 @@ HM2SVG_plot <- function(ds, x_desc, y_desc, z_desc, pal_fun, palette, ns) { # no
      ",
       collapse = "\n"
     )
-    # nolint end
   })
   SVG_append_raw(cells)
 
@@ -157,7 +155,6 @@ HM2SVG_plot <- function(ds, x_desc, y_desc, z_desc, pal_fun, palette, ns) { # no
   for (i in seq_along(lev)) {
     l <- lev[[i]]
 
-    # nolint start
     label <- ssub("
     <foreignObject x='0' y='Y' width='W' height='H'>
     <div xmlns='http://www.w3.org/1999/xhtml' style='display:flex;align-items:center;height:100%;justify-content:end;-webkit-transform:rotate(0deg);'>
@@ -165,7 +162,6 @@ HM2SVG_plot <- function(ds, x_desc, y_desc, z_desc, pal_fun, palette, ns) { # no
     </div>
     </foreignObject>
     ", Y = (i - 1) * 100 + 10, W = legend_width, H = legend_height, LABEL = l)
-    # nolint end
     SVG_append_raw(label)
   }
 
@@ -173,7 +169,6 @@ HM2SVG_plot <- function(ds, x_desc, y_desc, z_desc, pal_fun, palette, ns) { # no
   for (i in seq_along(lev)) {
     l <- lev[[i]]
 
-    # nolint start
     label <- ssub("
     <foreignObject x='X' y='Y' width=1 height=1 style='overflow: visible'>
     <div xmlns='http://www.w3.org/1999/xhtml' style='display:flex;align-items:center;width:W;height:H;justify-content:end;-webkit-transform:rotate(-90deg);transform-origin: right;'>
@@ -185,7 +180,6 @@ HM2SVG_plot <- function(ds, x_desc, y_desc, z_desc, pal_fun, palette, ns) { # no
       Y = cell_width * length(lev) - legend_height / 2 + 10,
       W = paste0(legend_width, "px"), H = paste0(legend_height, "px"), LABEL = l
     )
-    # nolint end
     SVG_append_raw(label)
   }
 
@@ -270,9 +264,9 @@ HM2SVG_plot <- function(ds, x_desc, y_desc, z_desc, pal_fun, palette, ns) { # no
 #'         elements "top", "bottom", "left" and "right") and click (reactive that returns user click info)
 #' @keywords internal
 
-HM2SVG_server <- function(id, data, x_desc = "S", y_desc = "W", z_desc = "E", palette = NULL, # nolint
+HM2SVG_server <- function(id, data, x_desc = "S", y_desc = "W", z_desc = "E", palette = NULL,
                           margins = list(top = 0, bottom = 0, left = 0, right = 0),
-                          debug_gtable = FALSE) { # nolint
+                          debug_gtable = FALSE) {
   shiny::moduleServer(id = id, module = function(input, output, session) {
     ns <- session[["ns"]]
 
@@ -280,11 +274,21 @@ HM2SVG_server <- function(id, data, x_desc = "S", y_desc = "W", z_desc = "E", pa
       palette <- resolve_or_return(palette)
 
       na_color <- names(which(is.na(palette)))
-      if (length(na_color) > 0) stop("Explicit NA on palette still not supported") # TODO
+      if (length(na_color) > 1) stop("Explicit NA on palette should only be specified once")
 
       colors <- names(palette)
       values <- unname(palette)
       pal_fun <- scales::gradient_n_pal(colors, values)
+      
+      if (length(na_color) == 1) {
+        base_pal_fun <- pal_fun
+        pal_fun <- function(v) {
+          res <- base_pal_fun(v)
+          res[is.na(res)] <- na_color 
+          return(res)
+        }
+      }
+      
       return(pal_fun)
     })
 

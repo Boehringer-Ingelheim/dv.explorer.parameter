@@ -1122,7 +1122,7 @@ check_mod_boxplot <- function(
   using_new_api <- !using_old_api
 
   # X-axis resolution
-  x_axis_source <- "user"
+  x_axis_source <- "user" # TODO(miguel): What's the purpose of this (unused variable) # nolint
 
   if (using_old_api) {
 
@@ -1244,7 +1244,7 @@ check_mod_boxplot <- function(
     }
 
   } else {
-    #ahwopu
+    #ahwopu # FIXME(miguel)? checks OK[["visit_var"]] and then iterates over `x_axis_vars` and not over `visit_var` # nolint
     if (OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] && OK[["visit_var"]] && OK[["anlfl_vars"]]) {
       for (x_var in x_axis_vars) {
         check_unique_sub_cat_par_vis(
