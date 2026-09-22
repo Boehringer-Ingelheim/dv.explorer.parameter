@@ -87,7 +87,7 @@ test_that("apply_correlation_function generates data for a heatmap", {
 
 test_that("apply_correlation_function labels errors as NA" |> 
             vdoc[["add_spec"]](c(specs$corr_hm_module$show_errors_as_NA, specs$corr_hm_module$show_missing_data_as_NA)), {
-  # errors as NA
+  # Errors as NA
   df <- local({
     df <- data.frame(row.names = seq(4))
     df[[CNT$SBJ]] <- c("sbj_1", "sbj_2", "sbj_1", "sbj_2") |> as.factor()
@@ -103,21 +103,30 @@ test_that("apply_correlation_function labels errors as NA" |>
   pearson <- dv.explorer.parameter::pearson_correlation
   label <- "label"
   res <- apply_correlation_function(df, pearson, label)
+  # checks one element we know to be affected
   par_1_2_index <- which(res[["x"]] == "par_1 - vis_1" & res[["y"]] == "par_2 - vis_1")
   expect_equal(res[["z"]][[par_1_2_index]], NA_real_)
   expect_equal(res[["error"]][[par_1_2_index]], "not enough finite observations")
   expect_equal(res[["label"]][[par_1_2_index]], "NA")
- 
-  # missing data as NA
+
+  # checks complete output
+  expect_snapshot(res)
+  
+   
+  # Missing data as NA
   cat_par_vis <- list(category = c("cat_1", "cat_2", "cat_3"), 
                       parameter = c("par_1", "par_2", "par_3"), 
                       visit = list('vis_1', 'vis_1', 'vis_1'))
   res <- insert_parameter_visit_combinations_that_lack_data(res, cat_par_vis)
-  
+ 
+  # checks one element we know to be affected
   par_1_3_index <- which(res[["x"]] == "par_1 - vis_1" & res[["y"]] == "par_3 - vis_1")
   expect_equal(res[["z"]][[par_1_3_index]], NA_real_)
   expect_equal(res[["error"]][[par_1_3_index]], "not enough observations")
   expect_equal(res[["label"]][[par_1_3_index]], "NA")
+  
+  # checks complete output
+  expect_snapshot(res)
 })
 
 # listings/count table
