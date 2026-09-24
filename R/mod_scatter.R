@@ -16,8 +16,8 @@ SP <- poc( # nolint
     ),
     ANLFL_FILTER = "anlfl_filter",
     GRP_BUTTON = "grp_button",
-    GRP = "group",
-    COLOR = "color",
+    MAIN_GRP = "group",              # NOTE(miguel): Original string kept to avoid breaking bookmarks
+    SUB_GRP = "color",               # NOTE(miguel): Original string kept to avoid breaking bookmarks
     OTHER_BUTTON = "other_button",
     X_LIM_MAX = "x_lim_max",
     X_LIM_MIN = "x_lim_min",
@@ -44,8 +44,8 @@ SP <- poc( # nolint
       ANLFL_FILTER = "Analysis Flag Filter",
       PAR_TRANSFORM = "Transform",
       GRP_BUTTON = "Grouping",
-      GRP = "Group by",
-      COLOR = "Color by",
+      MAIN_GRP = "Group by",
+      SUB_GRP = "Subgroup by",
       OTHER_BUTTON = "Other",
       X_LIM = "X limit",
       Y_LIM = "Y limit",
@@ -147,10 +147,10 @@ scatterplot_UI <- function(id) { # nolint
   group_menu <- drop_menu_helper(
     ns(SP$ID$GRP_BUTTON), SP$MSG$LABEL$GRP_BUTTON,
     col_menu_UI(
-      id = ns(SP$ID$GRP)
+      id = ns(SP$ID$MAIN_GRP)
     ),
     col_menu_UI(
-      id = ns(SP$ID$COLOR)
+      id = ns(SP$ID$SUB_GRP)
     )
   )
 
@@ -237,6 +237,9 @@ scatterplot_UI <- function(id) { # nolint
 #' It expects, at least, the columns passed in the parameters, `subjid_var`, `cat_var`, `par_var`,
 #' `visit_var` and `value_var`. The values of these variables are as described
 #' in the CDISC standard for the variables USUBJID, PARCAT, PARAM, AVISIT and AVAL.
+#' 
+#' Optional columns specified by `ref_line_vars` should contain the same numeric value for all
+#' records of the same parameter for any given subject.
 #'
 #' ### group_dataset
 #'
@@ -260,6 +263,11 @@ scatterplot_UI <- function(id) { # nolint
 #'
 #' Columns from `bm_dataset` that correspond to the parameter category, parameter and visit
 #'
+#' @param ref_line_vars `[character(n)]`
+#'
+#' Columns for `bm_dataset` specifying reference values for parameters.
+#' See [this article](../articles/scatterplot_reference_values.html) for more details
+#'
 #' @param value_vars `[character(n)]`
 #'
 #' Columns from `bm_dataset` that correspond to values of the parameters
@@ -281,7 +289,7 @@ scatterplot_UI <- function(id) { # nolint
 #'
 #' Default values for the selectors
 #'
-#' @param default_y_visit,default_y_value,default_group,default_color `[character(1)|NULL]`
+#' @param default_y_visit,default_y_value,default_main_group,default_sub_group,default_group,default_color `[character(1)|NULL]`
 #'
 #' Default values for the selectors
 #'
@@ -306,8 +314,10 @@ scatterplot_server <- function(id,
                                default_y_par = NULL,
                                default_y_value = NULL,
                                default_y_visit = NULL,
-                               default_group = NULL,
-                               default_color = NULL,
+                               default_main_group = NULL,
+                               default_sub_group = NULL,
+                               default_group = NULL, # TODO: map and deprecate
+                               default_color = NULL, # TODO: map and deprecate
                                compute_lm_cor_fn = sp_compute_lm_cor_default) {
   ac <- checkmate::makeAssertCollection()
   # id assert ---- It goes on its own as id is used to provide context to the other assertions
@@ -327,6 +337,8 @@ scatterplot_server <- function(id,
   checkmate::assert_string(default_y_par, min.chars = 1, null.ok = TRUE, add = ac)
   checkmate::assert_string(default_y_visit, min.chars = 1, null.ok = TRUE, add = ac)
   checkmate::assert_string(default_y_value, min.chars = 1, null.ok = TRUE, add = ac)
+  checkmate::assert_string(default_main_group, min.chars = 1, null.ok = TRUE, add = ac)
+  checkmate::assert_string(default_sub_group, min.chars = 1, null.ok = TRUE, add = ac)
   checkmate::assert_string(default_group, min.chars = 1, null.ok = TRUE, add = ac)
   checkmate::assert_string(default_color, min.chars = 1, null.ok = TRUE, add = ac)
   checkmate::assert_character(
@@ -415,23 +427,23 @@ scatterplot_server <- function(id,
 
     # input ----
     inputs <- list()
-    inputs[[SP$ID$GRP]] <- col_menu_server(
-      id = SP$ID$GRP,
+    inputs[[SP$ID$MAIN_GRP]] <- col_menu_server(
+      id = SP$ID$MAIN_GRP,
       data = v_group_dataset,
-      label = SP$MSG$LABEL$GRP,
+      label = SP$MSG$LABEL$MAIN_GRP,
       include_func = function(x) {
         is.factor(x) || is.character(x)
       },
-      default = default_group
+      default = default_main_group
     )
-    inputs[[SP$ID$COLOR]] <- col_menu_server(
-      id = SP$ID$COLOR,
+    inputs[[SP$ID$SUB_GRP]] <- col_menu_server(
+      id = SP$ID$SUB_GRP,
       data = v_group_dataset,
-      label = SP$MSG$LABEL$COLOR,
+      label = SP$MSG$LABEL$SUB_GRP,
       include_func = function(x) {
         is.factor(x) || is.character(x)
       },
-      default = default_color
+      default = default_sub_group
     )
     inputs[[SP$ID$X$PAR]] <- parameter_server(
       id = SP$ID$X$PAR,
@@ -574,16 +586,16 @@ scatterplot_server <- function(id,
 
     group_iv <- shinyvalidate::InputValidator$new()
     group_iv$add_rule(
-      get_id(inputs[[SP$ID$GRP]]),
+      get_id(inputs[[SP$ID$MAIN_GRP]]),
       sv_not_empty(
-        inputs[[SP$ID$GRP]],
+        inputs[[SP$ID$MAIN_GRP]],
         SP$MSG$VALIDATE$NO_MAIN_GROUP_SEL
       )
     )
     group_iv$add_rule(
-      get_id(inputs[[SP$ID$COLOR]]),
+      get_id(inputs[[SP$ID$SUB_GRP]]),
       sv_not_empty(
-        inputs[[SP$ID$COLOR]],
+        inputs[[SP$ID$SUB_GRP]],
         SP$MSG$VALIDATE$NO_SUB_GROUP_SEL
       )
     )
@@ -619,7 +631,7 @@ scatterplot_server <- function(id,
         subset_inputs <- c(
           SP$ID$X$PAR, SP$ID$X$PAR_VISIT, SP$ID$X$PAR_VALUE,
           SP$ID$Y$PAR, SP$ID$Y$PAR_VISIT, SP$ID$Y$PAR_VALUE,
-          SP$ID$GRP, SP$ID$COLOR
+          SP$ID$MAIN_GRP, SP$ID$SUB_GRP
         )
         if (!is.null(inputs[[SP$ID$ANLFL_FILTER]]))
           subset_inputs <- c(subset_inputs, SP$ID$ANLFL_FILTER)
@@ -645,8 +657,8 @@ scatterplot_server <- function(id,
 
       group_vect <- drop_nones(
         stats::setNames(
-          c(l_input[[SP$ID$GRP]], l_input[[SP$ID$COLOR]]),
-          c(CNT$MAIN_GROUP, CNT$COLOR_GROUP)
+          c(l_input[[SP$ID$MAIN_GRP]], l_input[[SP$ID$SUB_GRP]]),
+          c(CNT$MAIN_GROUP, CNT$SUB_GROUP)
         )
       )
 
@@ -809,8 +821,10 @@ mod_scatterplot <- function(module_id,
                             default_y_par = NULL,
                             default_y_value = NULL,
                             default_y_visit = NULL,
-                            default_group = NULL,
-                            default_color = NULL,
+                            default_main_group = NULL,
+                            default_sub_group = NULL,
+                            default_group = NULL, # TODO: map and deprecate
+                            default_color = NULL, # TODO: map and deprecate
                             compute_lm_cor_fn = sp_compute_lm_cor_default) {
   mod <- list(
     ui = scatterplot_UI,
@@ -835,6 +849,8 @@ mod_scatterplot <- function(module_id,
         default_y_par = default_y_par,
         default_y_value = default_y_value,
         default_y_visit = default_y_visit,
+        default_main_group = default_main_group,
+        default_sub_group = default_sub_group,
         default_group = default_group,
         default_color = default_color,
         compute_lm_cor_fn = compute_lm_cor_fn
@@ -867,6 +883,8 @@ mod_scatterplot_API_docs <- list(
   default_y_par = "",
   default_y_value = "",
   default_y_visit = "",
+  default_main_group = "",
+  default_sub_group = "",
   default_group = "",
   default_color = "",
   compute_lm_cor_fn = ""
@@ -891,6 +909,8 @@ mod_scatterplot_API_spec <- TC$group(
   default_y_par = TC$choice_from_col_contents("par_var") |> TC$flag("optional"),
   default_y_value = TC$choice("value_vars") |> TC$flag("optional"), # FIXME(miguel): ? Should be called default_value_var
   default_y_visit = TC$choice_from_col_contents("visit_var") |> TC$flag("optional"),
+  default_main_group = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("optional"),
+  default_sub_group = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("optional"),
   default_group = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("optional"),
   default_color = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("optional"),
   compute_lm_cor_fn = TC$fn(arg_count = 1) |> TC$flag("optional")
@@ -901,6 +921,7 @@ check_mod_scatterplot <- function(
     cat_var, par_var, value_vars, visit_var, ref_line_vars, anlfl_vars, subjid_var,
     default_x_cat, default_x_par, default_x_value, default_x_visit,
     default_y_cat, default_y_par, default_y_value, default_y_visit,
+    default_main_group, default_sub_group,
     default_group, default_color, compute_lm_cor_fn) {
   err <- CM$container()
 
@@ -911,6 +932,7 @@ check_mod_scatterplot <- function(
     cat_var, par_var, value_vars, visit_var, ref_line_vars, anlfl_vars, subjid_var,
     default_x_cat, default_x_par, default_x_value, default_x_visit,
     default_y_cat, default_y_par, default_y_value, default_y_visit,
+    default_main_group, default_sub_group,
     default_group, default_color, compute_lm_cor_fn, err
   )
 
@@ -1033,7 +1055,7 @@ sp_subset_data <- function(x_cat,
   is_grouped <- length(group_vect) > 0
 
   if (is_grouped) {
-    checkmate::assert_subset(names(group_vect), c(CNT$MAIN_GROUP, CNT$COLOR_GROUP))
+    checkmate::assert_subset(names(group_vect), c(CNT$MAIN_GROUP, CNT$SUB_GROUP))
   }
 
   grp_fragment <- subset_adsl(
@@ -1076,9 +1098,9 @@ sp_subset_data <- function(x_cat,
 
 # Chart functions ----
 
-scatterplot_chart <- function(ds) {
+scatterplot_chart <- function(ds, ref_line_data = NULL) {
   is_grouped <- CNT$MAIN_GROUP %in% names(ds)
-  is_colored <- CNT$COLOR_GROUP %in% names(ds)
+  is_colored <- CNT$SUB_GROUP %in% names(ds)
 
   common_aes <- ggplot2::aes(
     x = .data[[CNT$X_VAL]],
@@ -1088,8 +1110,8 @@ scatterplot_chart <- function(ds) {
   if (is_grouped) {
     if (is_colored) {
       point_aes <- ggplot2::aes(
-        color = .data[[CNT$COLOR_GROUP]],
-        shape = .data[[CNT$MAIN_GROUP]]
+        color = .data[[CNT$SUB_GROUP]],
+        shape = .data[[CNT$MAIN_GROUP]] # TODO(miguel): #reverse_color_shape Use color for main grouping and shape for subgrouping
       )
     } else {
       point_aes <- ggplot2::aes(
@@ -1099,7 +1121,7 @@ scatterplot_chart <- function(ds) {
   } else {
     if (is_colored) {
       point_aes <- ggplot2::aes(
-        color = .data[[CNT$COLOR_GROUP]]
+        color = .data[[CNT$SUB_GROUP]] # TODO: #reverse_color_shape
       )
     } else {
       point_aes <- ggplot2::aes()
@@ -1109,7 +1131,7 @@ scatterplot_chart <- function(ds) {
   lab_args <- list(
     x = get_lbl_robust(ds, CNT$X_VAL),
     y = get_lbl_robust(ds, CNT$Y_VAL),
-    color = if (is_colored) get_lbl_robust(ds, CNT$COLOR_GROUP) else NULL,
+    color = if (is_colored) get_lbl_robust(ds, CNT$SUB_GROUP) else NULL,  # TODO: #reverse_color_shape
     shape = if (is_grouped) get_lbl_robust(ds, CNT$MAIN_GROUP) else NULL
   )
 
@@ -1164,7 +1186,7 @@ sp_compute_lm_cor_default <- function(ds) {
 
 # Composed functions ----
 
-sp_get_scatterplot_output <- function(ds, xlim = c(NA_real_, NA_real_), ylim = c(NA_real_, NA_real_)) {
+sp_get_scatterplot_output <- function(ds, xlim = c(NA_real_, NA_real_), ylim = c(NA_real_, NA_real_), ref_line_data = NULL) {
   # Complete cases
   complete_lgl_mask <- stats::complete.cases(ds[c(CNT$X_VAL, CNT$Y_VAL)])
 
@@ -1201,7 +1223,7 @@ sp_get_scatterplot_output <- function(ds, xlim = c(NA_real_, NA_real_), ylim = c
   ds <- ds[complete_lgl_mask & inbounds_mask, ]
   ds <- possibly_set_lbls(ds, lbls)
 
-  scatterplot_chart(ds)
+  scatterplot_chart(ds, ref_line_data)
 }
 
 sp_get_listings_output <- function(ds, brush) {

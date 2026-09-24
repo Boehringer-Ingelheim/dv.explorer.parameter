@@ -4,13 +4,13 @@
       shiny::isolate(exported_test_values[[SP$ID$TABLE_LISTING]]$render())[["x"]][[
         "data"]]
     Output
-            subject_id x_value y_value main_group color_group
-      7   7          7     337     507          B           F
-      8   8          8     338     508          A           H
-      9   9          9     339     509          A           E
-      10 10         10     340     510          B           G
-      11 11         11     341     511          B           F
-      12 12         12     342     512          B           E
+            subject_id x_value y_value main_group sub_group
+      7   7          7     337     507          B         F
+      8   8          8     338     508          A         H
+      9   9          9     339     509          A         E
+      10 10         10     340     510          B         G
+      11 11         11     341     511          B         F
+      12 12         12     342     512          B         E
 
 ---
 

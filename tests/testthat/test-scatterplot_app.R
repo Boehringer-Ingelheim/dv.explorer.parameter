@@ -20,8 +20,8 @@ ID <- poc(
       VAL = tns(SP$ID$Y$PAR_VALUE, "val"),
       VIS = tns(SP$ID$Y$PAR_VISIT, "val")
     ),
-    GRP = tns(SP$ID$GRP, "val"),
-    COLOR = tns(SP$ID$COLOR, "val"),
+    MAIN_GRP = tns(SP$ID$MAIN_GRP, "val"),
+    SUB_GRP = tns(SP$ID$SUB_GRP, "val"),
     ANLFL = tns(BP$ID$ANLFL_FILTER, "val")
   ),
   OUTPUT = poc(
@@ -55,8 +55,8 @@ local({
   inputs[[ID$INPUT$Y$CAT]] <- "PARCAT3"
   inputs[[ID$INPUT$Y$VAL]] <- "VALUE3"
   inputs[[ID$INPUT$Y$VIS]] <- "VISIT3"
-  inputs[[ID$INPUT$GRP]] <- "CAT2"
-  inputs[[ID$INPUT$COLOR]] <- "CAT3"
+  inputs[[ID$INPUT$MAIN_GRP]] <- "CAT2"
+  inputs[[ID$INPUT$SUB_GRP]] <- "CAT3"
 
   # Set in two steps because Category must be set before parameter can be set
   inputs2 <- list()
@@ -94,7 +94,7 @@ local({
     x_vis = inputs[[ID$INPUT$X$VIS]],
     y_vis = inputs[[ID$INPUT$Y$VIS]],
     vis_col = app_args$srv$visit_var,
-    group_vect = stats::setNames(c("CAT2", "CAT3"), c(CNT$MAIN_GROUP, CNT$COLOR_GROUP)),
+    group_vect = stats::setNames(c("CAT2", "CAT3"), c(CNT$MAIN_GROUP, CNT$SUB_GROUP)),
     bm_ds = shiny::isolate(app_args$srv$bm_dataset()),
     group_ds = shiny::isolate(app_args$srv$group_dataset()),
     subj_col = app_args$srv$subjid_var

@@ -13,6 +13,7 @@ scatterplot_server(
   par_var = "PARAM",
   value_vars = "AVAL",
   visit_var = "AVISIT",
+  ref_line_vars = character(0),
   anlfl_vars = NULL,
   subjid_var = "USUBJID",
   default_x_cat = NULL,
@@ -23,6 +24,8 @@ scatterplot_server(
   default_y_par = NULL,
   default_y_value = NULL,
   default_y_visit = NULL,
+  default_main_group = NULL,
+  default_sub_group = NULL,
   default_group = NULL,
   default_color = NULL,
   compute_lm_cor_fn = sp_compute_lm_cor_default
@@ -47,6 +50,11 @@ Columns from \code{bm_dataset} that correspond to the parameter category, parame
 
 Columns from \code{bm_dataset} that correspond to values of the parameters}
 
+\item{ref_line_vars}{\verb{[character(n)]}
+
+Columns for \code{bm_dataset} specifying reference values for parameters.
+See \href{../articles/scatterplot_reference_values.html}{this article} for more details}
+
 \item{anlfl_vars}{\verb{[character(n)]}
 
 Columns from \code{bm_dataset} that correspond to analysis flags}
@@ -59,7 +67,7 @@ Column corresponding to subject ID}
 
 Default values for the selectors}
 
-\item{default_y_visit, default_y_value, default_group, default_color}{\verb{[character(1)|NULL]}
+\item{default_y_visit, default_y_value, default_main_group, default_sub_group, default_group, default_color}{\verb{[character(1)|NULL]}
 
 Default values for the selectors}
 
@@ -79,6 +87,9 @@ https://www.cdisc.org/kb/examples/adam-basic-data-structure-bds-using-paramcd-80
 It expects, at least, the columns passed in the parameters, \code{subjid_var}, \code{cat_var}, \code{par_var},
 \code{visit_var} and \code{value_var}. The values of these variables are as described
 in the CDISC standard for the variables USUBJID, PARCAT, PARAM, AVISIT and AVAL.
+
+Optional columns specified by \code{ref_line_vars} should contain the same numeric value for all
+records of the same parameter for any given subject.
 }
 
 \subsection{group_dataset}{
