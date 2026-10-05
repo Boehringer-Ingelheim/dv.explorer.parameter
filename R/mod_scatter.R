@@ -23,6 +23,7 @@ SP <- poc( # nolint
     X_LIM_MIN = "x_lim_min",
     Y_LIM_MAX = "y_lim_max",
     Y_LIM_MIN = "y_lim_min",
+    SHOW_ALL_REFERENCE_VALUES = "show_all_reference_values",
     CHART = "chart",
     TAB_TABLES = "tab_tables",
     TABLE_LISTING = "table_listing",
@@ -50,30 +51,19 @@ SP <- poc( # nolint
       X_LIM = "X limit",
       Y_LIM = "Y limit",
       TABLE_LISTING = "Data Listing",
-      TABLE_REGRESSION = "Linear Regression"
+      TABLE_REGRESSION = "Linear Regression",
+      SHOW_ALL_REFERENCE_VALUES = "Show all reference values"
     ),
     VALIDATE = poc(
       NO_CAT_SEL = "Select a category",
       NO_PAR_SEL = "Select a parameter",
       NO_VALUE_SEL = "Value selection does not exist",
-      UKNOWN_VALUE_SEL = "Select a value",
       NO_VISIT_SEL = "Select a visit",
       NO_MAIN_GROUP_SEL = "Select a group",
       NO_SUB_GROUP_SEL = "(Subgroup) Select a group",
-      NO_PAGE_GROUP_SEL = "(Page group) Select a group",
       BM_TOO_MANY_ROWS = "(Biomarker) The selection returns more than 1 row per subject and cannot be plotted",
       GROUP_TOO_MANY_ROWS = "(Group) The selection returns more than 1 row per subject and cannot be plotted",
-      GROUP_COL_REPEATED = "(Group) Selected group is already a column in resp or pred datasets",
-      NOT_INVARIANT_N_SBJ = "The number of subjects differ between datasets",
-      NO_ROWS = "Current selection returns 0 rows",
-      NON_POS_SIZE = "Figure size must be positive",
-      X_COL_METRICS_NOT_IN_DS = "The selected column for the metrics X axis does not exist in the metrics dataset",
-      N_SUBJECT_EMPTY_RESPONSES = function(x) {
-        paste(x, "subjects with empty responses!")
-      },
-      CLICK_LISTING = "Click on a boxplot to see listing",
-      NO_GROUP_SEL = "Select a group",
-      NO_COLOR_SEL = "Select a color"
+      GROUP_COL_REPEATED = "(Group) Selected group is already a column in resp or pred datasets"
     )
   )
 )
@@ -165,6 +155,11 @@ scatterplot_UI <- function(id) { # nolint
     shiny::splitLayout(
       shiny::numericInput(ns(SP$ID$Y_LIM_MAX), NULL, NULL, width = 75),
       shiny::numericInput(ns(SP$ID$Y_LIM_MIN), NULL, NULL, width = 75)
+    ),
+    shiny::checkboxInput(
+      ns(SP$ID$SHOW_ALL_REFERENCE_VALUES),
+      SP$MSG$LABEL$SHOW_ALL_REFERENCE_VALUES,
+      value = FALSE
     )
   )
 
@@ -685,7 +680,53 @@ scatterplot_server <- function(id,
     lm_cor <- shiny::reactive({
       sp_apply_lm_cor(data_subset(), lm_cor_fn = compute_lm_cor_fn)
     })
-
+    
+    compute_df_for_ref_line_data <- function(df, cat, par, main_grp, ref_line_vars) {
+      if (identical(main_grp, "None")) main_grp <- NULL
+      
+      mask <- (df[[VAR$CAT]] == cat & df[[VAR$PAR]] == par)
+      
+      # TODO: Consider checking PAR is unique across CATs (requires changes to `generate_ref_line_data` and `mod_lineplot`)
+      lbls <- get_lbls_robust(df)
+      keep_cols <- intersect(c(VAR$PAR, main_grp, ref_line_vars), names(df))
+      df <- unique(df[keep_cols][mask, , drop = FALSE])  # Unique removes labels
+      df <- possibly_set_lbls(df, lbls)
+      
+      rename_list <- stats::setNames(
+        c(CNT$SBJ, CNT$CAT, CNT$PAR, CNT$VIS, CNT$MAIN_GROUP),
+        c(VAR$SBJ, VAR$CAT, VAR$PAR, VAR$VIS, main_grp)
+      )
+      df <- rename_with_list(df, rename_list)
+      
+      return(df)
+    }
+    
+    ref_line_data <- shiny::reactive({
+      show_all_ref_vals <- isTRUE(input[[SP$ID$SHOW_ALL_REFERENCE_VALUES]])
+      
+      l_input <- v_input_subset()
+      
+      df_x <- compute_df_for_ref_line_data(
+        df = v_bm_dataset(),
+        cat = l_input[[SP$ID$X$PAR]][["cat"]],
+        par = l_input[[SP$ID$X$PAR]][["par"]],
+        main_grp = l_input[[SP$ID$MAIN_GRP]],
+        ref_line_vars = ref_line_vars
+      )
+      
+      df_y <- compute_df_for_ref_line_data(
+        df = v_bm_dataset(),
+        cat = l_input[[SP$ID$Y$PAR]][["cat"]],
+        par = l_input[[SP$ID$Y$PAR]][["par"]],
+        main_grp = l_input[[SP$ID$MAIN_GRP]],
+        ref_line_vars = ref_line_vars
+      )
+      
+      res <- list(x = generate_ref_line_data(df_x, show_all_ref_vals),
+                  y = generate_ref_line_data(df_y, show_all_ref_vals))
+      if (show_all_ref_vals) attr(res, "force_black_lines") <- TRUE
+      return(res)
+    })
 
     # List of output arguments
     output_arguments <- list()
@@ -696,7 +737,8 @@ scatterplot_server <- function(id,
       list(
         ds = data_subset(),
         xlim = inputs[["x_lim"]](),
-        ylim = inputs[["y_lim"]]()
+        ylim = inputs[["y_lim"]](),
+        ref_line_data = ref_line_data()
       )
     )
 
@@ -706,6 +748,21 @@ scatterplot_server <- function(id,
       })
     }
     output[[SP$ID$CHART]] <- shiny::renderPlot({
+      local({ # warn against overlapping ref lines
+        args <- output_arguments[[SP$ID$CHART]][["arguments"]]()
+        repeat_info <- c(
+          compute_overlap_of_ref_line_data(args[["ref_line_data"]][["x"]]),
+          compute_overlap_of_ref_line_data(args[["ref_line_data"]][["y"]])
+        )
+        for (i in seq_along(repeat_info)){
+          e <- repeat_info[[i]]
+          msg <- sprintf("Reference lines for parameter %s and groups %s overlap on value %s.",
+                         e$parameter, paste(e$groups, collapse = ", "), e$value)
+          shiny::showNotification(ui = msg, duration = NULL, closeButton = TRUE, type = "warning",
+                                  id = paste0(LP_ID$OVERLAP_WARNING, i))
+        }
+      })
+
       do.call(sp_get_scatterplot_output, output_arguments[[SP$ID$CHART]][["arguments"]]())
     })
 
@@ -1099,8 +1156,8 @@ sp_subset_data <- function(x_cat,
 # Chart functions ----
 
 scatterplot_chart <- function(ds, ref_line_data = NULL) {
-  is_grouped <- CNT$MAIN_GROUP %in% names(ds)
-  is_colored <- CNT$SUB_GROUP %in% names(ds)
+  is_grouped <- CNT$SUB_GROUP %in% names(ds)
+  is_colored <- CNT$MAIN_GROUP %in% names(ds)
 
   common_aes <- ggplot2::aes(
     x = .data[[CNT$X_VAL]],
@@ -1110,18 +1167,18 @@ scatterplot_chart <- function(ds, ref_line_data = NULL) {
   if (is_grouped) {
     if (is_colored) {
       point_aes <- ggplot2::aes(
-        color = .data[[CNT$SUB_GROUP]],
-        shape = .data[[CNT$MAIN_GROUP]] # TODO(miguel): #reverse_color_shape Use color for main grouping and shape for subgrouping
+        color = .data[[CNT$MAIN_GROUP]],
+        shape = .data[[CNT$SUB_GROUP]] # TODO(miguel): #reverse_color_shape Use color for main grouping and shape for subgrouping
       )
     } else {
       point_aes <- ggplot2::aes(
-        shape = .data[[CNT$MAIN_GROUP]]
+        shape = .data[[CNT$SUB_GROUP]]
       )
     }
   } else {
     if (is_colored) {
       point_aes <- ggplot2::aes(
-        color = .data[[CNT$SUB_GROUP]] # TODO: #reverse_color_shape
+        color = .data[[CNT$MAIN_GROUP]] # TODO: #reverse_color_shape
       )
     } else {
       point_aes <- ggplot2::aes()
@@ -1131,8 +1188,8 @@ scatterplot_chart <- function(ds, ref_line_data = NULL) {
   lab_args <- list(
     x = get_lbl_robust(ds, CNT$X_VAL),
     y = get_lbl_robust(ds, CNT$Y_VAL),
-    color = if (is_colored) get_lbl_robust(ds, CNT$SUB_GROUP) else NULL,  # TODO: #reverse_color_shape
-    shape = if (is_grouped) get_lbl_robust(ds, CNT$MAIN_GROUP) else NULL
+    color = if (is_colored) get_lbl_robust(ds, CNT$MAIN_GROUP) else NULL,  # TODO: #reverse_color_shape
+    shape = if (is_grouped) get_lbl_robust(ds, CNT$SUB_GROUP) else NULL
   )
 
   labs <- do.call(
@@ -1154,6 +1211,41 @@ scatterplot_chart <- function(ds, ref_line_data = NULL) {
       axis.text.x = ggplot2::element_text(size = STYLE$AXIS_TEXT_SIZE),
       axis.text.y = ggplot2::element_text(size = STYLE$AXIS_TEXT_SIZE)
     )
+  
+  # Reference lines
+  for (axis in c("x", "y")){
+    ref_line_data_axis <- ref_line_data[[axis]]
+    
+    for (entry_name in names(ref_line_data_axis)){
+      # TODO? plot in descending order of value instead, so that legend matches chart top-to-bottom
+      p <- local({ # local because of NSE symbol capture
+        ref_line_var_data <- ref_line_data_axis[[entry_name]]
+        
+        label_col_name <- "Reference lines"
+        ref_line_var_data[[label_col_name]] <- entry_name
+        colors <- ref_line_var_data[[CNT$MAIN_GROUP]]
+       
+        if (axis == "x") {
+          args <- list(
+            data = ref_line_var_data,
+            ggplot2::aes(xintercept = .data[[CNT$VAL]], linetype = .data[[label_col_name]], color = colors)
+          )
+          if (isTRUE(attr(ref_line_data, "force_black_lines"))) args[["color"]] <- "#000000"
+          p <- p + do.call(ggplot2::geom_vline, args)
+        } else {
+          stopifnot(axis == "y")
+          args <- list(
+            data = ref_line_var_data,
+            ggplot2::aes(yintercept = .data[[CNT$VAL]], linetype = .data[[label_col_name]], color = colors)
+          )
+          if (isTRUE(attr(ref_line_data, "force_black_lines"))) args[["color"]] <- "#000000"
+          p <- p + do.call(ggplot2::geom_hline, args)
+        }
+        
+        return(p)
+      })
+    }
+  }
 
   p
 }

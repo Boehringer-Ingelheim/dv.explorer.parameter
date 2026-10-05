@@ -107,7 +107,8 @@ local({
       expected <- list(
         ds = expected_ds,
         xlim = c(NA_real_, NA_real_),
-        ylim = c(NA_real_, NA_real_)
+        ylim = c(NA_real_, NA_real_),
+        ref_line_data = list(x = list(), y = list())
       )
 
       exported <- shiny::isolate(exported_test_values[[SP$ID$CHART]][["arguments"]]())
