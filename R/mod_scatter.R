@@ -720,8 +720,8 @@ scatterplot_server <- function(id,
       )
       
       res <- list(x = generate_ref_line_data(df_x, show_all_ref_vals),
-                  y = generate_ref_line_data(df_y, show_all_ref_vals))
-      if (show_all_ref_vals) attr(res, "force_black_lines") <- TRUE
+                  y = generate_ref_line_data(df_y, show_all_ref_vals),
+                  force_black_lines = show_all_ref_vals)
       return(res)
     })
 
@@ -1005,7 +1005,7 @@ mod_scatterplot_API_spec <- TC$group(
   default_sub_group = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("optional"),
   default_group = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("optional"),
   default_color = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("optional"),
-  default_include_regression_info = TC$logical(),
+  default_include_regression_info = TC$logical() |> TC$flag("optional"),
   compute_lm_cor_fn = TC$fn(arg_count = 1) |> TC$flag("optional")
 ) |> TC$attach_docs(mod_scatterplot_API_docs)
 
@@ -1263,7 +1263,7 @@ scatterplot_chart <- function(ds, include_regression_line, ref_line_data = NULL)
             data = ref_line_var_data,
             ggplot2::aes(xintercept = .data[[CNT$VAL]], linetype = .data[[label_col_name]], color = colors)
           )
-          if (isTRUE(attr(ref_line_data, "force_black_lines"))) args[["color"]] <- "#000000"
+          if (ref_line_data[["force_black_lines"]]) args[["color"]] <- "#000000"
           p <- p + do.call(ggplot2::geom_vline, args)
         } else {
           stopifnot(axis == "y")
@@ -1271,7 +1271,7 @@ scatterplot_chart <- function(ds, include_regression_line, ref_line_data = NULL)
             data = ref_line_var_data,
             ggplot2::aes(yintercept = .data[[CNT$VAL]], linetype = .data[[label_col_name]], color = colors)
           )
-          if (isTRUE(attr(ref_line_data, "force_black_lines"))) args[["color"]] <- "#000000"
+          if (ref_line_data[["force_black_lines"]]) args[["color"]] <- "#000000"
           p <- p + do.call(ggplot2::geom_hline, args)
         }
         

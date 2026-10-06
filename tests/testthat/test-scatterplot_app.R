@@ -109,7 +109,7 @@ local({
         xlim = c(NA_real_, NA_real_),
         ylim = c(NA_real_, NA_real_),
         include_regression_line = TRUE,
-        ref_line_data = list(x = list(), y = list())
+        ref_line_data = list(x = list(), y = list(), force_black_lines = FALSE)
       )
 
       exported <- shiny::isolate(exported_test_values[[SP$ID$CHART]][["arguments"]]())

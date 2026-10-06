@@ -476,7 +476,7 @@ check_mod_scatterplot_auto <- function(afmm, datasets, module_id, bm_dataset_nam
     flags <- list(optional = TRUE)
     OK[["default_color"]] <- OK[["group_dataset_name"]] && CM$check_dataset_colum_name("default_color",
         default_color, subkind, flags, group_dataset_name, datasets[[group_dataset_name]], err)
-    flags <- structure(list(), names = character(0))
+    flags <- list(optional = TRUE)
     OK[["default_include_regression_info"]] <- CM$check_type("default_include_regression_info", default_include_regression_info,
         "logical", flags, err)
     flags <- list(optional = TRUE)
