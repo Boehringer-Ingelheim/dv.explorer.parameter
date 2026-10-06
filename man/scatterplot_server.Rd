@@ -28,6 +28,7 @@ scatterplot_server(
   default_sub_group = NULL,
   default_group = NULL,
   default_color = NULL,
+  default_include_regression_info = default_include_regression_info,
   compute_lm_cor_fn = sp_compute_lm_cor_default
 )
 }

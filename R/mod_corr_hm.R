@@ -34,8 +34,8 @@ CH_MSG <- poc( # nolint
     CORR_METHOD_PEARSON = "Pearson",
     CORR_METHOD_SPEARMAN = "Spearman",
     P_VALUE = "p-value (2-sided)",
-    CI_MIN = "95% CI (min)",
-    CI_MAX = "95% CI (max)",
+    CI_MIN = "95% CI (lower)",
+    CI_MAX = "95% CI (upper)",
     COUNT = "N",
     TABLE_CORRELATION_LISTING = "Correlation Listing"
   ),

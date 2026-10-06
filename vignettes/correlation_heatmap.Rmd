@@ -124,13 +124,13 @@ confidence intervals and number of points contributing to the
 calculation. Decimal values on this table are rounded (mathematical,
 round-to-even) to four digits of precision.
 
-The p-values are computed as follows:
+The p-values are computed using the `stats::cor.test` function:
 
-- In the case of Pearson's Correlation: <!-- https://stackoverflow.com/questions/45411729/r-function-cor-test-how-is-the-p-value-calculated-for-pearson-correlation#comment77786988_45412227 -->
+- In the case of Pearson's Correlation, the underlying code: <!-- https://stackoverflow.com/questions/45411729/r-function-cor-test-how-is-the-p-value-calculated-for-pearson-correlation#comment77786988_45412227 -->
 
-  - Compute the t-statistic ($r$ is the correlation coefficient, the $df$ degrees of freedom is $n-2$ where $n$ is the number of samples):
+  - Computes the t-statistic ($r$ is the correlation coefficient, the $df$ degrees of freedom is $n-2$ where $n$ is the number of samples):
 $$t=\frac{r\sqrt{df}}{\sqrt{1-r^{2}}}$$
-  - Get the minimum of the upper and lower probabilities of this t-statistic and multiply by 2 for a two-tailed p-value. In R, this can be written as: `pval = 2 * min(pt(t, df), pt(t, df, lower.tail = FALSE))`.
+  - Gets the minimum of the upper and lower probabilities of this t-statistic and multiplies by 2 for a two-tailed p-value. In R, this can be written as: `pval = 2 * min(pt(t, df), pt(t, df, lower.tail = FALSE))`.
   
 - In the case of Spearman's Correlation, the process is described in the R manual page for `?cor.test`:
 

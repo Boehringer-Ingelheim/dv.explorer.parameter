@@ -4,7 +4,7 @@
 \alias{scatterplot_UI}
 \title{Scatter plot UI function}
 \usage{
-scatterplot_UI(id)
+scatterplot_UI(id, default_include_regression_info)
 }
 \arguments{
 \item{id}{Shiny ID \verb{[character(1)]}}
