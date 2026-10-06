@@ -998,7 +998,38 @@ mod_boxplot <- function(module_id,
         )
       )
     },
-    module_id = module_id
+    module_id = module_id,
+    meta = list(
+      dataset_info = list(all = unique(c(bm_dataset_name, group_dataset_name)), subject_level = group_dataset_name),
+      check_mod_fn = function(afmm, datasets) {
+        check_mod_boxplot(afmm,
+                          datasets,
+                          module_id,
+                          bm_dataset_name,
+                          group_dataset_name,
+                          receiver_id,
+                          cat_var, par_var,
+                          value_vars,
+                          x_axis_vars,
+                          visit_var,
+                          anlfl_vars,
+                          subjid_var,
+                          quantile_type,
+                          default_cat,
+                          default_par,
+                          default_x_axis_var,
+                          default_x_axis_vals,
+                          default_visit,
+                          default_value,
+                          default_main_group,
+                          default_sub_group,
+                          default_page_group,
+                          server_wrapper_func,
+                          allow_pvalue,
+                          allow_violin
+        )
+      }
+    )
   )
   mod
 }
@@ -1256,17 +1287,9 @@ check_mod_boxplot <- function(
     }
   }
 
-  res <- list(errors = err[["messages"]])
+  res <- err[["messages"]]
   return(res)
 }
-
-dataset_info_boxplot <- function(bm_dataset_name, group_dataset_name, ...) {
-  # TODO: Replace this function with a generic one that builds the list based on mod_boxplot_API_spec.
-  # Something along the lines of CM$dataset_info(mod_boxplot_API_spec, args = match.call())
-  return(list(all = unique(c(bm_dataset_name, group_dataset_name)), subject_level = group_dataset_name))
-}
-
-mod_boxplot <- CM$module(mod_boxplot, check_mod_boxplot, dataset_info_boxplot)
 
 
 # Data manipulation

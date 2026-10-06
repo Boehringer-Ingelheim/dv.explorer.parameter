@@ -566,7 +566,16 @@ mod_scatterplotmatrix <- function(module_id,
         default_main_group = default_main_group
       )
     },
-    module_id = module_id
+    module_id = module_id,
+    meta = list(
+      dataset_info = list(all = unique(c(bm_dataset_name, group_dataset_name)), subject_level = group_dataset_name),
+      check_mod_fn = function(afmm, datasets) {
+        check_mod_scatterplotmatrix(
+          afmm, datasets, module_id, bm_dataset_name, group_dataset_name,
+          cat_var, par_var, value_vars, visit_var, anlfl_vars, subjid_var,
+          default_cat, default_par, default_visit, default_value, default_main_group)
+      }
+    )
   )
   mod
 }
@@ -632,19 +641,9 @@ check_mod_scatterplotmatrix <- function(
     )
   }
 
-  res <- list(errors = err[["messages"]])
+  res <- err[["messages"]]
   return(res)
 }
-
-dataset_info_scatterplotmatrix <- function(bm_dataset_name, group_dataset_name, ...) {
-  # TODO: Replace this function with a generic one that builds the list based on mod_boxplot_API_spec.
-  # Something along the lines of CM$dataset_info(mod_scatterplotmatrix_API_spec, args = match.call())
-  return(list(all = unique(c(bm_dataset_name, group_dataset_name)), subject_level = group_dataset_name))
-}
-
-mod_scatterplotmatrix <- CM$module(
-  mod_scatterplotmatrix, check_mod_scatterplotmatrix, dataset_info_scatterplotmatrix
-)
 
 # Logic functions ----
 

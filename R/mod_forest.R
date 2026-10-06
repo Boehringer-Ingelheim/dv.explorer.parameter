@@ -1090,7 +1090,7 @@ forest_server <- function(id,
       },
       label = "result_table"
     )
-    
+
     output_arguments <- list()
     output_arguments[[FP_ID$TABLE_LISTING]] <- list(arguments = list(), render = NA)
     output_arguments[[FP_ID$TABLE_LISTING]][["arguments"]] <- shiny::reactive({
@@ -1102,7 +1102,7 @@ forest_server <- function(id,
     if (is_shiny_test_mode()) {
       output_arguments[[FP_ID$TABLE_LISTING]][["render"]] <- shiny::reactive({
         do.call(compute_data_table_output, output_arguments[[FP_ID$TABLE_LISTING]][["arguments"]]())
-      })      
+      })
     }
 
 
@@ -1119,7 +1119,7 @@ forest_server <- function(id,
       unlist(res) |> type("size")
     }) |>
       shiny::debounce(millis = 100)
-    
+
 
     output_arguments[[FP_ID$FOREST_SVG]] <- list(arguments = list(), render = NA)
     output_arguments[[FP_ID$FOREST_SVG]][["arguments"]] <- shiny::reactive({
@@ -1141,7 +1141,7 @@ forest_server <- function(id,
 
 
     output[[FP_ID$FOREST_SVG]] <- shiny::renderUI({
-      do.call(compute_forest_svg_output, output_arguments[[FP_ID$FOREST_SVG]][["arguments"]]())      
+      do.call(compute_forest_svg_output, output_arguments[[FP_ID$FOREST_SVG]][["arguments"]]())
     })
 
     # debug tab ----
@@ -1302,7 +1302,17 @@ mod_forest <- function(module_id,
         default_categorical_B = default_categorical_B
       )
     },
-    module_id = module_id
+    module_id = module_id,
+    meta = list(
+      dataset_info = list(all = unique(c(bm_dataset_name, group_dataset_name)), subject_level = group_dataset_name),
+      check_mod_fn = function(afmm, datasets) {
+        check_mod_forest(
+          afmm, datasets, module_id, bm_dataset_name, group_dataset_name, numeric_numeric_functions,
+          numeric_factor_functions, subjid_var, cat_var, par_var, visit_var, value_vars,
+          default_cat, default_par, default_visit, default_value, default_var, default_group,
+          default_categorical_A, default_categorical_B)
+      }
+    )
   )
   return(mod)
 }
@@ -1380,17 +1390,9 @@ check_mod_forest <- function(
     )
   }
 
-  res <- list(errors = err[["messages"]])
+  res <- err[["messages"]]
   return(res)
 }
-
-dataset_info_forest <- function(bm_dataset_name, group_dataset_name, ...) {
-  # TODO: Replace this function with a generic one that builds the list based on mod_boxplot_API_spec.
-  # Something along the lines of CM$dataset_info(mod_forest_API_spec, args = match.call())
-  return(list(all = unique(c(bm_dataset_name, group_dataset_name)), subject_level = group_dataset_name))
-}
-
-mod_forest <- CM$module(mod_forest, check_mod_forest, dataset_info_forest)
 
 # TODO: Move pearson_correlation and spearman_correlation to their own file
 # TODO: Maybe odds_ratio too
@@ -1434,7 +1436,7 @@ pearson_correlation <- function(a, b) {
 spearman_correlation <- function(a, b) {
   # IMPORTANT NOTE: This function is used also by the correlation heatmap module
   #                 Changes to this function may affect the validity of that module or its documentation
-  
+
   # Adapted from https://stats.stackexchange.com/a/506367
   spearman_CI <- function(x, y, rho, alpha = 0.05) {
     n <- sum(stats::complete.cases(x, y))

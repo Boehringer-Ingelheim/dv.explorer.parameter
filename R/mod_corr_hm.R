@@ -245,18 +245,18 @@ insert_parameter_visit_combinations_that_lack_data <- function(data, cat_par_vis
   if (length(missing_parvis) > 0) {
     all_combinations <- expand.grid(x = expected_parvis, y = expected_parvis)
     data <- merge(all_combinations, data, by = c("x", "y"), all.x = TRUE, all.y = TRUE)
-    
+
     # new rows have 0 observations and an appropriate error message
     new_rows_mask <- (data[["x"]] %in% missing_parvis | data[["y"]] %in% missing_parvis)
     data[["N"]][new_rows_mask] <- 0L
     data[["error"]][new_rows_mask] <- "not enough observations"
     data[["label"]][new_rows_mask] <- "NA"
-    
-    # diagonal elements on new rows match style of the rest of diagonal elements 
+
+    # diagonal elements on new rows match style of the rest of diagonal elements
     new_diagonal_cell_mask <- (data[["x"]] == data[["y"]] & data[["x"]] %in% missing_parvis)
     data[["label"]][new_diagonal_cell_mask] <- ""
     data[["z"]][new_diagonal_cell_mask] <- 1
-    
+
     # if expansion of matrix "flipped" labels over the diagonal, we move them back under it
     n <- length(expected_parvis)
     for (i in seq_len(n - 1)) {
@@ -264,7 +264,7 @@ insert_parameter_visit_combinations_that_lack_data <- function(data, cat_par_vis
         # Compute dataframe row corresponding to this particular combination
         i_row <- (i - 1) * n + (j - 1) + 1
         reflected_i_row <- (j - 1) * n + (i - 1) + 1
-        
+
         label <- data[["label"]][[i_row]]
         reflected_label <- data[["label"]][[reflected_i_row]]
         if (isTRUE(nchar(label) == 0 && nchar(reflected_label) > 0)) {
@@ -274,7 +274,7 @@ insert_parameter_visit_combinations_that_lack_data <- function(data, cat_par_vis
       }
     }
   }
-  
+
   return(data)
 }
 
@@ -302,7 +302,7 @@ scatter_plot <- function(df, x_var, y_var) {
   )
   df <- df[c(CNT$SBJ, CNT$PAR, CNT$VAL)]
   checkmate::assert_numeric(df[[CNT$VAL]], finite = TRUE, any.missing = FALSE)
-  
+
   # TODO: This scatter plot needs a thorough tightening of screws, but let's see how users like it first
 
   svg_elem_list <- list()
@@ -352,34 +352,34 @@ scatter_plot <- function(df, x_var, y_var) {
   # nolint end
 
   viewbox_size <- 2 * apron_size + scatter_size + axis_size
-  
+
   tick_size <- 20
   axis_legend_size <- tick_size * 1.5
 
   wide_df <- tidyr::pivot_wider(df, names_from = CNT$PAR, values_from = CNT$VAL)
   can_plot <- (x_var %in% names(wide_df) && y_var %in% names(wide_df))
-  
+
   if (!can_plot) {
     svg <- SVG_push(
       "svg", "xmlns='http://www.w3.org/2000/svg' version='2.1' width=100% viewBox='0 0 W H'",
       W = viewbox_size, H = viewbox_size
-    ) 
-    
+    )
+
     SVG_append_raw("
     <text x='X' y='Y' font-size='6rem' fill='#aaaaaa' text-anchor='middle' dominant-baseline='central'>
       No data
     </text>" |> ssub(X = viewbox_size / 2, Y = viewbox_size / 2))
-                   
+
     SVG_pop(svg)
     svg_string <- paste(svg_elem_list, collapse = "\n")
-  
+
     return(svg_string) # IMPORTANT: early out
   }
-    
+
   x_y_df <- wide_df[union(x_var, y_var)]
   x <- x_y_df[[x_var]]
   y <- x_y_df[[y_var]]
-  
+
   r_x <- range(x, na.rm = TRUE)
   r_x[is.na(r_x)] <- 1
   x_min <- floor(r_x[[1]])
@@ -826,7 +826,7 @@ corr_hm_server <- function(id,
       #       produce a partial or complete listing using our internal function.
       data <- apply_correlation_function(df, corr_fun, z_label) |>
         set_lbl("y", get_lbl_robust(df, "value"))
-     
+
       cat_par_vis <- shiny::isolate(mpvs())
       data <- insert_parameter_visit_combinations_that_lack_data(
         data, cat_par_vis
@@ -1033,7 +1033,16 @@ mod_corr_hm <- function(module_id, bm_dataset_name,
         visit_var = visit_var, anlfl_vars = anlfl_vars, value_vars = value_vars
       )
     },
-    module_id = module_id
+    module_id = module_id,
+    meta = list(
+      dataset_info = list(all = bm_dataset_name, subject_level = character(0)),
+      check_mod_fn = function(afmm, datasets) {
+        check_mod_corr_hm(
+          afmm, datasets, module_id, bm_dataset_name, subjid_var, cat_var, par_var, visit_var,
+          anlfl_vars, value_vars, default_cat, default_par, default_visit, default_value
+        )
+      }
+    )
   )
   return(mod)
 }
@@ -1102,14 +1111,6 @@ check_mod_corr_hm <- function(
     )
   }
 
-  res <- list(errors = err[["messages"]])
+  res <- err[["messages"]]
   return(res)
 }
-
-dataset_info_corr_hm <- function(bm_dataset_name, ...) {
-  # TODO: Replace this function with a generic one that builds the list based on mod_boxplot_API_spec.
-  # Something along the lines of CM$dataset_info(mod_corr_hm_API_spec, args = match.call())
-  return(list(all = bm_dataset_name, subject_level = character(0)))
-}
-
-mod_corr_hm <- CM$module(mod_corr_hm, check_mod_corr_hm, dataset_info_corr_hm)
