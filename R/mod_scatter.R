@@ -941,10 +941,11 @@ mod_scatterplot <- function(module_id,
       check_mod_fn = function(afmm, datasets) {
         check_mod_scatterplot(
           afmm, datasets, module_id, bm_dataset_name, group_dataset_name,
-          cat_var, par_var, value_vars, visit_var, anlfl_vars, subjid_var,
+          cat_var, par_var, value_vars, visit_var, ref_line_vars, anlfl_vars, subjid_var,
           default_x_cat, default_x_par, default_x_value, default_x_visit,
           default_y_cat, default_y_par, default_y_value, default_y_visit,
-          default_group, default_color, compute_lm_cor_fn)
+          default_main_group, default_sub_group,
+          default_group, default_color, default_include_regression_info, compute_lm_cor_fn)
       }
     )
   )
