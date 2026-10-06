@@ -2418,7 +2418,15 @@ mod_wfphm <- function(
         show_x_ticks = show_x_ticks
       )
     },
-    module_id = module_id
+    module_id = module_id,
+    meta = list(
+      dataset_info = list(all = unique(c(bm_dataset_name, group_dataset_name)), subject_level = group_dataset_name),
+      check_mod_fn = function(afmm, datasets) {
+        check_mod_wfphm(
+          afmm, datasets, module_id, bm_dataset_name, group_dataset_name, cat_var, par_var, visit_var, anlfl_vars, subjid_var,
+          value_vars, bar_group_palette, cat_palette, tr_mapper, show_x_ticks)
+      }
+    )
   )
   mod
 }
@@ -2485,15 +2493,6 @@ check_mod_wfphm <- function(
     )
   }
 
-  res <- list(errors = err[["messages"]])
+  res <- err[["messages"]]
   return(res)
 }
-
-dataset_info_wfphm <- function(bm_dataset_name, group_dataset_name, ...) {
-
-  # TODO: Replace this function with a generic one that builds the list based on mod_boxplot_API_spec.
-  # Something along the lines of CM$dataset_info(mod_wfphm_API_spec, args = match.call())
-  return(list(all = unique(c(bm_dataset_name, group_dataset_name)), subject_level = group_dataset_name))
-}
-
-mod_wfphm <- CM$module(mod_wfphm, check_mod_wfphm, dataset_info_wfphm)

@@ -1,3 +1,7 @@
+# dv.explorer.paramezer 0.3.0-9005
+
+- [NOT USER-FACING] Call EEF from dv.manager for all modules
+
 # dv.explorer.parameter 0.3.0-9004
 
 - correlation heatmap:
