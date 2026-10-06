@@ -18,7 +18,8 @@ mock_app_scatterplot <- function(dry_run = FALSE,
 
   ui_params <- c(
     list(
-      id = "not_ebas"
+      id = "not_ebas",
+      default_include_regression_info = TRUE
     ),
     ui_defaults
   )
