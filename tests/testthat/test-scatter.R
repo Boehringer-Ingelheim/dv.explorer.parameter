@@ -260,7 +260,7 @@ test_that("scatterplot_chart produces a ggplot", {
     subject_id = 1
   )
 
-  p <- scatterplot_chart(df)
+  p <- scatterplot_chart(df, include_regression_line = TRUE)
 
   expect_true("ggplot" %in% class(p))
 })

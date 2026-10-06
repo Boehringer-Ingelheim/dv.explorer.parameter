@@ -1,3 +1,9 @@
+# dv.explorer.paramezer 0.3.0-9006
+
+- scatter plot:
+    - Added support for reference values
+    - Made regression lines optional
+
 # dv.explorer.paramezer 0.3.0-9005
 
 - [NOT USER-FACING] Call EEF from dv.manager for all modules

@@ -24,6 +24,8 @@ SP <- poc( # nolint
     Y_LIM_MAX = "y_lim_max",
     Y_LIM_MIN = "y_lim_min",
     SHOW_ALL_REFERENCE_VALUES = "show_all_reference_values",
+    TABLES_UI = "tables",
+    INCLUDE_REGRESSION_INFO = "include_regression_info",
     CHART = "chart",
     TAB_TABLES = "tab_tables",
     TABLE_LISTING = "table_listing",
@@ -52,7 +54,8 @@ SP <- poc( # nolint
       Y_LIM = "Y limit",
       TABLE_LISTING = "Data Listing",
       TABLE_REGRESSION = "Linear Regression",
-      SHOW_ALL_REFERENCE_VALUES = "Show all reference values"
+      SHOW_ALL_REFERENCE_VALUES = "Show all reference values",
+      INCLUDE_REGRESSION_INFO = "Include regression information"
     ),
     VALIDATE = poc(
       NO_CAT_SEL = "Select a category",
@@ -90,9 +93,10 @@ NULL
 #' @keywords developers
 #' @param id Shiny ID `[character(1)]`
 #' @export
-scatterplot_UI <- function(id) { # nolint
+scatterplot_UI <- function(id, default_include_regression_info) {
   # id assert ---- It goes on its own as id is used to provide context to the other assertions
   checkmate::assert_string(id, min.chars = 1)
+  checkmate::assert_logical(default_include_regression_info, len = 1)
 
   # argument asserts ----
 
@@ -157,6 +161,11 @@ scatterplot_UI <- function(id) { # nolint
       shiny::numericInput(ns(SP$ID$Y_LIM_MIN), NULL, NULL, width = 75)
     ),
     shiny::checkboxInput(
+      ns(SP$ID$INCLUDE_REGRESSION_INFO),
+      SP$MSG$LABEL$INCLUDE_REGRESSION_INFO,
+      value = default_include_regression_info
+    ),
+    shiny::checkboxInput(
       ns(SP$ID$SHOW_ALL_REFERENCE_VALUES),
       SP$MSG$LABEL$SHOW_ALL_REFERENCE_VALUES,
       value = FALSE
@@ -185,21 +194,8 @@ scatterplot_UI <- function(id) { # nolint
     ),
     style = "height:70vh;position:relative"
   )
-  tables <- shiny::tabsetPanel(
-    id = ns(SP$ID$TAB_TABLES),
-    shiny::tabPanel(
-      SP$MSG$LABEL$TABLE_LISTING,
-      DT::DTOutput(ns(SP$ID$TABLE_LISTING))
-    ),
-    shiny::tabPanel(
-      SP$MSG$LABEL$TABLE_REGRESSION,
-      shiny::h3("Linear Regression"),
-      DT::DTOutput(ns(SP$ID$TABLE_REGRESSION)),
-      shiny::h3("Correlation measures"),
-      DT::DTOutput(ns(SP$ID$TABLE_CORRELATION))
-    )
-  )
-
+  tables <- shiny::uiOutput(ns(SP$ID$TABLES_UI))
+  
   # main_ui ----
 
   main_ui <- shiny::tagList(
@@ -313,6 +309,7 @@ scatterplot_server <- function(id,
                                default_sub_group = NULL,
                                default_group = NULL, # TODO: map and deprecate
                                default_color = NULL, # TODO: map and deprecate
+                               default_include_regression_info = default_include_regression_info,
                                compute_lm_cor_fn = sp_compute_lm_cor_default) {
   ac <- checkmate::makeAssertCollection()
   # id assert ---- It goes on its own as id is used to provide context to the other assertions
@@ -738,6 +735,7 @@ scatterplot_server <- function(id,
         ds = data_subset(),
         xlim = inputs[["x_lim"]](),
         ylim = inputs[["y_lim"]](),
+        include_regression_line = isTRUE(input[[SP$ID$INCLUDE_REGRESSION_INFO]]),
         ref_line_data = ref_line_data()
       )
     )
@@ -764,6 +762,28 @@ scatterplot_server <- function(id,
       })
 
       do.call(sp_get_scatterplot_output, output_arguments[[SP$ID$CHART]][["arguments"]]())
+    })
+       
+    # tables UI ----
+    output[[SP$ID$TABLES_UI]] <- shiny::renderUI({
+      args <- list(
+        id = ns(SP$ID$TAB_TABLES),
+        shiny::tabPanel(
+          SP$MSG$LABEL$TABLE_LISTING,
+          DT::DTOutput(ns(SP$ID$TABLE_LISTING))
+        )
+      ) 
+     
+      if (input[[SP$ID$INCLUDE_REGRESSION_INFO]]) {
+        args[[length(args) + 1]] <- shiny::tabPanel(
+          SP$MSG$LABEL$TABLE_REGRESSION,
+          shiny::h3("Linear Regression"),
+          DT::DTOutput(ns(SP$ID$TABLE_REGRESSION)),
+          shiny::h3("Correlation measures"),
+          DT::DTOutput(ns(SP$ID$TABLE_CORRELATION))
+        )
+      }
+      do.call(shiny::tabsetPanel, args)
     })
 
     # listings table ----
@@ -882,9 +902,10 @@ mod_scatterplot <- function(module_id,
                             default_sub_group = NULL,
                             default_group = NULL, # TODO: map and deprecate
                             default_color = NULL, # TODO: map and deprecate
+                            default_include_regression_info = TRUE,
                             compute_lm_cor_fn = sp_compute_lm_cor_default) {
   mod <- list(
-    ui = scatterplot_UI,
+    ui = function(id) scatterplot_UI(id, default_include_regression_info = default_include_regression_info),
     server = function(afmm) {
       scatterplot_server(
         id = module_id,
@@ -910,6 +931,7 @@ mod_scatterplot <- function(module_id,
         default_sub_group = default_sub_group,
         default_group = default_group,
         default_color = default_color,
+        default_include_regression_info = default_include_regression_info,
         compute_lm_cor_fn = compute_lm_cor_fn
       )
     },
@@ -955,6 +977,7 @@ mod_scatterplot_API_docs <- list(
   default_sub_group = "",
   default_group = "",
   default_color = "",
+  default_include_regression_info = "",
   compute_lm_cor_fn = ""
 )
 
@@ -981,6 +1004,7 @@ mod_scatterplot_API_spec <- TC$group(
   default_sub_group = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("optional"),
   default_group = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("optional"),
   default_color = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("optional"),
+  default_include_regression_info = TC$logical(),
   compute_lm_cor_fn = TC$fn(arg_count = 1) |> TC$flag("optional")
 ) |> TC$attach_docs(mod_scatterplot_API_docs)
 
@@ -990,7 +1014,7 @@ check_mod_scatterplot <- function(
     default_x_cat, default_x_par, default_x_value, default_x_visit,
     default_y_cat, default_y_par, default_y_value, default_y_visit,
     default_main_group, default_sub_group,
-    default_group, default_color, compute_lm_cor_fn) {
+    default_group, default_color, default_include_regression_info, compute_lm_cor_fn) {
   err <- CM$container()
 
   # TODO: Replace this function with a generic one that performs the checks based on mod_boxplot_API_spec.
@@ -1001,7 +1025,7 @@ check_mod_scatterplot <- function(
     default_x_cat, default_x_par, default_x_value, default_x_visit,
     default_y_cat, default_y_par, default_y_value, default_y_visit,
     default_main_group, default_sub_group,
-    default_group, default_color, compute_lm_cor_fn, err
+    default_group, default_color, default_include_regression_info, compute_lm_cor_fn, err
   )
 
   # Checks that API spec does not (yet?) capture
@@ -1159,7 +1183,7 @@ sp_subset_data <- function(x_cat,
 
 # Chart functions ----
 
-scatterplot_chart <- function(ds, ref_line_data = NULL) {
+scatterplot_chart <- function(ds, include_regression_line, ref_line_data = NULL) {
   is_grouped <- CNT$SUB_GROUP %in% names(ds)
   is_colored <- CNT$MAIN_GROUP %in% names(ds)
 
@@ -1207,9 +1231,13 @@ scatterplot_chart <- function(ds, ref_line_data = NULL) {
   ) +
     ggplot2::geom_point(mapping = point_aes) +
     labs +
-    ggplot2::theme(aspect.ratio = 1) +
-    ggplot2::geom_smooth(method = "lm", formula = y ~ x) +
-    ggplot2::theme(
+    ggplot2::theme(aspect.ratio = 1)
+ 
+  if (include_regression_line) {
+    p <- p + ggplot2::geom_smooth(method = "lm", formula = y ~ x)
+  }
+    
+  p <- p + ggplot2::theme(
       aspect.ratio = 1,
       axis.title = ggplot2::element_text(size = STYLE$AXIS_TITLE_SIZE),
       axis.text.x = ggplot2::element_text(size = STYLE$AXIS_TEXT_SIZE),
@@ -1282,7 +1310,8 @@ sp_compute_lm_cor_default <- function(ds) {
 
 # Composed functions ----
 
-sp_get_scatterplot_output <- function(ds, xlim = c(NA_real_, NA_real_), ylim = c(NA_real_, NA_real_), ref_line_data = NULL) {
+sp_get_scatterplot_output <- function(ds, xlim = c(NA_real_, NA_real_), ylim = c(NA_real_, NA_real_), 
+                                      include_regression_line = include_regression_line, ref_line_data = NULL) {
   # Complete cases
   complete_lgl_mask <- stats::complete.cases(ds[c(CNT$X_VAL, CNT$Y_VAL)])
 
@@ -1319,7 +1348,7 @@ sp_get_scatterplot_output <- function(ds, xlim = c(NA_real_, NA_real_), ylim = c
   ds <- ds[complete_lgl_mask & inbounds_mask, ]
   ds <- possibly_set_lbls(ds, lbls)
 
-  scatterplot_chart(ds, ref_line_data)
+  scatterplot_chart(ds, include_regression_line = include_regression_line, ref_line_data)
 }
 
 sp_get_listings_output <- function(ds, brush) {

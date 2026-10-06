@@ -108,6 +108,7 @@ local({
         ds = expected_ds,
         xlim = c(NA_real_, NA_real_),
         ylim = c(NA_real_, NA_real_),
+        include_regression_line = TRUE,
         ref_line_data = list(x = list(), y = list())
       )
 

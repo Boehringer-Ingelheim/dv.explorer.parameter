@@ -396,7 +396,8 @@ check_mod_roc_auto <- function(afmm, datasets, module_id, pred_dataset_name, res
 check_mod_scatterplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, group_dataset_name,
     cat_var, par_var, value_vars, visit_var, ref_line_vars, anlfl_vars, subjid_var, default_x_cat, default_x_par,
     default_x_value, default_x_visit, default_y_cat, default_y_par, default_y_value, default_y_visit,
-    default_main_group, default_sub_group, default_group, default_color, compute_lm_cor_fn, err) {
+    default_main_group, default_sub_group, default_group, default_color, default_include_regression_info,
+    compute_lm_cor_fn, err) {
     OK <- logical(0)
     used_dataset_names <- new.env(parent = emptyenv())
     OK[["module_id"]] <- CM$check_module_id("module_id", module_id, err)
@@ -475,6 +476,9 @@ check_mod_scatterplot_auto <- function(afmm, datasets, module_id, bm_dataset_nam
     flags <- list(optional = TRUE)
     OK[["default_color"]] <- OK[["group_dataset_name"]] && CM$check_dataset_colum_name("default_color",
         default_color, subkind, flags, group_dataset_name, datasets[[group_dataset_name]], err)
+    flags <- structure(list(), names = character(0))
+    OK[["default_include_regression_info"]] <- CM$check_type("default_include_regression_info", default_include_regression_info,
+        "logical", flags, err)
     flags <- list(optional = TRUE)
     OK[["compute_lm_cor_fn"]] <- CM$check_function("compute_lm_cor_fn", compute_lm_cor_fn, 1, flags,
         err)
