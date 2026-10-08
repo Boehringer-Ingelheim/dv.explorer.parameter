@@ -29,7 +29,7 @@ mod_corr_hm(
 )
 }
 \arguments{
-\item{id}{\verb{[character(1)]}}
+\item{id}{\verb{[character(1)]} Shiny ID}
 
 \item{default_cat}{Default selected categories}
 
@@ -37,9 +37,7 @@ mod_corr_hm(
 
 \item{default_visit}{Default selected visits}
 
-\item{default_corr_method}{Default correlation method \verb{[character(1)]}
-
-Shiny ID}
+\item{default_corr_method}{Default correlation method \verb{[character(1)]}}
 
 \item{module_id}{Shiny ID \verb{[character(1)]}
 

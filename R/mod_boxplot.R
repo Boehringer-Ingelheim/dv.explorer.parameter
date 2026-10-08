@@ -95,9 +95,17 @@ NULL
 
 #' Boxplot UI function
 #' @param id Shiny ID `[character(1)]`
+#' @param allow_pvalue `[logical(1)]`
+#'
+#' If `FALSE`, the significance table (containing p-values comparing groups) is not displayed
+#'
+#' @param allow_violin `[logical(1)]`
+#'
+#' If `FALSE`, the violin plot option is not displayed
+#'
 #' @keywords developers
 #' @export
-boxplot_UI <- function(id) { # nolint
+boxplot_UI <- function(id, allow_pvalue = TRUE, allow_violin = TRUE) { # nolint
   # UI ----
   ns <- shiny::NS(id)
 
@@ -119,7 +127,7 @@ boxplot_UI <- function(id) { # nolint
 
   other_menu <- drop_menu_helper(
     ns(BP$ID$OTHER_BUTTON), BP$MSG$LABEL$OTHER_BUTTON,
-    shiny::checkboxInput(inputId = ns(BP$ID$VIOLIN_CHECK), BP$MSG$LABEL$VIOLIN_CHECK),
+    if (allow_violin) shiny::checkboxInput(inputId = ns(BP$ID$VIOLIN_CHECK), BP$MSG$LABEL$VIOLIN_CHECK),
     shiny::checkboxInput(inputId = ns(BP$ID$SHOW_POINTS_CHECK), BP$MSG$LABEL$SHOW_POINTS_CHECK),
     shiny::checkboxInput(inputId = ns(BP$ID$Y_PROJECTION_CHECK), BP$MSG$LABEL$Y_PROJECTION_CHECK)
   )
@@ -165,10 +173,12 @@ boxplot_UI <- function(id) { # nolint
       BP$MSG$LABEL$TABLE_SUMMARY,
       DT::DTOutput(ns(BP$ID$TABLE_SUMMARY))
     ),
-    shiny::tabPanel(
-      BP$MSG$LABEL$TABLE_SIGNIFICANCE,
-      DT::DTOutput(ns(BP$ID$TABLE_SIGNIFICANCE))
-    )
+    if (allow_pvalue) {
+      shiny::tabPanel(
+        BP$MSG$LABEL$TABLE_SIGNIFICANCE,
+        DT::DTOutput(ns(BP$ID$TABLE_SIGNIFICANCE))
+      )
+    }
   )
 
   #   # main_ui ----
@@ -260,6 +270,14 @@ boxplot_UI <- function(id) { # nolint
 #'
 #' Default values for the x-axis variable
 #'
+#' @param allow_pvalue `[logical(1)]`
+#'
+#' If `FALSE`, the significance table (containing p-values comparing groups) is not displayed
+#'
+#' @param allow_violin `[logical(1)]`
+#'
+#' If `FALSE`, the violin plot option is not displayed and violin plots cannot be shown
+#'
 #' @export
 #'
 boxplot_server <- function(id,
@@ -273,6 +291,8 @@ boxplot_server <- function(id,
                            anlfl_vars = NULL,
                            subjid_var = "USUBJID",
                            quantile_type = 7L,
+                           allow_pvalue = TRUE,
+                           allow_violin = TRUE,
                            default_cat = NULL,
                            default_par = NULL,
                            default_x_axis_var = NULL,
@@ -307,6 +327,8 @@ boxplot_server <- function(id,
   )
   checkmate::assert_character(x_axis_vars, min.chars = 1, any.missing = FALSE, null.ok = FALSE, add = ac)
   checkmate::assert_string(subjid_var, min.chars = 1, add = ac)
+  checkmate::assert_logical(allow_pvalue, len = 1, any.missing = FALSE, add = ac)
+  checkmate::assert_logical(allow_violin, len = 1, any.missing = FALSE, add = ac)
 
   checkmate::reportAssertions(ac)
   # module constants ----
@@ -477,7 +499,7 @@ boxplot_server <- function(id,
     }
 
     inputs[[BP$ID$VIOLIN_CHECK]] <- shiny::reactive({
-      input[[BP$ID$VIOLIN_CHECK]]
+      if (allow_violin) input[[BP$ID$VIOLIN_CHECK]] else FALSE
     })
     inputs[[BP$ID$SHOW_POINTS_CHECK]] <- shiny::reactive({
       input[[BP$ID$SHOW_POINTS_CHECK]]
@@ -767,20 +789,22 @@ boxplot_server <- function(id,
     })
 
     # significance table
-    output_arguments[[BP$ID$TABLE_SIGNIFICANCE]] <- list(arguments = list(), render = NA)
-    output_arguments[[BP$ID$TABLE_SIGNIFICANCE]][["arguments"]] <- shiny::reactive(
-      list(
-        ds = data_subset()
+    if (allow_pvalue) {
+      output_arguments[[BP$ID$TABLE_SIGNIFICANCE]] <- list(arguments = list(), render = NA)
+      output_arguments[[BP$ID$TABLE_SIGNIFICANCE]][["arguments"]] <- shiny::reactive(
+        list(
+          ds = data_subset()
+        )
       )
-    )
-    if (is_shiny_test_mode()) {
-      output_arguments[[BP$ID$TABLE_SIGNIFICANCE]][["render"]] <- shiny::reactive({
+      if (is_shiny_test_mode()) {
+        output_arguments[[BP$ID$TABLE_SIGNIFICANCE]][["render"]] <- shiny::reactive({
+          do.call(bp_get_significance_output, output_arguments[[BP$ID$TABLE_SIGNIFICANCE]][["arguments"]]())
+        })
+      }
+      output[[BP$ID$TABLE_SIGNIFICANCE]] <- DT::renderDT({
         do.call(bp_get_significance_output, output_arguments[[BP$ID$TABLE_SIGNIFICANCE]][["arguments"]]())
       })
     }
-    output[[BP$ID$TABLE_SIGNIFICANCE]] <- DT::renderDT({
-      do.call(bp_get_significance_output, output_arguments[[BP$ID$TABLE_SIGNIFICANCE]][["arguments"]]())
-    })
 
     # state store
 
@@ -808,7 +832,9 @@ boxplot_server <- function(id,
       )
       get_update(inputs[[BP$ID$X_VALS]])[["val"]](selected = loaded_state()[[BP$ID$X_VALS]])
       get_update(inputs[[BP$ID$PAR_VALUE]])[["val"]](selected = loaded_state()[[BP$ID$PAR_VALUE]])
-      shiny::updateCheckboxInput(inputId = BP$ID$VIOLIN_CHECK, value = loaded_state()[[BP$ID$VIOLIN_CHECK]])
+      if (allow_violin) {
+        shiny::updateCheckboxInput(inputId = BP$ID$VIOLIN_CHECK, value = loaded_state()[[BP$ID$VIOLIN_CHECK]])
+      }
       shiny::updateCheckboxInput(inputId = BP$ID$SHOW_POINTS_CHECK, value = loaded_state()[[BP$ID$SHOW_POINTS_CHECK]])
     })
 
@@ -907,7 +933,9 @@ mod_boxplot <- function(module_id,
                         default_main_group = NULL,
                         default_sub_group = NULL,
                         default_page_group = NULL,
-                        server_wrapper_func = function(x) list(subj_id = x)) {
+                        server_wrapper_func = function(x) list(subj_id = x),
+                        allow_pvalue = TRUE,
+                        allow_violin = TRUE) {
 
   # temporary backward compatibility for visit_var and default_visit
   if (!is.null(visit_var)) {
@@ -941,7 +969,7 @@ mod_boxplot <- function(module_id,
 
   mod <- list(
     ui = function(module_id) {
-      boxplot_UI(id = module_id)
+      boxplot_UI(id = module_id, allow_pvalue = allow_pvalue, allow_violin = allow_violin)
     },
     server = function(afmm) {
       if (is.null(receiver_id)) {
@@ -955,8 +983,8 @@ mod_boxplot <- function(module_id,
       server_wrapper_func(
         boxplot_server(
           id = module_id,
-          bm_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[bm_dataset_name]]),
-          group_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[group_dataset_name]]),
+          bm_dataset = shiny::reactive(afmm[["filtered_dataset_list"]]()[[bm_dataset_name]]),
+          group_dataset = shiny::reactive(afmm[["filtered_dataset_list"]]()[[group_dataset_name]]),
           dataset_name = afmm[["dataset_name"]],
           on_sbj_click = on_sbj_click_fun,
           cat_var = cat_var, par_var = par_var, value_vars = value_vars, x_axis_vars = x_axis_vars,
@@ -965,11 +993,43 @@ mod_boxplot <- function(module_id,
           default_cat = default_cat, default_par = default_par,
           default_x_axis_var = default_x_axis_var, default_x_axis_vals = default_x_axis_vals,
           default_value = default_value, default_main_group = default_main_group, default_sub_group = default_sub_group,
-          default_page_group = default_page_group
+          default_page_group = default_page_group,
+          allow_pvalue = allow_pvalue, allow_violin = allow_violin
         )
       )
     },
-    module_id = module_id
+    module_id = module_id,
+    meta = list(
+      dataset_info = list(all = unique(c(bm_dataset_name, group_dataset_name)), subject_level = group_dataset_name),
+      check_mod_fn = function(afmm, datasets) {
+        check_mod_boxplot(afmm,
+                          datasets,
+                          module_id,
+                          bm_dataset_name,
+                          group_dataset_name,
+                          receiver_id,
+                          cat_var, par_var,
+                          value_vars,
+                          x_axis_vars,
+                          visit_var,
+                          anlfl_vars,
+                          subjid_var,
+                          quantile_type,
+                          default_cat,
+                          default_par,
+                          default_x_axis_var,
+                          default_x_axis_vals,
+                          default_visit,
+                          default_value,
+                          default_main_group,
+                          default_sub_group,
+                          default_page_group,
+                          server_wrapper_func,
+                          allow_pvalue,
+                          allow_violin
+        )
+      }
+    )
   )
   mod
 }
@@ -999,7 +1059,9 @@ mod_boxplot_API_docs <- list(
   default_main_group = "",
   default_sub_group = "",
   default_page_group = "",
-  server_wrapper_func = ""
+  server_wrapper_func = "",
+  allow_pvalue = "",
+  allow_violin = ""
 )
 
 mod_boxplot_API_spec <- TC$group(
@@ -1025,7 +1087,9 @@ mod_boxplot_API_spec <- TC$group(
   default_main_group = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("optional"),
   default_sub_group = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("optional"),
   default_page_group = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("optional"),
-  server_wrapper_func = TC$fn(arg_count = 1) |> TC$flag("optional", "ignore")
+  server_wrapper_func = TC$fn(arg_count = 1) |> TC$flag("optional", "ignore"),
+  allow_pvalue = TC$logical(),
+  allow_violin = TC$logical()
 ) |> TC$attach_docs(mod_boxplot_API_docs)
 
 check_mod_boxplot <- function(
@@ -1051,7 +1115,9 @@ check_mod_boxplot <- function(
     default_main_group,
     default_sub_group,
     default_page_group,
-    server_wrapper_func
+    server_wrapper_func,
+    allow_pvalue,
+    allow_violin
 ) {
 
   err <- CM$container()
@@ -1087,7 +1153,7 @@ check_mod_boxplot <- function(
   using_new_api <- !using_old_api
 
   # X-axis resolution
-  x_axis_source <- "user"
+  x_axis_source <- "user" # TODO(miguel): What's the purpose of this (unused variable) # nolint
 
   if (using_old_api) {
 
@@ -1146,6 +1212,8 @@ check_mod_boxplot <- function(
     default_sub_group,
     default_page_group,
     server_wrapper_func,
+    allow_pvalue,
+    allow_violin,
     err
   )
 
@@ -1207,7 +1275,7 @@ check_mod_boxplot <- function(
     }
 
   } else {
-    #ahwopu
+    #ahwopu # FIXME(miguel)? checks OK[["visit_var"]] and then iterates over `x_axis_vars` and not over `visit_var` # nolint
     if (OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] && OK[["visit_var"]] && OK[["anlfl_vars"]]) {
       for (x_var in x_axis_vars) {
         check_unique_sub_cat_par_vis(
@@ -1219,17 +1287,9 @@ check_mod_boxplot <- function(
     }
   }
 
-  res <- list(errors = err[["messages"]])
+  res <- err[["messages"]]
   return(res)
 }
-
-dataset_info_boxplot <- function(bm_dataset_name, group_dataset_name, ...) {
-  # TODO: Replace this function with a generic one that builds the list based on mod_boxplot_API_spec.
-  # Something along the lines of CM$dataset_info(mod_boxplot_API_spec, args = match.call())
-  return(list(all = unique(c(bm_dataset_name, group_dataset_name)), subject_level = group_dataset_name))
-}
-
-mod_boxplot <- CM$module(mod_boxplot, check_mod_boxplot, dataset_info_boxplot)
 
 
 # Data manipulation

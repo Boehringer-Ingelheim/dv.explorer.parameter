@@ -135,7 +135,7 @@ module_list <- list(
 dv.manager::run_app(
   data = list("DS" = list(adbm = adbm_dataset, adsl = adsl_dataset)),
   module_list = module_list,
-  filter_data = "adsl",
+  filter_dataset_name = "adsl",
   filter_key = "SUBJID"
 )
 ```

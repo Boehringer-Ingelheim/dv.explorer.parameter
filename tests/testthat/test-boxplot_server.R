@@ -48,3 +48,79 @@ test_that("boxplot_server prints message for 0 rows bm_dataset", {
   )
 })
 
+test_that("boxplot_server does not build the significance table output when allow_pvalue = FALSE", {
+  data <- test_data(anlfl_flags = FALSE)
+
+  shiny::testServer(
+    app = boxplot_server,
+    args = list(
+      bm_dataset    = reactive(data$bm),
+      group_dataset = reactive(data$sl),
+      value_vars = "VALUE1",
+      x_axis_vars = "VISIT",
+      subjid_var = "SUBJID",
+      allow_pvalue = FALSE
+    ),
+    {
+      expect_null(output_arguments[[BP$ID$TABLE_SIGNIFICANCE]])
+    }
+  )
+})
+
+test_that("boxplot_server builds the significance table output when allow_pvalue = TRUE (default)", {
+  data <- test_data(anlfl_flags = FALSE)
+
+  shiny::testServer(
+    app = boxplot_server,
+    args = list(
+      bm_dataset    = reactive(data$bm),
+      group_dataset = reactive(data$sl),
+      value_vars = "VALUE1",
+      x_axis_vars = "VISIT",
+      subjid_var = "SUBJID"
+    ),
+    {
+      expect_false(is.null(output_arguments[[BP$ID$TABLE_SIGNIFICANCE]]))
+    }
+  )
+})
+
+test_that("boxplot_server ignores the violin checkbox input when allow_violin = FALSE", {
+  data <- test_data(anlfl_flags = FALSE)
+
+  shiny::testServer(
+    app = boxplot_server,
+    args = list(
+      bm_dataset    = reactive(data$bm),
+      group_dataset = reactive(data$sl),
+      value_vars = "VALUE1",
+      x_axis_vars = "VISIT",
+      subjid_var = "SUBJID",
+      allow_violin = FALSE
+    ),
+    {
+      session$setInputs(violin_check = TRUE)
+      expect_false(inputs[[BP$ID$VIOLIN_CHECK]]())
+    }
+  )
+})
+
+test_that("boxplot_server honors the violin checkbox input when allow_violin = TRUE (default)", {
+  data <- test_data(anlfl_flags = FALSE)
+
+  shiny::testServer(
+    app = boxplot_server,
+    args = list(
+      bm_dataset    = reactive(data$bm),
+      group_dataset = reactive(data$sl),
+      value_vars = "VALUE1",
+      x_axis_vars = "VISIT",
+      subjid_var = "SUBJID"
+    ),
+    {
+      session$setInputs(violin_check = TRUE)
+      expect_true(inputs[[BP$ID$VIOLIN_CHECK]]())
+    }
+  )
+})
+

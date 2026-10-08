@@ -22,10 +22,10 @@
       [1] "W"
       
       $palette
-      #053061 #2166AC #4393C3 #92C5DE #D1E5F0 #F7F7F7 #FDDBC7 #F4A582 #D6604D #B2182B 
-         -1.0    -0.8    -0.6    -0.4    -0.2     0.0     0.2     0.4     0.6     0.8 
-      #67001F 
-          1.0 
+        #053061   #2166AC   #4393C3   #92C5DE   #D1E5F0   #F7F7F7   #FDDBC7   #F4A582 
+           -1.0      -0.8      -0.6      -0.4      -0.2       0.0       0.2       0.4 
+        #D6604D   #B2182B   #67001F #FFFFFF00 
+            0.6       0.8       1.0        NA 
       
 
 # table is included according to selection__spec_ids{corr_hm_module$correlation_chart;corr_hm_module$composition}

@@ -85,7 +85,7 @@ mock_app_scatterplotmatrix_mm <- function(in_fluid = TRUE, defaults = list(), up
         anlfl_vars = anlfl_vars
       )
     ),
-    filter_data = "adsl",
+    filter_dataset_name = "adsl",
     filter_key = "SUBJID",
     enableBookmarking = "url"
   )

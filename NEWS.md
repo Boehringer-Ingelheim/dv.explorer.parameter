@@ -1,3 +1,16 @@
+# dv.explorer.paramezer 0.3.1
+
+- correlation heatmap:
+    - Display cells with errors as NAs.
+    - Document the calculation of p-values and confidence intervals
+    - Display parameter-visit combinations that lack data
+    - Guard against missing data in click-through scatter plots
+    - Indicate heatmap interactivity with hover-on pointer change
+
+- boxplot: Provide flags for removing violin plots and p values from the user interface
+
+- forest plot: Fix regression in calculation of plot height
+
 # dv.explorer.parameter 0.3.0
 
 - lineplot:
@@ -9,9 +22,6 @@
 - scatterplot matrix:
     - Fixed labeling issue of selected analysis value
 
-- [NOT USER-FACING] Fix encoding of single character in DR.R snippet    
-- [NOT USER-FACING] Update TC.R and DR.R snippets
-- [NOT USER-FACING] Update CM.R snippet
 - Faster early error feedback
 
 # dv.explorer.parameter 0.2.1

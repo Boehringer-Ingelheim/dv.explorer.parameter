@@ -98,7 +98,7 @@ mock_app_correlation_hm_mm <- function(anlfl_flags = FALSE) {
   dv.manager::run_app(
     data = list("DS" = list(bm = bm_dataset, sl = bm_dataset)),
     module_list = module_list,
-    filter_data = "sl",
+    filter_dataset_name = "sl",
     filter_key = "SUBJID"
   )
 }
@@ -124,7 +124,7 @@ mock_app_correlation_hm_mm_safetyData <- function() {
   dv.manager::run_app(
     data = list("DS" = list(bm = data[["bm"]], sl = data[["sl"]])),
     module_list = module_list,
-    filter_data = "sl",
+    filter_dataset_name = "sl",
     filter_key = "SUBJID"
   )
 }

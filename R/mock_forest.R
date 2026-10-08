@@ -86,7 +86,7 @@ mock_app_forest_mm <- function() {
   dv.manager::run_app(
     data = list("DS" = list(bm = bm_dataset, sl = group_dataset)),
     module_list = module_list,
-    filter_data = "sl",
+    filter_dataset_name = "sl",
     filter_key = "SUBJID"
   )
 }

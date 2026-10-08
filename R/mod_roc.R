@@ -948,7 +948,7 @@ roc_server <- function(id,
       do.call(get_gt_summary_output, output_arguments[[ROC_ID$ROC$GT_SUMMARY_TABLE]]())
     })
 
-    # info panel    
+    # info panel
     output_arguments[[ROC_ID$ROC$INFO_PANEL]] <- shiny::reactive({
       list(
         ds = try(data_subset(), silent = TRUE)
@@ -1079,9 +1079,9 @@ mod_roc <- function(
     server = function(afmm) {
       roc_server(
         id = module_id,
-        pred_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[pred_dataset_name]]),
-        resp_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[resp_dataset_name]]),
-        group_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[group_dataset_name]]),
+        pred_dataset = shiny::reactive(afmm[["filtered_dataset_list"]]()[[pred_dataset_name]]),
+        resp_dataset = shiny::reactive(afmm[["filtered_dataset_list"]]()[[resp_dataset_name]]),
+        group_dataset = shiny::reactive(afmm[["filtered_dataset_list"]]()[[group_dataset_name]]),
         dataset_name = afmm[["dataset_name"]],
         pred_cat_var = pred_cat_var,
         pred_par_var = pred_par_var,
@@ -1097,7 +1097,17 @@ mod_roc <- function(
         compute_metric_fn = compute_metric_fn
       )
     },
-    module_id = module_id
+    module_id = module_id,
+    meta = list(
+      dataset_info = list(all = unique(c(pred_dataset_name, resp_dataset_name, group_dataset_name)),
+                          subject_level = group_dataset_name),
+      check_mod_fn = function(afmm, datasets) {
+        check_mod_roc(
+          afmm, datasets, module_id, pred_dataset_name, resp_dataset_name, group_dataset_name, pred_cat_var,
+          pred_par_var, pred_value_vars, pred_visit_var, resp_cat_var, resp_par_var, resp_value_vars,
+          resp_visit_var, subjid_var, quantile_type, compute_roc_fn, compute_metric_fn)
+      }
+    )
   )
   mod
 }
@@ -1184,20 +1194,9 @@ check_mod_roc <- function(
 
   # TODO: check resp_value_vars are binary?
 
-  res <- list(errors = err[["messages"]])
+  res <- err[["messages"]]
   return(res)
 }
-
-dataset_info_roc <- function(pred_dataset_name, resp_dataset_name, group_dataset_name, ...) {
-  # TODO: Replace this function with a generic one that builds the list based on mod_boxplot_API_spec.
-  # Something along the lines of CM$dataset_info(mod_roc_API_spec, args = match.call())
-  return(list(
-    all = unique(c(pred_dataset_name, resp_dataset_name, group_dataset_name)),
-    subject_level = group_dataset_name
-  ))
-}
-
-mod_roc <- CM$module(mod_roc, check_mod_roc, dataset_info_roc)
 
 # Server Logic
 
@@ -4760,7 +4759,7 @@ mock_roc_mm_app <- function(adbm = test_roc_data()[["adbm"]],
           group_dataset_name = "adsl"
         )
       ),
-      filter_data = "adsl",
+      filter_dataset_name = "adsl",
       filter_key = "USUBJID",
       enableBookmarking = "url"
     )
@@ -4814,7 +4813,7 @@ roc_test_app <- function(dataset) {
       shiny::reactiveValuesToList(input)
       session$doBookmark()
     })
-    
+
     shiny::onBookmarked(shiny::updateQueryString)
     roc_server(
       id = "roc",
@@ -4824,7 +4823,7 @@ roc_test_app <- function(dataset) {
     )
   }
 
-  
+
   shiny::shinyApp(
     ui = ui,
     server = server,

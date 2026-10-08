@@ -704,7 +704,7 @@ scatterplot_server <- function(id,
         brush = inputs[[SP$ID$CHART_BRUSH]]()
       )
     )
-    
+
     if (is_shiny_test_mode()) {
       output_arguments[[SP$ID$TABLE_LISTING]][["render"]] <- shiny::reactive({
         do.call(sp_get_listings_output, output_arguments[[SP$ID$TABLE_LISTING]][["arguments"]]())
@@ -815,8 +815,8 @@ mod_scatterplot <- function(module_id,
     server = function(afmm) {
       scatterplot_server(
         id = module_id,
-        bm_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[bm_dataset_name]]),
-        group_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[group_dataset_name]]),
+        bm_dataset = shiny::reactive(afmm[["filtered_dataset_list"]]()[[bm_dataset_name]]),
+        group_dataset = shiny::reactive(afmm[["filtered_dataset_list"]]()[[group_dataset_name]]),
         dataset_name = afmm[["dataset_name"]],
         cat_var = cat_var,
         par_var = par_var,
@@ -837,7 +837,18 @@ mod_scatterplot <- function(module_id,
         compute_lm_cor_fn = compute_lm_cor_fn
       )
     },
-    module_id = module_id
+    module_id = module_id,
+    meta = list(
+      dataset_info = list(all = unique(c(bm_dataset_name, group_dataset_name)), subject_level = group_dataset_name),
+      check_mod_fn = function(afmm, datasets) {
+        check_mod_scatterplot(
+          afmm, datasets, module_id, bm_dataset_name, group_dataset_name,
+          cat_var, par_var, value_vars, visit_var, anlfl_vars, subjid_var,
+          default_x_cat, default_x_par, default_x_value, default_x_visit,
+          default_y_cat, default_y_par, default_y_value, default_y_visit,
+          default_group, default_color, compute_lm_cor_fn)
+      }
+    )
   )
   mod
 }
@@ -918,17 +929,10 @@ check_mod_scatterplot <- function(
     )
   }
 
-  res <- list(errors = err[["messages"]])
+  res <- err[["messages"]]
   return(res)
 }
 
-dataset_info_scatterplot <- function(bm_dataset_name, group_dataset_name, ...) {
-  # TODO: Replace this function with a generic one that builds the list based on mod_boxplot_API_spec.
-  # Something along the lines of CM$dataset_info(mod_scatterplot_API_spec, args = match.call())
-  return(list(all = unique(c(bm_dataset_name, group_dataset_name)), subject_level = group_dataset_name))
-}
-
-mod_scatterplot <- CM$module(mod_scatterplot, check_mod_scatterplot, dataset_info_scatterplot)
 
 # Logic functions ----
 

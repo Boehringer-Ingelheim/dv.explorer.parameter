@@ -14,6 +14,9 @@ specs <- list(
     boxplot_chart = "
     The chart shall display one boxplot for each selected parameter and grouping variable.
     ",
+    violin_configurable = "
+    The module shall support restricting the availability of the violin plot display option.
+    ",
     data_listing = "
     The data listing shall contain a table containing the subjects of a given group.
     ",
@@ -28,6 +31,9 @@ specs <- list(
     ",
     data_significance = "
     The data significance shall contain a table containing statistical comparisons per parameter and grouping variable.
+    ",
+    pvalue_configurable = "
+    The module shall support restricting the display of the data significance table.
     ",
     bookmark = "
     The application shall support bookmarking. Boxplot selection by click and double click are explicitly excluded.
@@ -51,7 +57,9 @@ corr_hm_module = list(
     ",
     bookmark = "
     The application shall support bookmarking. Clicks and brush are explicitely excluded.
-    "
+    ",
+    show_missing_data_as_NA = "The chart shows NA for selected combinations of categories, parameter and visits that lack data",
+    show_errors_as_NA = "The chart shows NA for correlation coefficients that produce an error during computation"
 ),
 
 forest_module = list(

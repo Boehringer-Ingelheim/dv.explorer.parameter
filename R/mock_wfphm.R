@@ -39,7 +39,7 @@ mock_wfphm_mm_app <- function(anlfl_flags = FALSE) {
           anlfl_vars = anlfl_vars
         )
       ),
-      filter_data = "group",
+      filter_dataset_name = "group",
       filter_key = "SUBJID"
     )
   } else {

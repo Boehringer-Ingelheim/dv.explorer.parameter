@@ -1753,8 +1753,8 @@ mod_lineplot <- function(module_id,
 
       lineplot_server(
         id = module_id,
-        bm_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[bm_dataset_name]]),
-        group_dataset = shiny::reactive(afmm[["filtered_dataset"]]()[[group_dataset_name]]),
+        bm_dataset = shiny::reactive(afmm[["filtered_dataset_list"]]()[[bm_dataset_name]]),
+        group_dataset = shiny::reactive(afmm[["filtered_dataset_list"]]()[[group_dataset_name]]),
         on_sbj_click = on_sbj_click_fun,
         summary_fns = summary_fns,
         subjid_var = subjid_var,
@@ -1779,7 +1779,19 @@ mod_lineplot <- function(module_id,
         default_y_axis_projection = default_y_axis_projection
       )
     },
-    module_id = module_id
+    module_id = module_id,
+    meta = list(
+      dataset_info = list(all = unique(c(bm_dataset_name, group_dataset_name)), subject_level = group_dataset_name),
+      check_mod_fn = function(afmm, datasets) {
+        check_mod_lineplot(
+          afmm, datasets, module_id, bm_dataset_name, group_dataset_name, receiver_id, summary_fns,
+          subjid_var, cat_var, par_var, visit_vars, cdisc_visit_vars, anlfl_vars,
+          value_vars, additional_listing_vars, ref_line_vars,
+          default_centrality_fn, default_dispersion_fn, default_cat, default_par,
+          default_val, default_visit_var, default_visit_val, default_main_group, default_sub_group,
+          default_transparency, default_y_axis_projection)
+      }
+    )
   )
   return(mod)
 }
@@ -2022,14 +2034,6 @@ check_mod_lineplot <- function(
     }
   }
 
-  res <- list(errors = err[["messages"]])
+  res <- err[["messages"]]
   return(res)
 }
-
-dataset_info_lineplot <- function(bm_dataset_name, group_dataset_name, ...) {
-  # TODO: Replace this function with a generic one that builds the list based on mod_boxplot_API_spec.
-  # Something along the lines of CM$dataset_info(mod_lineplot_API_spec, args = match.call())
-  return(list(all = unique(c(bm_dataset_name, group_dataset_name)), subject_level = group_dataset_name))
-}
-
-mod_lineplot <- CM$module(mod_lineplot, check_mod_lineplot, dataset_info_lineplot)

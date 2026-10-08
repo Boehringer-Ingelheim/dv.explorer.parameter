@@ -3,7 +3,7 @@
     Code
       svg
     Output
-      <svg version="1.1" viewBox="-1 0 2 5.33333333333333" height="100%" width="100%" style="overflow: visible"> <line x1="0" y1="0" x2="0" y2="4" style="stroke:rgb(0,0,0);stroke-opacity:0.3;stroke-width:0.0266666666666667"/> <line x1="-1" y1="4" x2="1" y2="4" style="stroke:rgb(0,0,0);stroke-opacity:0.8;stroke-width:0.0533333333333333"/> <line x1="-1" y1="4" x2="-1" y2="4.22222222222222" style="stroke:rgb(0,0,0);stroke-opacity:0.8;stroke-width:0.0533333333333333" stroke-linecap="round"/>
+      <svg version="1.1" viewBox="-1 0 2 5.33333333333333" width="100%" style="overflow: visible"> <line x1="0" y1="0" x2="0" y2="4" style="stroke:rgb(0,0,0);stroke-opacity:0.3;stroke-width:0.0266666666666667"/> <line x1="-1" y1="4" x2="1" y2="4" style="stroke:rgb(0,0,0);stroke-opacity:0.8;stroke-width:0.0533333333333333"/> <line x1="-1" y1="4" x2="-1" y2="4.22222222222222" style="stroke:rgb(0,0,0);stroke-opacity:0.8;stroke-width:0.0533333333333333" stroke-linecap="round"/>
              <text x="-1" y="4.22222222222222" dy=0.222222222222222 text-anchor="middle" dominant-baseline="hanging" font-size=0.444444444444444>-1</text>
       <line x1="-0.5" y1="4" x2="-0.5" y2="4.22222222222222" style="stroke:rgb(0,0,0);stroke-opacity:0.8;stroke-width:0.0533333333333333" stroke-linecap="round"/>
              <text x="-0.5" y="4.22222222222222" dy=0.222222222222222 text-anchor="middle" dominant-baseline="hanging" font-size=0.444444444444444>-0.5</text>

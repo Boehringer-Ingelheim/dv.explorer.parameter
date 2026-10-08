@@ -151,7 +151,7 @@ dv.manager::run_app(
       numeric_factor_functions = fp_numeric_factor_functions
     )
   ),
-  filter_data = "adsl",
+  filter_dataset_name = "adsl",
   filter_key = "USUBJID"
 )
 ```
