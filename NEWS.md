@@ -1,14 +1,10 @@
-# dv.explorer.paramezer 0.3.0-9006
+# dv.explorer.parameter 0.3.1-9001
 
 - scatter plot:
-    - Added support for reference values
-    - Made regression lines optional
+    - Add support for reference values
+    - Make regression lines optional
 
-# dv.explorer.paramezer 0.3.0-9005
-
-- [NOT USER-FACING] Call EEF from dv.manager for all modules
-
-# dv.explorer.parameter 0.3.0-9004
+# dv.explorer.parameter 0.3.1
 
 - correlation heatmap:
     - Display cells with errors as NAs.
@@ -17,22 +13,9 @@
     - Guard against missing data in click-through scatter plots
     - Indicate heatmap interactivity with hover-on pointer change
 
-# dv.explorer.parameter 0.3.0-9003
-
-- [NOT USER-FACING/REMOVE BEFORE PR TO MAIN] Adapt dressing room to dv.manager 3.1.0 new afmm names
-- [NOT USER-FACING/REMOVE BEFORE PR TO MAIN] Pass new boxplot flags to EEF checker function
-
-# dv.explorer.parameter 0.3.0-9002
+- boxplot: Provide flags for removing violin plots and p values from the user interface
 
 - forest plot: Fix regression in calculation of plot height
-
-# dv.explorer.parameter 0.3.0-9001
-
-- boxplot: Includes flags for removing violin plots and p values from the user interface
-
-# dv.explorer.parameter 0.3.0-9000
-
-- [NOT USER-FACING/REMOVE BEFORE PR TO MAIN] Address dv.manager 3.1.0 deprecation warning messages
 
 # dv.explorer.parameter 0.3.0
 
