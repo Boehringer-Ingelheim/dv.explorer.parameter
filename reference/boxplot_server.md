@@ -38,6 +38,8 @@ boxplot_server(
   anlfl_vars = NULL,
   subjid_var = "USUBJID",
   quantile_type = 7L,
+  allow_pvalue = TRUE,
+  allow_violin = TRUE,
   default_cat = NULL,
   default_par = NULL,
   default_x_axis_var = NULL,
@@ -108,6 +110,20 @@ boxplot_server(
   Quantile algorithm type passed to
   [`quantile`](https://rdrr.io/r/stats/quantile.html) (an integer
   between 1 and 9, default 7).
+
+- allow_pvalue:
+
+  `[logical(1)]`
+
+  If `FALSE`, the significance table (containing p-values comparing
+  groups) is not displayed
+
+- allow_violin:
+
+  `[logical(1)]`
+
+  If `FALSE`, the violin plot option is not displayed and violin plots
+  cannot be shown
 
 - default_cat, default_par, default_x_axis_var, default_value,
   default_main_group, default_sub_group, default_page_group:

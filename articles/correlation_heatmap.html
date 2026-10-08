@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">dv.explorer.parameter</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -200,6 +200,50 @@ parameter-visit combinations and their corresponding correlation
 coefficients, p-values, confidence intervals and number of points
 contributing to the calculation. Decimal values on this table are
 rounded (mathematical, round-to-even) to four digits of precision.</p>
+<p>The p-values are computed as follows:</p>
+<ul>
+<li>
+<p>In the case of Pearson’s Correlation:
+<!-- https://stackoverflow.com/questions/45411729/r-function-cor-test-how-is-the-p-value-calculated-for-pearson-correlation#comment77786988_45412227 --></p>
+<ul>
+<li>Compute the t-statistic
+(<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>r</mi><annotation encoding="application/x-tex">r</annotation></semantics></math>
+is the correlation coefficient, the
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>d</mi><mi>f</mi></mrow><annotation encoding="application/x-tex">df</annotation></semantics></math>
+degrees of freedom is
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>n</mi><mo>−</mo><mn>2</mn></mrow><annotation encoding="application/x-tex">n-2</annotation></semantics></math>
+where
+<math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mi>n</mi><annotation encoding="application/x-tex">n</annotation></semantics></math>
+is the number of samples):
+<math display="block" xmlns="http://www.w3.org/1998/Math/MathML"><semantics><mrow><mi>t</mi><mo>=</mo><mfrac><mrow><mi>r</mi><msqrt><mrow><mi>d</mi><mi>f</mi></mrow></msqrt></mrow><msqrt><mrow><mn>1</mn><mo>−</mo><msup><mi>r</mi><mn>2</mn></msup></mrow></msqrt></mfrac></mrow><annotation encoding="application/x-tex">t=\frac{r\sqrt{df}}{\sqrt{1-r^{2}}}</annotation></semantics></math>
+</li>
+<li>Get the minimum of the upper and lower probabilities of this
+t-statistic and multiply by 2 for a two-tailed p-value. In R, this can
+be written as:
+<code>pval = 2 * min(pt(t, df), pt(t, df, lower.tail = FALSE))</code>.</li>
+</ul>
+</li>
+<li>
+<p>In the case of Spearman’s Correlation, the process is described
+in the R manual page for <code><a href="https://rdrr.io/r/stats/cor.test.html" class="external-link">?cor.test</a></code>:</p>
+<blockquote>
+<p>For Spearman’s test, p-values are computed using algorithm AS 89 for
+n &lt; 1290 and ‘exact = TRUE’, otherwise via the asymptotic t
+approximation. Note that these are ‘exact’ for n &lt; 10, and use an
+Edgeworth series approximation for larger sample sizes (the cutoff has
+been changed from the original paper).</p>
+</blockquote>
+</li>
+</ul>
+<p>The confidence intervals are computed as follows:</p>
+<ul>
+<li>In the case of Pearson’s Correlation: Fisher’s Z transform.</li>
+<li>In the case of Spearman’s Correlation: The method is described in
+Section 1.32 of <a href="https://bpb-us-e1.wpmucdn.com/sites.ucsc.edu/dist/2/1389/files/2026/08/part2.pdf" class="external-link">Bonett
+(2021, Volume 2)</a> and originally published in <a href="https://web.archive.org/web/20130203182221/http://biostat.georgiahealth.edu/Journal%20Club/bonett_wright_2000.pdf" class="external-link">Bonnet-Wright
+(2000)</a>. It matches the behavior of
+<code>statpsych::ci.spear</code>.</li>
+</ul>
 </div>
 </div>
 <div class="section level2">
@@ -222,7 +266,7 @@ rounded (mathematical, round-to-even) to four digits of precision.</p>
 <span>      value_vars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"AVAL"</span>, <span class="st">"CHG"</span><span class="op">)</span></span>
 <span>    <span class="op">)</span></span>
 <span>  <span class="op">)</span>,</span>
-<span>  filter_data <span class="op">=</span> <span class="st">"adsl"</span>,</span>
+<span>  filter_dataset_name <span class="op">=</span> <span class="st">"adsl"</span>,</span>
 <span>  filter_key <span class="op">=</span> <span class="st">"USUBJID"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>

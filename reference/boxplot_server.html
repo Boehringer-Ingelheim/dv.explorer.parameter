@@ -63,7 +63,7 @@ It must contain, at least, the column passed in the parameter, subjid_var.
 
     <a class="navbar-brand me-2" href="../index.html">dv.explorer.parameter</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -149,6 +149,8 @@ one record per subject.</p>
 <span>  anlfl_vars <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  subjid_var <span class="op">=</span> <span class="st">"USUBJID"</span>,</span>
 <span>  quantile_type <span class="op">=</span> <span class="fl">7L</span>,</span>
+<span>  allow_pvalue <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  allow_violin <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  default_cat <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  default_par <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  default_x_axis_var <span class="op">=</span> <span class="cn">NULL</span>,</span>
@@ -209,6 +211,16 @@ one record per subject.</p>
 <dd><p><code>[integer(1)]</code></p>
 <p>Quantile algorithm type passed to <code><a href="https://rdrr.io/r/stats/quantile.html" class="external-link">quantile</a></code>
 (an integer between 1 and 9, default 7).</p></dd>
+
+
+<dt id="arg-allow-pvalue">allow_pvalue<a class="anchor" aria-label="anchor" href="#arg-allow-pvalue"></a></dt>
+<dd><p><code>[logical(1)]</code></p>
+<p>If <code>FALSE</code>, the significance table (containing p-values comparing groups) is not displayed</p></dd>
+
+
+<dt id="arg-allow-violin">allow_violin<a class="anchor" aria-label="anchor" href="#arg-allow-violin"></a></dt>
+<dd><p><code>[logical(1)]</code></p>
+<p>If <code>FALSE</code>, the violin plot option is not displayed and violin plots cannot be shown</p></dd>
 
 
 <dt id="arg-default-cat-default-par-default-x-axis-var-default-value-default-main-group-default-sub-group-default-page-group">default_cat, default_par, default_x_axis_var, default_value, default_main_group, default_sub_group, default_page_group<a class="anchor" aria-label="anchor" href="#arg-default-cat-default-par-default-x-axis-var-default-value-default-main-group-default-sub-group-default-page-group"></a></dt>

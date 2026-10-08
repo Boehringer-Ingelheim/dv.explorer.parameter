@@ -5,7 +5,12 @@ Mock mm boxplot app
 ## Usage
 
 ``` r
-mock_app_boxplot_mm(update_query_string = TRUE, anlfl_flags = FALSE)
+mock_app_boxplot_mm(
+  update_query_string = TRUE,
+  anlfl_flags = FALSE,
+  allow_pvalue = TRUE,
+  allow_violin = TRUE
+)
 ```
 
 ## Arguments
@@ -17,3 +22,7 @@ mock_app_boxplot_mm(update_query_string = TRUE, anlfl_flags = FALSE)
 - anlfl_flags:
 
   indicates that the input data contain analysis flag variables or not
+
+- allow_pvalue, allow_violin:
+
+  passed onto [`mod_boxplot()`](mod_boxplot.md)

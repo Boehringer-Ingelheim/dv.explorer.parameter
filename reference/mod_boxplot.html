@@ -9,7 +9,7 @@ It also includes a set of listings with information about the population, distri
 
     <a class="navbar-brand me-2" href="../index.html">dv.explorer.parameter</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -78,7 +78,9 @@ It also includes a set of listings with information about the population, distri
 <span>  default_main_group <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  default_sub_group <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  default_page_group <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  server_wrapper_func <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>subj_id <span class="op">=</span> <span class="va">x</span><span class="op">)</span></span>
+<span>  server_wrapper_func <span class="op">=</span> <span class="kw">function</span><span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>subj_id <span class="op">=</span> <span class="va">x</span><span class="op">)</span>,</span>
+<span>  allow_pvalue <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  allow_violin <span class="op">=</span> <span class="cn">TRUE</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -154,6 +156,16 @@ be present in the app or be NULL.</p></dd>
 <dt id="arg-server-wrapper-func">server_wrapper_func<a class="anchor" aria-label="anchor" href="#arg-server-wrapper-func"></a></dt>
 <dd><p><code>[function()]</code></p>
 <p>A function that will be applied to the server returned value. Its default value will work for the current cases.</p></dd>
+
+
+<dt id="arg-allow-pvalue">allow_pvalue<a class="anchor" aria-label="anchor" href="#arg-allow-pvalue"></a></dt>
+<dd><p><code>[logical(1)]</code></p>
+<p>If <code>FALSE</code>, the significance table (containing p-values comparing groups) is not displayed</p></dd>
+
+
+<dt id="arg-allow-violin">allow_violin<a class="anchor" aria-label="anchor" href="#arg-allow-violin"></a></dt>
+<dd><p><code>[logical(1)]</code></p>
+<p>If <code>FALSE</code>, the violin plot option is not displayed and violin plots cannot be shown</p></dd>
 
 </dl></div>
 

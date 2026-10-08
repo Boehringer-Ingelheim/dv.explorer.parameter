@@ -35,7 +35,7 @@ mod_corr_hm(
 
 - id:
 
-  `[character(1)]`
+  `[character(1)]` Shiny ID
 
 - default_cat:
 
@@ -52,8 +52,6 @@ mod_corr_hm(
 - default_corr_method:
 
   Default correlation method `[character(1)]`
-
-  Shiny ID
 
 - module_id:
 

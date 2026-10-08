@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">dv.explorer.parameter</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -114,7 +114,9 @@ function in the programming context</li>
 <p><code>boxplot</code> features the following plot and tables:</p>
 <ul>
 <li>A set of boxplot/violin charts with different custom groupings and
-optionally showing the individual data points.</li>
+optionally showing the individual data points. The violin plot option
+can be restricted by the App Creator (see <code>allow_violin</code>
+below).</li>
 <li>A table showing the population listing of the selected boxplot</li>
 <li>A table showing the number of subjects per boxplot</li>
 <li>A table showing the number of subjects per boxplot and addition
@@ -154,6 +156,15 @@ continuous parameters. It expects a dataset similar to <a href="https://www.cdis
 </ul>
 <p>Refer to <code><a href="../reference/mod_boxplot.html">dv.explorer.parameter::mod_boxplot()</a></code> for the
 complete list of arguments and their description.</p>
+<p><strong>Optional Arguments controlling visible features</strong></p>
+<ul>
+<li><p><code>allow_violin</code>: If <code>FALSE</code> (default:
+<code>TRUE</code>), the violin plot option is removed from the “Other”
+menu and violin plots cannot be displayed.</p></li>
+<li><p><code>allow_pvalue</code>: If <code>FALSE</code> (default:
+<code>TRUE</code>), the “Data Significance” tab, which contains p-values
+comparing groups, is not displayed.</p></li>
+</ul>
 </div>
 <div class="section level2">
 <h2 id="input-menus">Input menus<a class="anchor" aria-label="anchor" href="#input-menus"></a>
@@ -216,6 +227,9 @@ additional configuration.</p>
 </h3>
 <p>A table containing a set of statistical tests comparing the means of
 different groups.</p>
+<p>Since this table contains p-values, it is only displayed if the App
+Creator sets <code>allow_pvalue = TRUE</code> (the default) when calling
+<code><a href="../reference/mod_boxplot.html">mod_boxplot()</a></code>.</p>
 <p><img src="images/bp_signif_table.png"></p>
 </div>
 </div>
@@ -242,10 +256,12 @@ different groups.</p>
 <span>      default_par <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Alanine Aminotransferase (U/L)"</span>, <span class="st">"Albumin (g/L)"</span><span class="op">)</span>,</span>
 <span>      default_x_axis_vals <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Week 2"</span>, <span class="st">"Week 4"</span>, <span class="st">"Week 6"</span><span class="op">)</span>,</span>
 <span>      default_main_group <span class="op">=</span> <span class="st">"ARM"</span>,</span>
-<span>      default_sub_group <span class="op">=</span> <span class="st">"AGEGR1"</span></span>
+<span>      default_sub_group <span class="op">=</span> <span class="st">"AGEGR1"</span>,</span>
+<span>      allow_violin <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>      allow_pvalue <span class="op">=</span> <span class="cn">FALSE</span></span>
 <span>    <span class="op">)</span></span>
 <span>  <span class="op">)</span>,</span>
-<span>  filter_data <span class="op">=</span> <span class="st">"adsl"</span>,</span>
+<span>  filter_dataset_name <span class="op">=</span> <span class="st">"adsl"</span>,</span>
 <span>  filter_key <span class="op">=</span> <span class="st">"USUBJID"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">dv.explorer.parameter</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -53,7 +53,7 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">boxplot_UI</span><span class="op">(</span><span class="va">id</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">boxplot_UI</span><span class="op">(</span><span class="va">id</span>, allow_pvalue <span class="op">=</span> <span class="cn">TRUE</span>, allow_violin <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -62,6 +62,16 @@
 
 <dl><dt id="arg-id">id<a class="anchor" aria-label="anchor" href="#arg-id"></a></dt>
 <dd><p>Shiny ID <code>[character(1)]</code></p></dd>
+
+
+<dt id="arg-allow-pvalue">allow_pvalue<a class="anchor" aria-label="anchor" href="#arg-allow-pvalue"></a></dt>
+<dd><p><code>[logical(1)]</code></p>
+<p>If <code>FALSE</code>, the significance table (containing p-values comparing groups) is not displayed</p></dd>
+
+
+<dt id="arg-allow-violin">allow_violin<a class="anchor" aria-label="anchor" href="#arg-allow-violin"></a></dt>
+<dd><p><code>[logical(1)]</code></p>
+<p>If <code>FALSE</code>, the violin plot option is not displayed</p></dd>
 
 </dl></div>
 

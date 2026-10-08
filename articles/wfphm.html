@@ -20,7 +20,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">dv.explorer.parameter</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -262,7 +262,7 @@ dataset for this app.</p>
 <span><span class="fu">dv.manager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/dv.manager/man/run_app.html" class="external-link">run_app</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>DS <span class="op">=</span> <span class="va">example_dataset</span><span class="op">)</span>,</span>
 <span>  module_list <span class="op">=</span> <span class="va">module_list</span>,</span>
-<span>  filter_data <span class="op">=</span> <span class="st">"adsl"</span>,</span>
+<span>  filter_dataset_name <span class="op">=</span> <span class="st">"adsl"</span>,</span>
 <span>  filter_key <span class="op">=</span> <span class="st">"SUBJID"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <div class="section level3">
@@ -403,7 +403,7 @@ module so it is included in the menu as seen in the example below.</p>
 <span><span class="fu">dv.manager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/dv.manager/man/run_app.html" class="external-link">run_app</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>DS <span class="op">=</span> <span class="va">example_dataset_custom_aval</span><span class="op">)</span>,</span>
 <span>  module_list <span class="op">=</span> <span class="va">module_list_custom_aval</span>,</span>
-<span>  filter_data <span class="op">=</span> <span class="st">"adbm"</span>,</span>
+<span>  filter_dataset_name <span class="op">=</span> <span class="st">"adbm"</span>,</span>
 <span>  filter_key <span class="op">=</span> <span class="st">"SUBJID"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="images/wf_custom_aval_param_1.png" style="width:25.0%"></p>
@@ -427,7 +427,7 @@ specified then all should be specified.</p>
 <span><span class="fu">dv.manager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/dv.manager/man/run_app.html" class="external-link">run_app</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>DS <span class="op">=</span> <span class="va">example_dataset_custom_aval</span><span class="op">)</span>,</span>
 <span>  module_list <span class="op">=</span> <span class="va">module_list_custom_aval</span>,</span>
-<span>  filter_data <span class="op">=</span> <span class="st">"adbm"</span>,</span>
+<span>  filter_dataset_name <span class="op">=</span> <span class="st">"adbm"</span>,</span>
 <span>  filter_key <span class="op">=</span> <span class="st">"SUBJID"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="images/wf_custom_aval_param_2.png" style="width:25.0%"></p>
@@ -562,7 +562,7 @@ similar vector with the transformed values.</p>
 <span><span class="fu">dv.manager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/dv.manager/man/run_app.html" class="external-link">run_app</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>DS <span class="op">=</span> <span class="va">example_dataset</span><span class="op">)</span>,</span>
 <span>  module_list <span class="op">=</span> <span class="va">module_list_custom_transformation</span>,</span>
-<span>  filter_data <span class="op">=</span> <span class="st">"adbm"</span>,</span>
+<span>  filter_dataset_name <span class="op">=</span> <span class="st">"adbm"</span>,</span>
 <span>  filter_key <span class="op">=</span> <span class="st">"SUBJID"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 <p><img src="images/hmpar_transformation_custom.png" style="width:25.0%"></p>
@@ -590,7 +590,7 @@ decorate the entries by setting a label attribute for the columns.</p>
 <span><span class="fu">dv.manager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/dv.manager/man/run_app.html" class="external-link">run_app</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>DS <span class="op">=</span> <span class="va">example_dataset_labelled</span><span class="op">)</span>,</span>
 <span>  module_list <span class="op">=</span> <span class="va">module_list</span>,</span>
-<span>  filter_data <span class="op">=</span> <span class="st">"adbm"</span>,</span>
+<span>  filter_dataset_name <span class="op">=</span> <span class="st">"adbm"</span>,</span>
 <span>  filter_key <span class="op">=</span> <span class="st">"SUBJID"</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>
@@ -625,7 +625,7 @@ for applicable module arguments.</p>
 <span><span class="fu">dv.manager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/dv.manager/man/run_app.html" class="external-link">run_app</a></span><span class="op">(</span></span>
 <span>  data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>dummy <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>adbm <span class="op">=</span> <span class="va">adbm_dataset</span>, adsl <span class="op">=</span> <span class="va">adsl_dataset</span><span class="op">)</span><span class="op">)</span>,</span>
 <span>  module_list <span class="op">=</span> <span class="va">module_list</span>,</span>
-<span>  filter_data <span class="op">=</span> <span class="st">"adsl"</span>,</span>
+<span>  filter_dataset_name <span class="op">=</span> <span class="st">"adsl"</span>,</span>
 <span>  filter_key <span class="op">=</span> <span class="st">"USUBJID"</span> <span class="co"># We changed this one too, see dv.manager filtering doc for this change</span></span>
 <span><span class="op">)</span></span></code></pre></div>
 </div>

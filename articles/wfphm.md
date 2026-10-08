@@ -176,7 +176,7 @@ module_list <- list(
 dv.manager::run_app(
   data = list(DS = example_dataset),
   module_list = module_list,
-  filter_data = "adsl",
+  filter_dataset_name = "adsl",
   filter_key = "SUBJID"
 )
 ```
@@ -302,7 +302,7 @@ module_list_custom_aval <- list(
 dv.manager::run_app(
   data = list(DS = example_dataset_custom_aval),
   module_list = module_list_custom_aval,
-  filter_data = "adbm",
+  filter_dataset_name = "adbm",
   filter_key = "SUBJID"
 )
 ```
@@ -329,7 +329,7 @@ module_list_custom_aval <- list(
 dv.manager::run_app(
   data = list(DS = example_dataset_custom_aval),
   module_list = module_list_custom_aval,
-  filter_data = "adbm",
+  filter_dataset_name = "adbm",
   filter_key = "SUBJID"
 )
 ```
@@ -454,7 +454,7 @@ module_list_custom_transformation <- list( # nolint
 dv.manager::run_app(
   data = list(DS = example_dataset),
   module_list = module_list_custom_transformation,
-  filter_data = "adbm",
+  filter_dataset_name = "adbm",
   filter_key = "SUBJID"
 )
 ```
@@ -483,7 +483,7 @@ attr(example_dataset_labelled[["adbm"]][["PARCAT1"]], "label") <- "Parameter Cat
 dv.manager::run_app(
   data = list(DS = example_dataset_labelled),
   module_list = module_list,
-  filter_data = "adbm",
+  filter_dataset_name = "adbm",
   filter_key = "SUBJID"
 )
 ```
@@ -521,7 +521,7 @@ module_list <- list(
 dv.manager::run_app(
   data = list(dummy = list(adbm = adbm_dataset, adsl = adsl_dataset)),
   module_list = module_list,
-  filter_data = "adsl",
+  filter_dataset_name = "adsl",
   filter_key = "USUBJID" # We changed this one too, see dv.manager filtering doc for this change
 )
 ```

@@ -131,7 +131,7 @@ dv.manager::run_app(
       subjid_var = "USUBJID"
     )
   ),
-  filter_data = "adsl",
+  filter_dataset_name = "adsl",
   filter_key = "USUBJID"
 )
 ```

@@ -30,7 +30,9 @@ mod_boxplot(
   default_main_group = NULL,
   default_sub_group = NULL,
   default_page_group = NULL,
-  server_wrapper_func = function(x) list(subj_id = x)
+  server_wrapper_func = function(x) list(subj_id = x),
+  allow_pvalue = TRUE,
+  allow_violin = TRUE
 )
 ```
 
@@ -121,3 +123,17 @@ mod_boxplot(
 
   A function that will be applied to the server returned value. Its
   default value will work for the current cases.
+
+- allow_pvalue:
+
+  `[logical(1)]`
+
+  If `FALSE`, the significance table (containing p-values comparing
+  groups) is not displayed
+
+- allow_violin:
+
+  `[logical(1)]`
+
+  If `FALSE`, the violin plot option is not displayed and violin plots
+  cannot be shown

@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">dv.explorer.parameter</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -53,7 +53,12 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">mock_app_boxplot_mm</span><span class="op">(</span>update_query_string <span class="op">=</span> <span class="cn">TRUE</span>, anlfl_flags <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">mock_app_boxplot_mm</span><span class="op">(</span></span>
+<span>  update_query_string <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  anlfl_flags <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  allow_pvalue <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  allow_violin <span class="op">=</span> <span class="cn">TRUE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -66,6 +71,10 @@
 
 <dt id="arg-anlfl-flags">anlfl_flags<a class="anchor" aria-label="anchor" href="#arg-anlfl-flags"></a></dt>
 <dd><p>indicates that the input data contain analysis flag variables or not</p></dd>
+
+
+<dt id="arg-allow-pvalue-allow-violin">allow_pvalue, allow_violin<a class="anchor" aria-label="anchor" href="#arg-allow-pvalue-allow-violin"></a></dt>
+<dd><p>passed onto <code><a href="mod_boxplot.html">mod_boxplot()</a></code></p></dd>
 
 </dl></div>
 
