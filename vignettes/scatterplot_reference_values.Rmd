@@ -1,0 +1,20 @@
+---
+title: "Scatterplot reference values"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Scatterplot reference values}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+THIS IS A PLACEHOLDER THAT SHOULD EITHER:
+- FOLLOW THE LINEPLOT REF VALUES VIGNETTE
+or
+- BE MERGED WITH THAT VIGNETTE

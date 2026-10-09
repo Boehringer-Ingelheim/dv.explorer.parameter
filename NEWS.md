@@ -1,4 +1,10 @@
-# dv.explorer.paramezer 0.3.1
+# dv.explorer.parameter 0.3.1-9001
+
+- scatter plot:
+    - Add support for reference values
+    - Make regression lines optional
+
+# dv.explorer.parameter 0.3.1
 
 - correlation heatmap:
     - Display cells with errors as NAs.

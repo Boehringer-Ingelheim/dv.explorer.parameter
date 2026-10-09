@@ -3,40 +3,40 @@
     Code
       res
     Output
-                    x             y  z p-value (2-sided) 95% CI (min) 95% CI (max)  N
-      1 par_1 - vis_1 par_1 - vis_1  1                NA           NA           NA NA
-      2 par_1 - vis_1 par_2 - vis_1 NA                NA           NA           NA NA
-      3 par_2 - vis_1 par_1 - vis_1 NA                NA           NA           NA NA
-      4 par_2 - vis_1 par_2 - vis_1  1                NA           NA           NA NA
-                                 error label
-      1                           <NA>      
-      2 not enough finite observations    NA
-      3 not enough finite observations    NA
-      4                           <NA>      
+                    x             y  z p-value (2-sided) 95% CI (lower)
+      1 par_1 - vis_1 par_1 - vis_1  1                NA             NA
+      2 par_1 - vis_1 par_2 - vis_1 NA                NA             NA
+      3 par_2 - vis_1 par_1 - vis_1 NA                NA             NA
+      4 par_2 - vis_1 par_2 - vis_1  1                NA             NA
+        95% CI (upper)  N                          error label
+      1             NA NA                           <NA>      
+      2             NA NA not enough finite observations    NA
+      3             NA NA not enough finite observations    NA
+      4             NA NA                           <NA>      
 
 ---
 
     Code
       res
     Output
-                    x             y  z p-value (2-sided) 95% CI (min) 95% CI (max)  N
-      1 par_1 - vis_1 par_1 - vis_1  1                NA           NA           NA NA
-      2 par_1 - vis_1 par_2 - vis_1 NA                NA           NA           NA NA
-      3 par_1 - vis_1 par_3 - vis_1 NA                NA           NA           NA  0
-      4 par_2 - vis_1 par_1 - vis_1 NA                NA           NA           NA NA
-      5 par_2 - vis_1 par_2 - vis_1  1                NA           NA           NA NA
-      6 par_2 - vis_1 par_3 - vis_1 NA                NA           NA           NA  0
-      7 par_3 - vis_1 par_1 - vis_1 NA                NA           NA           NA  0
-      8 par_3 - vis_1 par_2 - vis_1 NA                NA           NA           NA  0
-      9 par_3 - vis_1 par_3 - vis_1  1                NA           NA           NA  0
-                                 error label
-      1                           <NA>      
-      2 not enough finite observations    NA
-      3        not enough observations    NA
-      4 not enough finite observations    NA
-      5                           <NA>      
-      6        not enough observations    NA
-      7        not enough observations    NA
-      8        not enough observations    NA
-      9        not enough observations      
+                    x             y  z p-value (2-sided) 95% CI (lower)
+      1 par_1 - vis_1 par_1 - vis_1  1                NA             NA
+      2 par_1 - vis_1 par_2 - vis_1 NA                NA             NA
+      3 par_1 - vis_1 par_3 - vis_1 NA                NA             NA
+      4 par_2 - vis_1 par_1 - vis_1 NA                NA             NA
+      5 par_2 - vis_1 par_2 - vis_1  1                NA             NA
+      6 par_2 - vis_1 par_3 - vis_1 NA                NA             NA
+      7 par_3 - vis_1 par_1 - vis_1 NA                NA             NA
+      8 par_3 - vis_1 par_2 - vis_1 NA                NA             NA
+      9 par_3 - vis_1 par_3 - vis_1  1                NA             NA
+        95% CI (upper)  N                          error label
+      1             NA NA                           <NA>      
+      2             NA NA not enough finite observations    NA
+      3             NA  0        not enough observations    NA
+      4             NA NA not enough finite observations    NA
+      5             NA NA                           <NA>      
+      6             NA  0        not enough observations    NA
+      7             NA  0        not enough observations    NA
+      8             NA  0        not enough observations    NA
+      9             NA  0        not enough observations      
 

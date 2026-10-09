@@ -4,16 +4,16 @@
       chart_args
     Output
       $ds
-                       x                y         z p-value (2-sided) 95% CI (min)
-      1 PARAM22 - VISIT2 PARAM22 - VISIT2 1.0000000                NA           NA
-      2 PARAM22 - VISIT2 PARAM23 - VISIT2 0.4204741        0.06489441  -0.02708664
-      3 PARAM23 - VISIT2 PARAM22 - VISIT2 0.4204741        0.06489441  -0.02708664
-      4 PARAM23 - VISIT2 PARAM23 - VISIT2 1.0000000                NA           NA
-        95% CI (max)  N label
-      1           NA NA      
-      2    0.7276096 20  0.42
-      3    0.7276096 20      
-      4           NA NA      
+                       x                y         z p-value (2-sided) 95% CI (lower)
+      1 PARAM22 - VISIT2 PARAM22 - VISIT2 1.0000000                NA             NA
+      2 PARAM22 - VISIT2 PARAM23 - VISIT2 0.4204741        0.06489441    -0.02708664
+      3 PARAM23 - VISIT2 PARAM22 - VISIT2 0.4204741        0.06489441    -0.02708664
+      4 PARAM23 - VISIT2 PARAM23 - VISIT2 1.0000000                NA             NA
+        95% CI (upper)  N label
+      1             NA NA      
+      2      0.7276096 20  0.42
+      3      0.7276096 20      
+      4             NA NA      
       
       $x_desc
       [1] "S"
@@ -77,16 +77,16 @@
       580         20  PARCAT2 PARAM23 - VISIT2 VISIT2 21.584290
       
       $corr_data
-                       x                y         z p-value (2-sided) 95% CI (min)
-      1 PARAM22 - VISIT2 PARAM22 - VISIT2 1.0000000                NA           NA
-      2 PARAM22 - VISIT2 PARAM23 - VISIT2 0.4204741        0.06489441  -0.02708664
-      3 PARAM23 - VISIT2 PARAM22 - VISIT2 0.4204741        0.06489441  -0.02708664
-      4 PARAM23 - VISIT2 PARAM23 - VISIT2 1.0000000                NA           NA
-        95% CI (max)  N label
-      1           NA NA      
-      2    0.7276096 20  0.42
-      3    0.7276096 20      
-      4           NA NA      
+                       x                y         z p-value (2-sided) 95% CI (lower)
+      1 PARAM22 - VISIT2 PARAM22 - VISIT2 1.0000000                NA             NA
+      2 PARAM22 - VISIT2 PARAM23 - VISIT2 0.4204741        0.06489441    -0.02708664
+      3 PARAM23 - VISIT2 PARAM22 - VISIT2 0.4204741        0.06489441    -0.02708664
+      4 PARAM23 - VISIT2 PARAM23 - VISIT2 1.0000000                NA             NA
+        95% CI (upper)  N label
+      1             NA NA      
+      2      0.7276096 20  0.42
+      3      0.7276096 20      
+      4             NA NA      
       
       $method
       [1] "pearson"

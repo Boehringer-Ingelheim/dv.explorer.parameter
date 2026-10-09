@@ -24,8 +24,8 @@ ID <- poc(
       VAL = tns(SP$ID$Y$PAR_VALUE, "val"),
       VIS = tns(SP$ID$Y$PAR_VISIT, "val")
     ),
-    GRP = tns(SP$ID$GRP, "val"),
-    COLOR = tns(SP$ID$COLOR, "val"),
+    MAIN_GRP = tns(SP$ID$MAIN_GRP, "val"),
+    SUB_GRP = tns(SP$ID$SUB_GRP, "val"),
     ANLFL = tns(BP$ID$ANLFL_FILTER, "val")
   ),
   OUTPUT = poc(
@@ -51,8 +51,8 @@ test_that("default values are set", {
     default_y_par = "PARAM32",
     default_y_visit = "VISIT3",
     default_y_value = "VALUE3",
-    default_group = "CAT2",
-    default_color = "CAT3"
+    default_main_group = "CAT2",
+    default_sub_group = "CAT3"
   )
 
   app <- start_app_driver(
@@ -78,12 +78,12 @@ test_that("default values are set", {
   expect_equal(input_values[[ID$INPUT$Y$PAR]], srv_defaults[["default_y_par"]])
   expect_equal(input_values[[ID$INPUT$Y$VIS]], srv_defaults[["default_y_visit"]])
   expect_equal(input_values[[ID$INPUT$Y$VAL]], srv_defaults[["default_y_value"]])
-  expect_equal(input_values[[ID$INPUT$GRP]], srv_defaults[["default_group"]])
-  expect_equal(input_values[[ID$INPUT$COLOR]], srv_defaults[["default_color"]])
+  expect_equal(input_values[[ID$INPUT$MAIN_GRP]], srv_defaults[["default_main_group"]])
+  expect_equal(input_values[[ID$INPUT$SUB_GRP]], srv_defaults[["default_sub_group"]])
 })
 
 
-test_that("default values are set including analysis flag variables", {
+test_that("default values are set including analysis flag variables", { # TODO(miguel): Compact with previous test to reduce maintenance burden
   srv_defaults <- list(
     default_x_cat = "PARCAT2",
     default_x_par = "PARAM22",
@@ -93,8 +93,8 @@ test_that("default values are set including analysis flag variables", {
     default_y_par = "PARAM32",
     default_y_visit = "VISIT3",
     default_y_value = "VALUE3",
-    default_group = "CAT2",
-    default_color = "CAT3"
+    default_main_group = "CAT2",
+    default_sub_group = "CAT3"
   )
 
   app <- start_app_driver(
@@ -117,8 +117,8 @@ test_that("default values are set including analysis flag variables", {
   expect_equal(input_values[[ID$INPUT$Y$PAR]], srv_defaults[["default_y_par"]])
   expect_equal(input_values[[ID$INPUT$Y$VIS]], srv_defaults[["default_y_visit"]])
   expect_equal(input_values[[ID$INPUT$Y$VAL]], srv_defaults[["default_y_value"]])
-  expect_equal(input_values[[ID$INPUT$GRP]], srv_defaults[["default_group"]])
-  expect_equal(input_values[[ID$INPUT$COLOR]], srv_defaults[["default_color"]])
+  expect_equal(input_values[[ID$INPUT$MAIN_GRP]], srv_defaults[["default_main_group"]])
+  expect_equal(input_values[[ID$INPUT$SUB_GRP]], srv_defaults[["default_sub_group"]])
   expect_equal(input_values[[ID$INPUT$ANLFL]], "ANLFL1")
 })
 # nolint end
