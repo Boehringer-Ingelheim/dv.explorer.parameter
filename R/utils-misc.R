@@ -219,3 +219,33 @@ prefix_repeat_parameters <- function(dataset, cat_var, par_var) {
 is_shiny_test_mode <- function() {
   isTRUE(getOption("shiny.testmode"))
 }
+
+#' Helper for argument deprecation
+#' 
+#' Warn against the use of the deprecated argument, clear it and ensure that `new` carries the intended value.
+#' This function can alter the value of its arguments in the calling environment.
+#' It only applies to pairs of arguments that both default to NULL.
+#' 
+#' @param new New, recommended argument
+#' @param old Old, deprecated argument
+#' 
+#' @keywords misc
+fix_deprecated_use_of_arguments_THAT_ARE_BOTH_NULL_BY_DEFAULT <- function(new, old) {
+  if (!is.null(old)) {
+    new_s <- deparse(substitute(new))
+    old_s <- deparse(substitute(old))
+    caller_s <- as.character(sys.call(sys.parent(n = 1))[[1L]])
+    
+    # old
+    warning(sprintf("In %s(): Argument `%s` as been deprecated in favor of `%s`.", caller_s, old_s, new_s),
+            call. = FALSE)
+    assign(old_s, NULL, envir = parent.frame())
+    
+    # new
+    if (is.null(new)){
+      assign(new_s, old, envir = parent.frame())
+    }
+  }
+  
+  invisible(NULL)
+}

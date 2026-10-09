@@ -307,8 +307,8 @@ scatterplot_server <- function(id,
                                default_y_visit = NULL,
                                default_main_group = NULL,
                                default_sub_group = NULL,
-                               default_group = NULL, # TODO: map and deprecate
-                               default_color = NULL, # TODO: map and deprecate
+                               default_group = NULL,
+                               default_color = NULL,
                                default_include_regression_info = default_include_regression_info,
                                compute_lm_cor_fn = sp_compute_lm_cor_default) {
   ac <- checkmate::makeAssertCollection()
@@ -342,6 +342,9 @@ scatterplot_server <- function(id,
   checkmate::assert_string(subjid_var, min.chars = 1, add = ac)
   checkmate::assert_function(compute_lm_cor_fn, nargs = 1, add = ac)
   checkmate::reportAssertions(ac)
+ 
+  fix_deprecated_use_of_arguments_THAT_ARE_BOTH_NULL_BY_DEFAULT(new = default_main_group, old = default_group)
+  fix_deprecated_use_of_arguments_THAT_ARE_BOTH_NULL_BY_DEFAULT(new = default_sub_group, old = default_color)
 
   # module constants ----
   VAR <- poc( # nolint Parameters from the function that will be considered constant across the function
@@ -900,10 +903,13 @@ mod_scatterplot <- function(module_id,
                             default_y_visit = NULL,
                             default_main_group = NULL,
                             default_sub_group = NULL,
-                            default_group = NULL, # TODO: map and deprecate
-                            default_color = NULL, # TODO: map and deprecate
+                            default_group = NULL,
+                            default_color = NULL,
                             default_include_regression_info = TRUE,
                             compute_lm_cor_fn = sp_compute_lm_cor_default) {
+  fix_deprecated_use_of_arguments_THAT_ARE_BOTH_NULL_BY_DEFAULT(new = default_main_group, old = default_group)
+  fix_deprecated_use_of_arguments_THAT_ARE_BOTH_NULL_BY_DEFAULT(new = default_sub_group, old = default_color)
+  
   mod <- list(
     ui = function(id) scatterplot_UI(id, default_include_regression_info = default_include_regression_info),
     server = function(afmm) {
