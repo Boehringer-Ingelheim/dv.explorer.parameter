@@ -342,9 +342,20 @@ scatterplot_server <- function(id,
   checkmate::assert_string(subjid_var, min.chars = 1, add = ac)
   checkmate::assert_function(compute_lm_cor_fn, nargs = 1, add = ac)
   checkmate::reportAssertions(ac)
- 
-  fix_deprecated_use_of_arguments_THAT_ARE_BOTH_NULL_BY_DEFAULT(new = default_main_group, old = default_group)
-  fix_deprecated_use_of_arguments_THAT_ARE_BOTH_NULL_BY_DEFAULT(new = default_sub_group, old = default_color)
+
+  { # partially repeats #deprecate_default_color_default_group #nolint
+    if (!is.null(default_group)) {
+      warning("Argument `default_group` as been deprecated in favor of `default_main_group`.")
+      if (is.null(default_main_group)) default_main_group <- default_group
+      default_group <- NULL
+    }
+    
+    if (!is.null(default_color)) {
+      warning("Argument `default_color` as been deprecated in favor of `default_sub_group`.")
+      if (is.null(default_sub_group)) default_sub_group <- default_color
+      default_color <- NULL
+    }
+  }
 
   # module constants ----
   VAR <- poc( # nolint Parameters from the function that will be considered constant across the function
@@ -907,8 +918,19 @@ mod_scatterplot <- function(module_id,
                             default_color = NULL,
                             default_include_regression_info = TRUE,
                             compute_lm_cor_fn = sp_compute_lm_cor_default) {
-  fix_deprecated_use_of_arguments_THAT_ARE_BOTH_NULL_BY_DEFAULT(new = default_main_group, old = default_group)
-  fix_deprecated_use_of_arguments_THAT_ARE_BOTH_NULL_BY_DEFAULT(new = default_sub_group, old = default_color)
+  { # repeats #deprecate_default_color_default_group #nolint
+    if (!missing(default_group)) {
+      warning("Argument `default_group` as been deprecated in favor of `default_main_group`.")
+      if (missing(default_main_group)) default_main_group <- default_group
+      default_group <- NULL
+    }
+    
+    if (!missing(default_color)) {
+      warning("Argument `default_color` as been deprecated in favor of `default_sub_group`.")
+      if (missing(default_sub_group)) default_sub_group <- default_color
+      default_color <- NULL
+    }
+  }
   
   mod <- list(
     ui = function(id) scatterplot_UI(id, default_include_regression_info = default_include_regression_info),
