@@ -281,10 +281,10 @@ check_mod_lineplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, 
     flags <- list(zero_or_more = TRUE, optional = TRUE)
     OK[["ref_line_vars"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("ref_line_vars",
         ref_line_vars, subkind, flags, bm_dataset_name, datasets[[bm_dataset_name]], err)
-    flags <- list(ignore = TRUE)
+    flags <- list(optional = TRUE, ignore = TRUE)
     OK[["default_centrality_fn"]] <- CM$check_type("default_centrality_fn", default_centrality_fn, "character",
         flags, err)
-    flags <- list(ignore = TRUE)
+    flags <- list(optional = TRUE, ignore = TRUE)
     OK[["default_dispersion_fn"]] <- CM$check_type("default_dispersion_fn", default_dispersion_fn, "character",
         flags, err)
     flags <- list(zero_or_more = TRUE, optional = TRUE)

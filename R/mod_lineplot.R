@@ -1860,8 +1860,8 @@ mod_lineplot_API_spec <- TC$group(
   value_vars = TC$col("bm_dataset_name", TC$numeric()) |> TC$flag("one_or_more"),
   additional_listing_vars = TC$col("bm_dataset_name", TC$anything()) |> TC$flag("zero_or_more", "optional"),
   ref_line_vars = TC$col("bm_dataset_name", TC$numeric()) |> TC$flag("zero_or_more", "optional"),
-  default_centrality_fn = TC$character() |> TC$flag("ignore"), # TODO: TC$choice ?
-  default_dispersion_fn = TC$character() |> TC$flag("ignore"), # TODO: TC$choice ?
+  default_centrality_fn = TC$character() |> TC$flag("optional", "ignore"), # TODO: TC$choice ?
+  default_dispersion_fn = TC$character() |> TC$flag("optional", "ignore"), # TODO: TC$choice ?
   default_cat = TC$choice_from_col_contents("cat_var") |> TC$flag("zero_or_more", "optional"),
   default_par = TC$choice_from_col_contents("par_var") |> TC$flag("zero_or_more", "optional"),
   default_val = TC$choice("value_vars") |> TC$flag("optional"), # FIXME(miguel): Should be called default_value_var
