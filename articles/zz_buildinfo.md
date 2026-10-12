@@ -1,6 +1,6 @@
 # Build Info
 
-Build date: 2026-10-08 13:17:29
+Build date: 2026-10-12 09:35:08
 
 ``` r
 sessionInfo()
@@ -42,7 +42,7 @@ knitr::kable(as.data.frame(installed.packages(), row.names = FALSE)[c("Package",
 
 | Package               | Version    |
 |:----------------------|:-----------|
-| dv.explorer.parameter | 0.3.1      |
+| dv.explorer.parameter | 0.3.2      |
 | abind                 | 1.4-8      |
 | admiraldev            | 1.4.0      |
 | askpass               | 1.2.1      |
