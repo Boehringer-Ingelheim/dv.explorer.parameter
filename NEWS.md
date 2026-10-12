@@ -1,4 +1,8 @@
-# dv.explorer.paramezer 0.3.1
+# dv.explorer.parameter 0.3.2
+
+- lineplot: Fix regression that prevented module from running 
+
+# dv.explorer.parameter 0.3.1
 
 - correlation heatmap:
     - Display cells with errors as NAs.
