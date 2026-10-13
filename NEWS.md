@@ -1,8 +1,12 @@
-# dv.explorer.parameter 0.3.1-9001
+# dv.explorer.parameter 0.3.2-9001
 
 - scatter plot:
     - Add support for reference values
     - Make regression lines optional
+
+# dv.explorer.parameter 0.3.2
+
+- lineplot: Fix regression that prevented module from running 
 
 # dv.explorer.parameter 0.3.1
 
