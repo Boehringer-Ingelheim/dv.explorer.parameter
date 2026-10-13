@@ -1919,42 +1919,7 @@ check_mod_lineplot <- function(
     }
   }
 
-  if (OK[["subjid_var"]] && OK[["par_var"]] && OK[["ref_line_vars"]]) {
-    ds <- datasets[[bm_dataset_name]]
-
-    for (ref_line_var in ref_line_vars){
-      combinations <- unique(ds[c(subjid_var, par_var, ref_line_var)])
-      # broad pass (any floating point difference is detected)
-      dups <- duplicated(combinations[c(subjid_var, par_var)])
-      if (any(dups)) {
-        # narrow pass (floating point differences after the sixth decimal are dropped). Saves on float formatting
-        combinations[[ref_line_var]] <- sprintf("%.6f", combinations[[ref_line_var]])
-        combinations <- unique(combinations)
-        dups <- (duplicated(combinations[c(subjid_var, par_var)]) |
-                   duplicated(combinations[c(subjid_var, par_var)], fromLast = TRUE))
-      }
-      dup_df <- combinations[dups, ]
-
-
-      CM$assert(
-        container = err,
-        cond = nrow(dup_df) == 0,
-        msg = sprintf(
-          paste(
-            "The reference line variable `<b>%s</b>` in dataset `<b>%s</b>` is not constant for the following",
-            "subjects and parameters:",
-            "<pre>%s</pre>",
-            "You can either remove the `<b>%s</b>` variable from the `ref_line_vars` parameter or preprocess the",
-            "dataset to avoid this issue."
-          ),
-          ref_line_var,
-          bm_dataset_name,
-          paste(utils::capture.output(dup_df), collapse = "\n"),
-          ref_line_var
-        )
-      )
-    }
-  }
+  check_ref_lines(OK, datasets, bm_dataset_name, subjid_var, par_var, ref_line_vars, err)
 
   res <- err[["messages"]]
   return(res)

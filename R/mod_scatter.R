@@ -1075,6 +1075,8 @@ check_mod_scatterplot <- function(
     )
   }
 
+  check_ref_lines(OK, datasets, bm_dataset_name, subjid_var, par_var, ref_line_vars, err)
+
   res <- err[["messages"]]
   return(res)
 }
