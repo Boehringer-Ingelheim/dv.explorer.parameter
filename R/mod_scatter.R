@@ -692,9 +692,16 @@ scatterplot_server <- function(id,
       sp_apply_lm_cor(data_subset(), lm_cor_fn = compute_lm_cor_fn)
     })
     
-    compute_df_for_ref_line_data <- function(df, cat, par, main_grp, ref_line_vars) {
-      if (identical(main_grp, "None")) main_grp <- NULL
-      
+    compute_df_for_ref_line_data <- function(bm, group, cat, par, main_grp, ref_line_vars) {
+      df <- bm
+      if (identical(main_grp, "None")) {
+        main_grp <- NULL
+      } else if (!isTRUE(main_grp %in% names(df))) {
+        df <- merge(df, group[, c(subjid_var, main_grp)], by = subjid_var, all.x = TRUE)
+        df <- possibly_set_lbls(df, get_lbls(group))
+        df <- possibly_set_lbls(df, get_lbls(bm))
+      }
+     
       mask <- (df[[VAR$CAT]] == cat & df[[VAR$PAR]] == par)
       
       # TODO: Consider checking PAR is unique across CATs (requires changes to `generate_ref_line_data` and `mod_lineplot`)
@@ -718,7 +725,8 @@ scatterplot_server <- function(id,
       l_input <- v_input_subset()
       
       df_x <- compute_df_for_ref_line_data(
-        df = v_bm_dataset(),
+        bm = v_bm_dataset(),
+        group = v_group_dataset(),
         cat = l_input[[SP$ID$X$PAR]][["cat"]],
         par = l_input[[SP$ID$X$PAR]][["par"]],
         main_grp = l_input[[SP$ID$MAIN_GRP]],
@@ -726,7 +734,8 @@ scatterplot_server <- function(id,
       )
       
       df_y <- compute_df_for_ref_line_data(
-        df = v_bm_dataset(),
+        bm = v_bm_dataset(),
+        group = v_group_dataset(),
         cat = l_input[[SP$ID$Y$PAR]][["cat"]],
         par = l_input[[SP$ID$Y$PAR]][["par"]],
         main_grp = l_input[[SP$ID$MAIN_GRP]],
