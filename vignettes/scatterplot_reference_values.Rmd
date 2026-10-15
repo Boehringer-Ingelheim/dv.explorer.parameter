@@ -38,10 +38,10 @@ knitr::kable(sl, format = "markdown")
 ```{r, echo = FALSE}
 lb <- data.frame(
   SUBJID = c("1010", "1011", "1012", "1013", "1014", "1015") |> rep(2L) |> as.factor(),
-  SEX = c("F", "F", "F", "M", "M", "M") |> rep(2L)|> as.factor(),
+  SEX = c("F", "F", "F", "M", "M", "M") |> rep(2L) |> as.factor(),
   PARCAT1 = rep("CHEM", 12L) |> as.factor(),
   PARAM = c(rep("Imaginariol (mmol/L)", 6L), rep("Midichlorians (mg/dL)", 6L)) |> as.factor(),
-  AVISIT = rep('Baseline', 12L) |> as.factor(),
+  AVISIT = rep("Baseline", 12L) |> as.factor(),
   AVAL = c(c(5.94780, 5.48232, 4.99098, 4.80996, 4.70652, 4.37034),
            c(2.94780, 2.48232, 2.99098, 1.80996, 1.70652, 1.37034)),
   A1LO = c(rep(3.5, 3L), rep(4., 3L), rep(2.0, 3L), rep(1.5, 3L)),
@@ -64,7 +64,7 @@ module_list <- list(
     value_vars = "AVAL", visit_var = "AVISIT", 
     default_x_cat = "CHEM", default_x_par = "Imaginariol (mmol/L)",
     default_y_cat = "CHEM", default_y_par = "Midichlorians (mg/dL)",
-    #default_main_group = "COUNTRY",
+    #default_main_group = "COUNTRY", # nolint
     default_include_regression_info = FALSE,
     ref_line_vars = c("A1LO", "A1HI")
   )
