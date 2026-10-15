@@ -233,7 +233,7 @@ check_ref_lines <- function(OK, datasets, bm_dataset_name, subjid_var, par_var, 
           paste(
             "The reference line variable `<b>%s</b>` in dataset `<b>%s</b>` is not constant for the following",
             "subjects and parameters:",
-            "<pre>%s</pre>",
+            "<pre style='background-color:#f5f5f5'>%s</pre>",
             "You can either remove the `<b>%s</b>` variable from the `ref_line_vars` parameter or preprocess the",
             "dataset to avoid this issue."
           ),
