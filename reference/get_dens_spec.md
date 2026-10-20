@@ -33,7 +33,7 @@ get_dens_spec(ds, param_as_cols, fig_size)
 ## Value
 
 A
-[vegawidget::vegawidget](https://vegawidget.github.io/vegawidget/reference/vegawidget.html)
+[vegawidget](https://vegawidget.github.io/vegawidget/reference/vegawidget.html)
 specification
 
 ## Details

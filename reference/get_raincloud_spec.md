@@ -32,7 +32,7 @@ get_raincloud_spec(area_ds, quantile_ds, point_ds, param_as_cols, fig_size)
 ## Value
 
 A
-[vegawidget::vegawidget](https://vegawidget.github.io/vegawidget/reference/vegawidget.html)
+[vegawidget](https://vegawidget.github.io/vegawidget/reference/vegawidget.html)
 specification
 
 ## Details

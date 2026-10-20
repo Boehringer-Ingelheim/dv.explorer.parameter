@@ -12,7 +12,12 @@ apply_cat_palette_legend(palette, data)
 ## Arguments
 
 - palette:
+
+  color palette
+
 - data:
+
+  dataset
 
 ## Details
 

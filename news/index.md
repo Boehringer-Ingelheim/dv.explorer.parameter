@@ -1,5 +1,9 @@
 # Changelog
 
+## dv.explorer.parameter 0.3.3
+
+- Maintenance: Adapt package to new behavior of {shinytest}.
+
 ## dv.explorer.parameter 0.3.2
 
 - lineplot: Fix regression that prevented module from running

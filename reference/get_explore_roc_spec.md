@@ -32,7 +32,7 @@ get_explore_roc_spec(ds, fig_size, sort_alph)
 ## Value
 
 A
-[vegawidget::vegawidget](https://vegawidget.github.io/vegawidget/reference/vegawidget.html)
+[vegawidget](https://vegawidget.github.io/vegawidget/reference/vegawidget.html)
 specification
 
 ## Details

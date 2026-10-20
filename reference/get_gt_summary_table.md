@@ -33,7 +33,7 @@ get_gt_summary_table(ds, rounder = function(x) round(x, digits = 2), sort_alph)
 ## Value
 
 A
-[vegawidget::vegawidget](https://vegawidget.github.io/vegawidget/reference/vegawidget.html)
+[vegawidget](https://vegawidget.github.io/vegawidget/reference/vegawidget.html)
 specification
 
 ## Details

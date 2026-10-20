@@ -43,7 +43,7 @@ get_metric_spec(ds, param_as_cols, fig_size, limits, x_col)
 ## Value
 
 A
-[vegawidget::vegawidget](https://vegawidget.github.io/vegawidget/reference/vegawidget.html)
+[vegawidget](https://vegawidget.github.io/vegawidget/reference/vegawidget.html)
 specification
 
 ## Details

@@ -13,23 +13,35 @@ HM2SVG_plot(ds, x_desc, y_desc, z_desc, pal_fun, palette, ns)
 
 - ds:
 
-  data to plot. It expects the following format: - columns names are
-  `x`, `y`, `z` and, optionally, `label` - both `x` and `y` columns are
-  factors - There is one entry for each combination of "x" and "y"
-  present in the dataset. In other words, the values for each heatmap
-  rectangle are defined explicitly, even if they are NA - Axis labels
-  and legend title are stored as the attribute "label" of the "x", "y"
-  and "z" columns - The order of records in the data frame dictates the
-  ordering of the x/y axes in the final plot
+  data to plot. It expects the following format:
+
+  - columns names are `x`, `y`, `z` and, optionally, `label`
+
+  - both `x` and `y` columns are factors
+
+  - There is one entry for each combination of "x" and "y" present in
+    the dataset. In other words, the values for each heatmap rectangle
+    are defined explicitly, even if they are NA
+
+  - Axis labels and legend title are stored as the attribute "label" of
+    the "x", "y" and "z" columns
+
+  - The order of records in the data frame dictates the ordering of the
+    x/y axes in the final plot
 
 - x_desc, y_desc, z_desc:
 
   Indicate the absence/presence and location of the axis descriptors
   (the descriptor for the x and y axes are the plot ticks; for the z
-  axis it's the legend) - x_desc can take the following values: "N"
-  (north), "S" (south), NULL (absent) - y_desc can take the following
-  values: "W" (west), "E" (east), NULL (absent) - z_desc can take the
-  following values: "N", "E", "S", "W", NULL
+  axis it's the legend)
+
+  - x_desc can take the following values: "N" (north), "S" (south), NULL
+    (absent)
+
+  - y_desc can take the following values: "W" (west), "E" (east), NULL
+    (absent)
+
+  - z_desc can take the following values: "N", "E", "S", "W", NULL
 
 - pal_fun:
 

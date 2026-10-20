@@ -12,12 +12,12 @@
 ## Citation
 
 Moris Fernandez L, Lechon M (2026). *dv.explorer.parameter: Parameter
-exploration modules*. R package version 0.3.2.
+exploration modules*. R package version 0.3.3.
 
     @Manual{,
       title = {dv.explorer.parameter: Parameter exploration modules},
       author = {Luis {Moris
             Fernandez} and Miguel Lechon},
       year = {2026},
-      note = {R package version 0.3.2},
+      note = {R package version 0.3.3},
     }

@@ -28,10 +28,15 @@ HM2SVG_server(
 
   Indicate the absence/presence and location of the axis descriptors
   (the descriptor for the x and y axes are the plot ticks; for the z
-  axis it's the legend) - x_desc can take the following values: "N"
-  (north), "S" (south), NULL (absent) - y_desc can take the following
-  values: "W" (west), "E" (east), NULL (absent) - z_desc can take the
-  following values: "N", "E", "S", "W", NULL
+  axis it's the legend)
+
+  - x_desc can take the following values: "N" (north), "S" (south), NULL
+    (absent)
+
+  - y_desc can take the following values: "W" (west), "E" (east), NULL
+    (absent)
+
+  - z_desc can take the following values: "N", "E", "S", "W", NULL
 
 - palette:
 
