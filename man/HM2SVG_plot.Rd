@@ -8,18 +8,22 @@ HM2SVG_plot(ds, x_desc, y_desc, z_desc, pal_fun, palette, ns)
 }
 \arguments{
 \item{ds}{data to plot. It expects the following format:
-- columns names are \code{x}, \code{y}, \code{z} and, optionally, \code{label}
-- both \code{x} and \code{y} columns are factors
-- There is one entry for each combination of "x" and "y" present in the dataset.
+\itemize{
+\item columns names are \code{x}, \code{y}, \code{z} and, optionally, \code{label}
+\item both \code{x} and \code{y} columns are factors
+\item There is one entry for each combination of "x" and "y" present in the dataset.
 In other words, the values for each heatmap rectangle are defined explicitly, even if they are NA
-- Axis labels and legend title are stored as the attribute "label" of the "x", "y" and "z" columns
-- The order of records in the data frame dictates the ordering of the x/y axes in the final plot}
+\item Axis labels and legend title are stored as the attribute "label" of the "x", "y" and "z" columns
+\item The order of records in the data frame dictates the ordering of the x/y axes in the final plot
+}}
 
 \item{x_desc, y_desc, z_desc}{Indicate the absence/presence and location of the axis descriptors
 (the descriptor for the x and y axes are the plot ticks; for the z axis it's the legend)
-- x_desc can take the following values: "N" (north), "S" (south), NULL (absent)
-- y_desc can take the following values: "W" (west), "E" (east), NULL (absent)
-- z_desc can take the following values: "N", "E", "S", "W", NULL}
+\itemize{
+\item x_desc can take the following values: "N" (north), "S" (south), NULL (absent)
+\item y_desc can take the following values: "W" (west), "E" (east), NULL (absent)
+\item z_desc can take the following values: "N", "E", "S", "W", NULL
+}}
 
 \item{pal_fun}{Function that maps values on column \code{z} of \code{data} to a color in #rrggbb or #rrggbbaa format}
 
