@@ -394,8 +394,9 @@ check_mod_roc_auto <- function(afmm, datasets, module_id, pred_dataset_name, res
 
 # dv.explorer.parameter::mod_scatterplot
 check_mod_scatterplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, group_dataset_name,
-    cat_var, par_var, value_vars, visit_var, anlfl_vars, subjid_var, default_x_cat, default_x_par, default_x_value,
-    default_x_visit, default_y_cat, default_y_par, default_y_value, default_y_visit, default_group, default_color,
+    cat_var, par_var, value_vars, visit_var, ref_line_vars, anlfl_vars, subjid_var, default_x_cat, default_x_par,
+    default_x_value, default_x_visit, default_y_cat, default_y_par, default_y_value, default_y_visit,
+    default_main_group, default_sub_group, default_group, default_color, default_include_regression_info,
     compute_lm_cor_fn, err) {
     OK <- logical(0)
     used_dataset_names <- new.env(parent = emptyenv())
@@ -423,6 +424,10 @@ check_mod_scatterplot_auto <- function(afmm, datasets, module_id, bm_dataset_nam
     flags <- list(map_character_to_factor = TRUE)
     OK[["visit_var"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("visit_var", visit_var,
         subkind, flags, bm_dataset_name, datasets[[bm_dataset_name]], err)
+    subkind <- list(kind = "numeric", min = NA, max = NA)
+    flags <- list(zero_or_more = TRUE, optional = TRUE)
+    OK[["ref_line_vars"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("ref_line_vars",
+        ref_line_vars, subkind, flags, bm_dataset_name, datasets[[bm_dataset_name]], err)
     subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
     flags <- list(zero_or_more = TRUE, optional = TRUE)
     OK[["anlfl_vars"]] <- OK[["bm_dataset_name"]] && CM$check_dataset_colum_name("anlfl_vars", anlfl_vars,
@@ -457,12 +462,23 @@ check_mod_scatterplot_auto <- function(afmm, datasets, module_id, bm_dataset_nam
         default_y_visit, flags, "bm_dataset_name", datasets[[bm_dataset_name]], visit_var, err)
     subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
     flags <- list(optional = TRUE)
+    OK[["default_main_group"]] <- OK[["group_dataset_name"]] && CM$check_dataset_colum_name("default_main_group",
+        default_main_group, subkind, flags, group_dataset_name, datasets[[group_dataset_name]], err)
+    subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
+    flags <- list(optional = TRUE)
+    OK[["default_sub_group"]] <- OK[["group_dataset_name"]] && CM$check_dataset_colum_name("default_sub_group",
+        default_sub_group, subkind, flags, group_dataset_name, datasets[[group_dataset_name]], err)
+    subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
+    flags <- list(optional = TRUE)
     OK[["default_group"]] <- OK[["group_dataset_name"]] && CM$check_dataset_colum_name("default_group",
         default_group, subkind, flags, group_dataset_name, datasets[[group_dataset_name]], err)
     subkind <- list(kind = "or", options = list(list(kind = "character"), list(kind = "factor")))
     flags <- list(optional = TRUE)
     OK[["default_color"]] <- OK[["group_dataset_name"]] && CM$check_dataset_colum_name("default_color",
         default_color, subkind, flags, group_dataset_name, datasets[[group_dataset_name]], err)
+    flags <- list(optional = TRUE)
+    OK[["default_include_regression_info"]] <- CM$check_type("default_include_regression_info", default_include_regression_info,
+        "logical", flags, err)
     flags <- list(optional = TRUE)
     OK[["compute_lm_cor_fn"]] <- CM$check_function("compute_lm_cor_fn", compute_lm_cor_fn, 1, flags,
         err)

@@ -12,8 +12,7 @@ CNT <- poc( # nolint
   Y_VAL = "y_value",
   MAIN_GROUP = "main_group",
   SUB_GROUP = "sub_group",
-  PAGE_GROUP = "page_group",
-  COLOR_GROUP = "color_group"
+  PAGE_GROUP = "page_group"
 )
 
 CMN <- poc( # nolint
