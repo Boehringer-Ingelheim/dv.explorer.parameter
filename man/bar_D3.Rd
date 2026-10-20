@@ -24,7 +24,7 @@ bar_d3_server(
 \arguments{
 \item{id}{Shiny ID \verb{[character(1)]}}
 
-\item{...}{Extra parameters that are passed to \link[r2d3:d3-shiny]{r2d3::d3Output}, \link[r2d3:d3-shiny]{r2d3::renderD3} and \link[r2d3:r2d3]{r2d3::r2d3}}
+\item{...}{Extra parameters that are passed to \link[r2d3:d3Output]{r2d3::d3Output}, \link[r2d3:renderD3]{r2d3::renderD3} and \link[r2d3:r2d3]{r2d3::r2d3}}
 
 \item{data}{\verb{[data.frame() | shiny::reactive(data.frame) | shinymeta::metaReactive(data.frame)]}
 

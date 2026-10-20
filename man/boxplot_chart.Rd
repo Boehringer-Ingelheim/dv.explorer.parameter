@@ -48,7 +48,7 @@ The chart consists of a faceted set of boxplots for biomarker data
 
 \subsection{Hack:}{
 
-\link[shiny:brushedPoints]{shiny::nearPoints} do not manage well charts with no x aesthetic. Therefore when no \code{main_group} is present
+\link[shiny:nearPoints]{shiny::nearPoints} do not manage well charts with no x aesthetic. Therefore when no \code{main_group} is present
 in \code{ds} a dummy one is added.
 }
 }

@@ -32,7 +32,7 @@ other two are specific calls for \code{click} and \code{double_click} events.
 \subsection{bp_get_closest_gen_click}{
 
 This function takes a dataset and a general click and returns the closest row to the click. It uses the
-\link[shiny:brushedPoints]{shiny::nearPoints}. \link[shiny:brushedPoints]{shiny::nearpoints} function is not particularly well-behaved in two cases:
+\link[shiny:nearPoints]{shiny::nearPoints}. \link[shiny:nearPoints]{shiny::nearpoints} function is not particularly well-behaved in two cases:
 \itemize{
 \item The ggplot does contain several facet levels
 Solved by:
@@ -41,10 +41,10 @@ Prefiltering \code{ds} manually so it only contains the rows corresponding to th
 Solved by:
 In this particular case the \code{x} aesthetic correspond to the \code{CNT$MAIN_GROUP} column. If no grouping
 is specified during the selection this function assumes that a dummy \code{x} aesthetic was used in \link{boxplot_chart}.
-Therefore, this dummy variable is introduced as a column in \code{ds}, and \link[shiny:brushedPoints]{shiny::nearPoints} can be used.
+Therefore, this dummy variable is introduced as a column in \code{ds}, and \link[shiny:nearPoints]{shiny::nearPoints} can be used.
 \item The aesthetic has been defined using the \code{.data} pronoun to overcome NSE used in \link[ggplot2:ggplot]{ggplot2::ggplot}
 Solved by:
-Stripping \code{.data} pronouns before passing them into \link[shiny:brushedPoints]{shiny::nearPoints}
+Stripping \code{.data} pronouns before passing them into \link[shiny:nearPoints]{shiny::nearPoints}
 }
 }
 

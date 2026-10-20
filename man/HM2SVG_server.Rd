@@ -20,9 +20,11 @@ HM2SVG_server(
 
 \item{x_desc, y_desc, z_desc}{Indicate the absence/presence and location of the axis descriptors
 (the descriptor for the x and y axes are the plot ticks; for the z axis it's the legend)
-- x_desc can take the following values: "N" (north), "S" (south), NULL (absent)
-- y_desc can take the following values: "W" (west), "E" (east), NULL (absent)
-- z_desc can take the following values: "N", "E", "S", "W", NULL}
+\itemize{
+\item x_desc can take the following values: "N" (north), "S" (south), NULL (absent)
+\item y_desc can take the following values: "W" (west), "E" (east), NULL (absent)
+\item z_desc can take the following values: "N", "E", "S", "W", NULL
+}}
 
 \item{palette}{Vector that maps values to "z" colors. The names of the vector are hexadecimal colors encoded as
 #rrggbb or #rrggbbaa (red, green, blue, alpha) and the values are the "z" values that should be

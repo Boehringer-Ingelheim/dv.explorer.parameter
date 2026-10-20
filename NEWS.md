@@ -1,3 +1,7 @@
+# dv.explorer.parameter 0.3.2-9000
+
+- [NOT USER FACING] Update test snapshots for new environment
+
 # dv.explorer.parameter 0.3.2
 
 - lineplot: Fix regression that prevented module from running 
