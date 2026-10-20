@@ -1,6 +1,6 @@
 # dv.explorer.parameter 0.3.3
 
-- [NOT USER FACING] Update test snapshots for new environment
+- Maintenance: Adapt package to new behavior of {shinytest}.
 
 # dv.explorer.parameter 0.3.2
 
