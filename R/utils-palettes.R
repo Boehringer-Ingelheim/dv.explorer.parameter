@@ -223,9 +223,9 @@ assert_palette <- function(palette, add) {
 #'
 #' TODO: Consider not passing palettes and only passing colors inside the data
 #'
-#' @param palette
+#' @param palette color palette
 #'
-#' @param data
+#' @param data dataset
 #'
 #' @keywords internal
 #'
