@@ -32,7 +32,7 @@ A selector composed by two rows containing:
 }
 \details{
 The UI root element is a divisor which id attribute is equal to the \code{id} parameter. So it can be used
-with \link[shiny:insertUI]{shiny::insertUI} and \link[shiny:insertUI]{shiny::removeUI} functions.
+with \link[shiny:insertUI]{shiny::insertUI} and \link[shiny:removeUI]{shiny::removeUI} functions.
 }
 \section{Functions}{
 \itemize{

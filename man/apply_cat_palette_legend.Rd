@@ -7,9 +7,9 @@
 apply_cat_palette_legend(palette, data)
 }
 \arguments{
-\item{palette}{}
+\item{palette}{color palette}
 
-\item{data}{}
+\item{data}{dataset}
 }
 \description{
 Colors can be specified as palettes or as colors, therefore we need to cover both.

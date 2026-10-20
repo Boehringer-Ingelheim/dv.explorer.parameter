@@ -1,8 +1,12 @@
-# dv.explorer.parameter 0.3.2-9001
+# dv.explorer.parameter 0.3.3-9000
 
 - scatter plot:
     - Add support for reference values
     - Make regression lines optional
+
+# dv.explorer.parameter 0.3.3
+
+- Maintenance: Adapt package to new behavior of {shinytest}.
 
 # dv.explorer.parameter 0.3.2
 
