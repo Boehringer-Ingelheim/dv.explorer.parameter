@@ -96,6 +96,20 @@ test_that("lp_listings_table 'Details' buttons target the subject of their own r
   }
 })
 
+test_that("lp_listings_table 'Details' buttons pass subject IDs containing quotes and backslashes as valid JS strings", {
+  df <- data.frame(row.names = seq(1))
+  df[[CNT$SBJ]] <- "SubjectWith'\\x"
+  df[[CNT$VIS]] <- "vis_1"
+  df[[CNT$PAR]] <- "par_1"
+  df[[CNT$VAL]] <- 1
+
+  actual_output <- lp_listings_table(df = df, selection = df, target_subject_input_id = "target")
+
+  # JS string literal "SubjectWith'\\x", HTML-escaped inside the onclick attribute
+  expected_subject_id <- htmltools::htmlEscape("\"SubjectWith'\\\\x\"", attribute = TRUE)
+  expect_match(actual_output[["Details"]][[1]], expected_subject_id, fixed = TRUE)
+})
+
 # count table
 
 test_that("lp_count_table counts the number of rows grouped by everything except CNT$SBJ and CNT$VAL and pivotted on visit", {

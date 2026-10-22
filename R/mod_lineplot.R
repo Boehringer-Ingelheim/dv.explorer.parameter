@@ -416,8 +416,8 @@ lp_listings_table <- function(df, selection, target_subject_input_id = NULL) {
         class = "",
         shiny::icon("address-card"),
         onclick = sprintf(
-          "Shiny.setInputValue('%s', '%s', {priority:'event'});",
-          target_subject_input_id, subject_id
+          "Shiny.setInputValue('%s', %s, {priority:'event'});",
+          target_subject_input_id, js_string_literal(subject_id)
         )
       ))
     }
