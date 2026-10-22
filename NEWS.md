@@ -1,6 +1,7 @@
 # dv.explorer.parameter 0.3.3-9000
 
 - Fix: fix clicking behaviour for ungrouped boxplots.
+- Fix: removes autoDropUp and adds padding to the selector
 
 # dv.explorer.parameter 0.3.3
 
