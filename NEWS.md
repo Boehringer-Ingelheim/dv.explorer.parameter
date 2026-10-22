@@ -1,3 +1,7 @@
+# dv.explorer.parameter 0.3.3-9001
+
+- Fix: Correlation heatmap bookmarking
+
 # dv.explorer.parameter 0.3.3-9000
 
 - Fix: fix clicking behaviour for ungrouped boxplots.

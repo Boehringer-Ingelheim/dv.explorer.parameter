@@ -239,9 +239,25 @@ multi_param_visit_selector_server <- function(id, data, cat_var, par_var, visit_
         }
 
         visible_selected <- to_safe(visible_selected_unsafe)
-        updates <- compute_updates(state, selected = visible_selected, choices = choices())
-        apply_updates(session, updates)
+        
+        choices <- choices()
+        if (is.null(choices)) {
+          # restore bookmark once choices become available (#aexaph)
+          # NOTE: choices() depends on data(), which may shiny::req and mess with bookmark restoration
+          bookmark_visible_selected <<- visible_selected
+        } else {
+          updates <- compute_updates(state, selected = visible_selected, choices = choices)
+          apply_updates(session, updates)
+        }
       })
+    })
+    
+    bookmark_visible_selected <- NULL
+    shiny::observeEvent(choices(), { # restore bookmark now that choices are available (#aexaph)
+      shiny::req(!is.null(bookmark_visible_selected))
+      updates <- compute_updates(state, selected = bookmark_visible_selected, choices = choices())
+      apply_updates(session, updates)
+      bookmark_visible_selected <<- NULL
     })
 
     empty_return_val <- data.frame(cat = character(0), par = character(0), vis = character(0))
