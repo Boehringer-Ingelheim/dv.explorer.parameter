@@ -79,6 +79,23 @@ test_that("lp_listings_table subsets a data frame based on the values of a one-r
   expect_equal(actual_output, expected_output)
 })
 
+test_that("lp_listings_table 'Details' buttons target the subject of their own row after sorting by visit", {
+  df <- data.frame(row.names = seq(4))
+  df[[CNT$SBJ]] <- c("sbj_1", "sbj_1", "sbj_2", "sbj_2")
+  df[[CNT$VIS]] <- c("vis_1", "vis_2", "vis_1", "vis_2")
+  df[[CNT$PAR]] <- c("par_1", "par_1", "par_1", "par_1")
+  df[[CNT$VAL]] <- c(1, 2, 3, 4)
+
+  sel <- df # subject-major order, which sorting by visit reorders
+
+  actual_output <- lp_listings_table(df = df, selection = sel, target_subject_input_id = "target")
+
+  expect_equal(actual_output[[CNT$VIS]], c("vis_1", "vis_1", "vis_2", "vis_2"))
+  for (i in seq_len(nrow(actual_output))) {
+    expect_match(actual_output[["Details"]][[i]], actual_output[[CNT$SBJ]][[i]], fixed = TRUE)
+  }
+})
+
 # count table
 
 test_that("lp_count_table counts the number of rows grouped by everything except CNT$SBJ and CNT$VAL and pivotted on visit", {

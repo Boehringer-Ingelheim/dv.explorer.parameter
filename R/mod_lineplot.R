@@ -399,14 +399,15 @@ lp_listings_table <- function(df, selection, target_subject_input_id = NULL) {
   visit_order <- order(result[[CNT$VIS]])
   result <- result[visit_order, ]
 
+  # Read subject IDs after sorting (so they match the row order) and before renaming (which changes the column name)
+  subject_ids <- result[[CNT$SBJ]]
+
   labels <- get_lbls_robust(df)
   labels <- stats::setNames(make.unique(unlist(labels)), names(labels))
   labels[labels == ""] <- ".0" # make.unique will miss empty labels, so we special-case them
   result <- rename_with_list(result, labels)
 
   if (!is.null(target_subject_input_id) && CNT$SBJ %in% names(selection)) {
-    subject_ids <- selection[[CNT$SBJ]]
-
     col <- "Details"
     result[[col]] <- ""
     for (i in seq_len(nrow(result))) {
