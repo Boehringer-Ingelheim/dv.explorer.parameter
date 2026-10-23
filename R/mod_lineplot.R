@@ -410,6 +410,7 @@ lp_listings_table <- function(df, selection, target_subject_input_id = NULL) {
     
     col <- "Details"
     result[[col]] <- ""
+    # TODO: vectorize
     for (i in seq_len(nrow(result))) {
       subject_id <- subject_ids[[i]]
       result[col][i, ] <- as.character(shiny::tags[["button"]](
