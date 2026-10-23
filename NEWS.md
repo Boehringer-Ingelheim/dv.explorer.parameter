@@ -1,3 +1,8 @@
+# dv.explorer.parameter 0.3.3-9002
+
+- Functionality: `mod_boxplot` and `mod_lineplot` will not attempt to autofill the visit selectors after data changes.
+Default values must be used if an initial selection is expected.
+
 # dv.explorer.parameter 0.3.3-9001
 
 - Fix: Correlation heatmap bookmarking
