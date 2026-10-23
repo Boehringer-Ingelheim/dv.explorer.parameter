@@ -894,7 +894,7 @@ lineplot_server <- function(id,
       var = input_lp[[LP_ID$PAR_VISIT_COL]],
       defaults_per_var = default_visit_val,
       multiple = TRUE,
-      all_on_change = TRUE,
+      all_on_change = FALSE,
       use_picker = TRUE
     )
     input_lp[[LP_ID$MAIN_GRP]] <- col_menu_server(
