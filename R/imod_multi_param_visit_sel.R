@@ -202,75 +202,55 @@ multi_param_visit_selector_server <- function(id, data, cat_var, par_var, visit_
     # - after bookmark restoration, run update logic and overwrite input state
     shiny::observe(shiny::setBookmarkExclude(names(shiny::reactiveValuesToList(input, all.names = TRUE))))
     shiny::onBookmark(function(bookmark_state) {
-      visible_selected <- state$selected[1:state$visible_row_count]
-      bookmark_state$values[["visible_selected"]] <- to_shiny_bookmark_value(visible_selected)
-    })
-    restoring_bookmark <- shiny::reactiveVal(FALSE)
-    shiny::onRestore(function(bookmark_state) restoring_bookmark(TRUE))
-    shiny::onRestored(function(bookmark_state) {
-      restoring_bookmark(FALSE)
-
-      try({
-        visible_selected_unsafe <- from_shiny_bookmark_value(bookmark_state$values[["visible_selected"]])[["unsafe"]]
-
-        # Makes sure returned deserialized value is plain list of named lists of character arrays
-        # and no extra attributes have been added
-        # TODO: Could be simplified by _not_ using `serialize` and just encoding the nested list ourselves.
-        to_safe <- function(x) {
-          res <- empty_state(row_count = MPVS$CONST$MAX_ROW_COUNT)
-          if (!is.list(x)) {
-            return(res)
-          }
-          attributes(x) <- NULL
-
-          for (i in seq_along(x)) {
-            if (!is.list(x[[i]])) {
-              return(res)
-            }
-            attributes(x[[i]]) <- attributes(x[[i]])["names"]
-            for (j in seq_along(x[[i]])) {
-              if (!is.character(x[[i]][[j]])) {
-                return(res)
-              }
-              attributes(x[[i]][[j]]) <- NULL
-            }
-          }
-          return(x)
-        }
-
-        visible_selected <- to_safe(visible_selected_unsafe)
-        
-        choices <- choices()
-        if (is.null(choices)) {
-          # restore bookmark once choices become available (#aexaph)
-          # NOTE: choices() depends on data(), which may shiny::req and mess with bookmark restoration
-          bookmark_visible_selected <<- visible_selected
-        } else {
-          updates <- compute_updates(state, selected = visible_selected, choices = choices)
-          apply_updates(session, updates)
-        }
-      })
+      selected <- state$selected
+      bookmark_state$values[["selected"]] <- to_shiny_bookmark_value(selected)
     })
     
-    bookmark_visible_selected <- NULL
-    shiny::observeEvent(choices(), { # restore bookmark now that choices are available (#aexaph)
-      shiny::req(!is.null(bookmark_visible_selected))
-      updates <- compute_updates(state, selected = bookmark_visible_selected, choices = choices())
-      apply_updates(session, updates)
-      bookmark_visible_selected <<- NULL
+    bookmark_selected <- NULL
+    shiny::onRestore(function(bookmark_state) {
+      bookmark_state_values_selected <- bookmark_state$values[["selected"]]
+      
+      if (!is.null(bookmark_state_values_selected)) {
+        try({
+            selected_unsafe <- from_shiny_bookmark_value(bookmark_state_values_selected)[["unsafe"]]
+
+            # Makes sure returned deserialized value is plain list of named lists of character arrays
+            # and no extra attributes have been added
+            # TODO: Could be simplified by _not_ using `serialize` and just encoding the nested list ourselves.
+            to_safe <- function(x) {
+              res <- empty_state(row_count = MPVS$CONST$MAX_ROW_COUNT)[["selected"]]
+              if (!is.list(x)) {
+                return(res)
+              }
+              attributes(x) <- NULL
+
+              for (i in seq_along(x)) {
+                if (!is.list(x[[i]])) {
+                  return(res)
+                }
+                attributes(x[[i]]) <- attributes(x[[i]])["names"]
+                for (j in seq_along(x[[i]])) {
+                  if (!is.character(x[[i]][[j]])) {
+                    return(res)
+                  }
+                  attributes(x[[i]][[j]]) <- NULL
+                }
+              }
+              return(x)
+            }
+
+            bookmark_selected <<- to_safe(selected_unsafe)
+          })
+      }
     })
 
     empty_return_val <- data.frame(cat = character(0), par = character(0), vis = character(0))
 
     selection <- shiny::reactiveVal(empty_return_val)
 
-    shiny::observe({
-      # ?? Shiny server appears to trigger onBookmarked events at inconvenient times which may prevent
-      #    an actually useful invalidation of this observe. We just make a note of coming back later
-      if (shiny::isolate(restoring_bookmark())) {
-        shiny::invalidateLater(500)
-        shiny::req(FALSE)
-      }
+    shiny::observe({      
+      shiny::req(!is.null(choices()))
+      
 
       selected <- list()
       for (i in seq_len(MPVS$CONST$MAX_ROW_COUNT)) {
@@ -278,12 +258,18 @@ multi_param_visit_selector_server <- function(id, data, cat_var, par_var, visit_
       }
       choices <- choices()
 
-      local({ # early out if inputs not available
+      local({
+        # early out if inputs not available
         available_inputs <- names(shiny::isolate(shiny::reactiveValuesToList(input)))
         expected_inputs <- c(cat_ids, par_ids, vis_ids)
         found_inputs <- intersect(expected_inputs, available_inputs)
         shiny::req(length(found_inputs) == length(expected_inputs))
       })
+
+      if (!is.null(bookmark_selected)) {
+        selected <- bookmark_selected
+        bookmark_selected <<- NULL
+      }
 
       updates <- compute_updates(state, selected = selected, choices = choices)
       apply_updates(session, updates)
@@ -296,7 +282,9 @@ multi_param_visit_selector_server <- function(id, data, cat_var, par_var, visit_
       }
       res <- res[!duplicated(res), ]
 
-      if (nrow(res) == 0) res <- empty_return_val
+      if (nrow(res) == 0) {
+        res <- empty_return_val
+      }
 
       colnames(res) <- c(CNT$CAT, CNT$PAR, CNT$VIS)
 
