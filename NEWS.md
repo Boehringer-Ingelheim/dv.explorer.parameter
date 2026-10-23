@@ -1,3 +1,7 @@
+# dv.explorer.parameter 0.3.3-9003
+
+- Fix: Correlation heatmap bookmarking refactor of bookmarking code
+
 # dv.explorer.parameter 0.3.3-9002
 
 - Fix: lineplot and boxplot listing "Details" buttons handle subject IDs containing quotes or backslashes
