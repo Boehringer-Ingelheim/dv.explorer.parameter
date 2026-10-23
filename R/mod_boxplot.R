@@ -473,7 +473,7 @@ boxplot_server <- function(id,
       default = default_x_axis_vals,
       multiple = TRUE,
       use_picker = TRUE,
-      all_on_change = TRUE
+      all_on_change = FALSE
     )
     inputs[[BP$ID$PAR_VALUE]] <- col_menu_server(
       id = BP$ID$PAR_VALUE,
@@ -1425,19 +1425,16 @@ bp_subset_data <- function(cat,
 #' @details
 #'
 #' ## Labels:
-#'   - X axis and color aesthetic are labelled using the label atttribute from ``r CNT$MAIN_GROUP`` column from `ds`
+#'   - X axis is labelled using the label atttribute from ``r CNT$VIS`` column from `ds`
+#'   - Color aesthetic is labelled using the label atttribute from ``r CNT$MAIN_GROUP`` column from `ds`
 #'   - Y axis is labelled using the label atttribute from ``r CNT$VAL`` column from `ds`
 #'
 #' ## Aesthetics:
 #'   - ``r CNT$PAR`` is coded as 1st level row facets
-#'   - ``r CNT$MAIN_GROUP`` is coded as colors and x axis
+#'   - ``r CNT$VIS`` is coded as x axis
+#'   - ``r CNT$MAIN_GROUP`` is coded as colors
 #'   - ``r CNT$SUB_GROUP`` is coded as 1st level column facets
 #'   - ``r CNT$PAGE_GROUP`` is coded as 2nd level row facets
-#'
-#' ## Hack:
-#'
-#' [shiny::nearPoints] do not manage well charts with no x aesthetic. Therefore when no ``r CNT$MAIN_GROUP`` is present
-#' in `ds` a dummy one is added.
 #'
 #' @param ds `data.frame()`
 #'
@@ -1783,7 +1780,7 @@ bp_get_single_listings_output <- function(ds, closest_point, input_id) {
       class = "",
       shiny::icon("address-card"),
       onclick = sprintf(
-        "Shiny.setInputValue('%s', '%s', {priority:'event'});", input_id, sbj
+        "Shiny.setInputValue('%s', %s, {priority:'event'});", input_id, js_string_literal(sbj)
       )
     ))
   })
@@ -1851,12 +1848,6 @@ bp_get_significance_output <- function(ds) {
 #' Solved by:
 #' Prefiltering `ds` manually so it only contains the rows corresponding to the clicked facet
 #'
-#' - The ggplot lacks an `x` or `y` aesthetic
-#' Solved by:
-#' In this particular case the `x` aesthetic correspond to the `CNT$MAIN_GROUP` column. If no grouping
-#' is specified during the selection this function assumes that a dummy `x` aesthetic was used in [boxplot_chart].
-#' Therefore, this dummy variable is introduced as a column in `ds`, and [shiny::nearPoints] can be used.
-#'
 #' - The aesthetic has been defined using the `.data` pronoun to overcome NSE used in [ggplot2::ggplot]
 #' Solved by:
 #' Stripping `.data` pronouns before passing them into [shiny::nearPoints]
@@ -1880,8 +1871,6 @@ bp_get_significance_output <- function(ds) {
 #' A data frame containing the closest row in `ds` to the click.
 #' @keywords internal
 bp_get_closest_gen_click <- function(ds, click) {
-  is_main_grouped <- CNT$MAIN_GROUP %in% names(ds)
-
   # Prefilter ds using panelvars
   var <- click[["mapping"]][startsWith(names(click[["mapping"]]), "panelvar")]
   val <- click[names(var)]
@@ -1889,15 +1878,6 @@ bp_get_closest_gen_click <- function(ds, click) {
 
   mask <- equal_and_mask_from_vec(ds = ds, fl = val)
   ds <- ds[mask, ]
-
-  # Nearpoints cannot manage plots with no x aesthetic, therefore,
-  # no main group implies no x aesthetic in the plot.
-  # To solve boxplot_chart imputs a dummy main grouping
-  # we have to patch the dataset to include this dummy grouping
-
-  if (!is_main_grouped) {
-    ds[[CNT$MAIN_GROUP]] <- click[["domain"]][["discrete_limits"]][["x"]]
-  }
 
   cp <- shiny::nearPoints(
     ds,
@@ -1909,10 +1889,6 @@ bp_get_closest_gen_click <- function(ds, click) {
     panelvar1 = strip_data_pronoun(click[["mapping"]][["panelvar1"]]),
     panelvar2 = strip_data_pronoun(click[["mapping"]][["panelvar2"]])
   )
-
-  if (!is_main_grouped) {
-    cp <- dplyr::select(cp, -dplyr::any_of(CNT$MAIN_GROUP))
-  }
 
   cp
 }

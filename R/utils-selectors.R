@@ -330,7 +330,15 @@ val_menu_server <- function(id,
           choices = choices,
           multiple = multiple,
           selected = selected,
-          options = shinyWidgets::pickerOptions(actionsBox = TRUE)
+          options = shinyWidgets::pickerOptions(
+            actionsBox = TRUE,
+            # BS5 positions the menu before bootstrap-select computes `dropup`, so auto-dropup lags one opening
+            # behind and sizes the menu against the window, hiding the actions box under the dv.manager tab bar
+            dropupAuto = FALSE,
+            # [top, right, bottom, left] keeps the menu clear of the dv.manager footer. Passed as JSON because
+            # pickerOptions serializes vectors space-separated, which bootstrap-select does not parse as an array
+            windowPadding = "[0,0,40,0]"
+          )
         )
       } else {
         res <- shiny::selectizeInput(

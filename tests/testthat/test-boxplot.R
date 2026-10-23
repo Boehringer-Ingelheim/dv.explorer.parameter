@@ -316,6 +316,21 @@ test_that("bp_listings_table subsets a data frame based on the values of a one-r
   expect_equal(actual_output, expected_output)
 })
 
+# bp_get_single_listings_output ----
+
+test_that("bp_get_single_listings_output 'View Details' buttons pass subject IDs containing quotes and backslashes as valid JS strings", {
+  df <- data.frame(row.names = seq(1))
+  df[[CNT$SBJ]] <- "SubjectWith'\\x"
+  df[[CNT$VAL]] <- 1
+
+  actual_output <- bp_get_single_listings_output(ds = df, closest_point = df, input_id = "target")
+  buttons <- unlist(actual_output[["x"]][["data"]][["View Details"]])
+
+  # JS string literal "SubjectWith'\\x", HTML-escaped inside the onclick attribute
+  expected_subject_id <- htmltools::htmlEscape("\"SubjectWith'\\\\x\"", attribute = TRUE)
+  expect_match(buttons[[1]], expected_subject_id, fixed = TRUE)
+})
+
 # bp_count_table ----
 
 test_that("bp_count_table counts the number of rows grouped by all variables except CNT$SBJ and CNT$VAL", {
