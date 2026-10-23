@@ -266,7 +266,7 @@ multi_param_visit_selector_server <- function(id, data, cat_var, par_var, visit_
         shiny::req(length(found_inputs) == length(expected_inputs))
       })
 
-      if(!is.null(bookmark_selected)) {
+      if (!is.null(bookmark_selected)) {
         selected <- bookmark_selected
         bookmark_selected <<- NULL
       }
