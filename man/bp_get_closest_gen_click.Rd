@@ -37,11 +37,6 @@ This function takes a dataset and a general click and returns the closest row to
 \item The ggplot does contain several facet levels
 Solved by:
 Prefiltering \code{ds} manually so it only contains the rows corresponding to the clicked facet
-\item The ggplot lacks an \code{x} or \code{y} aesthetic
-Solved by:
-In this particular case the \code{x} aesthetic correspond to the \code{CNT$MAIN_GROUP} column. If no grouping
-is specified during the selection this function assumes that a dummy \code{x} aesthetic was used in \link{boxplot_chart}.
-Therefore, this dummy variable is introduced as a column in \code{ds}, and \link[shiny:nearPoints]{shiny::nearPoints} can be used.
 \item The aesthetic has been defined using the \code{.data} pronoun to overcome NSE used in \link[ggplot2:ggplot]{ggplot2::ggplot}
 Solved by:
 Stripping \code{.data} pronouns before passing them into \link[shiny:nearPoints]{shiny::nearPoints}

@@ -32,7 +32,8 @@ The chart consists of a faceted set of boxplots for biomarker data
 \details{
 \subsection{Labels:}{
 \itemize{
-\item X axis and color aesthetic are labelled using the label atttribute from \code{main_group} column from \code{ds}
+\item X axis is labelled using the label atttribute from \code{visit} column from \code{ds}
+\item Color aesthetic is labelled using the label atttribute from \code{main_group} column from \code{ds}
 \item Y axis is labelled using the label atttribute from \code{value} column from \code{ds}
 }
 }
@@ -40,16 +41,11 @@ The chart consists of a faceted set of boxplots for biomarker data
 \subsection{Aesthetics:}{
 \itemize{
 \item \code{parameter} is coded as 1st level row facets
-\item \code{main_group} is coded as colors and x axis
+\item \code{visit} is coded as x axis
+\item \code{main_group} is coded as colors
 \item \code{sub_group} is coded as 1st level column facets
 \item \code{page_group} is coded as 2nd level row facets
 }
-}
-
-\subsection{Hack:}{
-
-\link[shiny:nearPoints]{shiny::nearPoints} do not manage well charts with no x aesthetic. Therefore when no \code{main_group} is present
-in \code{ds} a dummy one is added.
 }
 }
 \keyword{internal}
