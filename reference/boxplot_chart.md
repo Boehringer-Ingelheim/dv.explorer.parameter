@@ -42,8 +42,11 @@ A ggplot chart
 
 ### Labels:
 
-- X axis and color aesthetic are labelled using the label atttribute
-  from `main_group` column from `ds`
+- X axis is labelled using the label atttribute from `visit` column from
+  `ds`
+
+- Color aesthetic is labelled using the label atttribute from
+  `main_group` column from `ds`
 
 - Y axis is labelled using the label atttribute from `value` column from
   `ds`
@@ -52,14 +55,10 @@ A ggplot chart
 
 - `parameter` is coded as 1st level row facets
 
-- `main_group` is coded as colors and x axis
+- `visit` is coded as x axis
+
+- `main_group` is coded as colors
 
 - `sub_group` is coded as 1st level column facets
 
 - `page_group` is coded as 2nd level row facets
-
-### Hack:
-
-[shiny::nearPoints](https://rdrr.io/pkg/shiny/man/brushedPoints.html) do
-not manage well charts with no x aesthetic. Therefore when no
-`main_group` is present in `ds` a dummy one is added.

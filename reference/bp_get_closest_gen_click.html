@@ -9,11 +9,6 @@ shiny::nearPoints. shiny::nearpoints function is not particularly well-behaved i
 The ggplot does contain several facet levels
 Solved by:
 Prefiltering ds manually so it only contains the rows corresponding to the clicked facet
-The ggplot lacks an x or y aesthetic
-Solved by:
-In this particular case the x aesthetic correspond to the CNT$MAIN_GROUP column. If no grouping
-is specified during the selection this function assumes that a dummy x aesthetic was used in boxplot_chart.
-Therefore, this dummy variable is introduced as a column in ds, and shiny::nearPoints can be used.
 The aesthetic has been defined using the .data pronoun to overcome NSE used in ggplot2::ggplot
 Solved by:
 Stripping .data pronouns before passing them into shiny::nearPoints
@@ -39,11 +34,6 @@ shiny::nearPoints. shiny::nearpoints function is not particularly well-behaved i
 The ggplot does contain several facet levels
 Solved by:
 Prefiltering ds manually so it only contains the rows corresponding to the clicked facet
-The ggplot lacks an x or y aesthetic
-Solved by:
-In this particular case the x aesthetic correspond to the CNT$MAIN_GROUP column. If no grouping
-is specified during the selection this function assumes that a dummy x aesthetic was used in boxplot_chart.
-Therefore, this dummy variable is introduced as a column in ds, and shiny::nearPoints can be used.
 The aesthetic has been defined using the .data pronoun to overcome NSE used in ggplot2::ggplot
 Solved by:
 Stripping .data pronouns before passing them into shiny::nearPoints
@@ -67,7 +57,7 @@ that a 0-row dataset is returned.
 
     <a class="navbar-brand me-2" href="../index.html">dv.explorer.parameter</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -117,11 +107,6 @@ other two are specific calls for <code>click</code> and <code>double_click</code
 <a href="https://rdrr.io/pkg/shiny/man/brushedPoints.html" class="external-link">shiny::nearPoints</a>. <a href="https://rdrr.io/pkg/shiny/man/brushedPoints.html" class="external-link">shiny::nearpoints</a> function is not particularly well-behaved in two cases:</p><ul><li><p>The ggplot does contain several facet levels
 Solved by:
 Prefiltering <code>ds</code> manually so it only contains the rows corresponding to the clicked facet</p></li>
-<li><p>The ggplot lacks an <code>x</code> or <code>y</code> aesthetic
-Solved by:
-In this particular case the <code>x</code> aesthetic correspond to the <code>CNT$MAIN_GROUP</code> column. If no grouping
-is specified during the selection this function assumes that a dummy <code>x</code> aesthetic was used in <a href="boxplot_chart.html">boxplot_chart</a>.
-Therefore, this dummy variable is introduced as a column in <code>ds</code>, and <a href="https://rdrr.io/pkg/shiny/man/brushedPoints.html" class="external-link">shiny::nearPoints</a> can be used.</p></li>
 <li><p>The aesthetic has been defined using the <code>.data</code> pronoun to overcome NSE used in <a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot2::ggplot</a>
 Solved by:
 Stripping <code>.data</code> pronouns before passing them into <a href="https://rdrr.io/pkg/shiny/man/brushedPoints.html" class="external-link">shiny::nearPoints</a></p></li>

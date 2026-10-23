@@ -16,15 +16,6 @@ function is not particularly well-behaved in two cases:
   `ds` manually so it only contains the rows corresponding to the
   clicked facet
 
-- The ggplot lacks an `x` or `y` aesthetic Solved by: In this particular
-  case the `x` aesthetic correspond to the `CNT$MAIN_GROUP` column. If
-  no grouping is specified during the selection this function assumes
-  that a dummy `x` aesthetic was used in
-  [boxplot_chart](boxplot_chart.md). Therefore, this dummy variable is
-  introduced as a column in `ds`, and
-  [shiny::nearPoints](https://rdrr.io/pkg/shiny/man/brushedPoints.html)
-  can be used.
-
 - The aesthetic has been defined using the `.data` pronoun to overcome
   NSE used in
   [ggplot2::ggplot](https://ggplot2.tidyverse.org/reference/ggplot.html)

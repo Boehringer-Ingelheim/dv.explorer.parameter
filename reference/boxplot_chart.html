@@ -7,7 +7,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">dv.explorer.parameter</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.3</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.4</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -90,7 +90,8 @@
 <div class="section">
 <h3 id="labels-">Labels:<a class="anchor" aria-label="anchor" href="#labels-"></a></h3>
 
-<ul><li><p>X axis and color aesthetic are labelled using the label atttribute from <code>main_group</code> column from <code>ds</code></p></li>
+<ul><li><p>X axis is labelled using the label atttribute from <code>visit</code> column from <code>ds</code></p></li>
+<li><p>Color aesthetic is labelled using the label atttribute from <code>main_group</code> column from <code>ds</code></p></li>
 <li><p>Y axis is labelled using the label atttribute from <code>value</code> column from <code>ds</code></p></li>
 </ul></div>
 
@@ -98,18 +99,11 @@
 <h3 id="aesthetics-">Aesthetics:<a class="anchor" aria-label="anchor" href="#aesthetics-"></a></h3>
 
 <ul><li><p><code>parameter</code> is coded as 1st level row facets</p></li>
-<li><p><code>main_group</code> is coded as colors and x axis</p></li>
+<li><p><code>visit</code> is coded as x axis</p></li>
+<li><p><code>main_group</code> is coded as colors</p></li>
 <li><p><code>sub_group</code> is coded as 1st level column facets</p></li>
 <li><p><code>page_group</code> is coded as 2nd level row facets</p></li>
 </ul></div>
-
-<div class="section">
-<h3 id="hack-">Hack:<a class="anchor" aria-label="anchor" href="#hack-"></a></h3>
-
-
-<p><a href="https://rdrr.io/pkg/shiny/man/brushedPoints.html" class="external-link">shiny::nearPoints</a> do not manage well charts with no x aesthetic. Therefore when no <code>main_group</code> is present
-in <code>ds</code> a dummy one is added.</p>
-</div>
 
     </div>
 

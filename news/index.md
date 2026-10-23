@@ -1,5 +1,22 @@
 # Changelog
 
+## dv.explorer.parameter 0.3.4
+
+- UI and functionality:
+  - boxplot, lineplot: Visit selectors are no longer autofilled after
+    data changes. Default values must be used if an initial selection is
+    expected.
+  - Selectors: Dropdowns no longer open upwards automatically and leave
+    padding at the bottom, so they are not hidden behind the top bar or
+    footer on small screens.
+- Bugfix:
+  - boxplot: Fix clicking behaviour for ungrouped boxplots.
+  - boxplot, lineplot: Listing “Details” buttons handle subject IDs
+    containing quotes or backslashes.
+  - lineplot: Listing “Details” buttons now open the subject of their
+    own row.
+  - correlation heatmap: Fix bookmarking.
+
 ## dv.explorer.parameter 0.3.3
 
 - Maintenance: Adapt package to new behavior of {shinytest}.
