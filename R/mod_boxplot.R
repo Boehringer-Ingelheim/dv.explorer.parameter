@@ -473,7 +473,7 @@ boxplot_server <- function(id,
       default = default_x_axis_vals,
       multiple = TRUE,
       use_picker = TRUE,
-      all_on_change = TRUE
+      all_on_change = FALSE
     )
     inputs[[BP$ID$PAR_VALUE]] <- col_menu_server(
       id = BP$ID$PAR_VALUE,

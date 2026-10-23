@@ -9,6 +9,8 @@ mod <- mod_lineplot(
   value_vars = c("VALUE1"),
   default_cat = "PARCAT1",
   default_par = "PARAM11",
+  default_visit_var = "VISIT",
+  default_visit_val = list("VISIT" = "VISIT1"),
   receiver_id = "papo"
 )
 data <- test_data()
