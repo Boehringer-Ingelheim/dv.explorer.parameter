@@ -217,7 +217,7 @@ multi_param_visit_selector_server <- function(id, data, cat_var, par_var, visit_
         # and no extra attributes have been added
         # TODO: Could be simplified by _not_ using `serialize` and just encoding the nested list ourselves.
         to_safe <- function(x) {
-          res <- empty_state(row_count = MPVS$CONST$MAX_ROW_COUNT)
+          res <- empty_state(row_count = MPVS$CONST$MAX_ROW_COUNT)[["selected"]]
           if (!is.list(x)) {
             return(res)
           }
