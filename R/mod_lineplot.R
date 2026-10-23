@@ -405,18 +405,20 @@ lp_listings_table <- function(df, selection, target_subject_input_id = NULL) {
   result <- rename_with_list(result, labels)
 
   if (!is.null(target_subject_input_id) && CNT$SBJ %in% names(selection)) {
-    subject_ids <- selection[[CNT$SBJ]]
-
+    # Read subject IDs after sorting (so they match the row order) and before renaming (which changes the column name)
+    subject_ids <- result[[CNT$SBJ]]
+    
     col <- "Details"
     result[[col]] <- ""
+    # TODO: vectorize
     for (i in seq_len(nrow(result))) {
       subject_id <- subject_ids[[i]]
       result[col][i, ] <- as.character(shiny::tags[["button"]](
         class = "",
         shiny::icon("address-card"),
         onclick = sprintf(
-          "Shiny.setInputValue('%s', '%s', {priority:'event'});",
-          target_subject_input_id, subject_id
+          "Shiny.setInputValue('%s', %s, {priority:'event'});",
+          target_subject_input_id, js_string_literal(subject_id)
         )
       ))
     }

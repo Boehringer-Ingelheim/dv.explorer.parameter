@@ -1780,7 +1780,7 @@ bp_get_single_listings_output <- function(ds, closest_point, input_id) {
       class = "",
       shiny::icon("address-card"),
       onclick = sprintf(
-        "Shiny.setInputValue('%s', '%s', {priority:'event'});", input_id, sbj
+        "Shiny.setInputValue('%s', %s, {priority:'event'});", input_id, js_string_literal(sbj)
       )
     ))
   })
