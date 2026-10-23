@@ -149,6 +149,10 @@ from_shiny_bookmark_value <- function(v) {
   list(unsafe = base64enc::base64decode(v) |> memDecompress(type = "gzip") |> unserialize())
 }
 
+# Escaped before including in JS calls, such as
+# sprintf("Shiny.setInputValue(%s, {priority:'event'});",shiny.setInputValue(js_string_literal(""))        
+js_string_literal <- function(x) as.character(jsonlite::toJSON(as.character(x), auto_unbox = TRUE))
+
 drop_columns_by_name <- function(df, col_names) {
   df[col_names] <- list(NULL)
   return(df)
