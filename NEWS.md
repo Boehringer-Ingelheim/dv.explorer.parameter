@@ -1,3 +1,7 @@
+# dv.explorer.parameter 0.3.4-9000
+
+- lineplot: adds `main_group_palette` parameter to assign custom colors to main group values
+
 # dv.explorer.parameter 0.3.4
 
 - UI and functionality:

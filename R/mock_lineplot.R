@@ -200,7 +200,8 @@ mock_app_lineplot_mm_safetyData <- function() {
       default_cat = "CHEM",
       default_par = "Bilirubin (umol/L)",
       default_main_group = "ARM",
-      default_visit_var = "VISIT"
+      default_visit_var = "VISIT",
+      main_group_palette = c(Placebo = "#1A1A1A")
     )
   )
 
