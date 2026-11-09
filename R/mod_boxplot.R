@@ -681,13 +681,17 @@ boxplot_server <- function(id,
 
     bp_title_data <- shiny::reactive({
       l_inputs <- v_input_subset()
-      list(
-        par = l_inputs[[BP$ID$PAR]][["par"]],
-        par_value = l_inputs[[BP$ID$PAR_VALUE]],
-        x_axis_var = l_inputs[[BP$ID$X_VAR]],
-        main_grp = l_inputs[[BP$ID$MAIN_GRP]],
-        sub_grp = l_inputs[[BP$ID$SUB_GRP]],
-        page_grp = l_inputs[[BP$ID$PAGE_GRP]]
+      c(
+        list(
+          par = l_inputs[[BP$ID$PAR]][["par"]],
+          par_value = get_lbl_robust(v_bm_dataset(), l_inputs[[BP$ID$PAR_VALUE]]),
+          x_axis_var = get_lbl_robust(v_bm_dataset(), l_inputs[[BP$ID$X_VAR]])
+        ),
+        lapply(list(
+          main_grp = l_inputs[[BP$ID$MAIN_GRP]],
+          sub_grp = l_inputs[[BP$ID$SUB_GRP]],
+          page_grp = l_inputs[[BP$ID$PAGE_GRP]]
+        ), \(x) if (x == "None") x else get_lbl_robust(v_group_dataset(), x))
       )
     })
 
