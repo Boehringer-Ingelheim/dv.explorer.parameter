@@ -113,6 +113,9 @@ lineplot_module = list(
     ",
     jumping_feature = "
     The module can communicate subject values to other modules.
+    ",
+    custom_palette = "
+    The module allows applying a custom palette for main group coloring. Main group values not covered by the custom palette use the built-in palette.
     "
 ),
 

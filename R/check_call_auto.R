@@ -229,7 +229,7 @@ check_mod_lineplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, 
     summary_fns, subjid_var, cat_var, par_var, visit_vars, cdisc_visit_vars, anlfl_vars, value_vars,
     additional_listing_vars, ref_line_vars, default_centrality_fn, default_dispersion_fn, default_cat,
     default_par, default_val, default_visit_var, default_visit_val, default_main_group, default_sub_group,
-    default_transparency, default_y_axis_projection, err) {
+    default_transparency, default_y_axis_projection, main_group_palette, err) {
     OK <- logical(0)
     used_dataset_names <- new.env(parent = emptyenv())
     OK[["module_id"]] <- CM$check_module_id("module_id", module_id, err)
@@ -316,6 +316,9 @@ check_mod_lineplot_auto <- function(afmm, datasets, module_id, bm_dataset_name, 
     flags <- list(optional = TRUE, ignore = TRUE)
     OK[["default_y_axis_projection"]] <- CM$check_type("default_y_axis_projection", default_y_axis_projection,
         "character", flags, err)
+    "NOTE: main_group_palette (color) has no associated automated checks"
+    "      The expectation is that it either does not require them or that"
+    "      the caller of this function has written manual checks near the call site."
     for (ds_name in names(used_dataset_names)) {
         OK[["subjid_var"]] <- OK[["subjid_var"]] && CM$check_subjid_col(datasets, ds_name, get(ds_name),
             "subjid_var", subjid_var, err)

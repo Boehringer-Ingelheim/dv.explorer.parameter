@@ -29,7 +29,8 @@ lineplot_server(
   default_main_group = NULL,
   default_sub_group = NULL,
   default_transparency = 1,
-  default_y_axis_projection = "Linear"
+  default_y_axis_projection = "Linear",
+  main_group_palette = NULL
 )
 }
 \arguments{
@@ -126,6 +127,12 @@ Default values for the selectors}
 \item{default_y_axis_projection}{\verb{["Linear"|"Logarithmic"]}
 
 Default projection for the Y axis}
+
+\item{main_group_palette}{\verb{[named character(n)|NULL]}
+
+Colors for the values of the main grouping variable, e.g. \code{c(Placebo = "#FF007F", "Low Dose" = "darkgreen")}.
+This mapping takes precedence over the built-in palette. Colors can be specified either as R color names
+or as HTML hex codes (#rrggbb or #rrggbbaa).}
 }
 \description{
 Lineplot server function

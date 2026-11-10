@@ -156,7 +156,7 @@ lp_selected_line_mask <- function(data, selected_points) {
 }
 
 lineplot_chart <- function(data, title = NULL, ref_line_data = NULL, log_project_y_axis = FALSE, time_var_is_cdisc = FALSE,
-                           alpha = 1) {
+                           alpha = 1, palette = NULL) {
   trace_grp1 <- CNT$PAR
   if (CNT$MAIN_GROUP %in% names(data)) trace_grp1 <- CNT$MAIN_GROUP
   if (CNT$SBJ %in% names(data)) trace_grp1 <- CNT$SBJ
@@ -171,6 +171,9 @@ lineplot_chart <- function(data, title = NULL, ref_line_data = NULL, log_project
 
     color_palette <- c(scales::hue_pal()(length(main_group_unique_vals)), unselected_color)
     names(color_palette) <- c(main_group_unique_vals, unselected_color)
+
+    custom_vals <- intersect(names(palette), main_group_unique_vals)
+    color_palette[custom_vals] <- palette[custom_vals]
   }else {
     color_palette <- unselected_color
   }
@@ -342,29 +345,18 @@ lineplot_chart <- function(data, title = NULL, ref_line_data = NULL, log_project
   }
 
   if (length(ref_line_data)) {
-    # Extend default ggplot2 palette to include an extra black level to indicate a reference line common to all groups
-    # Adapted from https://stackoverflow.com/a/8197703
-    gg_color_hue <- function(lev) {
-      res <- "#000000" # just black
-      n <- length(lev)
-      if (n > 1) {
-        # `n` colors + black
-        hues <- seq(15, 375, length = n)
-        res <- c(grDevices::hcl(h = hues, l = 65, c = 100)[1:n - 1], "#000000")
-      }
-      # https://web.archive.org/web/20250130090454/https://ggplot2.tidyverse.org/reference/scale_manual.html says
-      # "It's recommended to use a named vector"
-      # (miguel) I can confirm that the colors sometimes come out wrong when there is a large level count (255).
-      res <- stats::setNames(res, lev)
-      return(res)
-    }
+    # extra black level to indicate a reference line common to all groups
+    # https://web.archive.org/web/20250130090454/https://ggplot2.tidyverse.org/reference/scale_manual.html says
+    # "It's recommended to use a named vector"
+    # (miguel) I can confirm that the colors sometimes come out wrong when there is a large level count (255).
+    extra_levels <- setdiff(levels(ref_line_data[[1]][[CNT$MAIN_GROUP]]), names(color_palette))
 
-    ref_line_colors <- gg_color_hue(levels(ref_line_data[[1]][[CNT$MAIN_GROUP]]))
-    merged_palette <- c(color_palette, ref_line_colors)
-    fig <- fig + ggplot2::scale_color_manual(
-      values = merged_palette,
-      breaks = setdiff(names(merged_palette), unselected_color)
-    )
+    merged_palette <- c(color_palette, stats::setNames(rep("#000000", length(extra_levels)), extra_levels))
+    fig <- fig +
+      ggplot2::scale_color_manual(
+        values = merged_palette,
+        breaks = setdiff(names(merged_palette), unselected_color)
+      )
   }
 
   fig <- fig + ggplot2::ggtitle(title)
@@ -712,6 +704,12 @@ compute_overlap_of_ref_line_data <- function(ref_line_data) {
 #'
 #' Default projection for the Y axis
 #'
+#' @param main_group_palette `[named character(n)|NULL]`
+#'
+#' Colors for the values of the main grouping variable, e.g. `c(Placebo = "#FF007F", "Low Dose" = "darkgreen")`.
+#' This mapping takes precedence over the built-in palette. Colors can be specified either as R color names
+#' or as HTML hex codes (#rrggbb or #rrggbbaa).
+#'
 #' @keywords developers
 #'
 #' @export
@@ -746,7 +744,8 @@ lineplot_server <- function(id,
                             default_main_group = NULL,
                             default_sub_group = NULL,
                             default_transparency = 1.,
-                            default_y_axis_projection = "Linear") {
+                            default_y_axis_projection = "Linear",
+                            main_group_palette = NULL) {
   ac <- checkmate::makeAssertCollection()
   # non reactive asserts
 
@@ -770,6 +769,7 @@ lineplot_server <- function(id,
   checkmate::assert_string(default_sub_group, min.chars = 1, add = ac, null.ok = TRUE)
   checkmate::assert_choice(default_y_axis_projection, choices = c("Linear", "Logarithmic"))
   checkmate::assert_string(subjid_var, min.chars = 1, add = ac)
+  checkmate::assert_character(main_group_palette, any.missing = FALSE, names = "unique", null.ok = TRUE, add = ac)
 
   checkmate::reportAssertions(ac)
 
@@ -1132,7 +1132,8 @@ lineplot_server <- function(id,
           ref_line_data = ref_line_data,
           log_project_y_axis = should_log_project,
           time_var_is_cdisc = time_var_is_cdisc,
-          alpha = alpha
+          alpha = alpha,
+          palette = main_group_palette
         )
       )
 
@@ -1742,7 +1743,8 @@ mod_lineplot <- function(module_id,
                          default_main_group = NULL,
                          default_sub_group = NULL,
                          default_transparency = 1.,
-                         default_y_axis_projection = "Linear") {
+                         default_y_axis_projection = "Linear",
+                         main_group_palette = NULL) {
   mod <- list(
     ui = function(mod_id) {
       lineplot_UI(id = mod_id)
@@ -1778,7 +1780,8 @@ mod_lineplot <- function(module_id,
         default_main_group = default_main_group,
         default_sub_group = default_sub_group,
         default_transparency = default_transparency,
-        default_y_axis_projection = default_y_axis_projection
+        default_y_axis_projection = default_y_axis_projection,
+        main_group_palette = main_group_palette
       )
     },
     module_id = module_id,
@@ -1791,7 +1794,7 @@ mod_lineplot <- function(module_id,
           value_vars, additional_listing_vars, ref_line_vars,
           default_centrality_fn, default_dispersion_fn, default_cat, default_par,
           default_val, default_visit_var, default_visit_val, default_main_group, default_sub_group,
-          default_transparency, default_y_axis_projection)
+          default_transparency, default_y_axis_projection, main_group_palette)
       }
     )
   )
@@ -1834,7 +1837,8 @@ mod_lineplot_API_docs <- list(
   default_main_group = "",
   default_sub_group = "",
   default_transparency = "",
-  default_y_axis_projection = ""
+  default_y_axis_projection = "",
+  main_group_palette = ""
 )
 
 # TODO: Complete
@@ -1875,7 +1879,8 @@ mod_lineplot_API_spec <- TC$group(
   default_main_group = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("optional"),
   default_sub_group = TC$col("group_dataset_name", TC$or(TC$character(), TC$factor())) |> TC$flag("optional"),
   default_transparency = TC$numeric(min = 0.05, max = 1.) |> TC$flag("optional"),
-  default_y_axis_projection = TC$character() |> TC$flag("optional", "ignore") # FIXME: something like TC$enum(c())
+  default_y_axis_projection = TC$character() |> TC$flag("optional", "ignore"), # FIXME: something like TC$enum(c())
+  main_group_palette = TC$color() |> TC$flag("optional", "zero_or_more", "named", "as_array")
 ) |> TC$attach_docs(mod_lineplot_API_docs)
 
 check_mod_lineplot <- function(
@@ -1884,7 +1889,7 @@ check_mod_lineplot <- function(
     value_vars, additional_listing_vars, ref_line_vars,
     default_centrality_fn, default_dispersion_fn, default_cat, default_par,
     default_val, default_visit_var, default_visit_val, default_main_group, default_sub_group,
-    default_transparency, default_y_axis_projection) {
+    default_transparency, default_y_axis_projection, main_group_palette) {
   err <- CM$container()
 
   # TODO: Replace this function with a generic one that performs the checks based on mod_corr_hm_API_spec.
@@ -1895,10 +1900,19 @@ check_mod_lineplot <- function(
     subjid_var, cat_var, par_var, visit_vars, cdisc_visit_vars, anlfl_vars, value_vars, additional_listing_vars,
     ref_line_vars, default_centrality_fn, default_dispersion_fn, default_cat, default_par, default_val,
     default_visit_var, default_visit_val, default_main_group, default_sub_group, default_transparency,
-    default_y_axis_projection, err
+    default_y_axis_projection, main_group_palette, err
   )
 
   # Checks that API spec does not (yet?) capture
+  CM$assert(
+    container = err,
+    cond = checkmate::test_character(main_group_palette, any.missing = FALSE, names = "unique", null.ok = TRUE),
+    msg = paste(
+      "`main_group_palette` must be a vector of colors with unique names.",
+      "Colors can be R color names or HTML hex codes (#rrggbb or #rrggbbaa)."
+    )
+  )
+
   if (OK[["subjid_var"]] && OK[["cat_var"]] && OK[["par_var"]] &&
       OK[["visit_vars"]] && OK[["cdisc_visit_vars"]] && OK[["anlfl_vars"]]) {
     for (visit_var in c(visit_vars, cdisc_visit_vars)) {
