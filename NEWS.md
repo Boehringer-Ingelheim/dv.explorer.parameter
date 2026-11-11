@@ -1,3 +1,7 @@
+# dv.explorer.parameter 0.3.4-9000
+
+- boxplot: Title data display updated to show variable labels rather than names.
+
 # dv.explorer.parameter 0.3.4
 
 - UI and functionality:
