@@ -54,6 +54,45 @@ test_that("lineplot_chart renders reference lines" |> vdoc[["add_spec"]](c(specs
   expect_equal(refline_count, nrow(ref_line_df))
 })
 
+test_that(
+  "lineplot_chart colors main group values with the custom palette and the rest with the built-in palette" |>
+    vdoc[["add_spec"]](specs$lineplot_module$custom_palette),
+  {
+    df <- data.frame(row.names = seq(3))
+    df[[CNT$VIS]] <- "vis_1"
+    df[[CNT$MAIN_GROUP]] <- c("A", "B", "C")
+    df[[CNT$PAR]] <- "par_1"
+    df[[CNT$VAL]] <- c(1, 2, 3) # one distinct value per group to tell their points apart
+
+    # `Z` is not a main group value and must be ignored
+    palette <- c(A = "#FF007F", Z = "darkgreen")
+    built_in_palette <- scales::hue_pal()(3)
+    expected_colors <- c(A = "#FF007F", B = built_in_palette[[2]], C = built_in_palette[[3]])
+
+    # Colors of the foreground (selected) points, named by main group value
+    point_colors <- function(p) {
+      is_point_layer <- vapply(p[["layers"]], function(l) inherits(l[["geom"]], "GeomPoint"), logical(1))
+      layer <- ggplot2::layer_data(p, max(which(is_point_layer)))
+      res <- stats::setNames(layer[["colour"]], df[[CNT$MAIN_GROUP]][match(layer[["y"]], df[[CNT$VAL]])])
+      res[sort(names(res))]
+    }
+
+    p <- lineplot_chart(data = df, palette = palette)
+    expect_equal(point_colors(p), expected_colors)
+
+    # Reference lines rebuild the color scale, the custom palette must survive it
+    ref_line_data <- list(
+      ref = data.frame(
+        factor("par_1"),
+        factor("Common reference value", levels = c("A", "B", "C", "Common reference value")),
+        0.5
+      ) |> setNames(c(CNT$PAR, CNT$MAIN_GROUP, CNT$VAL))
+    )
+    p <- lineplot_chart(data = df, ref_line_data = ref_line_data, palette = palette)
+    expect_equal(point_colors(p), expected_colors)
+  }
+)
+
 # listings table
 
 test_that("lp_listings_table subsets a data frame based on the values of a one-rowed data frame", {
