@@ -1,3 +1,7 @@
+# dv.explorer.parameter 0.3.4-9000
+
+- [NOT USER-FACING] Expand "communication with papo" snippet to check switching to the papo tab
+
 # dv.explorer.parameter 0.3.4
 
 - UI and functionality:
